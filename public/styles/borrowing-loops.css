@@ -11,6 +11,18 @@
 .loop-card .scenario-field { margin: 18px 0; }
 .loop-card summary { cursor: pointer; min-height: 44px; line-height: 1.8; padding: 10px 0; font-size: 14px; color: var(--accent); }
 .loop-card select { width: 100%; min-height: 48px; padding: 10px; border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text); background: var(--surface); font: inherit; }
+.loop-round-control { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 8px; }
+.loop-round-control input { text-align: center; appearance: textfield; -moz-appearance: textfield; }
+.loop-round-control input::-webkit-inner-spin-button, .loop-round-control input::-webkit-outer-spin-button { appearance: none; margin: 0; }
+.loop-round-button { min-width: 44px; min-height: 48px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-size: 22px; cursor: pointer; }
+.loop-round-button:hover:not(:disabled) { border-color: var(--accent); background: var(--highlight); }
+.loop-round-button:disabled { opacity: .45; cursor: default; }
+.loop-setup-caption { display: block; margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.loop-comparison { color: var(--text); font-size: 23px; line-height: 1.5; font-weight: 600; margin: 20px 0 6px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.loop-round summary strong { font-weight: 600; }
+.loop-round-caption, .loop-round-action { display: block; margin: 7px 0 0; font-size: 13px; line-height: 1.8; }
+.loop-round-caption { color: var(--muted); }
+.loop-round-action { text-decoration: underline; text-underline-offset: 3px; }
 .loop-stages { display: flex; flex-wrap: wrap; gap: 8px; }
 .loop-stages button { min-height: 44px; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 12px; color: var(--text); background: var(--surface); font-size: 13px; cursor: pointer; }
 .loop-stages button[aria-pressed=true] { border-color: var(--accent); background: var(--highlight); }

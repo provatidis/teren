@@ -4,6 +4,41 @@ import { formatTokenQuantity } from './format.js';
 export const loopTokens = value => formatTokenQuantity(value, 6) + ' ETH';
 export const loopMoney = value => (value < 0 ? '−' : '') + loanMoney(Math.abs(value));
 
+// Ignore only floating-point noise relative to the compared balances.
+// A small real loss must keep its sign even when it is less than one cent.
+export function loopComparison(value, holding) {
+  const raw = value - holding;
+  const tolerance = Number.EPSILON * Math.max(1, Math.abs(value), Math.abs(holding)) * 8;
+  const difference = Math.abs(raw) <= tolerance ? 0 : raw;
+  if (difference === 0) {
+    const exact = raw === 0;
+    return { difference, relation: 'equal', label: exact ? 'Matches holding' : 'Nearly the same as holding', compact: exact ? 'Same as holding' : 'Nearly the same as holding' };
+  }
+  const amount = loopMoney(Math.abs(difference));
+  return {
+    difference,
+    relation: difference > 0 ? 'ahead' : 'behind',
+    label: amount + (difference > 0 ? ' more than holding' : ' less than holding'),
+    compact: (difference > 0 ? '+' : '−') + amount + ' vs holding',
+  };
+}
+
+export function loopUnwindLabels(status) {
+  if (status === 'blocked') return {
+    eth: 'Supplied ETH · unchanged', debt: 'Debt still owed', cost: 'Unwind swaps', net: 'Assets minus debt · before liquidation',
+  };
+  if (status === 'limited') return {
+    eth: 'ETH still supplied', debt: 'Debt still owed', cost: 'Swap losses so far', net: 'Assets minus debt · after partial preview',
+  };
+  if (status === 'no-debt') return {
+    eth: 'ETH kept · no sale needed', debt: 'Debt', cost: 'Swap losses during unwind', net: 'Assets minus debt · no unwind needed',
+  };
+  if (status !== 'complete') throw new RangeError('Choose a known unwind status.');
+  return {
+    eth: 'ETH freed from the loan', debt: 'Debt remaining', cost: 'Swap losses during unwind', net: 'Assets minus debt · after unwind',
+  };
+}
+
 export function loopLessonMetrics(id, result) {
   if (id === 'build') return [
     ['ETH supplied after one round', loopTokens(result.start.collateralTokens)],

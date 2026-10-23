@@ -9,6 +9,7 @@ Review this list before expanding a mechanism. Discuss newly found omissions wit
 - What conclusion could a learner draw from the headline number that the model cannot support? Put the decisive assumption beside that result.
 - Which excluded event could change the conclusion: liquidation, changing fees or rates, a previous range exit, execution costs or an unavailable response?
 - What happens at the exact boundary, on each side, with no debt, with tiny balances, or when an asset is exhausted? Preserve obligations rather than silently discarding them.
+- Do headings and status labels still describe the result with zero rounds, a blocked action or a partial response? Correct arithmetic can still be misread as completed execution or forgiven debt.
 - Are cash and debt both counted? Are repayment and penalties separate? Are fees, principal and already owed tokens kept distinct?
 - Does a chart compare possible prices, connect recorded samples, or reconstruct a path? Label the distinction in the visible explanation.
 - Which checks validate arithmetic, which re-read chain state, and which were performed by another person? Give capture/check dates without implying a new verification run.

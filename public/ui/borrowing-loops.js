@@ -2,11 +2,10 @@ import { LOOP_DEFAULTS, LOOP_LIMITS, calculateLoop, validateLoop, loopAtPrice } 
 import { readLoopDraft, saveLoopDraft } from '../data/loop-state.js';
 import { loopHash, readLoopHash } from '../lib/loop-links.js';
 import { healthLabel, loanStatus } from '../lib/lending-presentation.js';
-import { loopTokens, loopMoney } from '../lib/loop-presentation.js';
+import { loopTokens, loopMoney, loopComparison, loopUnwindLabels } from '../lib/loop-presentation.js';
 import { fmt, compactUSD, formatTokenQuantity } from '../lib/format.js';
 
 const money = loopMoney;
-const signedMoney = value => (value < -1e-7 ? '−' : value > 1e-7 ? '+' : '') + money(Math.abs(value));
 const usdc = value => formatTokenQuantity(value, 2) + ' USDC';
 
 export function initBorrowingLoops() {
@@ -37,7 +36,6 @@ export function initBorrowingLoops() {
   }
   function renderLedger(result) {
     const opened = new Set([...$('loop-ledger').querySelectorAll('details[open]')].map(item => item.dataset.loopRound));
-    const firstRender = !$('loop-ledger').querySelector('details');
     if (!result.rounds.length) {
       $('loop-ledger').replaceChildren(node('p', 'Only your original ETH is supplied. No USDC was borrowed or spent.', 'body-copy'));
       return;
@@ -45,8 +43,13 @@ export function initBorrowingLoops() {
     $('loop-ledger').replaceChildren(...result.rounds.map(round => {
       const details = node('details', undefined, 'loop-round');
       details.dataset.loopRound = String(round.round);
-      details.open = opened.has(String(round.round)) || firstRender && result.rounds.length === 1;
-      details.append(node('summary', 'Round ' + round.round + ' · Borrow ' + usdc(round.borrowed)));
+      details.open = opened.has(String(round.round));
+      const summary = node('summary');
+      const action = node('span', details.open ? 'Hide the three actions' : 'Show the three actions', 'loop-round-action');
+      summary.append(node('strong', 'Round ' + round.round + ' · Borrow ' + usdc(round.borrowed)),
+        node('span', 'After supplying: ' + loopTokens(round.position.collateralTokens) + ' · ' + usdc(round.position.debt) + ' debt', 'loop-round-caption'), action);
+      details.addEventListener('toggle', () => { action.textContent = details.open ? 'Hide the three actions' : 'Show the three actions'; });
+      details.append(summary);
       const list = node('ol', undefined, 'loop-step-list');
       for (const step of result.steps.filter(item => item.round === round.round)) {
         const item = node('li');
@@ -93,7 +96,8 @@ export function initBorrowingLoops() {
     $('loop-chart-bottom').textContent = compactUSD(minValue);
     $('loop-chart-left').textContent = compactUSD(minPrice) + '/ETH';
     $('loop-chart-right').textContent = compactUSD(maxPrice) + '/ETH';
-    $('loop-price-chart').setAttribute('aria-label', 'Possible ETH prices at fixed accrued balances. At ' + money(input.future) + ' per ETH, loop net assets are ' + money(result.end.netAssets) + ', versus ' + money(result.holdingValue) + ' holding original ETH. Before liquidation and unwinding.');
+    $('loop-chart-current').textContent = 'Dot: your selected price, ' + money(input.future) + '/ETH. Assets minus debt: ' + money(result.end.netAssets) + '.';
+    $('loop-price-chart').setAttribute('aria-label', 'Possible ETH prices at fixed accrued balances. At ' + money(input.future) + ' per ETH, setup net assets are ' + money(result.end.netAssets) + ', versus ' + money(result.holdingValue) + ' holding original ETH. Before liquidation and unwinding.');
   }
   function renderUnwind(result) {
     const preview = result.unwind;
@@ -103,13 +107,18 @@ export function initBorrowingLoops() {
       complete: 'The assumed sequence repays all debt. The remaining ETH is no longer backing a loan. No outside money was added.',
       limited: 'The preview stopped before clearing all debt. Remaining debt is still shown; no amount has been written off.',
     };
-    $('loop-unwind-status').textContent = messages[preview.status];
+    if ($('loop-unwind-status').textContent !== messages[preview.status]) $('loop-unwind-status').textContent = messages[preview.status];
+    const labels = loopUnwindLabels(preview.status);
+    for (const [key, label] of Object.entries(labels)) $('loop-unwind-' + key + '-label').textContent = label;
+    $('loop-unwind-result').dataset.state = preview.status;
     $('loop-unwind-eth').textContent = loopTokens(preview.remaining.collateralTokens);
     $('loop-unwind-debt').textContent = money(preview.remaining.debt);
-    $('loop-unwind-cost').textContent = money(preview.costs);
+    $('loop-unwind-cost').textContent = preview.status === 'blocked' ? 'Not run' : money(preview.costs);
     $('loop-unwind-net').textContent = money(preview.remaining.netAssets);
     $('loop-unwind-details').hidden = preview.steps.length === 0;
-    $('loop-unwind-caption').textContent = 'See ' + preview.steps.length + ' assumed withdrawal / sale / repayment ' + (preview.steps.length === 1 ? 'step' : 'steps');
+    $('loop-unwind-caption').textContent = 'See the ' + preview.steps.length + ' ' + (preview.steps.length === 1 ? 'step' : 'steps');
+    $('loop-unwind-cost-note').hidden = preview.steps.length === 0;
+    $('loop-unwind-cost-note').textContent = 'Swap losses: ' + money(result.buildCosts) + ' while building, plus ' + money(preview.costs) + (preview.status === 'limited' ? ' in this partial unwind' : ' while unwinding') + '. Gas is excluded.';
     $('loop-unwind-steps').replaceChildren(...preview.steps.map(step => {
       const item = node('li');
       item.append(node('p', 'Withdraw and sell ' + loopTokens(step.soldTokens) + ', then repay ' + usdc(step.repaid) + '.'),
@@ -122,6 +131,9 @@ export function initBorrowingLoops() {
     $('loop-share-url').hidden = true;
     $('loop-share-status').textContent = '';
     const input = read(), errors = validateLoop(input);
+    if (errors.borrowPercent && Number.isFinite(input.borrowPercent) && Number.isFinite(input.maxLTV) && input.borrowPercent > input.maxLTV) {
+      errors.borrowPercent = 'Use ' + formatTokenQuantity(input.maxLTV, 4) + '% or less. Edit maximum LTV in Original capital and assumptions to change that limit.';
+    }
     firstInvalid = keys.find(key => errors[key]);
     for (const key of keys) {
       $('loop-' + key).setAttribute('aria-invalid', String(!!errors[key]));
@@ -131,27 +143,42 @@ export function initBorrowingLoops() {
     $('loop-invalid').hidden = !firstInvalid;
     $('loop-results').hidden = !!firstInvalid;
     $('loop-share').disabled = !!firstInvalid;
+    const roundsValid = Number.isInteger(input.rounds) && !errors.rounds;
+    $('loop-round-down').disabled = !roundsValid || input.rounds === 0;
+    $('loop-round-up').disabled = !roundsValid || input.rounds === 5;
     $('loop-quick-result').dataset.state = firstInvalid ? 'invalid' : 'above';
     if (firstInvalid) {
       current = null;
       $('loop-quick-value').textContent = 'Check loop inputs';
       $('loop-quick-state').textContent = errors[firstInvalid];
+      if (errors.collateral || errors.start || errors.borrowPercent || errors.rounds) $('loop-borrowPercent-help').textContent = 'Complete the highlighted inputs to calculate the first round’s borrowing.';
+      if (errors.collateral || errors.start) $('loop-setup-caption').textContent = 'Check original capital inputs';
       return;
     }
     current = calculateLoop(input);
-    const result = current, end = result.end, gap = end.netAssets - result.holdingValue;
+    const result = current, end = result.end, comparison = loopComparison(end.netAssets, result.holdingValue);
     $('loop-quick-result').dataset.state = end.status;
-    $('loop-quick-value').textContent = signedMoney(gap) + ' vs holding';
+    $('loop-quick-value').textContent = comparison.compact;
     $('loop-quick-state').textContent = 'Health factor: ' + healthLabel(end.healthFactor);
-    $('loop-capital-note').textContent = 'Both setups start with ' + loopTokens(input.collateral) + ' worth ' + money(result.ownCapital) + '. The loop adds no outside capital.';
+    $('loop-outcome-title').textContent = input.rounds ? 'Your loop compared with holding' : 'Supply only compared with holding';
+    $('loop-capital-note').textContent = 'Both start with ' + loopTokens(input.collateral) + ' worth ' + money(result.ownCapital) + '. No outside capital is added.';
+    $('loop-result-context').textContent = 'At ' + money(input.future) + '/ETH' + (input.days === 0 ? ', with no time elapsed.' : ', after ' + formatTokenQuantity(input.days, 2) + (input.days === 1 ? ' day.' : ' days.'));
+    $('loop-ledger-title').textContent = input.rounds ? 'Follow each round' : 'Starting supply';
+    $('loop-ledger-context').textContent = input.rounds ? 'All rounds use the starting price of ' + money(input.start) + '/ETH and happen before time passes.'
+      : 'Your original ETH is supplied at the starting price of ' + money(input.start) + '/ETH.';
+    $('loop-ledger-help').hidden = input.rounds === 0;
     $('loop-tokens').textContent = loopTokens(end.collateralTokens);
-    $('loop-exposure').textContent = fmt(result.startingExposure) + '× the original ETH after building, before interest';
+    $('loop-exposure').textContent = input.rounds ? 'About ' + fmt(result.startingExposure) + '× the original ETH before interest' : 'Your original supply, including any assumed interest';
     $('loop-debt').textContent = money(end.debt);
     $('loop-cash-note').textContent = input.rounds ? 'Borrowed cash was spent buying ETH' : 'No USDC was borrowed';
     $('loop-net').textContent = money(end.netAssets);
     $('loop-net-note').textContent = 'ETH value ' + money(end.collateralValue) + ' minus debt; no borrowed cash remains';
     $('loop-hold').textContent = money(result.holdingValue);
-    $('loop-difference').textContent = 'Loop minus holding: ' + signedMoney(gap);
+    $('loop-difference').textContent = comparison.label;
+    $('loop-difference').dataset.relation = comparison.relation;
+    $('loop-borrowPercent-help').textContent = input.rounds === 0 ? 'No borrowing is applied at zero rounds. This fraction is used when you add a round.'
+      : 'Round 1 borrows ' + usdc(input.collateral * input.start * input.borrowPercent / 100) + '. Later rounds borrow the same fraction of the preceding purchase’s value.';
+    $('loop-setup-caption').textContent = loopTokens(input.collateral) + ' at ' + money(input.start) + '/ETH';
     $('loop-health').textContent = 'Health factor: ' + healthLabel(end.healthFactor);
     $('loop-risk-copy').textContent = loanStatus(end) + '. Health factor measures backing, not profit or price exposure.';
     $('loop-risk-boundary').textContent = end.boundaryPrice === null ? 'With no debt, there is no loan liquidation boundary.'
@@ -188,6 +215,13 @@ export function initBorrowingLoops() {
     : 'Working loop kept in this tab, separately from your single loan. Copy a link to keep or share it.';
   restore();
   for (const key of keys) $('loop-' + key).addEventListener(key === 'interestMode' ? 'change' : 'input', () => render(true));
+  for (const [id, delta] of [['loop-round-down', -1], ['loop-round-up', 1]]) $(id).addEventListener('click', () => {
+    const count = Number($('loop-rounds').value);
+    if (!Number.isInteger(count) || count + delta < 0 || count + delta > 5) return;
+    $('loop-rounds').value = count + delta;
+    render(true);
+    if ($(id).disabled) $('loop-rounds').focus({ preventScroll: true });
+  });
   for (const button of document.querySelectorAll('[data-loop-rounds]')) button.addEventListener('click', () => { $('loop-rounds').value = button.dataset.loopRounds; render(true); });
   for (const button of document.querySelectorAll('[data-loop-price]')) button.addEventListener('click', () => { $('loop-future').value = Number($('loop-start').value) * Number(button.dataset.loopPrice); render(true); });
   $('loop-fix-input').addEventListener('click', () => { if (firstInvalid) focus('loop-' + firstInvalid); });

@@ -324,7 +324,11 @@
               <div class="scenario-field">
                 <label for="loop-rounds">Borrowing rounds <span>0–5</span>
                 </label>
-                <input id="loop-rounds" type="number" min="0" max="5" step="1" value="1" aria-describedby="loop-rounds-error">
+                <div class="loop-round-control">
+                  <button id="loop-round-down" class="loop-round-button" type="button" aria-label="Remove a borrowing round">−</button>
+                  <input id="loop-rounds" type="number" min="0" max="5" step="1" value="1" aria-describedby="loop-rounds-error">
+                  <button id="loop-round-up" class="loop-round-button" type="button" aria-label="Add a borrowing round">+</button>
+                </div>
                 <p id="loop-rounds-error" class="field-error" hidden>
                 </p>
               </div>
@@ -345,7 +349,7 @@
                 </div>
               </details>
               <details id="loop-setup">
-                <summary>Original capital and assumptions</summary>
+                <summary>Original capital and assumptions<span id="loop-setup-caption" class="loop-setup-caption"></span></summary>
                 <div class="scenario-field">
                   <label for="loop-collateral">Your original ETH <span>ETH</span>
                   </label>
@@ -447,19 +451,21 @@
             <div id="loop-results">
               <section id="loop-outcome" class="card loop-card" aria-labelledby="loop-outcome-title" tabindex="-1">
                 <p class="eyebrow">SAME ORIGINAL CAPITAL</p>
-                <h2 id="loop-outcome-title">More exposure, with debt beside it</h2>
+                <h2 id="loop-outcome-title">Your loop compared with holding</h2>
                 <p id="loop-capital-note" class="body-copy">
                 </p>
+                <p id="loop-difference" class="loop-comparison"></p>
+                <p id="loop-result-context" class="fine-print"></p>
                 <div class="loop-metrics">
                   <div>
-                    <span>ETH supplied now</span>
+                    <span>ETH supplied</span>
                     <strong id="loop-tokens">
                     </strong>
                     <small id="loop-exposure">
                     </small>
                   </div>
                   <div>
-                    <span>USDC debt now</span>
+                    <span>USDC debt</span>
                     <strong id="loop-debt">
                     </strong>
                     <small id="loop-cash-note">Borrowed cash was spent buying ETH</small>
@@ -475,8 +481,6 @@
                     <span>Hold your original ETH</span>
                     <strong id="loop-hold">
                     </strong>
-                    <small id="loop-difference">
-                    </small>
                   </div>
                 </div>
                 <div id="loop-risk" class="loop-risk">
@@ -497,7 +501,8 @@
               </section>
               <section class="card loop-card" aria-labelledby="loop-ledger-title">
                 <h2 id="loop-ledger-title">Follow each round</h2>
-                <p class="body-copy">Watch cash become wallet ETH, then collateral. Only supplied ETH backs the loan.</p>
+                <p id="loop-ledger-context" class="body-copy"></p>
+                <p id="loop-ledger-help" class="fine-print">Open a round to follow cash into wallet ETH, then collateral. Only supplied ETH backs the loan.</p>
                 <div id="loop-ledger">
                 </div>
               </section>
@@ -523,11 +528,12 @@
                   <div class="loop-chart-legend">
                     <span>
                       <i class="loop-line-key">
-                      </i>Loop · assets minus debt</span>
+                      </i>Your setup · assets minus debt</span>
                     <span>
                       <i class="loop-line-key hold">
                       </i>Hold original ETH</span>
                   </div>
+                  <p id="loop-chart-current" class="fine-print"></p>
                   <figcaption class="fine-print">Possible prices at the same elapsed time, before liquidation and unwinding. This is a sensitivity chart, not a price history.</figcaption>
                   <p id="loop-chart-limit" class="fine-print">
                   </p>
@@ -539,28 +545,29 @@
                 <p class="body-copy">Try a sequence at your chosen price using only this position. It needs no outside cash or flash loan.</p>
                 <p id="loop-unwind-status" class="loan-attention" role="status">
                 </p>
-                <div class="loop-metrics">
+                <div id="loop-unwind-result" class="loop-metrics">
                   <div>
-                    <span>ETH remaining</span>
+                    <span id="loop-unwind-eth-label">ETH remaining</span>
                     <strong id="loop-unwind-eth">
                     </strong>
                   </div>
                   <div>
-                    <span>Debt remaining</span>
+                    <span id="loop-unwind-debt-label">Debt remaining</span>
                     <strong id="loop-unwind-debt">
                     </strong>
                   </div>
                   <div>
-                    <span>Swap losses during unwind</span>
+                    <span id="loop-unwind-cost-label">Swap losses during unwind</span>
                     <strong id="loop-unwind-cost">
                     </strong>
                   </div>
                   <div>
-                    <span>Net assets after this preview</span>
+                    <span id="loop-unwind-net-label">Assets minus debt after this preview</span>
                     <strong id="loop-unwind-net">
                     </strong>
                   </div>
                 </div>
+                <p id="loop-unwind-cost-note" class="fine-print"></p>
                 <details id="loop-unwind-details" class="loop-disclosure">
                   <summary id="loop-unwind-caption">See the assumed steps</summary>
                   <ol id="loop-unwind-steps" class="loop-unwind-steps">
@@ -597,7 +604,7 @@
         <div class="learn-workspace">
           <aside class="learn-sidebar">
             <details id="lend-course" class="card learn-course" open>
-              <summary><span>All lending lessons</span><strong id="lend-progress">0 of 4 checked</strong><span class="learn-course-chevron">⌄</span></summary>
+              <summary><span>Lessons and chapters</span><strong id="lend-progress">0 of 4 checked</strong><span class="learn-course-chevron">⌄</span></summary>
               <nav class="lending-chapters" aria-label="Lending chapters"><a id="lend-chapter-essentials" href="#lesson=supply">1 · Lending essentials</a><a id="lend-chapter-loops" href="#loop-lesson=build">2 · Borrowing loops</a></nav>
               <nav aria-label="Lending lessons">
                 <ol id="lend-lesson-list" class="lending-lesson-list">
