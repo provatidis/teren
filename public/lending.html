@@ -30,41 +30,44 @@
     <meta name="twitter:description" content="Explore collateral, borrowing, interest and liquidation boundaries with a hypothetical lending lab and four short lessons.">
     <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
     <meta name="twitter:image:alt" content="Teren. Learn and experiment with DeFi, with a liquidity range scenario.">
-    <link rel="stylesheet" href="styles.css?v=1.17.0">
-    <script type="module" src="lending-main.js?v=1.17.0"></script>
+    <link rel="stylesheet" href="styles.css?v=1.17.1">
+    <script type="module" src="lending-main.js?v=1.17.1"></script>
   </head>
   <body class="lending-page">
     <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="topbar">
       <a class="brand" href="./#experiment" aria-label="Teren home"><img class="brand-logo" src="assets/teren-logo.svg" width="145" height="40" alt=""></a>
       <nav class="site-nav" aria-label="Teren">
-        <div class="product-nav"><a id="lending-nav-experiment" href="#experiment" aria-current="page">Experiment</a><a id="lending-nav-learn" href="#lesson=supply">Learn</a><a href="./#inspect" aria-label="Inspect liquidity records">Inspect</a>
+        <div class="product-nav"><a id="lending-nav-experiment" href="#experiment" aria-current="page">Experiment</a><a id="lending-nav-learn" href="#learn">Learn</a><a href="./#inspect" aria-label="Inspect liquidity records">Inspect</a>
         </div>
       </nav>
     </header>
     <main id="main-content" tabindex="-1">
-      <nav class="topic-switch" aria-label="DeFi topic"><span>Explore</span><a id="topic-liquidity" href="./#experiment">Liquidity</a><a href="#experiment" aria-current="page">Lending</a>
+      <nav class="topic-switch" aria-label="DeFi topic"><span class="topic-label">Topic</span><a id="topic-liquidity" href="./#experiment">Liquidity</a><span class="topic-current" aria-current="true">Lending</span>
       </nav>
       <noscript>
         <div class="notice">
           <p>Enable JavaScript to use the lending lab and lessons. <a href="methods.html">Read the methods →</a></p>
         </div>
       </noscript>
-      <section class="intro">
+      <section class="intro lending-intro">
         <div>
-          <p id="lending-evidence" class="eyebrow evidence-badge">HYPOTHETICAL MODEL · LENDING</p>
-          <h1 id="lending-page-title" tabindex="-1">Understand a collateralized loan</h1>
-          <p id="lending-page-subtitle" class="subtitle">Supply ETH, borrow USDC and see how prices, interest and time change the position.</p>
+          <p id="lending-evidence" class="eyebrow evidence-badge">AAVE V3-STYLE · HYPOTHETICAL</p>
+          <div class="lending-title-row"><h1 id="lending-page-title" tabindex="-1">Lending lab</h1><a id="lending-start" class="button secondary" href="#learn" aria-label="Learn about lending">Learn →</a></div>
+          <p id="lending-page-subtitle" class="subtitle">Supply ETH, borrow USDC, then change price or time.</p>
         </div>
-        <a id="lending-start" class="button secondary" href="#lesson=supply">Learn from the beginning →</a>
       </section>
       <div id="lending-route-note" class="notice" role="status" hidden>
         <p>That lending lesson link could not be opened. <a href="#lesson=supply">Open the first lesson →</a></p>
       </div>
       <section id="lending-experiment" aria-label="Lending experiment">
-        <p class="loan-model-label">Aave v3-style collateral rules · Illustrative ETH/USDC inputs · USDC = $1</p>
+        <p class="loan-model-label">Illustrative ETH/USDC inputs · USDC = $1</p>
         <div id="loan-route-note" class="notice" role="status" hidden>
           <p>This experiment link is incomplete or unsupported. Your current working setup is shown.</p>
+        </div>
+        <div id="loan-quick-result" class="lab-quick-result loan-quick-result" data-state="above">
+          <div class="quick-result-heading"><strong id="loan-quick-health" role="status">Health factor 1.60</strong><button id="loan-show-result" class="text-button" type="button">Full result ↓</button></div>
+          <p id="loan-quick-state">Above the liquidation boundary</p>
         </div>
         <div class="loan-layout">
           <div>
@@ -89,7 +92,7 @@
                   <p id="loan-borrow-error" class="field-error" hidden></p>
                 </div>
                 <p id="loan-start-limit" class="fine-print"></p>
-                <details class="loan-assumptions">
+                <details id="loan-assumptions" class="loan-assumptions">
                   <summary>Rates and collateral rules</summary>
                   <p class="fine-print">Teaching assumptions, not current market quotes. Both rates use fixed simple interest over a 365-day year.</p>
                   <div class="scenario-field">
@@ -121,7 +124,7 @@
             <section class="card loan-conditions" aria-labelledby="loan-conditions-title">
               <div class="card-heading">
                 <h2 id="loan-conditions-title">Change the conditions</h2>
-                <span id="loan-quick-health" class="small-badge" role="status">Health factor 1.60</span>
+                <span id="loan-desktop-health" class="small-badge">Health factor 1.60</span>
               </div>
               <div class="loan-condition-fields">
                 <div class="scenario-field">
@@ -143,12 +146,13 @@
                 <button type="button" data-loan-price="1" aria-pressed="true">Unchanged</button>
                 <button type="button" data-loan-price="1.25" aria-pressed="false">+25%</button>
               </div>
+              <div class="loan-rate-summary"><p id="loan-rates">Assumed APRs: 2% supply · 5% borrow</p><button id="loan-edit-rates" class="text-button" type="button">Edit rates ↑</button></div>
             </section>
             <div id="loan-invalid" class="notice" role="status" hidden>
-              <p>Check the highlighted fields to see the result. If needed, open <strong>Your starting loan</strong> above.</p>
+              <p id="loan-error-summary">Check the highlighted loan fields to see the result.</p><button id="loan-fix-input" class="text-button" type="button">Go to field ↑</button>
             </div>
             <div id="loan-outcomes">
-              <section id="loan-risk" class="card loan-risk" data-state="above" aria-labelledby="loan-state">
+              <section id="loan-risk" class="card loan-risk" data-state="above" aria-labelledby="loan-state" tabindex="-1">
                 <div>
                   <p class="eyebrow">HEALTH FACTOR</p>
                   <h2 id="loan-state">Above the liquidation boundary</h2>

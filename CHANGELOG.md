@@ -1,5 +1,12 @@
 # Release history
 
+## 1.17.1 — 2026-10-23
+
+- Shorten the lending entry and keep health factor and liquidation status visible while editing on mobile. Show assumed APRs beside the time controls, with a direct shortcut to edit them.
+- Keep the existing loan result visible while a response budget is incomplete. Add focused recovery for invalid loan fields, including fields inside closed disclosures, and prevent delayed clipboard failures from surfacing an outdated link.
+- Resume the current lending lesson through Learn and topic navigation. Make the selected topic a non-navigating label, so it cannot reset the workspace. Preserve older progress and explicit lesson links.
+- Make response comparisons easier to scan on narrow screens, remove unnecessary token decimal padding and extend desktop/mobile interaction checks. Calculations and recorded evidence are unchanged.
+
 ## 1.17.0 — 2026-10-23
 
 - Add Lending as a second topic with an ETH/USDC collateralized-loan lab: adjust prices and time, inspect both sides of the balance sheet, and compare repayment with adding collateral using the same additional budget.

@@ -1,4 +1,4 @@
-import { LOAN_MODEL, LOAN_LIMITS, validateLoan } from '../models/collateral-loan-v1.js?v=1.17.0';
+import { LOAN_MODEL, LOAN_LIMITS, validateLoan } from '../models/collateral-loan-v1.js?v=1.17.1';
 
 export function loanHash(input) {
   if (Object.keys(validateLoan(input)).length) throw new RangeError('Use a valid loan setup.');
