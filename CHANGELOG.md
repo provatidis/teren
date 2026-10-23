@@ -1,5 +1,11 @@
 # Release history
 
+## 1.21.0 — 2026-10-23
+
+- Extend **Follow the money** to the unwinding lesson. Eight slider stops separate two withdrawals, sales and repayments, then the final transfer of debt-free ETH to the wallet.
+- Show debt unchanged after a sale, swap losses charged at the sale, and collateral still supplied after repayment. Keep health factor, wallet balances and net assets beside the sequence.
+- Add action-level model balances without changing existing unwind totals, scenarios or saved progress. Check intermediate balance conservation, incomplete previews and desktop/mobile slider interaction.
+
 ## 1.20.1 — 2026-10-23
 
 - Turn the first loop lesson's money flow into a four-stop slider, with named stages, keyboard controls and Previous/Next as an alternative. Keep exact action balances instead of inventing intermediate transaction states.

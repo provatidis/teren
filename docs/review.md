@@ -46,3 +46,10 @@ Carry both asset and debt exposure through every loop. Separate borrowed cash, r
 - Keep the reference distinct from holding, particularly when a zero-round supplied position earns interest. Links and drafts must preserve which comparison is shown.
 - The first lesson's step-through targets a specific misconception: bought ETH remains a wallet asset until supplied, and more collateral does not by itself create wealth. The ledger supplies every displayed balance; stage navigation adds no grading or calculation task.
 - Retained blind spots: the comparison still has fixed rates and endpoint prices, with no price path, liquidation execution or real-market borrowing opportunity. More interaction is not evidence of better understanding. In the next observed session, ask the learner to explain the wallet-versus-collateral distinction and what changes when a price move acts on more borrowed exposure.
+
+## Unwind money flow review · 1.21.0
+
+- Targeted misconceptions: a withdrawal does not repay debt; selling ETH does not automatically use the proceeds to repay; debt-free collateral remains supplied until withdrawn. The eight-stage lesson keeps each of those intermediate balances visible.
+- Check that only sales incur the assumed swap loss, withdrawals and repayments conserve net assets, and the final wallet transfer appears only after full repayment. Blocked and partial previews retain unpaid debt. The action ledger does not alter the existing aggregate results.
+- Retained blind spots: the fixed-price preview still excludes gas, liquidity restrictions, protocol-specific execution and liquidation ordering. Its final transfer is an assumed available withdrawal, not a claim that a real pool can execute it. A health factor above 1 is not a guarantee of a safe strategy.
+- Next learning evidence: pause just after a sale and ask what is in the wallet and whether debt has changed. Then pause after repayment and ask where the remaining ETH is. No calculation or rounding is needed.

@@ -42,9 +42,9 @@ function balance(collateralTokens, debt, price, threshold, cash = 0, walletETH =
 // This is an illustrative sequence, with no flash loan or outside cash.
 function unwind(position, input) {
   let collateral = position.collateralTokens, debt = position.debt, costs = 0;
-  const steps = [], price = input.future, threshold = input.threshold / 100, loss = input.swapCost / 100;
-  if (debt === 0) return { status: 'no-debt', steps, costs, remaining: position };
-  if (position.status !== 'above') return { status: 'blocked', steps, costs, remaining: position };
+  const steps = [], actions = [], price = input.future, threshold = input.threshold / 100, loss = input.swapCost / 100;
+  if (debt === 0) return { status: 'no-debt', steps, actions, costs, remaining: position };
+  if (position.status !== 'above') return { status: 'blocked', steps, actions, costs, remaining: position };
   for (let index = 0; index < 64 && debt > 0; index++) {
     const headroom = Math.max(0, collateral * price - debt / threshold);
     const needed = debt / (1 - loss);
@@ -55,13 +55,23 @@ function unwind(position, input) {
     const soldTokens = soldValue / price;
     collateral -= soldTokens;
     const withdrawalHealth = collateral * price * threshold / debt;
-    debt = soldValue === needed ? 0 : debt - repaid;
+    actions.push({ action: 'withdraw', cycle: index + 1, amount: soldTokens, costs,
+      position: balance(collateral, debt, price, input.threshold, 0, soldTokens) });
     const cost = soldValue - repaid;
     costs += cost;
+    actions.push({ action: 'sell', cycle: index + 1, amount: soldTokens, proceeds: repaid, costs,
+      position: balance(collateral, debt, price, input.threshold, repaid) });
+    debt = soldValue === needed ? 0 : debt - repaid;
+    const remaining = balance(collateral, debt, price, input.threshold);
+    actions.push({ action: 'repay', cycle: index + 1, amount: repaid, costs, position: remaining });
     steps.push({ index: index + 1, soldTokens, soldValue, repaid, cost, withdrawalHealth,
-      remaining: balance(collateral, debt, price, input.threshold) });
+      remaining });
   }
-  return { status: debt === 0 ? 'complete' : 'limited', steps, costs,
+  // Keep the existing aggregate result supplied. The teaching ledger separately
+  // shows the final transfer to the wallet, which is possible only after repayment.
+  if (debt === 0) actions.push({ action: 'release', cycle: null, amount: collateral, costs,
+    position: balance(0, 0, price, input.threshold, 0, collateral) });
+  return { status: debt === 0 ? 'complete' : 'limited', steps, actions, costs,
     remaining: balance(collateral, debt, price, input.threshold) };
 }
 

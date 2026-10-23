@@ -210,6 +210,13 @@ test('independent geometric references and balance conservation hold across vari
     assert.ok(Number.isFinite(result.end.netAssets));
     assert.ok(result.unwind.steps.length <= 64);
     for (const step of result.unwind.steps) assert.ok(step.withdrawalHealth > 1);
+    for (const action of result.unwind.actions) {
+      close(action.position.netAssets, result.end.netAssets - action.costs);
+      assert.ok(action.position.debt >= 0);
+      assert.ok(action.position.collateralTokens >= 0);
+      assert.ok(action.position.cash >= 0);
+      assert.ok(action.position.walletETH >= 0);
+    }
     close(result.unwind.remaining.netAssets, result.end.netAssets - result.unwind.costs);
   }
 });
