@@ -126,6 +126,12 @@ export async function checkMobileAppliedLearning({ evaluate, click, fill, text, 
     assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
     await evaluate("document.querySelector('input[name=applied-application][value=not-proof]').click()"); await evaluate("document.querySelector('input[name=applied-reason][value=counters]').click()"); await click('applied-check');
     assert.equal(await text('applied-feedback-title'), 'Both answers are correct.');
+    assert.equal(await text('learn-current-chapter'), 'Recorded cases');
+    assert.equal(await text('learn-current-progress'), await text('applied-progress-count'));
+    assert.equal(await evaluate('document.activeElement.id'), 'applied-feedback');
+    await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+    assert.ok(await evaluate("(()=>{const r=document.getElementById('applied-next').getBoundingClientRect();return r.top>=document.querySelector('.topbar').getBoundingClientRect().bottom&&r.bottom<=innerHeight})()"), 'The next exercise is visible with its feedback.');
+
     await click('applied-topics'); await evaluate("document.querySelector('[data-applied-id=period-vs-holding]').click()");
     assert.equal(await evaluate("document.getElementById('learn-course').open"), false);
     assert.equal(await text('applied-title'), 'Explain the period’s result');

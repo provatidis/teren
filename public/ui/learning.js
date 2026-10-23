@@ -1,21 +1,21 @@
 import { stageForLesson } from '../learning/example-path.js';
-import { DEEPER_READING } from '../learning/deeper-reading.js?v=1.16.0';
-import { lessonWalkthrough } from '../lib/lesson-walkthrough.js?v=1.16.0';
-import { LESSONS } from '../learning/liquidity-essentials.js?v=1.16.0';
-import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, checkLesson } from '../models/lesson-experiments.js?v=1.16.0';
-import { checkLessonUnderstanding } from '../models/lesson-application.js?v=1.16.0';
-import { lessonApplicationCopy } from '../lib/lesson-application-copy.js?v=1.16.0';
-import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.16.0';
-import { learningChoices, learningMetric, learningPitfall } from '../lib/learning-elements.js?v=1.16.0';
-import { POOL_PITFALLS } from '../learning/pool-pitfalls.js?v=1.16.0';
-import { managementLessonFromHash } from '../lib/management-links.js?v=1.16.0';
-import { readProgress, saveProgress } from '../data/learning-progress.js?v=1.16.0';
+import { DEEPER_READING } from '../learning/deeper-reading.js?v=1.16.1';
+import { lessonWalkthrough } from '../lib/lesson-walkthrough.js?v=1.16.1';
+import { LESSONS } from '../learning/liquidity-essentials.js?v=1.16.1';
+import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, checkLesson } from '../models/lesson-experiments.js?v=1.16.1';
+import { checkLessonUnderstanding } from '../models/lesson-application.js?v=1.16.1';
+import { lessonApplicationCopy } from '../lib/lesson-application-copy.js?v=1.16.1';
+import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.16.1';
+import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback } from '../lib/learning-elements.js?v=1.16.1';
+import { POOL_PITFALLS } from '../learning/pool-pitfalls.js?v=1.16.1';
+import { managementLessonFromHash } from '../lib/management-links.js?v=1.16.1';
+import { readProgress, saveProgress } from '../data/learning-progress.js?v=1.16.1';
 import { fmt, usd, signedUSD, percent } from '../lib/format.js';
 import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
-import { resultCardBlob } from '../lib/result-card.js?v=1.16.0';
+import { resultCardBlob } from '../lib/result-card.js?v=1.16.1';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
-import { tokenBalanceNarration, benchmarkNarration, lessonReasonFeedback } from '../lib/lesson-narration.js?v=1.16.0';
+import { tokenBalanceNarration, benchmarkNarration, lessonReasonFeedback } from '../lib/lesson-narration.js?v=1.16.1';
 
 export function initLearning() {
   const $ = id => document.getElementById(id);
@@ -36,6 +36,7 @@ export function initLearning() {
   }
   function updateProgress() {
     const count = progress.completed.length;
+    if (!managementLessonFromHash(location.hash) && !appliedLessonFromHash(location.hash)) learningChapter('Essentials', count, 7);
     $('learn-progress-count').textContent = count + ' of 7 checked';
     $('learn-progress').value = count;
     $('learn-progress').setAttribute('aria-label', count + ' of 7 exercises checked');
@@ -208,8 +209,8 @@ export function initLearning() {
     else if (r) home.hash = scenarioHash(s);
     else home.hash = 'swap-sandbox';
     $('learn-explore').href = home.href;
-    $('learn-explore').textContent = r ? 'Explore this setup in Playground ↗' : 'Open the swap sandbox ↗';
-    $('learn-explore-note').textContent = r ? 'Opens a separate playground tab. Your current playground tab and virtual wallet are unchanged.' : 'Opens your independent swap sandbox in a new tab; its existing virtual balances are preserved.';
+    $('learn-explore').textContent = r ? 'Explore this setup in Experiment ↗' : 'Open the swap sandbox ↗';
+    $('learn-explore-note').textContent = r ? 'Opens Experiment in a new tab with this setup. Your existing experiments and virtual balances stay separate.' : 'Opens your independent swap sandbox in a new tab; its existing virtual balances are preserved.';
     if (r && lesson.id === 'final-challenge') $('learn-share-url').value = home.href;
     $('learn-answer').value = draft.answer;
     $('learn-answer').setAttribute('aria-invalid', 'false');
@@ -271,7 +272,8 @@ export function initLearning() {
       $('learn-next').href = index < 6 ? '#lesson=' + LESSON_IDS[index + 1] : '#manage=range-width';
       $('learn-next').textContent = index < 6 ? 'Next: ' + LESSONS[index + 1].short + ' →' : 'Next: Choosing and managing a range →';
     }
-    updateProgress(); if (save) persist();
+    updateProgress();
+    if (save) { persist(); focusLearningFeedback('learn'); }
   }
   $('learn-run').addEventListener('click', () => {
     draft.prediction = selection('learn-prediction'); if (!draft.prediction) return;

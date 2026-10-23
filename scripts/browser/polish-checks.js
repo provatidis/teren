@@ -12,6 +12,17 @@ const waitForRecord = evaluate => evaluate(`new Promise((resolve, reject) => {
 })`);
 
 export async function checkPolish({ evaluate, navigate, call, base }) {
+  await navigate(base + '#range-lab');
+  const primaryValues = await evaluate("['cl-value','cl-hold-value'].map(id=>document.getElementById(id).textContent)");
+  assert.equal(await evaluate("getComputedStyle(document.getElementById('cl-chart-full')).display"), 'none');
+  for (const open of [true, false]) {
+    await evaluate("document.querySelector('#cl-reference summary').click()");
+    await settle(evaluate);
+    assert.equal(await evaluate("document.getElementById('cl-reference').open"), open);
+    assert.equal(await evaluate("getComputedStyle(document.getElementById('cl-chart-full')).display !== 'none'"), open);
+    assert.equal(await evaluate("document.getElementById('cl-chart-title').textContent.includes('V2-style')"), open);
+    assert.deepEqual(await evaluate("['cl-value','cl-hold-value'].map(id=>document.getElementById(id).textContent)"), primaryValues, 'Opening a reference must not change the experiment.');
+  }
   for (const [fragment, body, input, price] of [
     ['lp-lab', 'scenario-comparisons', 'scenario-future', '1000'],
     ['range-lab', 'cl-comparisons', 'cl-future', '1440'],
@@ -51,6 +62,9 @@ export async function checkPolish({ evaluate, navigate, call, base }) {
         assert.ok(gap >= 8, 'Larger axis labels must clear the explanation below the chart.');
       }
       assert.equal(await evaluate('document.documentElement.scrollWidth > innerWidth'), false);
+      if (chart === 'curve') {
+        assert.ok(await evaluate("[...document.querySelectorAll('.stat strong')].every(element=>{const range=document.createRange();range.selectNodeContents(element);return range.getClientRects().length===1&&element.scrollWidth<=element.clientWidth})"), 'Sandbox amounts stay whole at ' + width + 'px.');
+      }
     }
   }
   console.log('PASS: keyboard comparison continuity and readable chart labels across all four mobile workspaces');

@@ -1,6 +1,6 @@
 import { MODEL, calculateScenario } from '../models/cp50-v1.js';
 import { usd, percent } from './format.js';
-import { drawBrand } from './brand.js?v=1.16.0';
+import { drawBrand } from './brand.js?v=1.16.1';
 
 export async function resultCardBlob(input, siteURL) {
   const result = calculateScenario(input);

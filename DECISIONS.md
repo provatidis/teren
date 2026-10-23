@@ -6,7 +6,7 @@ These are durable working choices, not a feature backlog. Revisit them when evid
 - Teren takes its name from Pontic Greek τέρεν, “look.” Keep the founder’s heritage to a short About explanation. Use the custom wordmark as the main identity and the separate open-t symbol for compact uses. Liquidity is the current area of depth; the name can accommodate other DeFi subjects later.
 - Rebranding preserves existing browser-storage keys, scenario versions and file-format identifiers. Those are compatibility contracts, independent of visible names and download filenames.
 - Complexity increases predictably across examples. Advanced cases and every lesson remain directly accessible.
-- Learn links carry their setup into Playground. Learning progress, virtual balances, model drafts and recorded snapshots remain independent.
+- Learn links carry their setup into Experiment. Learning progress, virtual balances, model drafts and recorded snapshots remain independent.
 - Give each task a focused workspace. Preserve public fragments, existing storage schemas and working drafts during navigation.
 - Explain the result plainly. Keep essential assumptions nearby; put derivations and detailed accounting in optional disclosures.
 - Treat hypothetical models, recorded single-block snapshots and independently checked historical accounting as different kinds of evidence.

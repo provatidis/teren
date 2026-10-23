@@ -169,6 +169,12 @@ export async function checkMobileLearning({ evaluate, click, fill, text, navigat
   await evaluate("document.querySelector('input[name=learn-reason][value=path]').click()");
   await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
+    assert.equal(await text('learn-current-chapter'), 'Essentials');
+    assert.equal(await text('learn-current-progress'), await text('learn-progress-count'));
+    assert.equal(await evaluate('document.activeElement.id'), 'learn-feedback');
+    await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+    assert.ok(await evaluate("(()=>{const r=document.getElementById('learn-next').getBoundingClientRect();return r.top>=document.querySelector('.topbar').getBoundingClientRect().bottom&&r.bottom<=innerHeight})()"), 'The next exercise is visible with its feedback.');
+
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'),true);
   await navigate(base);
   assert.equal(await evaluate("getComputedStyle(document.querySelector('.product-nav')).display"), 'flex');

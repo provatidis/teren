@@ -1,7 +1,7 @@
 import { MODEL, calculateRange } from '../models/cl-range-v1.js';
 import { usd, percent } from './format.js';
 import { STATE_COPY, rangePriceLabels, assetAmounts } from './range-presentation.js';
-import { drawBrand } from './brand.js?v=1.16.0';
+import { drawBrand } from './brand.js?v=1.16.1';
 
 export async function rangeCardBlob(input, siteURL) {
   const result = calculateRange(input);

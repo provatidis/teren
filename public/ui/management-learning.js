@@ -1,9 +1,9 @@
-import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js?v=1.16.0';
-import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../models/range-decisions.js?v=1.16.0';
-import { managementLessonFromHash } from '../lib/management-links.js?v=1.16.0';
-import { readManagementProgress, saveManagementProgress } from '../data/management-progress.js?v=1.16.0';
-import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.16.0';
-import { learningChoices, learningMetric, learningSources } from '../lib/learning-elements.js?v=1.16.0';
+import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js?v=1.16.1';
+import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../models/range-decisions.js?v=1.16.1';
+import { managementLessonFromHash } from '../lib/management-links.js?v=1.16.1';
+import { readManagementProgress, saveManagementProgress } from '../data/management-progress.js?v=1.16.1';
+import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.16.1';
+import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback } from '../lib/learning-elements.js?v=1.16.1';
 import { rangeHash } from '../lib/range-links.js';
 
 export function initManagementLearning() {
@@ -13,6 +13,7 @@ export function initManagementLearning() {
   function focus(id) {$(id).focus({preventScroll:true});$(id).scrollIntoView({block:'start',behavior:'instant'});}
   function navigation() {
     $('manage-progress-count').textContent=progress.completed.length+' of 3 checked';
+    if(managementLessonFromHash(location.hash))learningChapter('Range choices',progress.completed.length,3);
     for(const link of document.querySelectorAll('[data-management-id]')) {
       const id=link.dataset.managementId, active=id===managementLessonFromHash(location.hash), complete=progress.completed.includes(id);
       link.setAttribute('aria-current',active?'step':'false');link.classList.toggle('learn-step-done',complete);
@@ -48,13 +49,13 @@ export function initManagementLearning() {
     $('manage-feedback-title').textContent=result.passed?'Both answers are correct.':'Review your answers.';
     const reasonFeedback=lesson.reasonFeedback[draft.reason]||'Choose an explanation for the example. '+lesson.hint;
     const applicationFeedback=draft.application?application.feedback:'Choose an answer for the changed situation. '+application.hint;
-    $('manage-feedback-copy').textContent=result.passed?lesson.takeaway+' '+application.feedback:!result.reasoning&&!result.application?reasonFeedback+' '+applicationFeedback:!result.reasoning?'Your application fits the changed situation. '+reasonFeedback:'Your explanation fits the example. '+applicationFeedback;
+    $('manage-feedback-copy').textContent=result.passed?lesson.takeaway:!result.reasoning&&!result.application?reasonFeedback+' '+applicationFeedback:!result.reasoning?'Your application fits the changed situation. '+reasonFeedback:'Your explanation fits the example. '+applicationFeedback;
     $('manage-continue').hidden=!result.passed;
     if(result.passed&&!progress.completed.includes(lesson.id))progress.completed.push(lesson.id);
     const next=MANAGEMENT_LESSONS[MANAGEMENT_IDS.indexOf(lesson.id)+1];
     $('manage-next').href=next?'#manage='+next.id:'#applied=fees-over-time';
     $('manage-next').textContent=next?'Next: '+next.short+' →':'Next: Fees, time and range exits →';
-    if(save)persist();else navigation();
+    if(save){persist();focusLearningFeedback('manage');}else navigation();
   }
   function activate(scroll=false) {
     const id=managementLessonFromHash(location.hash);$('learn-management').hidden=!id;navigation();if(!id)return;

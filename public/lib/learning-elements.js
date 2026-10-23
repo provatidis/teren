@@ -1,4 +1,15 @@
-import { orderedLearningChoices } from './learning-choices.js?v=1.16.0';
+import { orderedLearningChoices } from './learning-choices.js?v=1.16.1';
+
+export function learningChapter(chapter, completed, total) {
+  document.getElementById('learn-current-chapter').textContent = chapter;
+  document.getElementById('learn-current-progress').textContent = completed + ' of ' + total + ' checked';
+}
+
+export function focusLearningFeedback(prefix) {
+  const feedback = document.getElementById(prefix + '-feedback');
+  feedback.focus({ preventScroll: true });
+  feedback.scrollIntoView({ block: 'start', behavior: 'instant' });
+}
 
 export function learningChoices(container, {name,values,selected,seed,group,onChange,shuffle=true}) {
   const ordered=shuffle?orderedLearningChoices(values,seed,group):values;

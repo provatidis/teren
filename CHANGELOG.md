@@ -1,5 +1,14 @@
 # Release history
 
+
+## 1.16.1 — 2026-10-23
+
+- Give mobile editing more space: the wordmark scrolls away while primary navigation stays available, lab tabs scroll normally, and the compact result stays beside working inputs.
+- Keep sandbox currency amounts on one line with labelled mobile summary rows.
+- Lead the range lab with holding versus the range's own starting tokens. Make the V2-style reference and its chart line optional, while preserving all calculations and export formats.
+- Label the lesson selector “All topics” and show the current chapter's progress. Group answer feedback, the takeaway and the next lesson in one focused panel.
+- Use Experiment consistently in learning handoffs, label V2 pool snapshots explicitly and simplify recorded-lesson feedback.
+
 ## 1.16.0 — 2026-10-23
 
 - Rebrand the interface, documentation and downloads as Teren, with a custom vector wordmark, open-t symbol, favicon, app icons and social preview. Introduce ink-blue surfaces while retaining the distinct token-allocation colors and patterns.

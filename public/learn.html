@@ -28,8 +28,8 @@
   <meta name="twitter:title" content="Learn liquidity by doing · Teren">
   <meta name="twitter:description" content="Interactive liquidity lessons and applied historical cases, with predictions and understanding checks.">
   <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
-  <link rel="stylesheet" href="styles.css?v=1.16.0">
-  <script type="module" src="learn-main.js?v=1.16.0"></script>
+  <link rel="stylesheet" href="styles.css?v=1.16.1">
+  <script type="module" src="learn-main.js?v=1.16.1"></script>
 </head>
 <body class="learning-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -38,7 +38,7 @@
     <nav class="site-nav" aria-label="Teren"><div class="product-nav"><a href="./#experiment">Experiment</a><a href="learn.html" aria-current="page">Learn</a><a href="./#inspect">Inspect</a></div></nav>
   </header>
   <main id="main-content" tabindex="-1">
-    <noscript><div class="notice"><p>JavaScript is needed for the interactive lessons and progress. Enable it to predict, run and check your experiments. <a href="./">Open Playground →</a></p></div></noscript>
+    <noscript><div class="notice"><p>JavaScript is needed for the interactive lessons and progress. Enable it to predict, run and check your experiments. <a href="./">Open Experiment →</a></p></div></noscript>
     <section class="intro learn-intro">
       <div><p class="eyebrow">LEARN BY DOING</p><h1 id="learn-page-title">Liquidity essentials</h1><p id="learn-page-subtitle" class="subtitle">Explore Uniswap v2-style full-range pools and Uniswap v3-style price ranges with interactive examples.</p></div>
       <button type="button" id="learn-resume" class="button secondary">Start lesson 1 ↓</button>
@@ -49,7 +49,8 @@
     <div id="learn-workspace" class="learn-workspace">
       <aside class="learn-sidebar">
         <details id="learn-course" class="card learn-course" open>
-          <summary><span>ESSENTIALS</span> <strong id="learn-progress-count">0 of 7 checked</strong> <span class="learn-course-chevron">⌄</span></summary>
+          <summary><span>All topics</span><span class="learn-course-current"><span id="learn-current-chapter">Essentials</span><strong id="learn-current-progress">0 of 7 checked</strong></span><span class="learn-course-chevron">⌄</span></summary>
+          <div class="applied-course-heading learn-essentials-heading"><h2>Liquidity essentials</h2><span id="learn-progress-count">0 of 7 checked</span></div>
           <progress id="learn-progress" max="7" value="0" aria-label="0 of 7 exercises checked"></progress>
           <p id="learn-course-status" class="fine-print">Six lessons and a final challenge. Open any topic.</p>
           <nav aria-label="Liquidity essentials lessons"><ol id="learn-lesson-list"></ol></nav>
@@ -59,9 +60,9 @@
             <p class="fine-print">Next: apply the mechanics to verified history. Open any exercise.</p>
             <nav aria-label="Applied liquidity exercises"><ol id="applied-lesson-list"></ol></nav>
           </section>
-          <a class="learn-sidebar-link" href="./">Have your own question? Open Playground ↗</a>
+          <a class="learn-sidebar-link" href="./">Have your own question? Open Experiment ↗</a>
         </details>
-        <p class="learn-independence">These exercises have their own inputs. Your playground experiments and virtual balances stay separate.</p>
+        <p class="learn-independence">These exercises have their own inputs. Your experiments and virtual balances stay separate.</p>
       </aside>
       <article id="learn-essential" class="learn-lesson" aria-labelledby="learn-lesson-title">
         <div class="learn-lesson-heading"><p id="learn-lesson-number" class="eyebrow">LESSON 1 OF 6</p><span id="learn-concept" class="small-badge">Swaps</span><button type="button" id="learn-topics" class="learn-text-button">All topics ↑</button></div>
@@ -86,7 +87,7 @@
           <p id="learn-takeaway" class="learn-takeaway"></p>
           <p id="learn-explanation" class="learn-reading"></p>
           <aside id="learn-pitfall" class="learn-pitfall" aria-label="Common pitfall"></aside>
-          <a id="learn-explore" class="learn-explore" href="./" target="_blank" rel="noopener noreferrer">Explore in Playground ↗</a>
+          <a id="learn-explore" class="learn-explore" href="./" target="_blank" rel="noopener noreferrer">Explore in Experiment ↗</a>
           <p id="learn-explore-note" class="fine-print"></p>
           <details id="learn-deeper" class="learn-deeper">
             <summary><span><strong>Go deeper</strong> <span class="learn-deeper-subtitle">Mechanics, calculations &amp; primary sources</span></span> <span class="learn-deeper-optional">Optional</span> <span class="learn-deeper-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" focusable="false"><path d="M6 1v10M1 6h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
@@ -112,14 +113,14 @@
             <details id="learn-hint" class="learn-hint"><summary>Need a hint?</summary><p id="learn-hint-text"></p></details>
             <button id="learn-check" class="button primary" type="submit">Check answers →</button>
           </form>
-          <div id="learn-feedback" class="learn-feedback" role="status" hidden><strong id="learn-feedback-title"></strong><p id="learn-feedback-copy"></p></div>
-          <div id="learn-continue" class="learn-continue" hidden><a id="learn-next" class="button secondary" href="#lesson=pool-share">Next lesson →</a><button id="learn-fresh" class="learn-text-button" type="button">Test a fresh variation ↻</button></div>
+          <div id="learn-feedback" class="learn-feedback" tabindex="-1" aria-labelledby="learn-feedback-title" hidden><div role="status"><strong id="learn-feedback-title"></strong><p id="learn-feedback-copy"></p></div>
+          <div id="learn-continue" class="learn-continue" hidden><a id="learn-next" class="button primary" href="#lesson=pool-share">Next lesson →</a><button id="learn-fresh" class="learn-text-button" type="button">Test a fresh variation ↻</button></div></div>
         </section>
         <section id="learn-share" class="card learn-share" hidden aria-labelledby="learn-share-title">
           <p class="eyebrow">KEEP YOUR EXPERIMENT</p><h3 id="learn-share-title">Save or share this scenario</h3>
           <p class="body-copy">Share the model inputs or download a result card. Your answers and learning progress stay in this browser.</p>
           <div class="learn-share-actions"><button id="learn-create-card" class="button secondary" type="button">Create result card</button><button id="learn-copy" class="button secondary" type="button">Copy scenario link</button></div>
-          <label class="sr-only" for="learn-share-url">Reproducible playground scenario link</label><input id="learn-share-url" class="learn-share-url" type="text" readonly>
+          <label class="sr-only" for="learn-share-url">Reproducible experiment link</label><input id="learn-share-url" class="learn-share-url" type="text" readonly>
           <p id="learn-card-status" class="fine-print" role="status"></p>
           <div id="learn-card-preview" hidden><img id="learn-card-image" alt="Final challenge result card with inputs, holding and LP values, assumed fees and model limitations."><a id="learn-card-download" class="button secondary" download="teren-learning-challenge-cp50-v1.png">Download PNG</a></div>
         </section>
@@ -147,8 +148,8 @@
             <fieldset class="learn-fieldset"><legend id="manage-application-question"></legend><div id="manage-applications" class="learn-choices"></div></fieldset>
             <details id="manage-hint" class="learn-hint"><summary>Need a hint?</summary><p id="manage-hint-text"></p></details><button id="manage-check" class="button primary" type="submit">Check answers →</button>
           </form>
-          <div id="manage-feedback" class="learn-feedback" role="status" hidden><strong id="manage-feedback-title"></strong><p id="manage-feedback-copy"></p></div>
-          <div id="manage-continue" class="learn-continue" hidden><a id="manage-next" class="button secondary" href="#manage=fee-tiers">Next exercise →</a><button id="manage-fresh" class="learn-text-button" type="button">Test another situation ↻</button></div>
+          <div id="manage-feedback" class="learn-feedback" tabindex="-1" aria-labelledby="manage-feedback-title" hidden><div role="status"><strong id="manage-feedback-title"></strong><p id="manage-feedback-copy"></p></div>
+          <div id="manage-continue" class="learn-continue" hidden><a id="manage-next" class="button primary" href="#manage=fee-tiers">Next exercise →</a><button id="manage-fresh" class="learn-text-button" type="button">Test another situation ↻</button></div></div>
         </section>
       </article>
       <article id="learn-applied" class="learn-lesson applied-lesson" aria-labelledby="applied-title" hidden>
@@ -180,8 +181,8 @@
           <p id="applied-takeaway" class="learn-takeaway"></p>
           <p id="applied-explanation" class="learn-reading"></p>
           <aside id="applied-pitfall" class="learn-pitfall" aria-label="Common pitfall"></aside>
-          <div class="applied-handoffs"><a id="applied-explore" class="learn-explore" href="./" target="_blank" rel="noopener noreferrer">Explore this setup in Playground ↗</a><a id="applied-inspect" href="./#historical-case" target="_blank" rel="noopener noreferrer">Inspect the full recorded case ↗</a></div>
-          <p class="fine-print">Playground starts a new hypothetical experiment from the selected checkpoint’s principal and range, with zero assumed future fees. Earlier collectable tokens and recorded period earnings are excluded. Inspect opens the historical evidence.</p>
+          <div class="applied-handoffs"><a id="applied-explore" class="learn-explore" href="./" target="_blank" rel="noopener noreferrer">Explore this setup in Experiment ↗</a><a id="applied-inspect" href="./#historical-case" target="_blank" rel="noopener noreferrer">Inspect the full recorded case ↗</a></div>
+          <p class="fine-print">Experiment starts a new hypothetical experiment from the selected checkpoint’s principal and range, with zero assumed future fees. Earlier collectable tokens and recorded period earnings are excluded. Inspect opens the historical evidence.</p>
           <details id="applied-deeper" class="applied-deeper"><summary>Go deeper: accounting and evidence</summary><div>
             <details id="applied-calculation" class="learn-math learn-calculation"><summary>Try a calculation · optional</summary><p>Practice using the numbers. This does not affect lesson completion.</p><label id="applied-question" for="applied-answer" class="learn-answer-label"></label><input id="applied-answer" class="learn-answer" type="number" step="any" inputmode="decimal" autocomplete="off" aria-describedby="applied-question applied-calculation-feedback"><p id="applied-calculation-hint"></p><button id="applied-calculation-check" type="button" class="button secondary">Check calculation</button><p id="applied-calculation-feedback" role="status"></p></details>
             <p id="applied-accounting"></p><dl id="applied-evidence"></dl>
@@ -201,8 +202,8 @@
             <details id="applied-hint" class="learn-hint"><summary>Need a hint?</summary><p id="applied-hint-text"></p></details>
             <button id="applied-check" class="button primary" type="submit">Check answers →</button>
           </form>
-          <div id="applied-feedback" class="learn-feedback" role="status" hidden><strong id="applied-feedback-title"></strong><p id="applied-feedback-copy"></p></div>
-          <div id="applied-continue" class="learn-continue" hidden><a id="applied-next" class="button secondary" href="#applied=between-samples">Next exercise →</a><button id="applied-restart" class="learn-text-button" type="button">Try this question again ↻</button></div>
+          <div id="applied-feedback" class="learn-feedback" tabindex="-1" aria-labelledby="applied-feedback-title" hidden><div role="status"><strong id="applied-feedback-title"></strong><p id="applied-feedback-copy"></p></div>
+          <div id="applied-continue" class="learn-continue" hidden><a id="applied-next" class="button primary" href="#applied=between-samples">Next exercise →</a><button id="applied-restart" class="learn-text-button" type="button">Try this question again ↻</button></div></div>
           <p id="applied-reflection" class="learn-reading" hidden>Explain it in your own words: what changed the token mix, what did fees contribute, and what information would you need for a wider comparison?</p>
         </section>
       </article>
