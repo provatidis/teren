@@ -129,7 +129,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     assert.equal(await text('lend-number'), 'LOOPING ' + (index + 1) + ' OF 3');
     await choose('prediction', prediction); await click('lend-reveal');
     assert.match(await text('lend-prediction-feedback'), /Compare this with your prediction/);
-    assert.equal(await evaluate("document.getElementById('lend-money-flow').hidden"), id !== 'build');
+    assert.equal(await evaluate("document.getElementById('lend-money-flow').hidden"), id === 'stress');
     if (id === 'build') {
       assert.equal(await text('loop-flow-supplied'), '5 ETH');
       assert.equal(await text('loop-flow-debt'), '0 USDC');
