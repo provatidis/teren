@@ -1,3 +1,4 @@
+import { checkBorrowingLoops } from './browser/borrowing-loop-checks.js';
 import { checkProjectInformation, checkMobileTools } from './browser/clarity-checks.js';
 import { checkLending } from './browser/lending-checks.js';
 import { checkLoanConsequences } from './browser/loan-consequence-checks.js';
@@ -579,6 +580,7 @@ try {
   await checkMobileInspect({ evaluate, call, click, fill, navigate, nextEvent, base });
   await checkLending({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   await checkLoanConsequences({ evaluate, click, fill, text, navigate, base, call });
+  await checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call });
   assert.deepEqual(errors, [], 'No uncaught browser errors');
   console.log('PASS: mobile layout and interaction; no uncaught browser errors');
 } finally {

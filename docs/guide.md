@@ -37,7 +37,19 @@ The lab keeps the last valid working loan in this tab's session storage, separat
 
 **Learn** resumes the last opened lending lesson, including after a reload or a visit to Liquidity. Explicit `#lesson=...` links still select their named lesson, and **All lessons** keeps the whole sequence accessible. The current topic is labelled rather than linked, so selecting it cannot unexpectedly switch modes.
 
-USDC = $1 is an assumption. Rates, LTV and threshold are illustrative, not current Aave market quotes; Aave's indexed interest accounting is not reproduced. Looping, multiple collateral assets, live lending snapshots and independently checked lending history are later iterations. See [the model](models.md#collateralized-loan-model).
+USDC = $1 is an assumption. Rates, LTV and threshold are illustrative, not current Aave market quotes; Aave's indexed interest accounting is not reproduced. Multiple collateral assets, live lending snapshots and independently checked lending history are later iterations. Borrowing loops use the separate lab below. See [the model](models.md#collateralized-loan-model).
+
+## Borrowing loops: build, change conditions, unwind
+
+Open **Borrowing loops** beside Single loan, or use [the direct lab link](https://teren.sh/lending.html#loops). Begin with zero or one round, then add rounds up to five. Each round borrows a fraction of the ETH value just supplied: the original ETH for round one, then the preceding purchase for later rounds. **Follow each round** separates borrowing, swapping and supplying, including wallet balances, debt, health factor and net assets. Borrowed USDC is spent when it buys ETH; it is never counted again beside that purchase.
+
+Both sides of the holding comparison start with the original ETH. The loop adds no outside funds. **Original capital and assumptions** sets the ETH, starting price, borrowing limit, liquidation threshold and assumed loss on each swap. The swap loss represents a combined fee/price-impact haircut, applied when buying or selling; gas is excluded. **Where the difference comes from** separates construction costs, interest and a supply-only comparison at the same assumed supply rate.
+
+**Test price and time** applies a later ETH valuation and interest period to the completed loop. Continuous compounding is the default; fixed simple interest is available for comparison. Neither calculation reproduces changing protocol rates or Aave reserve indexes. The chart compares possible prices at the same accrued token balances, rather than reconstructing a price path. Health factor and net assets are separate: an improved health factor does not undo extra ETH exposure.
+
+**Withdraw, sell, repay** previews a sequential unwind at that one selected price. Each withdrawal uses up to 95% of the collateral value above health factor 1, capped by the sale needed to repay the remaining debt. Sale proceeds repay debt before the next withdrawal. The preview stops at or below the liquidation boundary, retains unpaid debt and uses no outside cash or flash loan. Its 95% convention and 64-step limit belong to this teaching model, not Aave. Gas, liquidity restrictions, market changes and execution ordering are excluded. Pre-liquidation headline balances do not establish that a real position survived earlier prices.
+
+**Copy loop link** includes every assumption in a strict `#loop=borrowing-loop-v1` fragment. A valid working loop stays in its own tab draft, separate from the single loan; incomplete edits do not overwrite it. The three [loop lessons](https://teren.sh/lending.html#loop-lesson=build) follow the four essentials and remain independently accessible. They use the actual loop model, ungraded predictions and conceptual explanation/application checks. Lesson links open their exact loop setup in a separate tab. Loop progress has its own storage key; earlier checked lessons are preserved. Learn resumes the last chapter/lesson in this tab.
 
 ## Starting and comparing an experiment
 

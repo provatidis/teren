@@ -1,0 +1,68 @@
+.lending-tools, .lending-chapters { display: flex; gap: 8px; margin: 0 0 24px; }
+.lending-tools a, .lending-chapters a { display: flex; align-items: center; min-height: 44px; padding: 10px 18px; border: 1px solid var(--border); border-radius: 10px; color: var(--muted); font-size: 14px; }
+.lending-tools a[aria-current=page], .lending-chapters a[aria-current=true] { color: var(--text); background: var(--highlight); border-color: var(--accent); }
+.lending-chapters { flex-direction: column; margin: 16px 0 0; }
+.lending-chapters a { font-size: 13px; }
+.loop-layout { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 24px; align-items: start; }
+.loop-controls, .loop-analysis, #loop-results { display: grid; gap: 20px; min-width: 0; }
+.loop-card { padding: 26px; min-width: 0; }
+.loop-card h2 { font-size: 22px; line-height: 1.4; letter-spacing: -.5px; margin: 0 0 16px; }
+.loop-card .body-copy { margin: 0 0 18px; }
+.loop-card .scenario-field { margin: 18px 0; }
+.loop-card summary { cursor: pointer; min-height: 44px; line-height: 1.8; padding: 10px 0; font-size: 14px; color: var(--accent); }
+.loop-card select { width: 100%; min-height: 48px; padding: 10px; border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text); background: var(--surface); font: inherit; }
+.loop-stages { display: flex; flex-wrap: wrap; gap: 8px; }
+.loop-stages button { min-height: 44px; border: 1px solid var(--border-strong); border-radius: 8px; padding: 8px 12px; color: var(--text); background: var(--surface); font-size: 13px; cursor: pointer; }
+.loop-stages button[aria-pressed=true] { border-color: var(--accent); background: var(--highlight); }
+.loop-learn-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent); font-size: 14px; text-decoration: underline; text-underline-offset: 4px; }
+.loop-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 24px; margin: 22px 0; }
+.loop-metrics > div { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.loop-metrics span { font-size: 14px; line-height: 1.6; color: var(--muted); }
+.loop-metrics strong { font-size: 28px; font-variant-numeric: tabular-nums; line-height: 1.35; overflow-wrap: anywhere; }
+.loop-metrics small { color: var(--muted); font-size: 13px; line-height: 1.7; }
+.loop-risk { padding: 18px; background: var(--highlight); border: 1px solid var(--accent); border-radius: 12px; }
+.loop-risk strong { font-size: 22px; line-height: 1.5; }
+.loop-risk p { font-size: 14px; line-height: 1.8; margin: 8px 0 0; color: var(--muted); }
+.loop-risk[data-state=eligible], .loop-risk[data-state=boundary] { border-color: #e5bd85; background: #392f28; }
+.loop-risk[data-state=eligible] strong, .loop-risk[data-state=boundary] strong { color: #e5bd85; }
+.loop-round, .loop-disclosure { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 8px; }
+.loop-step-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.loop-step-list > li { padding: 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.loop-step-list h3 { margin: 0 0 8px; font-size: 16px; line-height: 1.5; }
+.loop-step-list p { font-size: 14px; line-height: 1.8; color: var(--muted); margin: 0 0 14px; }
+.loop-step-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.loop-step-facts dt, .loop-accounting dt { color: var(--muted); font-size: 13px; line-height: 1.7; }
+.loop-step-facts dd, .loop-accounting dd { margin: 4px 0 0; font-size: 15px; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.loop-step-facts > div:last-child { grid-column: 1 / -1; }
+.loop-accounting > div { margin: 14px 0; }
+.loop-chart { margin: 0; }
+.loop-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.loop-value-line, .loop-hold-line { fill: none; stroke: var(--accent); stroke-width: 3; }
+.loop-hold-line { stroke: #e5bd85; stroke-dasharray: 8 5; }
+.loop-chart-point { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.loop-chart-boundary { fill: none; stroke: #e5bd85; stroke-width: 2; stroke-dasharray: 3 5; }
+.chart-zero { fill: none; stroke: var(--muted); stroke-width: 1; }
+.loop-chart-legend { display: flex; flex-wrap: wrap; gap: 12px 24px; font-size: 13px; line-height: 1.8; margin: 12px 0; }
+.loop-chart-legend span { display: flex; align-items: center; gap: 8px; }
+.loop-line-key { display: inline-block; width: 24px; border-top: 3px solid var(--accent); }
+.loop-line-key.hold { border-top: 3px dashed #e5bd85; }
+.loop-unwind-steps { padding-left: 22px; }
+.loop-unwind-steps li { padding: 8px 0; }
+.loop-unwind-steps p { line-height: 1.8; font-size: 14px; margin: 0 0 6px; }
+#loop-outcome, #lending-loops :is(input, select, button, summary) { scroll-margin-top: calc(var(--lab-feedback-height, 0px) + 24px); }
+#loop-outcome:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+@media (max-width: 1000px) { .loop-layout { grid-template-columns: 290px minmax(0, 1fr); } .loop-metrics { grid-template-columns: 1fr; } }
+@media (max-width: 750px) {
+  .lending-page:is([data-lending-view=loops], [data-lending-view=loan]) .lending-intro .subtitle,
+  .lending-page #lending-start { display: none; }
+  .lending-tools { margin-bottom: 16px; }
+  .loop-layout { grid-template-columns: 1fr; gap: 16px; }
+  .loop-card { padding: 20px; }
+  .loop-metrics { gap: 18px; }
+  .loop-metrics strong { font-size: 25px; }
+  .loop-step-list > li { padding: 14px; }
+  .loop-step-facts { grid-template-columns: 1fr; }
+  .loop-step-facts > div:last-child { grid-column: auto; }
+  .loop-card h2 { font-size: 21px; }
+}
+@media (max-width: 360px) { .loop-card { padding: 16px; } .lending-tools a { font-size: 13px; padding: 10px 14px; } }

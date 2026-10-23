@@ -36,12 +36,12 @@ export function saveLiquidationDraft(input, getStorage = () => globalThis.sessio
   catch { return false; }
 }
 
-export function parseLendingProgress(value) {
-  const clean = { version: 1, completed: [], drafts: {}, currentLesson: 'supply' };
+export function parseLendingProgress(value, ids = LENDING_LESSON_IDS) {
+  const clean = { version: 1, completed: [], drafts: {}, currentLesson: ids[0] };
   if (value?.version !== 1) return clean;
-  if (LENDING_LESSON_IDS.includes(value.currentLesson)) clean.currentLesson = value.currentLesson;
-  clean.completed = LENDING_LESSON_IDS.filter(id => Array.isArray(value.completed) && value.completed.includes(id));
-  for (const id of LENDING_LESSON_IDS) {
+  if (ids.includes(value.currentLesson)) clean.currentLesson = value.currentLesson;
+  clean.completed = ids.filter(id => Array.isArray(value.completed) && value.completed.includes(id));
+  for (const id of ids) {
     const draft = value.drafts?.[id];
     if (!draft) continue;
     const choice = key => typeof draft[key] === 'string' && draft[key].length < 30 ? draft[key] : '';

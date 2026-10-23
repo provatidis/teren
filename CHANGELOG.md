@@ -1,5 +1,13 @@
 # Release history
 
+## 1.19.0 — 2026-10-23
+
+- Add an ETH/USDC borrowing-loop lab alongside the single-loan lab. Follow borrowing, buying ETH and supplying it through up to five rounds, with original capital, wallet balances, debt, swap losses and price exposure kept distinct.
+- Compare the loop with holding its original ETH. Test price and time with fixed simple interest or continuous compounding; show health factor separately from net value and retain pre-liquidation balances at adverse endpoints.
+- Add a withdrawal-first unwind preview with intermediate collateral checks, swap losses and no outside funds. Stop at or below the liquidation boundary, retain remaining debt and label the assumed sequence’s execution limits.
+- Add three directly accessible lessons: build one loop, repeat and change conditions, then explore unwinding. Keep predictions ungraded and checks conceptual; preserve the earlier four lessons and their independent progress.
+- Add strict versioned loop links and independent tab drafts, with model reference/conservation tests and desktop/mobile browser coverage. Document the new model and remaining blind spots; existing loan and liquidity calculations are unchanged.
+
 ## 1.18.2 — 2026-10-23
 
 - Update About and README around liquidity and lending as two topics, with direct routes to both labs and lesson sequences.
