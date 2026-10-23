@@ -70,7 +70,7 @@ All lending figures are hypothetical teaching cases with fixed simple interest a
 
 ## Borrowing-loop chapter
 
-Three directly accessible lessons follow lending essentials. They use `borrowing-loop-v1` and the existing Predict → Observe → Explain → Apply interface. Loop drafts and completion have their own storage key, preserving earlier lending progress. The scenario handoff carries all loop assumptions into a separate Experiment tab.
+Three directly accessible lessons follow lending essentials. They use `borrowing-loop-v1` and connect prediction, observation, explanation and application. Build and unwind use the visual pattern described below. Loop drafts and completion have their own storage key, preserving earlier lending progress. The scenario handoff carries all loop assumptions into a separate Experiment tab.
 
 | Step | Misconception | Changed situation |
 | --- | --- | --- |
@@ -80,10 +80,32 @@ Three directly accessible lessons follow lending essentials. They use `borrowing
 
 The first lesson removes costs and interest to isolate matching debt. The second compares the same original capital with more ETH exposure; no arithmetic is required from the learner. The last explains intermediate collateral constraints and labels the unwind as an assumed sequence, not guaranteed execution. Automated checks cover every answer combination and numerical references. They do not establish learning effectiveness.
 
-## Visual loop pilot · 1.22.0
+## Visual lesson pilots · 1.23.0
 
-Build and unwind now begin with the explainer, without requiring an answer to unlock it. The learner controls the pace through fixed ledger stages. Three consistent areas separate wallet assets, ETH backing the loan (collateral), and debt. Arrows label transfers; swaps change wallet assets, and borrowing highlights cash and debt together. Every paused frame remains readable with motion disabled. Backward navigation revisits a frame rather than showing a loan being reversed.
+Four lessons establish reusable patterns: build and unwind a loop, changing token balances, and narrow versus wide ranges. The starting diagram is visible immediately. An optional **Pause to predict** disclosure comes before the exploration controls; answering or watching every step is never required. The sequence is **starting setup → optional prediction → exploration → explanation → changed situation**. The conceptual checks still determine completion, with no arithmetic or rounding task.
 
-Reflection follows the visual and remains ungraded. Explanation and changed-situation questions still determine completion; no calculations are required. Choosing an answer or opening its explanation preserves the current frame. The stage itself is temporary, and lesson reloads start the visual at the beginning while retaining saved answers and completion. Detailed balance changes, health factor and costs are available in a disclosure. Fixed-price assumptions and real-withdrawal limitations remain visible.
+- **Actions:** one named action per activation, a short visual cue, then a readable resting frame. Back revisits an earlier state without animating an undo. Replay repeats the current cue without changing balances. Direct step access groups unwind actions into withdrawal/sale/repayment passes. There is no autoplay or animation queue.
+- **Continuous conditions:** the token lesson changes the selected price while keeping both token quantities and their starting markers together. Arrows describe the net trades relative to the same start. The price slider is an endpoint comparison, not a recorded trading path.
+- **Comparison:** narrow and wider bands share one price scale and marker position. Bounds are directly selectable; exact boundaries are labelled separately from inside/outside states. Single-token principal remains visible outside the range. Inside means eligible to earn from swaps, not a claim about earnings.
 
-This is a focused pilot, not evidence that animation improves learning. In an observed session, pause after selling ETH and ask what changed in the wallet and whether the debt changed. After the final repayment, ask where the remaining ETH is. Look for an explanation of the mechanism rather than recall of the displayed numbers.
+Exploratory prices never edit the question, its saved answers or its Experiment link. **Question** returns to the assessed price; opening the explanation also shows that price. The token lesson retains **Change the question price** as an explicit setup change, which invalidates its earlier result and answers. Other variations keep their existing inputs and grading. Reload restores answers and completion, even when no prediction was made; loop scenes restart at the beginning, while revealed price examples reopen at the question price.
+
+Wallet assets, collateral and debt remain distinct. Borrowing highlights cash and matching debt; the debt card is never the source of tokens. Unwind health factor and the remaining collateral constraint stay visible. Detailed deltas and costs are optional. Reduced motion keeps the same completed frames, labels and arrows. Price controls are native keyboard/touch sliders; step controls are native buttons with named destinations and concise announcements.
+
+## Extending the patterns
+
+Use these four forms rather than forcing every subject into an animation:
+
+| Lessons | Next visual treatment |
+| --- | --- |
+| Swaps, deposits, supply and borrowing | Reuse action controls for assets entering/leaving a pool or wallet; show the resulting ownership or debt. |
+| Loss versus profit, fees and final challenge | Compare starting capital, holding and LP totals on a common scale. Keep assumed income separate from required fees. |
+| Concentrated liquidity and exits/returns | Reuse the price/range scene; add token composition and outside price exposure, then management costs. |
+| Prices/interest/time and loop stress | Change one condition at a time and compare the same starting capital. Keep debt and liquidation sensitivity visible. |
+| Repayment versus adding collateral | Show two branches from one loan, using the same outside budget. |
+| Fee tiers and APR | Reveal supplied facts and visibly missing information; never derive fee income from the tier alone. |
+| Historical lessons | Use recorded checkpoints. Separate principal, new fees and collection; keep unknown intervals unknown. Active-time totals do not establish crossing times. |
+
+Extend foundations after reviewing these pilots, then interpretation and evidence lessons. Each visual should replace repeated setup/result prose, retain essential assumptions nearby, and offer a changed-situation check. Keep the same starting basket within each comparison; equal budgets across ranges do not imply identical token mixes.
+
+Automated checks establish accounting and interaction consistency, not improved learning. In an observed session, pause after selling ETH and ask whether debt changed; after repayment, ask where collateral remains. For liquidity, reverse the price direction and ask which token enters the pool. For ranges, show a new price and ask what being inside establishes about fee income. Look for a mechanism explanation rather than recall of displayed numbers.

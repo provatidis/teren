@@ -9,11 +9,13 @@ import { loopHash } from '../lib/loop-links.js';
 import { lendingMetrics } from '../lib/lending-presentation.js';
 import { loopLessonMetrics } from '../lib/loop-presentation.js';
 import { renderLoopMoneyFlow } from '../lib/loop-money-flow.js';
+import { optionalPrediction } from '../lib/lesson-scene.js';
 import { newChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js';
 
 export function initLendingLearning() {
   const $ = id => document.getElementById(id);
+  const predictionField = $('lend-prediction-field'), revealButton = $('lend-reveal');
   const courses = {
     essentials: { lessons: LENDING_LESSONS, example: lendingCase, check: checkLendingUnderstanding,
       metrics: lendingMetrics, hash: loanHash, save: saveLendingProgress, progress: readLendingProgress().progress,
@@ -25,7 +27,7 @@ export function initLendingLearning() {
   let chapter = 'essentials', course = courses.essentials, progress = course.progress;
   let lesson, draft, example;
   const visualLesson = () => chapter === 'loops' && ['build', 'unwind'].includes(lesson?.id);
-  const revealLabel = () => visualLesson() ? 'Compare your answer →' : 'Reveal the result →';
+  const revealLabel = () => visualLesson() ? 'Explain this example →' : 'Reveal the result →';
   const fresh = () => ({ prediction: '', reason: '', application: '', revealed: false, seed: newChoiceSeed() });
   function navigation() {
     $('lend-progress').textContent = progress.completed.length + ' of ' + course.lessons.length + ' checked';
@@ -47,12 +49,12 @@ export function initLendingLearning() {
   }
   function clearFeedback() { $('lend-feedback').hidden = true; $('lend-continue').hidden = true; }
   function reveal() {
-    if (!draft.prediction) return;
+    if (!draft.prediction && !visualLesson()) return;
     draft.revealed = true;
     const prediction = lesson.predictions.find(([id]) => id === example.prediction)[1];
-    $('lend-prediction-feedback').textContent = draft.prediction === example.prediction
-      ? (visualLesson() ? 'Yes. ' : 'Your prediction matches. ') + prediction
-      : (visualLesson() ? 'Compare this with what you saw: ' : 'Compare this with your prediction: ') + prediction;
+    $('lend-prediction-feedback').textContent = !draft.prediction ? prediction
+      : draft.prediction === example.prediction ? 'Your prediction matches. ' + prediction
+        : 'Compare this with your prediction: ' + prediction;
     $('lend-metrics').replaceChildren(...course.metrics(lesson.id, example.result).map(items => learningMetric(...items)));
     $('lend-metrics').hidden = visualLesson();
     $('lend-observe').hidden = false;
@@ -91,7 +93,7 @@ export function initLendingLearning() {
     for (const [key, choices] of [['prediction', lesson.predictions], ['reason', lesson.reasons], ['application', lesson.applications]]) {
       if (!choices.some(([value]) => value === draft[key])) draft[key] = '';
     }
-    if (!draft.prediction) draft.revealed = false;
+    if (!draft.prediction && !visualLesson()) draft.revealed = false;
     const index = course.lessons.indexOf(lesson);
     document.title = lesson.short + ' · Teren Learn';
     $('lend-number').textContent = course.label + ' ' + (index + 1) + ' OF ' + course.lessons.length;
@@ -105,15 +107,18 @@ export function initLendingLearning() {
     $('lend-visual').hidden = !showFlow;
     $('lend-money-flow').hidden = !showFlow;
     $('lend-setup').hidden = showFlow;
-    $('lend-predict-label').textContent = showFlow ? 'REFLECT' : '01 · PREDICT';
-    $('lend-predict-title').textContent = showFlow ? 'What did you notice?' : 'Before opening the result';
-    $('lend-predict-note').textContent = showFlow
-      ? 'Revisit any stage to help you answer. Getting this wrong does not block completion.'
-      : 'Your prediction helps you explore the idea. You can complete the lesson even if it is wrong.';
+    $('lend-predict-card').hidden = showFlow;
+    $('lend-explanation').hidden = showFlow;
     $('lend-observe-label').textContent = showFlow ? 'CONNECT THE IDEA' : '02 · OBSERVE';
     $('lend-observe-title').textContent = showFlow ? 'What to take away' : 'Read the result';
     $('lend-check-label').textContent = showFlow ? 'CHECK YOUR UNDERSTANDING' : '03 · CHECK YOUR UNDERSTANDING';
-    if (showFlow) renderLoopMoneyFlow($('lend-money-flow'), example.result, lesson.id);
+    if (showFlow) {
+      renderLoopMoneyFlow($('lend-money-flow'), example.result, lesson.id, optionalPrediction(predictionField));
+      $('lend-visual').append(revealButton);
+    } else {
+      $('lend-predict-card').insertBefore(predictionField, $('lend-predict-note'));
+      $('lend-predict-card').insertBefore(revealButton, $('lend-predict-note'));
+    }
     $('lend-application-context').textContent = lesson.applicationContext;
     $('lend-application-question').textContent = lesson.applicationQuestion;
     $('lend-hint-text').textContent = lesson.hint;
@@ -143,7 +148,7 @@ export function initLendingLearning() {
       });
     }
     $('lend-observe').hidden = true; $('lend-assessment').hidden = true; clearFeedback();
-    $('lend-reveal').disabled = !draft.prediction; $('lend-reveal').textContent = revealLabel();
+    $('lend-reveal').disabled = !draft.prediction && !visualLesson(); $('lend-reveal').textContent = revealLabel();
     if (draft.revealed) {
       reveal();
       if (course.check(id, draft.reason, draft.application).passed) check(false);

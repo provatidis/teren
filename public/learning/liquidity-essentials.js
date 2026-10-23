@@ -26,7 +26,7 @@ export const LESSONS = [
   },
   {
     id: 'token-balances', protocol: 'Uniswap v2-style', title: 'Token balances after a price change', short: 'Changing token balances', concept: 'Allocation', skill: 'Explain what a price move does to token quantities.',
-    intro: 'In a full-range 50/50 model, arbitrage keeps the pool aligned with the new market price. The dollar split stays balanced while the quantities of ETH and USDC change.',
+    intro: 'When ETH’s market price changes, traders exchange tokens with the pool. Follow what comes in and what goes out.',
     prediction: 'At your selected future price, will the LP hold less, more, or the same ETH as at the start?',
     predictions: [['less', 'Less ETH'], ['more', 'More ETH'], ['same', 'The same ETH']],
     question: 'How much ETH does the LP hold at the future price? Use three decimal places.',

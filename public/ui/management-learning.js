@@ -1,3 +1,6 @@
+import { optionalPrediction } from '../lib/lesson-scene.js';
+import { createRangeWidthScene } from '../lib/liquidity-lesson-scenes.js';
+import { usd } from '../lib/format.js';
 import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js';
 import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../models/range-decisions.js';
 import { managementLessonFromHash } from '../lib/management-links.js';
@@ -8,7 +11,9 @@ import { rangeHash } from '../lib/range-links.js';
 
 export function initManagementLearning() {
   const $=id=>document.getElementById(id), {progress}=readManagementProgress();
-  let lesson, draft, outcome, presentation, application;
+  let lesson, draft, outcome, presentation, application, rangeScene;
+  const predictionField = $('manage-prediction-field');
+  const visualLesson = () => lesson?.id === 'range-width';
   const fresh=(variant=0)=>({variant,prediction:'',reason:'',application:'',revealed:false,choiceSeed:newChoiceSeed()});
   function focus(id) {$(id).focus({preventScroll:true});$(id).scrollIntoView({block:'start',behavior:'instant'});}
   function navigation() {
@@ -31,9 +36,9 @@ export function initManagementLearning() {
     learningChoices($(id),{name,values,selected,seed:draft.choiceSeed,group:lesson.id+name,onChange,shuffle:name!=='manage-prediction'});
   }
   function reveal() {
-    if(!draft.prediction)return;
+    if(!draft.prediction && !visualLesson())return;
     draft.revealed=true;
-    $('manage-prediction-feedback').textContent=draft.prediction===outcome.prediction?'Your prediction matches this example.':'The example differs from your prediction: '+presentation.predictions.find(([id])=>id===outcome.prediction)[1]+'. Compare it with your prediction.';
+    $('manage-prediction-feedback').textContent=!draft.prediction?'At the question price: '+presentation.predictions.find(([id])=>id===outcome.prediction)[1]+'.':draft.prediction===outcome.prediction?'Your prediction matches this example.':'The example differs from your prediction: '+presentation.predictions.find(([id])=>id===outcome.prediction)[1]+'. Compare it with your prediction.';
     $('manage-metrics').replaceChildren(...presentation.metrics.map(items=>learningMetric(...items)));
     $('manage-explanation').textContent=lesson.explanation;$('manage-takeaway').textContent=lesson.takeaway;$('manage-pitfall').textContent=lesson.pitfall;
     $('manage-handoffs').replaceChildren(...presentation.links.map(({label,scenario})=>{
@@ -62,7 +67,7 @@ export function initManagementLearning() {
     lesson=MANAGEMENT_LESSONS.find(item=>item.id===id);draft=progress.drafts[id]||fresh();
     if(!validChoiceSeed(draft.choiceSeed))draft.choiceSeed=newChoiceSeed();
     outcome=managementCase(id,draft.variant);presentation=managementPresentation(outcome);application=managementApplication(outcome);
-    if(!presentation.predictions.some(([value])=>value===draft.prediction)){draft.prediction='';draft.revealed=false;}
+    if(!presentation.predictions.some(([value])=>value===draft.prediction)){draft.prediction='';if(!visualLesson())draft.revealed=false;}
     if(!lesson.reasons.some(([value])=>value===draft.reason))draft.reason='';
     if(!application.choices.some(([value])=>value===draft.application))draft.application='';
     $('learn-page-title').textContent=MANAGEMENT_CHAPTER;$('learn-page-subtitle').textContent='Explore Uniswap v3-style price ranges after the essentials. All values are supplied; explain what they mean.';
@@ -74,17 +79,32 @@ export function initManagementLearning() {
     $('manage-hint-text').textContent=lesson.hint+' '+application.hint;$('manage-hint').open=false;$('manage-deeper').open=false;
     $('manage-deeper-copy').replaceChildren(...lesson.deeper.map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));
     learningSources($('manage-sources'),lesson.sources);
+    $('manage-range-scene').hidden = !visualLesson();
+    $('manage-metrics').hidden = visualLesson();
+    $('manage-explanation').hidden = visualLesson();
+    $('manage-predict-label').textContent = visualLesson() ? 'EXPLORE THE MECHANISM' : '01 · PREDICT';
+    $('manage-predict-title').textContent = visualLesson() ? 'Watch the same price cross both ranges' : 'Before opening the example';
+    if (visualLesson()) {
+      $('manage-setup').textContent = 'Each starts with $5,000 at $2,000/ETH, using its own token mix. USDC = $1.';
+      $('manage-prediction-question').textContent = 'If ETH moves to ' + usd(outcome.price) + ', which position will be inside its range?';
+      rangeScene = createRangeWidthScene(outcome, optionalPrediction(predictionField));
+      $('manage-range-scene').replaceChildren(rangeScene.element);
+    } else {
+      $('manage-prediction-home').append(predictionField);
+      $('manage-range-scene').replaceChildren(); rangeScene = null;
+    }
+
     $('manage-observe').hidden=true;$('manage-assessment').hidden=true;clearFeedback();
-    $('manage-reveal').disabled=!draft.prediction;$('manage-reveal').textContent='Reveal the example →';
+    $('manage-reveal').disabled=!draft.prediction && !visualLesson();$('manage-reveal').textContent=visualLesson()?'Explain this example →':'Reveal the example →';
     choices('manage-predictions','manage-prediction',presentation.predictions,draft.prediction,value=>{
       draft.prediction=value;draft.revealed=false;draft.reason='';draft.application='';
       $('manage-observe').hidden=true;$('manage-assessment').hidden=true;clearFeedback();
       document.querySelectorAll('input[name="manage-reason"],input[name="manage-application"]').forEach(input=>{input.checked=false;});
-      $('manage-reveal').disabled=false;$('manage-reveal').textContent='Reveal the example →';persist();
+      $('manage-reveal').disabled=false;$('manage-reveal').textContent=visualLesson()?'Explain this example →':'Reveal the example →';persist();
     });
     choices('manage-reasons','manage-reason',lesson.reasons,draft.reason,value=>{draft.reason=value;clearFeedback();persist();});
     choices('manage-applications','manage-application',application.choices,draft.application,value=>{draft.application=value;clearFeedback();persist();});
-    if(draft.revealed){reveal();if(checkManagementUnderstanding(id,draft.variant,draft.reason,draft.application).passed)check(false);}
+    if(draft.revealed){if(visualLesson())rangeScene.show(outcome.price);reveal();if(checkManagementUnderstanding(id,draft.variant,draft.reason,draft.application).passed)check(false);}
     persist();
     if(!matchMedia('(max-width: 750px)').matches){
       const sidebar=document.querySelector('.learn-sidebar'),selected=document.querySelector('[data-management-id="'+id+'"]');
@@ -102,7 +122,7 @@ export function initManagementLearning() {
     copy.append(title,' ',state);link.append(number,' ',copy);li.append(link);$('manage-lesson-list').append(li);
     link.addEventListener('click',()=>{if(matchMedia('(max-width: 750px)').matches)$('learn-course').open=false;});
   });
-  $('manage-reveal').addEventListener('click',()=>{reveal();focus('manage-observe-title');});
+  $('manage-reveal').addEventListener('click',()=>{if(visualLesson())rangeScene.show(outcome.price);reveal();focus('manage-observe-title');});
   $('manage-assessment-form').addEventListener('submit',event=>{event.preventDefault();if(draft?.revealed)check();});
   const nextVariation=()=>{progress.drafts[lesson.id]=fresh((draft.variant+1)%MANAGEMENT_VARIANTS);activate(true);};
   $('manage-variation').addEventListener('click',nextVariation);$('manage-fresh').addEventListener('click',nextVariation);

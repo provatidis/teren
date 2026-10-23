@@ -8,8 +8,6 @@ function building(result) {
   const [borrow, buy, supply] = result.steps.filter(step => step.round === 1);
   return {
     intro: 'Start with ' + loopTokens(result.initial.collateralTokens) + ' supplied. ETH stays at ' + loopMoney(result.input.start) + '; no interest or swap costs.',
-    sliderLabel: 'Move through the round',
-    completeLabel: 'Round complete',
     note: 'Count wallet assets and supplied ETH, then subtract the debt. Borrowing adds assets and a matching obligation.',
     stages: [
       {
@@ -77,14 +75,18 @@ function unwinding(result) {
   }
   return {
     intro: 'Start after ' + result.input.rounds + ' rounds. ETH stays at ' + loopMoney(result.input.future) + '; each sale costs ' + result.input.swapCost + '%.',
-    sliderLabel: 'Move through the unwind', completeLabel: 'Unwind complete',
     note: 'Starting balances already include the costs of building the loop. This fixed-price preview leaves out gas, market changes and withdrawal liquidity limits.',
     stages,
   };
 }
 
 export function loopFlowStages(result, lesson) {
-  if (lesson === 'build') return building(result);
-  if (lesson === 'unwind') return unwinding(result);
-  throw new RangeError('Choose a money-flow lesson.');
+  const flow = lesson === 'build' ? building(result) : lesson === 'unwind' ? unwinding(result) : null;
+  if (!flow) throw new RangeError('Choose a money-flow lesson.');
+  const labels = {
+    borrow: 'Show borrowing', buy: 'Show buying ETH', supply: 'Show supplying ETH',
+    withdraw: 'Show withdrawal', sell: 'Show selling ETH', repay: 'Show repayment',
+    release: 'Show the final withdrawal',
+  };
+  return { ...flow, stages: flow.stages.map(stage => ({ ...stage, playLabel: labels[stage.action] })) };
 }

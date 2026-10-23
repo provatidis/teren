@@ -19,23 +19,25 @@ export function createLoopFlowDiagram() {
     const card = node('div'), term = node('dt', label), value = node('dd');
     card.dataset.pocket = key;
     value.id = 'loop-flow-' + key;
-    if (key === 'wallet') term.append(walletCue);
+    if (key === 'wallet') term.append(' ', walletCue);
     else {
-      term.append(node('small', key === 'supplied' ? 'Collateral' : 'USDC owed'));
+      term.append(' ', node('small', key === 'supplied' ? 'Collateral' : 'USDC owed'));
       const route = node('span', undefined, 'loop-flow-route');
       route.id = 'loop-flow-route-' + key;
       route.setAttribute('aria-hidden', 'true');
       const label = node('span'), arrow = node('span', undefined, 'loop-flow-arrow');
       const dot = node('span', undefined, 'loop-flow-traveller');
-      route.append(label, arrow, dot); term.append(route);
+      route.append(label, ' ', arrow, dot); term.append(route);
       routes[key] = { element: route, label, arrow };
     }
-    card.append(term, value); element.append(card);
+    card.append(term, ' ', value); element.append('\n', card);
     values[key] = value; cards[key] = card;
   }
   return {
     element,
     show(stage, animate) {
+      element.dataset.motion = 'false';
+      for (const animation of element.getAnimations({ subtree: true })) animation.cancel();
       const p = stage.position, action = stage.action;
       element.dataset.action = action;
       element.dataset.motion = String(animate);
@@ -43,7 +45,7 @@ export function createLoopFlowDiagram() {
         cards[key].dataset.changed = String(action !== 'start' && stage.changes[key] !== 'Unchanged');
       }
       values.wallet.replaceChildren(
-        node('span', formatTokenQuantity(p.cash, 2) + ' USDC', 'loop-flow-token loop-flow-usdc'),
+        node('span', formatTokenQuantity(p.cash, 2) + ' USDC', 'loop-flow-token loop-flow-usdc'), ' ',
         node('span', loopTokens(p.walletETH), 'loop-flow-token loop-flow-eth'),
       );
       values.supplied.textContent = loopTokens(p.collateralTokens);
@@ -66,6 +68,10 @@ export function createLoopFlowDiagram() {
         route.element.dataset.direction = up ? 'up' : 'down';
         route.label.textContent = key === 'debt' ? 'Repay USDC' : up ? 'Withdraw ETH' : 'Supply ETH';
         route.arrow.textContent = up ? '↑' : '↓';
+      }
+      // Replay restarts only this action's short cue, never the financial state.
+      if (animate) for (const animation of element.getAnimations({ subtree: true })) {
+        animation.cancel(); animation.play();
       }
     },
   };
