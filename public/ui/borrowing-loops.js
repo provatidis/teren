@@ -116,7 +116,7 @@ export function initBorrowingLoops() {
     $('loop-unwind-cost').textContent = preview.status === 'blocked' ? 'Not run' : money(preview.costs);
     $('loop-unwind-net').textContent = money(preview.remaining.netAssets);
     $('loop-unwind-details').hidden = preview.steps.length === 0;
-    $('loop-unwind-caption').textContent = 'See the ' + preview.steps.length + ' ' + (preview.steps.length === 1 ? 'step' : 'steps');
+    $('loop-unwind-caption').textContent = preview.steps.length === 1 ? 'Show the unwind step' : 'Show the ' + preview.steps.length + ' unwind steps';
     $('loop-unwind-cost-note').hidden = preview.steps.length === 0;
     $('loop-unwind-cost-note').textContent = 'Swap losses: ' + money(result.buildCosts) + ' while building, plus ' + money(preview.costs) + (preview.status === 'limited' ? ' in this partial unwind' : ' while unwinding') + '. Gas is excluded.';
     $('loop-unwind-steps').replaceChildren(...preview.steps.map(step => {
