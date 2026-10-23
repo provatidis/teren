@@ -5,10 +5,10 @@ import { readSharedScenario } from '../lib/link-router.js';
 import { rangeCSV } from '../lib/range-csv.js';
 import { fmt, usd, percent, signedUSD, compactUSD } from '../lib/format.js';
 import { STATE_COPY, rangePriceLabels, assetAmounts } from '../lib/range-presentation.js';
-import { rangeCardBlob } from '../lib/range-card.js?v=1.15.2';
+import { rangeCardBlob } from '../lib/range-card.js?v=1.16.0';
 import { downloadBlob } from '../lib/download.js';
 import { validateExperimentDraft } from '../data/saved-experiments.js';
-import { experimentOriginLabel } from '../lib/saved-experiments.js?v=1.15.2';
+import { experimentOriginLabel } from '../lib/saved-experiments.js?v=1.16.0';
 
 export function initRangeLab({ navigation }) {
   const { selectLab } = navigation;
@@ -248,7 +248,7 @@ export function initRangeLab({ navigation }) {
     }
   });
   $('cl-export').addEventListener('click', () => {
-    if (current) downloadBlob(new Blob([rangeCSV(current)], { type: 'text/csv;charset=utf-8' }), 'passiko-range-scenarios-cl-range-v1.csv');
+    if (current) downloadBlob(new Blob([rangeCSV(current)], { type: 'text/csv;charset=utf-8' }), 'teren-range-scenarios-cl-range-v1.csv');
   });
   $('cl-image').addEventListener('click', async () => {
     if (!current) return;

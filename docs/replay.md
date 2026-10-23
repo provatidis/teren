@@ -1,6 +1,6 @@
 # Historical cases: fixed positions
 
-[In-range baseline](https://provatidis.github.io/passiko/#historical-case) · [Exit and return](https://provatidis.github.io/passiko/#historical-case=range-return) · [Project overview](../README.md)
+[In-range baseline](https://teren.sh/#historical-case) · [Exit and return](https://teren.sh/#historical-case=range-return) · [Project overview](../README.md)
 
 The recorded cases follow unchanged Ethereum Uniswap v3 WETH/USDC positions in the 0.3% pool. Each retains validated snapshots, cumulative range-time counters and independent read-only collection checks. They are fixed-position replays, not arbitrary-range backtests.
 
@@ -27,7 +27,7 @@ These facts explain why an endpoint status or sampled price line cannot establis
 
 ## Learn from these records
 
-The [Fees, time and range exits chapter](https://provatidis.github.io/passiko/learn.html#applied=fees-over-time) uses these unchanged records for three guided prediction-and-explanation exercises. Assessment targets come from the existing period accounting: final baseline fee value, the exit-and-return case’s 2,724 active seconds between blocks 26084375–26085000, and its final LP-minus-holding result before costs. Checkpoint exploration stays independent of the fixed question. Playground handoffs start a separate principal-only hypothetical experiment with zero assumed future fees.
+The [Fees, time and range exits chapter](https://teren.sh/learn.html#applied=fees-over-time) uses these unchanged records for three guided prediction-and-explanation exercises. Assessment targets come from the existing period accounting: final baseline fee value, the exit-and-return case’s 2,724 active seconds between blocks 26084375–26085000, and its final LP-minus-holding result before costs. Checkpoint exploration stays independent of the fixed question. Playground handoffs start a separate principal-only hypothetical experiment with zero assumed future fees.
 
 ## Calculations and checks
 

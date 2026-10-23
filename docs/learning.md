@@ -1,6 +1,6 @@
 # Lesson goals and misconceptions
 
-Reviewed 2026-10-13. Passiko teaches liquidity mechanics, interpretation and the limits of evidence. Completion checks explanation and application; predictions are ungraded and no required question asks the learner to calculate or round a result. Numeric practice remains optional in the essentials and historical chapters.
+Reviewed 2026-10-13. Teren teaches liquidity mechanics, interpretation and the limits of evidence. Completion checks explanation and application; predictions are ungraded and no required question asks the learner to calculate or round a result. Numeric practice remains optional in the essentials and historical chapters.
 
 ## What the research establishes
 
@@ -49,4 +49,4 @@ The three historical exercises continue to use the original two independently ch
 - [Uniswap: range orders](https://developers.uniswap.org/docs/get-started/concepts/liquidity-providers/range-orders): reversals and the limits of stop-loss interpretations.
 - [Revert: performance comparisons](https://docs.revert.finance/revert/open-positions): benchmark definitions, omitted gas and exceptional results.
 - [Circle: USDC risk disclosures](https://www.circle.com/fr/legal/mica-usdc-whitepaper): secondary-market price dislocation; the $1 setting remains an assumption.
-- [Milionis et al., Automated Market Making and Loss-Versus-Rebalancing](https://arxiv.org/abs/2208.06046): holding and rebalancing compare different strategies. Passiko's endpoint holding gap is not an LVR estimate, and the two metrics should not be added as independent penalties.
+- [Milionis et al., Automated Market Making and Loss-Versus-Rebalancing](https://arxiv.org/abs/2208.06046): holding and rebalancing compare different strategies. Teren's endpoint holding gap is not an LVR estimate, and the two metrics should not be added as independent penalties.

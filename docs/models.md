@@ -4,9 +4,9 @@
 
 ## Protocol names and calculation versions
 
-The full-range lab and virtual pool use Uniswap v2-style mechanics. The price-range lab uses simplified Uniswap v3-style concentrated liquidity math, without native tick constraints or on-chain rounding. V3 also allows full-range positions; these names identify Passiko’s models rather than an exclusive division between protocols. Inspect reads real Uniswap v2 pools or v3 positions, and the recorded historical cases are v3.
+The full-range lab and virtual pool use Uniswap v2-style mechanics. The price-range lab uses simplified Uniswap v3-style concentrated liquidity math, without native tick constraints or on-chain rounding. V3 also allows full-range positions; these names identify Teren’s models rather than an exclusive division between protocols. Inspect reads real Uniswap v2 pools or v3 positions, and the recorded historical cases are v3.
 
-`cp50-v1` and `cl-range-v1` are Passiko model-revision identifiers. Their `v1` does not refer to Uniswap v1. They remain in links, exports and technical details so calculations remain reproducible; prominent labels name the protocol style instead.
+`cp50-v1` and `cl-range-v1` are Teren model-revision identifiers. Their `v1` does not refer to Uniswap v1. They remain in links, exports and technical details so calculations remain reproducible; prominent labels name the protocol style instead.
 
 ## Three kinds of results
 

@@ -1,6 +1,6 @@
 {
-  "name": "passiko",
-  "version": "1.15.2",
+  "name": "teren",
+  "version": "1.16.0",
   "private": true,
   "type": "module",
   "description": "A DeFi playground for reproducible liquidity scenarios and virtual pool experiments",

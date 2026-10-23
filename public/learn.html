@@ -4,38 +4,38 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://ethereum-rpc.publicnode.com https://eth.drpc.org; base-uri 'none'; object-src 'none'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111916">
+  <meta name="theme-color" content="#101c27">
   <meta name="description" content="Learn liquidity basics, compare range choices and follow verified historical cases. Predict, observe, explain and apply.">
-  <meta name="application-name" content="Passiko">
-  <meta name="apple-mobile-web-app-title" content="Passiko">
-  <title>Liquidity essentials · Passiko Learn</title>
-  <link rel="canonical" href="https://provatidis.github.io/passiko/learn.html">
+  <meta name="application-name" content="Teren">
+  <meta name="apple-mobile-web-app-title" content="Teren">
+  <title>Liquidity essentials · Teren Learn</title>
+  <link rel="canonical" href="https://teren.sh/learn.html">
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" href="favicon.svg" type="image/svg+xml" sizes="any">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Passiko">
-  <meta property="og:title" content="Learn liquidity by doing · Passiko">
+  <meta property="og:site_name" content="Teren">
+  <meta property="og:title" content="Learn liquidity by doing · Teren">
   <meta property="og:description" content="Learn liquidity basics, practical range choices and fees through verified historical cases.">
-  <meta property="og:url" content="https://provatidis.github.io/passiko/learn.html">
-  <meta property="og:image" content="https://provatidis.github.io/passiko/assets/social-preview.png">
+  <meta property="og:url" content="https://teren.sh/learn.html">
+  <meta property="og:image" content="https://teren.sh/assets/social-preview.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Passiko. Learn and experiment with DeFi, with a liquidity range scenario.">
-  <meta name="twitter:image:alt" content="Passiko. Learn and experiment with DeFi, with a liquidity range scenario.">
+  <meta property="og:image:alt" content="Teren. Learn and experiment with DeFi, with a liquidity range scenario.">
+  <meta name="twitter:image:alt" content="Teren. Learn and experiment with DeFi, with a liquidity range scenario.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Learn liquidity by doing · Passiko">
+  <meta name="twitter:title" content="Learn liquidity by doing · Teren">
   <meta name="twitter:description" content="Interactive liquidity lessons and applied historical cases, with predictions and understanding checks.">
-  <meta name="twitter:image" content="https://provatidis.github.io/passiko/assets/social-preview.png">
-  <link rel="stylesheet" href="styles.css?v=1.15.2">
-  <script type="module" src="learn-main.js?v=1.15.2"></script>
+  <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
+  <link rel="stylesheet" href="styles.css?v=1.16.0">
+  <script type="module" src="learn-main.js?v=1.16.0"></script>
 </head>
 <body class="learning-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="topbar">
-    <a class="brand" href="./#experiment" aria-label="Passiko home"><img class="brand-logo" src="assets/passiko-logo.svg" width="165" height="40" alt=""></a>
-    <nav class="site-nav" aria-label="Passiko"><div class="product-nav"><a href="./#experiment">Experiment</a><a href="learn.html" aria-current="page">Learn</a><a href="./#inspect">Inspect</a></div></nav>
+    <a class="brand" href="./#experiment" aria-label="Teren home"><img class="brand-logo" src="assets/teren-logo.svg" width="145" height="40" alt=""></a>
+    <nav class="site-nav" aria-label="Teren"><div class="product-nav"><a href="./#experiment">Experiment</a><a href="learn.html" aria-current="page">Learn</a><a href="./#inspect">Inspect</a></div></nav>
   </header>
   <main id="main-content" tabindex="-1">
     <noscript><div class="notice"><p>JavaScript is needed for the interactive lessons and progress. Enable it to predict, run and check your experiments. <a href="./">Open Playground →</a></p></div></noscript>
@@ -121,7 +121,7 @@
           <div class="learn-share-actions"><button id="learn-create-card" class="button secondary" type="button">Create result card</button><button id="learn-copy" class="button secondary" type="button">Copy scenario link</button></div>
           <label class="sr-only" for="learn-share-url">Reproducible playground scenario link</label><input id="learn-share-url" class="learn-share-url" type="text" readonly>
           <p id="learn-card-status" class="fine-print" role="status"></p>
-          <div id="learn-card-preview" hidden><img id="learn-card-image" alt="Final challenge result card with inputs, holding and LP values, assumed fees and model limitations."><a id="learn-card-download" class="button secondary" download="passiko-learning-challenge-cp50-v1.png">Download PNG</a></div>
+          <div id="learn-card-preview" hidden><img id="learn-card-image" alt="Final challenge result card with inputs, holding and LP values, assumed fees and model limitations."><a id="learn-card-download" class="button secondary" download="teren-learning-challenge-cp50-v1.png">Download PNG</a></div>
         </section>
       </article>
       <article id="learn-management" class="learn-lesson management-lesson" aria-labelledby="manage-title" hidden>
@@ -187,7 +187,7 @@
             <p id="applied-accounting"></p><dl id="applied-evidence"></dl>
             <p>Fee tokens are valued at the selected pool price, with USDC = $1. Individual totals are rounded for display; differences use unrounded values. Gas and incentives are excluded. This bounded, unchanged-position record does not establish lifetime profit or future performance.</p>
             <p>Recorded fees were independently checked against read-only collection simulations. Unchanged-position evidence covers the entire block window. The bundled record is validated when opened; this does not make a new RPC request.</p>
-            <ul><li><a href="https://developers.uniswap.org/docs/get-started/concepts/liquidity-providers/concentrated-liquidity" target="_blank" rel="noopener noreferrer">Uniswap: active liquidity and ranges ↗</a></li><li><a href="https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol" target="_blank" rel="noopener noreferrer">Uniswap pool contract: range-time counters ↗</a></li><li><a href="https://github.com/Uniswap/v3-core/blob/main/contracts/libraries/Tick.sol" target="_blank" rel="noopener noreferrer">Uniswap tick accounting: fee growth inside ↗</a></li><li><a href="https://github.com/provatidis/passiko/blob/main/docs/replay.md" target="_blank" rel="noopener noreferrer">Passiko: recorded cases and verification method ↗</a></li></ul>
+            <ul><li><a href="https://developers.uniswap.org/docs/get-started/concepts/liquidity-providers/concentrated-liquidity" target="_blank" rel="noopener noreferrer">Uniswap: active liquidity and ranges ↗</a></li><li><a href="https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol" target="_blank" rel="noopener noreferrer">Uniswap pool contract: range-time counters ↗</a></li><li><a href="https://github.com/Uniswap/v3-core/blob/main/contracts/libraries/Tick.sol" target="_blank" rel="noopener noreferrer">Uniswap tick accounting: fee growth inside ↗</a></li><li><a href="https://github.com/provatidis/teren/blob/main/docs/replay.md" target="_blank" rel="noopener noreferrer">Teren: recorded cases and verification method ↗</a></li></ul>
           </div></details>
         </section>
         <section id="applied-assessment" class="card learn-assessment" aria-labelledby="applied-check-title" hidden>
@@ -208,12 +208,12 @@
       </article>
     </div>
     <footer class="site-footer">
-      <span>Passiko · See for yourself.</span>
+      <span>Teren · Look closely.</span>
       <nav aria-label="Project information">
         <a href="methods.html" target="_blank" rel="noopener noreferrer">Methods ↗</a>
-        <a href="https://github.com/provatidis/passiko" target="_blank" rel="noopener noreferrer">Source ↗</a>
+        <a href="https://github.com/provatidis/teren" target="_blank" rel="noopener noreferrer">Source ↗</a>
         <a href="about.html" target="_blank" rel="noopener noreferrer">About ↗</a>
-        <a href="https://github.com/provatidis/passiko/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Feedback ↗</a>
+        <a href="https://github.com/provatidis/teren/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Feedback ↗</a>
       </nav>
     </footer>
   </main>

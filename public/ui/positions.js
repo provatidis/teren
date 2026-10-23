@@ -134,7 +134,7 @@ export function initPositionSnapshots({ rangeLab, positionFees }) {
     }, 'file'); }
   });
   $('position-export').addEventListener('click', () => {
-    if (current) downloadBlob(new Blob([positionSnapshotJSON(current)], { type: 'application/json' }), 'passiko-uniswap-v3-position-' + current.tokenId + '-block-' + current.block.number + '.json');
+    if (current) downloadBlob(new Blob([positionSnapshotJSON(current)], { type: 'application/json' }), 'teren-uniswap-v3-position-' + current.tokenId + '-block-' + current.block.number + '.json');
   });
   $('position-apply').addEventListener('click', () => {
     if (!scenario) return;

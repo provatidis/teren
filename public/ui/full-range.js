@@ -6,9 +6,9 @@ import { scenarioCSV } from '../lib/scenario-csv.js';
 import { experimentScenario } from '../models/experiments.js';
 import { fmt, usd, signedUSD, percent, compactUSD } from '../lib/format.js';
 import { downloadBlob } from '../lib/download.js';
-import { resultCardBlob } from '../lib/result-card.js?v=1.15.2';
+import { resultCardBlob } from '../lib/result-card.js?v=1.16.0';
 import { validateExperimentDraft } from '../data/saved-experiments.js';
-import { experimentOriginLabel } from '../lib/saved-experiments.js?v=1.15.2';
+import { experimentOriginLabel } from '../lib/saved-experiments.js?v=1.16.0';
 
 export function initFullRangeLab({ navigation }) {
   const { selectLab } = navigation;
@@ -185,7 +185,7 @@ export function initFullRangeLab({ navigation }) {
     }
   });
   $('scenario-export').addEventListener('click', () => {
-    if (current) downloadBlob(new Blob([scenarioCSV(current)], { type: 'text/csv;charset=utf-8' }), 'passiko-liquidity-scenarios-cp50-v1.csv');
+    if (current) downloadBlob(new Blob([scenarioCSV(current)], { type: 'text/csv;charset=utf-8' }), 'teren-liquidity-scenarios-cp50-v1.csv');
   });
 
   $('scenario-image').addEventListener('click', async () => {

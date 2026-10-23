@@ -1,7 +1,7 @@
-import { initPageAccess } from './ui/page-access.js?v=1.15.2';
-import { initLearning } from './ui/learning.js?v=1.15.2';
-import { initAppliedLearning } from './ui/applied-learning.js?v=1.15.2';
-import { initManagementLearning } from './ui/management-learning.js?v=1.15.2';
+import { initPageAccess } from './ui/page-access.js?v=1.16.0';
+import { initLearning } from './ui/learning.js?v=1.16.0';
+import { initAppliedLearning } from './ui/applied-learning.js?v=1.16.0';
+import { initManagementLearning } from './ui/management-learning.js?v=1.16.0';
 initPageAccess();
 initLearning();
 initAppliedLearning();

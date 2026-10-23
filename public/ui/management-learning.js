@@ -1,9 +1,9 @@
-import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js?v=1.15.2';
-import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../models/range-decisions.js?v=1.15.2';
-import { managementLessonFromHash } from '../lib/management-links.js?v=1.15.2';
-import { readManagementProgress, saveManagementProgress } from '../data/management-progress.js?v=1.15.2';
-import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.15.2';
-import { learningChoices, learningMetric, learningSources } from '../lib/learning-elements.js?v=1.15.2';
+import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js?v=1.16.0';
+import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../models/range-decisions.js?v=1.16.0';
+import { managementLessonFromHash } from '../lib/management-links.js?v=1.16.0';
+import { readManagementProgress, saveManagementProgress } from '../data/management-progress.js?v=1.16.0';
+import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.16.0';
+import { learningChoices, learningMetric, learningSources } from '../lib/learning-elements.js?v=1.16.0';
 import { rangeHash } from '../lib/range-links.js';
 
 export function initManagementLearning() {
@@ -65,7 +65,7 @@ export function initManagementLearning() {
     if(!lesson.reasons.some(([value])=>value===draft.reason))draft.reason='';
     if(!application.choices.some(([value])=>value===draft.application))draft.application='';
     $('learn-page-title').textContent=MANAGEMENT_CHAPTER;$('learn-page-subtitle').textContent='Explore Uniswap v3-style price ranges after the essentials. All values are supplied; explain what they mean.';
-    document.title=lesson.short+' · Passiko Learn';$('learn-route-note').hidden=true;
+    document.title=lesson.short+' · Teren Learn';$('learn-route-note').hidden=true;
     $('manage-number').textContent='RANGE CHOICES '+(MANAGEMENT_IDS.indexOf(id)+1)+' OF 3';$('manage-title').textContent=lesson.title;
     $('manage-adds').textContent='Uniswap v3-style · '+lesson.adds;$('manage-intro').textContent=lesson.intro;$('manage-setup').textContent=presentation.setup;
     $('manage-prediction-question').textContent=presentation.prediction;$('manage-variation-label').textContent='Situation '+(draft.variant+1)+' of '+MANAGEMENT_VARIANTS;

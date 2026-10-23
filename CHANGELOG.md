@@ -1,5 +1,11 @@
 # Release history
 
+## 1.16.0 — 2026-10-23
+
+- Rebrand the interface, documentation and downloads as Teren, with a custom vector wordmark, open-t symbol, favicon, app icons and social preview. Introduce ink-blue surfaces while retaining the distinct token-allocation colors and patterns.
+- Explain the Pontic origin of the name briefly on About. Prepare canonical metadata and links for teren.sh, with GitHub Pages hosting and Cloudflare DNS.
+- Preserve all calculations, recorded evidence, browser-storage keys and file-format identifiers. Document the separate browser storage created by a domain change and the supported experiment/snapshot export path.
+
 ## 1.15.2 — 2026-10-15
 
 - Make token allocations easier to read with a taller bar, solid gold for ETH/WETH and striped blue for USDC. Add matching markers beside larger percentage labels in starting mixes, range outcomes and position snapshots.

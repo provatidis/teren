@@ -2,8 +2,8 @@
 
 These are durable working choices, not a feature backlog. Revisit them when evidence or the user’s direction changes.
 
-- Passiko helps people understand liquidity and test assumptions. Guided learning and direct exploration belong in one app.
-- The identity centres on careful observation and learning through experiments. Liquidity is the current area of depth; the name can accommodate other DeFi subjects later.
+- Teren helps people understand liquidity and test assumptions. Guided learning and direct exploration belong in one app.
+- Teren takes its name from Pontic Greek τέρεν, “look.” Keep the founder’s heritage to a short About explanation. Use the custom wordmark as the main identity and the separate open-t symbol for compact uses. Liquidity is the current area of depth; the name can accommodate other DeFi subjects later.
 - Rebranding preserves existing browser-storage keys, scenario versions and file-format identifiers. Those are compatibility contracts, independent of visible names and download filenames.
 - Complexity increases predictably across examples. Advanced cases and every lesson remain directly accessible.
 - Learn links carry their setup into Playground. Learning progress, virtual balances, model drafts and recorded snapshots remain independent.

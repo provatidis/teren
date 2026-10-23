@@ -4,40 +4,40 @@
   <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://ethereum-rpc.publicnode.com https://eth.drpc.org; base-uri 'none'; object-src 'none'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#111916">
-  <meta name="description" content="Explore full-range and concentrated liquidity, import pool and position snapshots, and experiment with virtual swaps in Passiko.">
-  <title>Passiko · Learn, experiment, inspect</title>
-  <meta name="application-name" content="Passiko">
-  <meta name="apple-mobile-web-app-title" content="Passiko">
+  <meta name="theme-color" content="#101c27">
+  <meta name="description" content="Explore full-range and concentrated liquidity, import pool and position snapshots, and experiment with virtual swaps in Teren.">
+  <title>Teren · Learn, experiment, inspect</title>
+  <meta name="application-name" content="Teren">
+  <meta name="apple-mobile-web-app-title" content="Teren">
   <meta name="color-scheme" content="dark">
-  <link rel="canonical" href="https://provatidis.github.io/passiko/">
+  <link rel="canonical" href="https://teren.sh/">
   <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
   <link rel="icon" href="favicon.svg" type="image/svg+xml" sizes="any">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180">
   <link rel="manifest" href="site.webmanifest">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Passiko">
-  <meta property="og:title" content="Passiko · Learn, experiment, inspect">
-  <meta property="og:description" content="Explore full-range and concentrated liquidity, import pool and position snapshots, and experiment with virtual swaps in Passiko.">
-  <meta property="og:url" content="https://provatidis.github.io/passiko/">
-  <meta property="og:image" content="https://provatidis.github.io/passiko/assets/social-preview.png">
+  <meta property="og:site_name" content="Teren">
+  <meta property="og:title" content="Teren · Learn, experiment, inspect">
+  <meta property="og:description" content="Explore full-range and concentrated liquidity, import pool and position snapshots, and experiment with virtual swaps in Teren.">
+  <meta property="og:url" content="https://teren.sh/">
+  <meta property="og:image" content="https://teren.sh/assets/social-preview.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Passiko. Learn and experiment with DeFi, with a liquidity range scenario.">
+  <meta property="og:image:alt" content="Teren. Learn and experiment with DeFi, with a liquidity range scenario.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Passiko · Learn, experiment, inspect">
-  <meta name="twitter:description" content="Explore full-range and concentrated liquidity, import pool and position snapshots, and experiment with virtual swaps in Passiko.">
-  <meta name="twitter:image" content="https://provatidis.github.io/passiko/assets/social-preview.png">
-  <meta name="twitter:image:alt" content="Passiko. Learn and experiment with DeFi, with a liquidity range scenario.">
-  <link rel="stylesheet" href="styles.css?v=1.15.2">
-  <script type="module" src="main.js?v=1.15.2"></script>
+  <meta name="twitter:title" content="Teren · Learn, experiment, inspect">
+  <meta name="twitter:description" content="Explore full-range and concentrated liquidity, import pool and position snapshots, and experiment with virtual swaps in Teren.">
+  <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
+  <meta name="twitter:image:alt" content="Teren. Learn and experiment with DeFi, with a liquidity range scenario.">
+  <link rel="stylesheet" href="styles.css?v=1.16.0">
+  <script type="module" src="main.js?v=1.16.0"></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="topbar">
-    <a class="brand" href="#experiment" aria-label="Passiko home"><img class="brand-logo" src="assets/passiko-logo.svg" width="165" height="40" alt=""></a>
-    <nav class="site-nav" aria-label="Passiko"><div class="product-nav"><a id="nav-experiment" href="#experiment" aria-current="page">Experiment</a><a href="learn.html">Learn</a><a id="nav-inspect" href="#inspect">Inspect</a></div></nav>
+    <a class="brand" href="#experiment" aria-label="Teren home"><img class="brand-logo" src="assets/teren-logo.svg" width="145" height="40" alt=""></a>
+    <nav class="site-nav" aria-label="Teren"><div class="product-nav"><a id="nav-experiment" href="#experiment" aria-current="page">Experiment</a><a href="learn.html">Learn</a><a id="nav-inspect" href="#inspect">Inspect</a></div></nav>
   </header>
   <main id="main-content" tabindex="-1">
     <noscript><div class="notice"><p>JavaScript is needed for the calculators and snapshot imports. Enable it to use the playground.</p></div></noscript>
@@ -96,12 +96,12 @@
           <div class="scenario-actions"><button id="scenario-share" class="button secondary" type="button">Copy scenario link</button><button id="scenario-export" class="button secondary" type="button">Export CSV</button><button id="scenario-image" class="button secondary" type="button">Create result card</button></div>
           <div class="experiment-lab-footer"><a href="#saved-experiments">Saved experiments →</a></div>
           <p id="scenario-image-status" class="fine-print" role="status"></p>
-          <details id="scenario-card-preview" class="result-card-preview" hidden><summary>Your result card</summary><img id="scenario-card-image" alt="Scenario card with investment, ETH prices, assumed fees and holding versus liquidity outcomes."><a id="scenario-image-download" class="button secondary" download="passiko-scenario-cp50-v1.png">Download PNG</a></details>
+          <details id="scenario-card-preview" class="result-card-preview" hidden><summary>Your result card</summary><img id="scenario-card-image" alt="Scenario card with investment, ETH prices, assumed fees and holding versus liquidity outcomes."><a id="scenario-image-download" class="button secondary" download="teren-scenario-cp50-v1.png">Download PNG</a></details>
           <div id="scenario-share-wrap" class="share-wrap" hidden><p id="scenario-share-status" role="status"></p><label class="sr-only" for="scenario-share-url">Scenario link</label><input id="scenario-share-url" type="text" readonly></div>
           <p id="scenario-link-status" class="fine-print" role="status"></p>
       </section>
       <div id="scenario-comparison-card" class="card comparison-card"><div class="card-heading"><div><h3>Compare outcomes</h3><p class="body-copy">Select a price to explore it. Investment and assumed fee income stay the same in every row.</p></div></div><p class="fine-print table-scroll-hint">Swipe or scroll sideways to see every column.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Scenario comparison table"><table role="table" class="scenario-table"><caption class="sr-only">Holding and liquidity outcomes under different future ETH prices, with the same assumed fees</caption><thead><tr role="row"><th scope="col">Future ETH price</th><th scope="col">Holding</th><th scope="col">LP + fees</th><th scope="col">LP minus holding</th><th scope="col">IL before fees</th></tr></thead><tbody id="scenario-comparisons"></tbody></table></div><p class="fine-print">Values are hypothetical outcomes, not probabilities or recommendations.</p></div>
-      <details class="model-details"><summary>How this model works</summary><div><p>This Uniswap v2-style full-range model starts with 50% ETH and 50% USDC by dollar value. USDC stays at $1. Ideal, frictionless arbitrage brings the pool price to the future market price.</p><p>For an initial investment V and price ratio r = future price / starting price, holding is worth V × (1 + r) / 2. The LP assets are worth V × √r before fee income. Initial ETH = V / (2 × starting price); after rebalancing, LP ETH = initial ETH / √r and LP USDC = initial USDC × √r.</p><p>Fee income is your assumed total for this position, added as separate USD cash at the end. It is held fixed across the comparison, does not compound, and is not inferred from market prices or trading volume. The model excludes gas, incentives, depegging, and concentrated liquidity. It shows endpoints, not a trading path.</p><p>Passiko calculation revision: cp50-v1. The v1 identifies this model revision, not Uniswap v1. Shared links and CSV exports include the assumptions and model version so another person can reproduce the calculation.</p></div></details>
+      <details class="model-details"><summary>How this model works</summary><div><p>This Uniswap v2-style full-range model starts with 50% ETH and 50% USDC by dollar value. USDC stays at $1. Ideal, frictionless arbitrage brings the pool price to the future market price.</p><p>For an initial investment V and price ratio r = future price / starting price, holding is worth V × (1 + r) / 2. The LP assets are worth V × √r before fee income. Initial ETH = V / (2 × starting price); after rebalancing, LP ETH = initial ETH / √r and LP USDC = initial USDC × √r.</p><p>Fee income is your assumed total for this position, added as separate USD cash at the end. It is held fixed across the comparison, does not compound, and is not inferred from market prices or trading volume. The model excludes gas, incentives, depegging, and concentrated liquidity. It shows endpoints, not a trading path.</p><p>Teren calculation revision: cp50-v1. The v1 identifies this model revision, not Uniswap v1. Shared links and CSV exports include the assumptions and model version so another person can reproduce the calculation.</p></div></details>
     </section>
     <section id="range-lab" class="scenario-section" role="tabpanel" aria-labelledby="lab-range-tab" hidden>
       <div class="lab-heading">
@@ -210,7 +210,7 @@
           <div class="experiment-lab-footer"><a href="#saved-experiments">Saved experiments →</a><button id="cl-reset" class="text-button" type="button">Reset range scenario</button></div>
           <div id="cl-share-wrap" class="share-wrap" hidden><p id="cl-share-status" role="status"></p><label class="sr-only" for="cl-share-url">Range scenario link</label><input id="cl-share-url" type="text" readonly></div>
           <p id="cl-image-status" class="fine-print" role="status"></p></div>
-          <details id="cl-card-preview" class="card result-card-preview cl-card-preview" hidden><summary>Your range result card</summary><img id="cl-card-image" alt="Range result card with price boundaries, starting allocation, assumptions and the three strategy outcomes."><a id="cl-image-download" class="button secondary" download="passiko-range-cl-range-v1.png">Download PNG</a></details>
+          <details id="cl-card-preview" class="card result-card-preview cl-card-preview" hidden><summary>Your range result card</summary><img id="cl-card-image" alt="Range result card with price boundaries, starting allocation, assumptions and the three strategy outcomes."><a id="cl-image-download" class="button secondary" download="teren-range-cl-range-v1.png">Download PNG</a></details>
         </div>
       </div>
       <details id="cl-comparison-card" class="card cl-comparisons"><summary>Compare prices at the edges</summary><p class="body-copy">Select a row to explore it. Each row keeps the same range, investment and separate fee assumptions.</p><p class="fine-print table-scroll-hint">Swipe or scroll sideways to see every column.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Range comparison table"><table role="table" class="scenario-table cl-table"><caption class="sr-only">Concentrated range outcomes at key future prices</caption><thead><tr role="row"><th scope="col">Future ETH price</th><th scope="col">Range status</th><th scope="col">Hold starting mix</th><th scope="col">V2-style 50/50 LP</th><th scope="col">Your range LP</th><th scope="col">Range LP minus holding</th></tr></thead><tbody id="cl-comparisons"></tbody></table></div></details>
@@ -218,7 +218,7 @@
         <p>Prices are USD per ETH, with USDC fixed at $1. The starting range determines your token mix; concentrated positions do not always begin 50/50. Holding keeps those exact starting tokens. The full-range LP invests the same amount in a separate 50/50 position.</p>
         <p>For liquidity L and lower/upper prices a and b, clamp the current price p to the range. The position holds ETH = L × (1/√p − 1/√b) and USDC = L × (√p − √a). L is sized so those assets equal your investment at the starting price. Below a the position is all ETH; above b it is all USDC.</p>
         <p>This simplified Uniswap v3-style model allows any valid price bounds; real v3 positions use tick-aligned bounds. It does not apply Uniswap tick spacing or on-chain rounding, and does not estimate fees, gas, incentives or trading paths. Each fee input is assumed total USD cash, added separately without compounding.</p>
-        <p>Passiko calculation revision: cl-range-v1. The v1 identifies this model revision, not Uniswap v1. Shared links, CSV exports and result cards include the range and assumptions. <a href="https://blog.uniswap.org/uniswap-v3-math-primer-2" target="_blank" rel="noopener noreferrer">Read the Uniswap liquidity math →</a></p>
+        <p>Teren calculation revision: cl-range-v1. The v1 identifies this model revision, not Uniswap v1. Shared links, CSV exports and result cards include the range and assumptions. <a href="https://blog.uniswap.org/uniswap-v3-math-primer-2" target="_blank" rel="noopener noreferrer">Read the Uniswap liquidity math →</a></p>
       </div></details>
     </section>
     </div>
@@ -456,12 +456,12 @@
       </section>
     </div>
     <footer class="site-footer">
-      <span>Passiko · See for yourself.</span>
+      <span>Teren · Look closely.</span>
       <nav aria-label="Project information">
         <a href="methods.html" target="_blank" rel="noopener noreferrer">Methods ↗</a>
-        <a href="https://github.com/provatidis/passiko" target="_blank" rel="noopener noreferrer">Source ↗</a>
+        <a href="https://github.com/provatidis/teren" target="_blank" rel="noopener noreferrer">Source ↗</a>
         <a href="about.html" target="_blank" rel="noopener noreferrer">About ↗</a>
-        <a href="https://github.com/provatidis/passiko/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Feedback ↗</a>
+        <a href="https://github.com/provatidis/teren/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Feedback ↗</a>
       </nav>
     </footer>
   </main>

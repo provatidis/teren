@@ -1,14 +1,14 @@
 {
   "id": "./",
-  "name": "Passiko · See for yourself",
-  "short_name": "Passiko",
+  "name": "Teren · Look closely",
+  "short_name": "Teren",
   "description": "Explore liquidity ranges, public position snapshots and virtual swaps.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#111916",
-  "theme_color": "#111916",
+  "background_color": "#101c27",
+  "theme_color": "#101c27",
   "icons": [
     {
       "src": "assets/icon-192.png",
