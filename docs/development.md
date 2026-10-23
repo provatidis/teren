@@ -160,3 +160,13 @@ The `#learn` lending route resumes an allowlisted `currentLesson`, added to the 
 The build tests cover parent hash invalidation, deterministic output, shared dependency identity, missing imports and cycles. Loan reference tests cover balance conservation, capped repayment, remaining debt, zero bonus, full repayment and boundaries. CI browser checks add event sharing/drafts, independent validation, compounding differences and chart readability at 390px/320px.
 
 Review [open blind spots](review.md) before a mechanism release. Report which misleading interpretation was tested as well as which calculation checks passed.
+
+## Borrowing loops
+
+The existing lending document has Single loan and Borrowing loops experiment routes. `#loops` and strict `#loop=borrowing-loop-v1` links select the loop lab; `#loop-lesson=build|stress|unwind` selects the companion chapter. The main composition root routes both without controller-to-controller imports. Experiment returns from loop lessons to loops; chapter links keep the foundations directly accessible.
+
+`models/borrowing-loop-v1.js` owns pure construction, accrued balances, price sensitivity and the withdrawal-first unwind. `models/loop-lessons.js` owns reference scenarios and conceptual grading. Editorial definitions live in `learning/borrowing-loops.js`; presentation/links in `lib/loop-presentation.js` and `lib/loop-links.js`. `ui/borrowing-loops.js` renders with DOM nodes and guards stale clipboard results.
+
+`data/loop-state.js` isolates `teren-loop-draft-v1` in session storage and `teren-loop-learning-v1` in local storage. A separate session chapter preference supports Learn resumption. The shared lending progress parser accepts explicit chapter allowlists; its default remains the earlier four IDs. The shared lesson renderer receives chapter-specific model, links, grading, presentation and persistence functions.
+
+Tests compare geometric-series references against the step ledger across 1,000 varied setups, check conservation before/after costs, exact boundaries, both interest assumptions, withdrawal health before repayment, remaining debt, strict links and storage isolation. CI browser checks cover lessons, links, draft restoration, compounding, invalid inputs, blocked unwind and 390px/320px layouts against the generated build.

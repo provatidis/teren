@@ -1,0 +1,111 @@
+import assert from 'node:assert/strict';
+
+const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
+
+export async function checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call }) {
+  await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
+  const oldLoan = await evaluate("sessionStorage.getItem('teren-lending-draft-v1')");
+  const oldLearning = await evaluate("localStorage.getItem('teren-lending-learning-v1')");
+  await navigate(base + 'lending.html#loops');
+  assert.equal(await evaluate("document.getElementById('lending-experiment').hidden"), true);
+  assert.equal(await evaluate("document.getElementById('lending-loops').hidden"), false);
+  assert.equal(await text('loop-net'), '$9,985.00');
+  assert.equal(await text('loop-debt'), '$5,000.00');
+  assert.match(await text('loop-ledger'), /USDC is spent/);
+  await fill('loop-rounds', '3');
+  assert.equal(await evaluate("document.querySelectorAll('#loop-ledger details').length"), 3);
+  await fill('loop-future', '1500');
+  assert.ok((await text('loop-difference')).includes('−'));
+  await fill('loop-future', '100');
+  assert.equal(await evaluate("document.getElementById('loop-liquidation-warning').hidden"), false);
+  assert.match(await text('loop-unwind-status'), /preview stops/);
+  assert.notEqual(await text('loop-unwind-debt'), '$0.00');
+  await fill('loop-future', '2000');
+  assert.equal(await text('loop-unwind-debt'), '$0.00');
+  await fill('loop-rounds', '1.5');
+  assert.equal(await evaluate("document.getElementById('loop-results').hidden"), true);
+  assert.equal(await evaluate("document.getElementById('loop-share').disabled"), true);
+  await click('loop-fix-input'); await settle(evaluate);
+  assert.equal(await evaluate('document.activeElement.id'), 'loop-rounds');
+  await fill('loop-rounds', '3');
+  await fill('loop-days', '365');
+  const compound = await text('loop-debt');
+  await evaluate("document.getElementById('loop-rates').open=true; const field=document.getElementById('loop-interestMode');field.value='simple';field.dispatchEvent(new Event('change',{bubbles:true}))");
+  assert.notEqual(await text('loop-debt'), compound);
+  await evaluate("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('Clipboard unavailable')}}})");
+  await click('loop-share');
+  const shared = await evaluate("document.getElementById('loop-share-url').value");
+  assert.match(shared, /loop=borrowing-loop-v1/);
+  assert.equal(await evaluate('document.activeElement.id'), 'loop-share-url');
+  await evaluate("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:()=>new Promise((resolve,reject)=>{window.rejectLoopCopy=reject})}})");
+  await click('loop-share');
+  await fill('loop-days', '30');
+  await evaluate("window.rejectLoopCopy(new Error('Delayed clipboard failure'))");
+  await settle(evaluate);
+  assert.equal(await evaluate("document.getElementById('loop-share-url').hidden"), true);
+  await navigate(shared);
+  assert.equal(await evaluate("document.getElementById('loop-rounds').value"), '3');
+  assert.equal(await evaluate("document.getElementById('loop-interestMode').value"), 'simple');
+  await navigate(base + 'lending.html#loop=unsupported');
+  assert.equal(await evaluate("document.getElementById('loop-route-note').hidden"), false);
+  assert.equal(await evaluate("document.getElementById('loop-rounds').value"), '3');
+  await click('lending-tool-loan');
+  assert.equal(await evaluate("document.getElementById('lending-loops').hidden"), true);
+  assert.equal(await evaluate("sessionStorage.getItem('teren-lending-draft-v1')"), oldLoan);
+  await click('lending-tool-loops');
+  assert.equal(await evaluate("document.getElementById('loop-days').value"), '365');
+
+  const choose = (group, value) => evaluate(`document.querySelector('input[name="lend-${group}"][value="${value}"]').click()`);
+  const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'falls'], ['unwind', 'all', 'backing', 'blocked']];
+  for (const [index, [id, prediction, reason, application]] of lessons.entries()) {
+    await navigate(base + 'lending.html#loop-lesson=' + id);
+    assert.equal(await evaluate("document.querySelectorAll('#lending-learn input[type=number]').length"), 0);
+    assert.equal(await text('lend-number'), 'LOOPING ' + (index + 1) + ' OF 3');
+    await choose('prediction', prediction); await click('lend-reveal');
+    assert.match(await text('lend-prediction-feedback'), /Compare this with your prediction/);
+    await click('lend-check');
+    assert.equal(await text('lend-feedback-title'), 'Review your answers.');
+    await choose('reason', reason); await choose('application', application); await click('lend-check');
+    assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
+    assert.equal(await text('lend-progress'), (index + 1) + ' of 3 checked');
+    assert.match(await evaluate("document.getElementById('lend-explore').href"), /loop=borrowing-loop-v1/);
+    assert.equal(await evaluate("document.getElementById('lend-explore').target"), '_blank');
+  }
+  await navigate(base + 'lending.html#learn');
+  assert.equal(await text('lend-number'), 'LOOPING 3 OF 3');
+  await click('lending-nav-experiment');
+  assert.equal(await evaluate('location.hash'), '#loops');
+  assert.equal(await evaluate("document.getElementById('loop-days').value"), '365');
+  assert.equal(await evaluate("localStorage.getItem('teren-lending-learning-v1')"), oldLearning);
+  assert.equal(await evaluate("sessionStorage.getItem('teren-lending-draft-v1')"), oldLoan);
+  console.log('PASS: loop ledger, exposure, compounding, unwind blocking, strict links, independent drafts and three conceptual lessons');
+
+  for (const [width, height] of [[390, 844], [320, 740]]) {
+    await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: true });
+    await navigate(base + 'lending.html#loops');
+    await click('loop-reset');
+    await click('loop-show-result'); await settle(evaluate);
+    assert.equal(await evaluate('document.activeElement.id'), 'loop-outcome');
+    assert.ok(await evaluate("document.getElementById('loop-outcome').getBoundingClientRect().top>=document.getElementById('loop-quick-result').getBoundingClientRect().bottom"));
+    await fill('loop-rounds', '5');
+    await evaluate("document.getElementById('loop-setup').open=true");
+    await fill('loop-threshold', '70');
+    await evaluate("document.getElementById('loop-setup').open=false");
+    await click('loop-show-result'); await settle(evaluate);
+    assert.equal(await evaluate('document.activeElement.id'), 'loop-threshold');
+    assert.equal(await evaluate("document.getElementById('loop-setup').open"), true);
+    await fill('loop-threshold', '80');
+    await fill('loop-future', '1500');
+    await evaluate("document.getElementById('loop-unwind-details').open=true;document.querySelector('#loop-ledger details').open=true");
+    await settle(evaluate);
+    assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
+    assert.ok(await evaluate("Array.from(document.querySelectorAll('#loop-price-chart .chart-label')).every(e=>Number.parseFloat(getComputedStyle(e).fontSize)*document.getElementById('loop-price-chart').getBoundingClientRect().width/620>=11.9)"));
+    await navigate(base + 'lending.html#loop-lesson=unwind');
+    await click('lend-retry'); await choose('prediction', 'all'); await click('lend-reveal');
+    await choose('reason', 'backing'); await choose('application', 'blocked'); await click('lend-check'); await settle(evaluate);
+    assert.equal(await evaluate('document.activeElement.id'), 'lend-feedback');
+    assert.ok(await evaluate("document.getElementById('lend-next').getBoundingClientRect().bottom<=innerHeight"));
+    assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
+  }
+  console.log('PASS: loop results, invalid-field focus, expanded ledger/unwind, readable chart and lesson feedback at 390px/320px');
+}

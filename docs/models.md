@@ -108,7 +108,7 @@ When supply is not enabled as collateral, new borrowing is zero, but the supplie
 
 Responses use the same external USD budget at the endpoint. Repayment is capped at debt, with unused money shown separately. Adding collateral buys ETH at `P`, adds it to the supplied balance and leaves debt unchanged. Neither response receives retroactive supply interest. At 5 ETH, $1,500/ETH, $5,000 debt and an 80% threshold, the unchanged health factor is 1.20. An additional $1,000 raises it to 1.50 by repayment or 1.36 by adding collateral.
 
-Results are endpoints before any liquidation, not a reconstruction of what would have survived the intervening path. The model excludes variable rates, reserve indexes, compounding, contract rounding, oracle delays, caps, E-mode, additional assets, liquidation execution, gas and swap costs. Borrowed cash is neither spent nor reinvested. Looping and independently verified lending history are not included. Primary references: [Aave collateral rules](https://aave.com/help/supplying/toggle-collateral-status), [supply mechanics](https://aave.com/help/supplying/supply-tokens) and [borrowing/liquidation overview](https://aave.com/faq).
+Results are endpoints before any liquidation, not a reconstruction of what would have survived the intervening path. The model excludes variable rates, reserve indexes, compounding, contract rounding, oracle delays, caps, E-mode, additional assets, liquidation execution, gas and swap costs. Borrowed cash is neither spent nor reinvested in this single-loan model. The separate borrowing-loop model below spends it explicitly. Independently verified lending history is not included. Primary references: [Aave collateral rules](https://aave.com/help/supplying/toggle-collateral-status), [supply mechanics](https://aave.com/help/supplying/supply-tokens) and [borrowing/liquidation overview](https://aave.com/faq).
 
 ### Single liquidation event and interest reference
 
@@ -152,3 +152,39 @@ Pool reserves, virtual wallet balances, and the latest 50 activity entries are s
 Saved data is versioned and validated before use. Invalid or incompatible sessions fall back to the starting sandbox. If browser storage is unavailable or full, the app remains usable and displays a notice that changes may not survive refresh. Storage is specific to this browser and site; it does not sync across devices. Open tabs keep their own in-memory state, and the last successful save wins. Clearing browser data removes the saved session. No credentials or real assets are stored.
 
 The virtual sandbox and hypothetical labs use JavaScript floating-point numbers for learning. Recorded v3 principal, fee credits and historical period accounting use exact integers; their human-readable dollar valuations use floating-point numbers and the recorded pool ratio. Live snapshots read existing contracts through public providers. There are no real-fund transactions, user accounts, or investment recommendations.
+
+## Borrowing-loop model
+
+`borrowing-loop-v1` is a separate hypothetical ETH-collateral/USDC-debt model. It does not alter `collateral-loan-v1`. All rounds occur at the starting price before interest accrues. USDC is fixed at $1, and no outside funds are added after the original ETH supply.
+
+Let initial ETH be `C`, starting price `P`, the per-round borrowing fraction `r`, swap-loss fraction `f` and number of rounds `n` (0–5). Define `a = r × (1 − f)`:
+
+```text
+ETH bought in round i = C × a^i
+USDC borrowed in round i = C × P × r × a^(i−1)
+total supplied ETH = C × sum(a^i, i=0..n)
+total debt = C × P × r × sum(a^i, i=0..n−1)
+construction swap loss = sum(round borrowing × f)
+net assets at construction = C × P − construction swap loss
+```
+
+Before each purchase, borrowing increases both cash and debt. The purchase spends that cash and creates wallet ETH less swap loss. Supplying then moves wallet ETH into collateral. At each borrow step, total debt is `r` times the then-supplied collateral value, so limiting `r` to maximum LTV respects the illustrative new-borrowing rule. All wallet proceeds are spent and supplied before the later-price result.
+
+For elapsed years `t = days / 365`, the selected growth factor is `1 + APR × t` for simple interest or `exp(APR × t)` for continuous compounding, with APR expressed as a fraction. Apply the supply factor to all built ETH and the borrow factor to all built debt. The default is continuous compounding; both rates remain constant. This is not Aave’s indexed interest approximation or a forecast of changing rates.
+
+At later price `Q`, net assets are `accrued ETH × Q − accrued USDC debt`; holding retains the exact original `C` ETH without supply interest. A separate supply-only reference accrues interest on `C` without borrowing. Health factor and the price boundary use the same collateral-threshold/debt definitions as the single-loan model. Values remain pre-liquidation endpoints, with negative net assets and unpaid obligations retained. The sensitivity chart varies price at fixed accrued balances; it does not show a trading path.
+
+### Withdrawal-first unwind preview
+
+At an endpoint strictly above the liquidation boundary, for collateral dollar value `V`, debt `D` and threshold fraction `h`:
+
+```text
+headroom value = max(0, V − D / h)
+gross ETH sale value = min(D / (1 − f), 0.95 × headroom value)
+ETH withdrawn = gross sale value / Q
+USDC repaid = gross sale value × (1 − f)
+```
+
+The 95% factor leaves intermediate health factor above 1 during withdrawal, before the sale repays debt. It is a teaching convention, not an Aave parameter or recommended margin. Repeat at fixed `Q`, without elapsed time, outside funds or flash loans. A final sale sufficient to repay all debt explicitly closes it. Stop at 64 steps or when floating-point progress becomes too small, leaving remaining debt visible. At/below the boundary the preview is blocked, with unchanged pre-liquidation balances. Net value after a completed or partial preview equals pre-unwind net value minus unwind swap losses.
+
+This preview excludes gas, dynamic fees/price impact, liquidity availability, caps, reserve-index updates, collateral-specific withdrawal rules, oracle changes, transaction ordering and liquidation execution. It is accounting under stated rules, not evidence that these transactions can execute on Aave. Primary references: [Aave borrowing](https://aave.com/help/borrowing/borrow-tokens), [health factor/liquidations](https://aave.com/help/borrowing/liquidations), [repayment](https://aave.com/help/borrowing/repay-tokens).

@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://ethereum-rpc.publicnode.com https://eth.drpc.org; base-uri 'none'; object-src 'none'; form-action 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#101c27">
-    <meta name="description" content="Explore collateral, borrowing, interest and liquidation boundaries with a hypothetical lending lab and four short lessons.">
+    <meta name="description" content="Explore collateral, borrowing, interest and liquidation boundaries with hypothetical loan and borrowing-loop labs, with guided lessons.">
     <title>Lending lab · Teren</title>
     <meta name="application-name" content="Teren">
     <meta name="apple-mobile-web-app-title" content="Teren">
@@ -18,7 +18,7 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Teren">
     <meta property="og:title" content="Teren · Learn, experiment, inspect">
-    <meta property="og:description" content="Explore collateral, borrowing, interest and liquidation boundaries with a hypothetical lending lab and four short lessons.">
+    <meta property="og:description" content="Explore collateral, borrowing, interest and liquidation boundaries with hypothetical loan and borrowing-loop labs, with guided lessons.">
     <meta property="og:url" content="https://teren.sh/lending.html">
     <meta property="og:image" content="https://teren.sh/assets/social-preview.png">
     <meta property="og:image:type" content="image/png">
@@ -27,7 +27,7 @@
     <meta property="og:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Teren · Learn, experiment, inspect">
-    <meta name="twitter:description" content="Explore collateral, borrowing, interest and liquidation boundaries with a hypothetical lending lab and four short lessons.">
+    <meta name="twitter:description" content="Explore collateral, borrowing, interest and liquidation boundaries with hypothetical loan and borrowing-loop labs, with guided lessons.">
     <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
     <meta name="twitter:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
     <link rel="stylesheet" href="styles.css">
@@ -60,6 +60,7 @@
       <div id="lending-route-note" class="notice" role="status" hidden>
         <p>That lending lesson link could not be opened. <a href="#lesson=supply">Open the first lesson →</a></p>
       </div>
+      <nav id="lending-tools" class="lending-tools" aria-label="Lending experiments"><a id="lending-tool-loan" href="#experiment" aria-current="page">Single loan</a><a id="lending-tool-loops" href="#loops">Borrowing loops</a></nav>
       <section id="lending-experiment" aria-label="Lending experiment">
         <p class="loan-model-label">Illustrative ETH/USDC inputs · USDC = $1</p>
         <div id="loan-route-note" class="notice" role="status" hidden>
@@ -300,18 +301,309 @@
           <p><a href="https://aave.com/help/supplying/toggle-collateral-status" target="_blank" rel="noopener noreferrer">Aave: collateral rules ↗</a> · <a href="https://aave.com/faq" target="_blank" rel="noopener noreferrer">Aave: borrowing and liquidation mechanics ↗</a></p>
         </details>
       </section>
+      <section id="lending-loops" aria-label="Borrowing-loop experiment" hidden>
+        <p class="loan-model-label">ETH / USDC · USDC = $1</p>
+        <div id="loop-route-note" class="notice" role="status" hidden>
+          <p>This loop link is incomplete or unsupported. Your working setup is shown.</p>
+        </div>
+        <div id="loop-quick-result" class="lab-quick-result loan-quick-result">
+          <div class="quick-result-heading">
+            <strong id="loop-quick-value" role="status">
+            </strong>
+            <button id="loop-show-result" class="text-button" type="button">Full result ↓</button>
+          </div>
+          <p id="loop-quick-state">
+          </p>
+        </div>
+        <div class="loop-layout">
+          <div class="loop-controls">
+            <section class="card loop-card" aria-labelledby="loop-build-title">
+              <p class="eyebrow">01 · BUILD</p>
+              <h2 id="loop-build-title">Choose your loop</h2>
+              <p class="body-copy">Borrow USDC → buy ETH → supply it.</p>
+              <div class="scenario-field">
+                <label for="loop-rounds">Borrowing rounds <span>0–5</span>
+                </label>
+                <input id="loop-rounds" type="number" min="0" max="5" step="1" value="1" aria-describedby="loop-rounds-error">
+                <p id="loop-rounds-error" class="field-error" hidden>
+                </p>
+              </div>
+              <div class="scenario-field">
+                <label for="loop-borrowPercent">Borrow each round <span>% of value just supplied</span>
+                </label>
+                <input id="loop-borrowPercent" type="number" min="1" max="95" step="any" value="50" aria-describedby="loop-borrowPercent-help loop-borrowPercent-error">
+                <p id="loop-borrowPercent-help" class="fine-print">First round: a fraction of your original ETH value. Later rounds: a fraction of the preceding purchase’s value, not all collateral.</p>
+                <p id="loop-borrowPercent-error" class="field-error" hidden>
+                </p>
+              </div>
+              <details class="loop-examples">
+                <summary>Try an example</summary>
+                <div class="loop-stages" role="group" aria-label="Loop examples">
+                  <button type="button" data-loop-rounds="0">No borrowing</button>
+                  <button type="button" data-loop-rounds="1">One round</button>
+                  <button type="button" data-loop-rounds="3">Three rounds</button>
+                </div>
+              </details>
+              <details id="loop-setup">
+                <summary>Original capital and assumptions</summary>
+                <div class="scenario-field">
+                  <label for="loop-collateral">Your original ETH <span>ETH</span>
+                  </label>
+                  <input id="loop-collateral" type="number" min="0.001" max="1000000" step="any" value="5" aria-describedby="loop-collateral-error">
+                  <p id="loop-collateral-error" class="field-error" hidden>
+                  </p>
+                </div>
+                <div class="scenario-field">
+                  <label for="loop-start">Starting ETH price <span>USD</span>
+                  </label>
+                  <input id="loop-start" type="number" min="0.01" max="10000000" step="any" value="2000" aria-describedby="loop-start-error">
+                  <p id="loop-start-error" class="field-error" hidden>
+                  </p>
+                </div>
+                <div class="scenario-field">
+                  <label for="loop-swapCost">Loss on each swap <span>% of value sold</span>
+                  </label>
+                  <input id="loop-swapCost" type="number" min="0" max="5" step="any" value="0.3" aria-describedby="loop-swapCost-help loop-swapCost-error">
+                  <p id="loop-swapCost-help" class="fine-print">An assumed combined fee and price-impact loss, applied when buying or selling. Gas is excluded.</p>
+                  <p id="loop-swapCost-error" class="field-error" hidden>
+                  </p>
+                </div>
+                <div class="scenario-field">
+                  <label for="loop-maxLTV">Maximum new-loan LTV <span>%</span>
+                  </label>
+                  <input id="loop-maxLTV" type="number" min="1" max="95" step="any" value="75" aria-describedby="loop-maxLTV-error">
+                  <p id="loop-maxLTV-error" class="field-error" hidden>
+                  </p>
+                </div>
+                <div class="scenario-field">
+                  <label for="loop-threshold">Liquidation threshold <span>%</span>
+                  </label>
+                  <input id="loop-threshold" type="number" min="1" max="99" step="any" value="80" aria-describedby="loop-threshold-error">
+                  <p id="loop-threshold-error" class="field-error" hidden>
+                  </p>
+                </div>
+                <p class="fine-print">All rounds happen at the starting price, before time passes. ETH represents WETH. Rates and rules are teaching assumptions.</p>
+              </details>
+            </section>
+            <section class="card loop-card" aria-labelledby="loop-conditions-title">
+              <p class="eyebrow">02 · CHANGE CONDITIONS</p>
+              <h2 id="loop-conditions-title">Test price and time</h2>
+              <div class="scenario-field">
+                <label for="loop-future">Later ETH price <span>USD</span>
+                </label>
+                <input id="loop-future" type="number" min="0.01" max="10000000" step="any" value="2000" aria-describedby="loop-future-error">
+                <p id="loop-future-error" class="field-error" hidden>
+                </p>
+              </div>
+              <div class="loop-stages" role="group" aria-label="Loop price changes">
+                <button type="button" data-loop-price="0.75">−25%</button>
+                <button type="button" data-loop-price="1">Unchanged</button>
+                <button type="button" data-loop-price="1.25">+25%</button>
+              </div>
+              <div class="scenario-field">
+                <label for="loop-days">Time elapsed <span>days</span>
+                </label>
+                <input id="loop-days" type="number" min="0" max="1825" step="any" value="0" aria-describedby="loop-days-error">
+                <p id="loop-days-error" class="field-error" hidden>
+                </p>
+              </div>
+              <details id="loop-rates">
+                <summary>Interest assumptions</summary>
+                <div class="scenario-field">
+                  <label for="loop-supplyAPR">Supply interest rate <span>% APR</span>
+                  </label>
+                  <input id="loop-supplyAPR" type="number" min="0" max="50" step="any" value="2" aria-describedby="loop-supplyAPR-error">
+                  <p id="loop-supplyAPR-error" class="field-error" hidden>
+                  </p>
+                </div>
+                <div class="scenario-field">
+                  <label for="loop-borrowAPR">Borrow interest rate <span>% APR</span>
+                  </label>
+                  <input id="loop-borrowAPR" type="number" min="0" max="100" step="any" value="5" aria-describedby="loop-borrowAPR-error">
+                  <p id="loop-borrowAPR-error" class="field-error" hidden>
+                  </p>
+                </div>
+                <div class="scenario-field">
+                  <label for="loop-interestMode">Interest calculation</label>
+                  <select id="loop-interestMode" aria-describedby="loop-interestMode-help loop-interestMode-error">
+                    <option value="compound">Continuous compounding</option>
+                    <option value="simple">Simple interest</option>
+                  </select>
+                  <p id="loop-interestMode-help" class="fine-print">APR means annual percentage rate. Both calculations use constant rates over a 365-day year. Continuous compounding includes interest on interest; neither reproduces Aave’s changing rates or reserve indexes.</p>
+                  <p id="loop-interestMode-error" class="field-error" hidden>
+                  </p>
+                </div>
+              </details>
+              <p id="loop-rate-summary" class="fine-print">
+              </p>
+              <a href="#loop-lesson=build" class="loop-learn-link">Learn borrowing loops →</a>
+            </section>
+          </div>
+          <div class="loop-analysis">
+            <div id="loop-invalid" class="notice error" hidden>
+              <p>Check the highlighted inputs. <button id="loop-fix-input" class="text-button" type="button">Go to the first field ↑</button>
+              </p>
+            </div>
+            <div id="loop-results">
+              <section id="loop-outcome" class="card loop-card" aria-labelledby="loop-outcome-title" tabindex="-1">
+                <p class="eyebrow">SAME ORIGINAL CAPITAL</p>
+                <h2 id="loop-outcome-title">More exposure, with debt beside it</h2>
+                <p id="loop-capital-note" class="body-copy">
+                </p>
+                <div class="loop-metrics">
+                  <div>
+                    <span>ETH supplied now</span>
+                    <strong id="loop-tokens">
+                    </strong>
+                    <small id="loop-exposure">
+                    </small>
+                  </div>
+                  <div>
+                    <span>USDC debt now</span>
+                    <strong id="loop-debt">
+                    </strong>
+                    <small id="loop-cash-note">Borrowed cash was spent buying ETH</small>
+                  </div>
+                  <div>
+                    <span>Assets minus debt · before liquidation</span>
+                    <strong id="loop-net">
+                    </strong>
+                    <small id="loop-net-note">
+                    </small>
+                  </div>
+                  <div>
+                    <span>Hold your original ETH</span>
+                    <strong id="loop-hold">
+                    </strong>
+                    <small id="loop-difference">
+                    </small>
+                  </div>
+                </div>
+                <div id="loop-risk" class="loop-risk">
+                  <strong id="loop-health">
+                  </strong>
+                  <p id="loop-risk-copy">
+                  </p>
+                  <p id="loop-risk-boundary">
+                  </p>
+                </div>
+                <p id="loop-liquidation-warning" class="loan-attention" hidden>These balances are before liquidation. An actual liquidation would remove collateral and change the result. This endpoint does not show whether liquidation happened earlier.</p>
+                <details class="loop-disclosure">
+                  <summary>Where the difference comes from</summary>
+                  <dl id="loop-accounting" class="loop-accounting">
+                  </dl>
+                  <p class="fine-print">The holding benchmark keeps the original ETH in a wallet without supply interest. Supply-only keeps it supplied with no debt at the same assumed supply rate.</p>
+                </details>
+              </section>
+              <section class="card loop-card" aria-labelledby="loop-ledger-title">
+                <h2 id="loop-ledger-title">Follow each round</h2>
+                <p class="body-copy">Watch cash become wallet ETH, then collateral. Only supplied ETH backs the loan.</p>
+                <div id="loop-ledger">
+                </div>
+              </section>
+              <section class="card loop-card" aria-labelledby="loop-chart-title">
+                <h2 id="loop-chart-title">How price changes net assets</h2>
+                <figure class="loop-chart">
+                  <svg id="loop-price-chart" viewBox="0 0 620 300" role="img" aria-label="Loop and holding net assets at different ETH prices">
+                    <path id="loop-chart-grid" class="chart-grid"/>
+                    <path id="loop-chart-zero" class="chart-zero"/>
+                    <path id="loop-chart-boundary" class="loop-chart-boundary"/>
+                    <path id="loop-chart-hold" class="loop-hold-line"/>
+                    <path id="loop-chart-value" class="loop-value-line"/>
+                    <circle id="loop-chart-point" r="5" class="loop-chart-point"/>
+                    <text id="loop-chart-top" x="8" y="28" class="chart-label">
+                    </text>
+                    <text id="loop-chart-bottom" x="8" y="252" class="chart-label">
+                    </text>
+                    <text id="loop-chart-left" x="94" y="282" class="chart-label">
+                    </text>
+                    <text id="loop-chart-right" x="600" y="282" text-anchor="end" class="chart-label">
+                    </text>
+                  </svg>
+                  <div class="loop-chart-legend">
+                    <span>
+                      <i class="loop-line-key">
+                      </i>Loop · assets minus debt</span>
+                    <span>
+                      <i class="loop-line-key hold">
+                      </i>Hold original ETH</span>
+                  </div>
+                  <figcaption class="fine-print">Possible prices at the same elapsed time, before liquidation and unwinding. This is a sensitivity chart, not a price history.</figcaption>
+                  <p id="loop-chart-limit" class="fine-print">
+                  </p>
+                </figure>
+              </section>
+              <section class="card loop-card" aria-labelledby="loop-unwind-title">
+                <p class="eyebrow">03 · EXPLORE UNWINDING</p>
+                <h2 id="loop-unwind-title">Withdraw, sell, repay</h2>
+                <p class="body-copy">Try a sequence at your chosen price using only this position. It needs no outside cash or flash loan.</p>
+                <p id="loop-unwind-status" class="loan-attention" role="status">
+                </p>
+                <div class="loop-metrics">
+                  <div>
+                    <span>ETH remaining</span>
+                    <strong id="loop-unwind-eth">
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Debt remaining</span>
+                    <strong id="loop-unwind-debt">
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Swap losses during unwind</span>
+                    <strong id="loop-unwind-cost">
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Net assets after this preview</span>
+                    <strong id="loop-unwind-net">
+                    </strong>
+                  </div>
+                </div>
+                <details id="loop-unwind-details" class="loop-disclosure">
+                  <summary id="loop-unwind-caption">See the assumed steps</summary>
+                  <ol id="loop-unwind-steps" class="loop-unwind-steps">
+                  </ol>
+                </details>
+                <p class="fine-print">Each withdrawal keeps health factor above 1 before its sale and repayment. The preview uses 95% of the available headroom, up to the amount needed to repay. This is a teaching convention, not an Aave rule or a recommended buffer. Gas, liquidity limits, changing prices and protocol-specific restrictions are excluded.</p>
+              </section>
+            </div>
+            <section class="card loan-sharing" aria-label="Keep this borrowing-loop experiment">
+              <button id="loop-share" class="button secondary" type="button">Copy loop link</button>
+              <button id="loop-reset" class="button secondary" type="button">Reset loop</button>
+              <label for="loop-share-url" class="sr-only">Loop experiment link</label>
+              <input id="loop-share-url" readonly hidden>
+              <p id="loop-share-status" class="fine-print" role="status">
+              </p>
+              <p id="loop-storage" class="fine-print">
+              </p>
+            </section>
+          </div>
+        </div>
+        <details class="card loan-method">
+          <summary>How this borrowing-loop model works</summary>
+          <p>Each round borrows the chosen fraction of the ETH value just supplied. The first uses your original ETH; later rounds use the preceding purchase. Swapping spends the borrowed USDC and applies the assumed percentage loss. Supplying then moves that ETH into collateral. No new outside capital is added.</p>
+          <p>All rounds happen at one starting price, before the selected time period. Supply interest adds ETH and borrow interest adds USDC debt. Choose fixed simple interest or continuous compounding; neither is exact Aave accounting. The earlier single-loan lab keeps its original simple-interest model.</p>
+          <p>The chart and headline values are pre-liquidation endpoints. The withdrawal-first unwind preview stops at or below health factor 1 and retains all debt. It runs at most 64 steps, showing unpaid debt if it cannot finish. It is not an execution plan or a protocol simulator. USDC = $1 is assumed. There is no wallet connection or live lending data.</p>
+          <p>
+            <a href="https://aave.com/help/borrowing/liquidations" target="_blank" rel="noopener noreferrer">Aave: health factor and liquidations ↗</a> · <a href="https://aave.com/help/borrowing/repay-tokens" target="_blank" rel="noopener noreferrer">Aave: repayment ↗</a>
+          </p>
+        </details>
+      </section>
       <section id="lending-learn" hidden aria-label="Lending lessons">
-        <div class="learn-meta"><span>Four steps · Open any lesson</span><span id="lend-storage" role="status">Progress saves in this browser.</span>
+        <div class="learn-meta"><span id="lend-meta-label">Four steps · Open any lesson</span><span id="lend-storage" role="status">Progress saves in this browser.</span>
         </div>
         <div class="learn-workspace">
           <aside class="learn-sidebar">
             <details id="lend-course" class="card learn-course" open>
               <summary><span>All lending lessons</span><strong id="lend-progress">0 of 4 checked</strong><span class="learn-course-chevron">⌄</span></summary>
+              <nav class="lending-chapters" aria-label="Lending chapters"><a id="lend-chapter-essentials" href="#lesson=supply">1 · Lending essentials</a><a id="lend-chapter-loops" href="#loop-lesson=build">2 · Borrowing loops</a></nav>
               <nav aria-label="Lending lessons">
                 <ol id="lend-lesson-list" class="lending-lesson-list">
                 </ol>
               </nav>
-              <a class="learn-sidebar-link" href="#experiment">Have your own question? Open Experiment →</a>
+              <a id="lend-own-question" class="learn-sidebar-link" href="#experiment">Have your own question? Open Experiment →</a>
             </details>
             <p class="learn-independence">Lesson examples stay separate from your working loan.</p>
           </aside>

@@ -67,3 +67,15 @@ All lending figures are hypothetical teaching cases with fixed simple interest a
 - [Revert: performance comparisons](https://docs.revert.finance/revert/open-positions): benchmark definitions, omitted gas and exceptional results.
 - [Circle: USDC risk disclosures](https://www.circle.com/fr/legal/mica-usdc-whitepaper): secondary-market price dislocation; the $1 setting remains an assumption.
 - [Milionis et al., Automated Market Making and Loss-Versus-Rebalancing](https://arxiv.org/abs/2208.06046): holding and rebalancing compare different strategies. Teren's endpoint holding gap is not an LVR estimate, and the two metrics should not be added as independent penalties.
+
+## Borrowing-loop chapter
+
+Three directly accessible lessons follow lending essentials. They use `borrowing-loop-v1` and the existing Predict → Observe → Explain → Apply interface. Loop drafts and completion have their own storage key, preserving earlier lending progress. The scenario handoff carries all loop assumptions into a separate Experiment tab.
+
+| Step | Misconception | Changed situation |
+| --- | --- | --- |
+| Build one loop | Extra borrowed ETH is new wealth; spent USDC remains in the wallet. | Pause before supplying purchased ETH; distinguish wallet assets from collateral. |
+| Repeat and change conditions | More collateral means less price risk; unchanged prices mean an unchanged loan. | Hold prices fixed while debt accrues interest and supply interest is zero. |
+| Explore unwinding | All collateral can be withdrawn first; withdrawing cancels debt. | Start below the liquidation boundary; the withdrawal-first preview stops. |
+
+The first lesson removes costs and interest to isolate matching debt. The second compares the same original capital with more ETH exposure; no arithmetic is required from the learner. The last explains intermediate collateral constraints and labels the unwind as an assumed sequence, not guaranteed execution. Automated checks cover every answer combination and numerical references. They do not establish learning effectiveness.
