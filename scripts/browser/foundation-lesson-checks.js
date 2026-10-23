@@ -104,7 +104,9 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
       await click('foundation-next');
       if (id === 'pool-share') await click('foundation-next');
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      assert.ok(await evaluate("document.getElementById('foundation-next').getBoundingClientRect().bottom-document.querySelector('.foundation-pool').getBoundingClientRect().top <= innerHeight-document.querySelector('.topbar').getBoundingClientRect().height"), 'Pool state and primary action must fit together on a short phone.');
+      const sceneHeight = await evaluate("document.getElementById('foundation-next').getBoundingClientRect().bottom-document.querySelector('.foundation-pool').getBoundingClientRect().top");
+      const available = await evaluate("innerHeight-document.querySelector('.topbar').getBoundingClientRect().height");
+      assert.ok(sceneHeight <= available, `${id} at ${width}px: pool state and primary action need ${sceneHeight}px; available ${available}px.`);
       await fill('foundation-amount', '1');
       await evaluate("document.getElementById('foundation-amount').scrollIntoView({block:'center'})");
       await settle(evaluate);

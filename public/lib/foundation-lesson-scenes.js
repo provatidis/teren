@@ -25,7 +25,7 @@ function poolFigure(original, deposit) {
   const share = node('p', '', 'foundation-pool-share'); share.id = 'foundation-pool-share'; share.hidden = !deposit;
   element.append(caption, '\n', flow, ...rows.flatMap(({ row }) => ['\n', row]), '\n', price, '\n',
     share, '\n',
-    node('p', 'Dashed marks = original balances. Each bar uses its own token units.', 'scene-key'));
+    node('p', 'Dashed = starting balances. Bars use different token units.', 'scene-key'));
   return { element, show({ pool, title, transfer, fraction = 0 }, animate = false) {
     element.dataset.motion = 'false';
     for (const animation of element.getAnimations({ subtree: true })) animation.cancel();
@@ -36,8 +36,8 @@ function poolFigure(original, deposit) {
       owned.style.width = fraction * 100 + '%'; owned.hidden = !deposit || !fraction;
     }
     price.textContent = 'Pool price: ' + usd(pool.usdc / pool.eth) + ' per ETH';
-    share.textContent = fraction ? 'Your share: ' + fmt(fraction * 100, 2) + '% · hatched in both bars'
-      : 'Your share: 0% · before this deposit';
+    share.textContent = fraction ? 'Your share: ' + fmt(fraction * 100, 2) + '% · striped'
+      : 'Your share: 0% · before deposit';
     element.dataset.motion = String(animate);
     if (animate) for (const animation of element.getAnimations({ subtree: true })) {
       animation.cancel(); animation.play();
@@ -86,7 +86,7 @@ function ownershipReceipt() {
   const claim = node('p'); claim.id = 'foundation-claim';
   const copy = node('p', '', 'scene-consequence'); copy.id = 'foundation-ownership-copy';
   element.append(title, '\n', percentage, '\n', claim, '\n', copy, '\n',
-    node('p', 'The hatched slice marks your claim on both balances. LP tokens represent this fraction; they do not reserve the tokens you deposited.', 'fine-print'));
+    node('p', 'The striped slice marks your claim on both balances. LP tokens represent this fraction; they do not reserve the tokens you deposited.', 'fine-print'));
   return { element, show(frame, index) {
     element.hidden = index === 0;
     percentage.textContent = fmt(frame.result.share, 2) + '% of both pool balances';

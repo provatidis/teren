@@ -6,7 +6,7 @@
 .foundation-pool .scene-token-fill { position: relative; overflow: hidden; }
 .foundation-owned { position: absolute; top: 0; right: 0; height: 100%; background: repeating-linear-gradient(135deg, #172635 0 2px, transparent 2px 5px); border-left: 1px solid #172635; }
 .foundation-pool-price { font-size: 14px; line-height: 1.7; margin: 14px 0 0; font-variant-numeric: tabular-nums; }
-.foundation-pool-share { font-size: 14px; line-height: 1.7; min-height: 3.4em; margin: 8px 0 0; font-weight: 600; }
+.foundation-pool-share { font-size: 14px; line-height: 1.7; min-height: 1.7em; margin: 8px 0 0; font-weight: 600; }
 .foundation-pool .scene-key { margin: 8px 0 0; }
 .foundation-outcome { margin: 20px 0; padding: 18px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); }
 .foundation-outcome h4 { margin: 0 0 18px; font-size: 16px; line-height: 1.6; }
