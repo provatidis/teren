@@ -65,7 +65,7 @@ async function checkAsset(source) {
   assert.ok(!relative(root, path).startsWith('..'));
   await access(path);
 }
-for (const document of ['index.html', 'learn.html', 'about.html', 'methods.html', '404.html']) {
+for (const document of ['index.html', 'learn.html', 'about.html', 'methods.html', 'lending.html', '404.html']) {
   const markup = await readFile(resolve(root, document), 'utf8');
   assert.match(markup, /<title>[^<]*Teren[^<]*<\/title>/, document + ': use the current public name.');
   assert.doesNotMatch(markup, /Passiko|ehipassiko|passiko-logo|download="passiko-/i, document + ': remove the former visible identity.');

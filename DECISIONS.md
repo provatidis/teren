@@ -2,8 +2,8 @@
 
 These are durable working choices, not a feature backlog. Revisit them when evidence or the user’s direction changes.
 
-- Teren helps people understand liquidity and test assumptions. Guided learning and direct exploration belong in one app.
-- Teren takes its name from Pontic Greek τέρεν, “look.” Keep the founder’s heritage to a short About explanation. Use the custom wordmark as the main identity and the separate open-t symbol for compact uses. Liquidity is the current area of depth; the name can accommodate other DeFi subjects later.
+- Teren helps people understand DeFi mechanisms and test assumptions. Guided learning and direct exploration belong in one app, with Liquidity and Lending as distinct topics.
+- Teren takes its name from Pontic Greek τέρεν, “look.” Keep the founder’s heritage to a short About explanation. Use the custom wordmark as the main identity and the separate open-t symbol for compact uses.
 - Rebranding preserves existing browser-storage keys, scenario versions and file-format identifiers. Those are compatibility contracts, independent of visible names and download filenames.
 - Complexity increases predictably across examples. Advanced cases and every lesson remain directly accessible.
 - Learn links carry their setup into Experiment. Learning progress, virtual balances, model drafts and recorded snapshots remain independent.
@@ -15,6 +15,7 @@ These are durable working choices, not a feature backlog. Revisit them when evid
 - Verify one bounded historical case before presenting editable replay. Hourly price samples alone do not establish arbitrary-range fee earnings.
 - Keep the frontend static while that serves the product. Add dependencies or maintained data services when their benefit justifies their cost.
 - Prefer depth and clearer workflows before more chains, wallet discovery or library features.
+- Expand lending in stages. First teach one collateral asset, one debt asset, interest and liquidation boundaries; then consider looping. The first loan model is explicitly hypothetical, with fixed simple interest. Independently verified lending accounting needs a separate adapter and evidence before it can appear in Inspect.
 
 Technical references: [models](docs/models.md), [data](docs/data.md), [development](docs/development.md).
 

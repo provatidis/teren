@@ -4,9 +4,25 @@
 
 ## Finding a tool and returning to your setup
 
+Choose **Liquidity** or **Lending** in the topic switch. Experiment and Learn follow the chosen topic. Inspect currently contains liquidity snapshots and historical cases; lending has no live or recorded position imports yet.
+
 The top navigation stays visible while scrolling. **Experiment** opens the calculator workspace introduction; **Inspect** opens the pool/position workspace introduction. The tool links below the introduction follow the current workspace: calculator tools in Experiment, snapshot sources in Inspect, and a return to experiments from recorded history or Pool mechanics. Historical cases belong to Inspect and remain directly accessible from Experiment. **Learn** opens the learning document. Existing tool and shared-scenario links still open their targets directly.
 
-Switching workspaces or calculator tabs preserves their current inputs. Clicking a same-tab Learn link temporarily retains valid calculator inputs, the selected lab and any matching source snapshot. Returning restores those working drafts; an explicit shared scenario takes precedence. This handoff uses per-tab session storage and is consumed after restoration. If storage is blocked, navigation still works but the handoff cannot be saved. Invalid/incomplete inputs are not captured. Use **Save experiment** and export the library for a durable, portable copy.
+Switching workspaces or calculator tabs preserves their current inputs. Clicking a same-tab Learn or Lending link temporarily retains valid liquidity calculator inputs, the selected lab and any matching source snapshot. Returning restores those working drafts; an explicit shared scenario takes precedence. This handoff uses per-tab session storage and is consumed after restoration. If storage is blocked, navigation still works but the handoff cannot be saved. Invalid/incomplete inputs are not captured. Use **Save experiment** and export the library for a durable, portable liquidity copy.
+
+## Lending: supply, borrow, change conditions, respond
+
+Open [the lending lab](https://teren.sh/lending.html#experiment) directly or start with [the first lesson](https://teren.sh/lending.html#lesson=supply). The four lessons add one idea at a time; every lesson can also be opened directly. Predictions are ungraded. The explanation and changed-situation checks require no arithmetic. Optional reading links to primary sources.
+
+**Your starting loan** sets supplied ETH (representing WETH), its starting price, whether it backs the loan and the amount of USDC borrowed. **Rates and collateral rules** contains editable teaching assumptions. Maximum starting LTV limits a new loan; the liquidation threshold governs an existing loan. The starting loan must be valid before later conditions can be explored. The setup collapses on phones and summarizes the starting balances.
+
+**Change the conditions** adjusts the later valuation price and elapsed days. Both rates use fixed simple interest: supply interest adds ETH, and borrow interest adds USDC debt. Borrowed USDC stays in the wallet. **Assets minus debt** includes that cash and its matching liability, so borrowing does not create profit. A health factor below 1 means eligible for liquidation; an endpoint does not reconstruct a path or execute a liquidation.
+
+**Repay or add collateral?** compares two immediate responses with the same additional external budget at the chosen price. Repayment stops at the total debt and shows unused money. Added collateral increases the supplied ETH without reducing debt. Execution costs and delays are excluded, so the comparison does not promise that a response can happen before liquidation.
+
+The lab keeps the last valid working loan in this tab's session storage, separately from lesson examples and liquidity drafts. **Copy experiment link** preserves all inputs in a validated `#loan=collateral-loan-v1` link; if clipboard access fails, a selectable link appears. Lending is not yet part of the saved liquidity experiment library. Lesson progress uses its own local-storage key. **Explore this setup in Experiment** opens the exact example in a separate tab without replacing the working loan.
+
+USDC = $1 is an assumption. Rates, LTV and threshold are illustrative, not current Aave market quotes; Aave's indexed interest accounting is not reproduced. Looping, multiple collateral assets, live lending snapshots and verified lending history are later iterations. See [the model](models.md#collateralized-loan-model).
 
 ## Starting and comparing an experiment
 

@@ -28,7 +28,7 @@ Open http://127.0.0.1:3000/ in your browser. The hypothetical labs, lessons and 
 npm test
 ```
 
-Tests cover the sandbox and both hypothetical models, versioned links and exports, v2/v3 snapshot validation, exact v3 fee accounting, fixed-position period accounting and continuity evidence, essential and applied learning assessments, saved comparisons, Learn-return drafts and storage failures. The bundled historical records are checked locally without RPC calls; `npm run check:replay` separately recaptures and verifies chain history through public providers.
+Tests cover the sandbox and hypothetical liquidity and lending models, versioned links and exports, v2/v3 snapshot validation, exact v3 fee accounting, fixed-position period accounting and continuity evidence, essential and applied learning assessments, saved comparisons, Learn-return drafts and storage failures. The bundled historical records are checked locally without RPC calls; `npm run check:replay` separately recaptures and verifies chain history through public providers.
 
 For a local browser smoke test, install Chromium or set `CHROMIUM_BIN` to its executable, then run `npm run test:browser`. It starts temporary servers and checks actual page interactions at desktop and mobile sizes, including calculators, learning, snapshot imports, saved comparisons, the historical checkpoint slider, downloads and persistence. Navigation checks cover sticky-header offsets, direct tool fragments, browser history and returning from Learn. The same suite runs in CI before deployment. Its mobile routing checks use touch events as well as keyboard and mouse input. The test runner launches Chromium with its browser sandbox disabled; serving the app itself requires no browser installation.
 
@@ -44,7 +44,7 @@ The period model lives in `public/models/fixed-position-period.js`; record valid
 
 ## Project structure
 
-- public/main.js and public/learn-main.js: composition roots for Experiment/Inspect and Learn respectively. They initialize each document's controllers and inject the interfaces they need.
+- public/main.js, public/learn-main.js and public/lending-main.js: composition roots for liquidity Experiment/Inspect, liquidity Learn and lending respectively. They initialize each document's controllers and inject the interfaces they need.
 - public/ui/: explicit initializers for the sandbox, both labs, learning, pool/position snapshots, saved experiments, historical replay and navigation. Importing a controller does not start it.
 - public/models/: pure hypothetical calculations, lesson experiments and exact protocol/period arithmetic. They do not read the DOM, browser storage or network.
 - public/data/: deployment configuration, read-only Uniswap v2/v3 adapters, snapshot/period schemas, saved experiments, learning progress and temporary Learn-return storage.
@@ -52,7 +52,7 @@ The period model lives in `public/models/fixed-position-period.js`; record valid
 - public/learning/: essential and applied lesson definitions, optional deeper reading and the ten-example progression.
 - public/examples/: bundled pool/position snapshots and the verified fixed-position period record; these open without RPC requests.
 - public/styles/: shared foundation and components followed by feature styles. public/styles.css preserves the existing cascade order.
-- public/index.html and public/learn.html: semantic, static markup with one module entry point per document. Each feature owns its IDs; the structure check rejects duplicates.
+- public/index.html, public/learn.html and public/lending.html: semantic, static markup with one module entry point per document. Each feature owns its IDs; the structure check rejects duplicates.
 - scripts/: development, integration and browser checks; test/: reference calculations and adapter/storage contracts.
 - server.js: a local static server; GitHub Pages deploys public/ directly.
 
@@ -106,7 +106,7 @@ These unchanged identifiers preserve saved work on the same origin. **Moving to 
 
 ## Working drafts during a Learn visit
 
-Clicking a same-tab Learn link captures validated calculator inputs, the active lab and any matching source snapshot into `degenerator-learn-return-v1` in session storage. Returning restores the working drafts without changing saved experiments, lesson progress or latest chain snapshots, then consumes that temporary handoff. Explicit shared scenario links take precedence. Browser history restores cached pages directly; stale handoffs are cleared when such a page returns. Unsupported or unreadable handoff data is preserved, and blocked storage leaves navigation usable. Invalid incomplete inputs are not captured.
+Clicking a same-tab Learn or Lending link captures validated liquidity calculator inputs, the active lab and any matching source snapshot into `degenerator-learn-return-v1` in session storage. Returning restores the working drafts without changing saved experiments, lesson progress or latest chain snapshots, then consumes that temporary handoff. Explicit shared scenario links take precedence. Browser history restores cached pages directly; stale handoffs are cleared when such a page returns. Unsupported or unreadable handoff data is preserved, and blocked storage leaves navigation usable. Invalid incomplete inputs are not captured.
 
 ## Applied learning records
 
@@ -139,3 +139,13 @@ The new `passiko-range-learning-v1` key stores bounded variants, choices and a v
 `managementApplication` supplies situation-specific follow-ups. Width totals combine calculated principal with supplied fee/cost assumptions; fee-tier totals are explicitly fictional teaching facts; removal and fee collection remain distinct actions. These values do not modify historical records or estimate earned fees. Completed topics remain saved; a restored draft is checked against its displayed situation.
 
 For coverage diagnostics, use the same release-qualified module URL as production consumers. Node treats a bare URL and a URL with `?v=` as separate instances; an unused copy can otherwise obscure the exercised grader in its per-file report. The range-learning test reads the package version for that import. Answer-combination tests and browser restoration checks remain the primary evidence for grading behavior, rather than a project-wide coverage percentage.
+
+## Lending foundations
+
+`lending.html` has its own composition root, `lending-main.js`, with separate Experiment and Learn panels. It does not add lending controllers to the liquidity document. The topic links preserve the current mode; Inspect still opens the existing liquidity records. Strict `#loan=collateral-loan-v1` links carry all model assumptions, and `#lesson=supply|borrow|conditions|respond` routes select directly accessible lessons.
+
+`models/collateral-loan-v1.js` validates the initial loan and calculates later balances, liquidation eligibility and immediate responses. It is pure floating-point teaching arithmetic, separate from the integer protocol accounting. `models/lending-lessons.js` defines reference cases and grades conceptual choices; `learning/lending-essentials.js` owns editorial definitions. `lib/lending-presentation.js` preserves the side of the liquidation boundary when formatting health factors. UI controllers share choice rendering and feedback focus without importing one another.
+
+`data/lending-state.js` validates a per-tab `teren-lending-draft-v1` session draft and independent `teren-lending-learning-v1` local progress. Invalid edits do not overwrite the last valid working setup. Explicit valid links override the draft; unsupported links leave it intact and explain the failure. Lesson handoffs open a separate tab. The existing liquidity Learn-return handoff also captures departures to Lending; no older key or schema changes.
+
+The release stamper and structure checker include the third entry point and its mutable teaching dependencies. Reference tests cover debt/cash conservation, simple interest on each token balance, LTV versus liquidation threshold, exact boundaries, full/partial repayment, same-budget responses, links, storage and all conceptual answer combinations. CI also checks the complete lessons, shares, recovery from invalid inputs, topic draft isolation and desktop/390px/320px layouts.

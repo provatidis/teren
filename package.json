@@ -1,9 +1,9 @@
 {
   "name": "teren",
-  "version": "1.16.1",
+  "version": "1.17.0",
   "private": true,
   "type": "module",
-  "description": "A DeFi playground for reproducible liquidity scenarios and virtual pool experiments",
+  "description": "A DeFi playground for liquidity, lending and reproducible learning experiments",
   "scripts": {
     "start": "node server.js",
     "test": "node --test",

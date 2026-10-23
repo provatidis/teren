@@ -1,5 +1,12 @@
 # Release history
 
+## 1.17.0 — 2026-10-23
+
+- Add Lending as a second topic with an ETH/USDC collateralized-loan lab: adjust prices and time, inspect both sides of the balance sheet, and compare repayment with adding collateral using the same additional budget.
+- Add four directly accessible lessons: supply and collateral, borrowing and debt, prices/interest/time, then responses. Completion checks understanding without calculations; predictions stay ungraded and each exact setup opens in Experiment.
+- Separate the maximum starting loan from the liquidation boundary. Use explicit, editable assumptions and fixed simple interest; identify all lending outcomes as hypothetical, with no live market quotes or simulated liquidation execution.
+- Preserve liquidity drafts across topic changes, keep lending drafts in the current tab and learning progress in its own browser key, and add validated share links. Extend reference, storage, link and desktop/mobile browser checks.
+
 
 ## 1.16.1 — 2026-10-23
 

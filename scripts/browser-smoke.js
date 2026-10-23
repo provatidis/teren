@@ -1,4 +1,5 @@
 import { checkProjectInformation, checkMobileTools } from './browser/clarity-checks.js';
+import { checkLending } from './browser/lending-checks.js';
 import { checkManagementLearning, checkMobileManagementLearning } from './browser/management-learning-checks.js';
 import { checkLessonConsistency, checkMobileLessonConsistency } from './browser/lesson-consistency-checks.js';
 import { checkAppliedLearning, checkMobileAppliedLearning } from './browser/applied-learning-checks.js';
@@ -575,6 +576,7 @@ try {
   await checkPolish({ evaluate, navigate, call, base });
   await checkExperimentFlow({ evaluate, click, fill, text, navigate, base, call });
   await checkMobileInspect({ evaluate, call, click, fill, navigate, nextEvent, base });
+  await checkLending({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   assert.deepEqual(errors, [], 'No uncaught browser errors');
   console.log('PASS: mobile layout and interaction; no uncaught browser errors');
 } finally {

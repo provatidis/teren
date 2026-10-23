@@ -1,21 +1,21 @@
 import { stageForLesson } from '../learning/example-path.js';
-import { DEEPER_READING } from '../learning/deeper-reading.js?v=1.16.1';
-import { lessonWalkthrough } from '../lib/lesson-walkthrough.js?v=1.16.1';
-import { LESSONS } from '../learning/liquidity-essentials.js?v=1.16.1';
-import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, checkLesson } from '../models/lesson-experiments.js?v=1.16.1';
-import { checkLessonUnderstanding } from '../models/lesson-application.js?v=1.16.1';
-import { lessonApplicationCopy } from '../lib/lesson-application-copy.js?v=1.16.1';
-import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.16.1';
-import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback } from '../lib/learning-elements.js?v=1.16.1';
-import { POOL_PITFALLS } from '../learning/pool-pitfalls.js?v=1.16.1';
-import { managementLessonFromHash } from '../lib/management-links.js?v=1.16.1';
-import { readProgress, saveProgress } from '../data/learning-progress.js?v=1.16.1';
+import { DEEPER_READING } from '../learning/deeper-reading.js?v=1.17.0';
+import { lessonWalkthrough } from '../lib/lesson-walkthrough.js?v=1.17.0';
+import { LESSONS } from '../learning/liquidity-essentials.js?v=1.17.0';
+import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, checkLesson } from '../models/lesson-experiments.js?v=1.17.0';
+import { checkLessonUnderstanding } from '../models/lesson-application.js?v=1.17.0';
+import { lessonApplicationCopy } from '../lib/lesson-application-copy.js?v=1.17.0';
+import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.17.0';
+import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback } from '../lib/learning-elements.js?v=1.17.0';
+import { POOL_PITFALLS } from '../learning/pool-pitfalls.js?v=1.17.0';
+import { managementLessonFromHash } from '../lib/management-links.js?v=1.17.0';
+import { readProgress, saveProgress } from '../data/learning-progress.js?v=1.17.0';
 import { fmt, usd, signedUSD, percent } from '../lib/format.js';
 import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
-import { resultCardBlob } from '../lib/result-card.js?v=1.16.1';
+import { resultCardBlob } from '../lib/result-card.js?v=1.17.0';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
-import { tokenBalanceNarration, benchmarkNarration, lessonReasonFeedback } from '../lib/lesson-narration.js?v=1.16.1';
+import { tokenBalanceNarration, benchmarkNarration, lessonReasonFeedback } from '../lib/lesson-narration.js?v=1.17.0';
 
 export function initLearning() {
   const $ = id => document.getElementById(id);
