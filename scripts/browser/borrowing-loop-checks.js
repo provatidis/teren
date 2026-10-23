@@ -221,13 +221,17 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     const point = fraction => ({ x: sliderBox.left + 26 + (sliderBox.width - 52) * fraction, y: sliderBox.top + sliderBox.height / 2, id: 0, radiusX: 2, radiusY: 2 });
     await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     try {
+      // Touch moves can be coalesced to animation frames; let each stop render.
       await call('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(0)] });
       await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(1 / 3)] });
+      await settle(evaluate);
       assert.equal(await evaluate("document.getElementById('loop-flow-slider').value"), '1');
       await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(2 / 3)] });
+      await settle(evaluate);
       assert.match(await text('loop-flow-wallet'), /2.5 ETH/);
       await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(1)] });
       await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await settle(evaluate);
     } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
     assert.equal(await text('loop-flow-supplied'), '7.5 ETH');
     assert.equal(await text('loop-flow-net'), 'Assets minus debt: $10,000.00');
