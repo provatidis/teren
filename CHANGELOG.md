@@ -1,5 +1,12 @@
 # Release history
 
+## 1.19.1 — 2026-10-23
+
+- Lead borrowing-loop results with the difference from holding and the selected price/time. Identify zero rounds as supply only and show original capital beside its assumptions.
+- Add touch-sized round controls with clear limits. Keep round summaries compact, preserve opened details while editing and distinguish construction balances from later price/interest results.
+- Label completed, partial, blocked and unnecessary unwinds separately. Show that blocked swaps were not run, retain debt and separate construction from unwind swap losses.
+- Explain the chart's selected point, clarify chapter navigation and preserve the sign of real sub-cent differences. Extend unit and desktop/mobile interaction checks; financial models and recorded evidence are unchanged.
+
 ## 1.19.0 — 2026-10-23
 
 - Add an ETH/USDC borrowing-loop lab alongside the single-loan lab. Follow borrowing, buying ETH and supplying it through up to five rounds, with original capital, wallet balances, debt, swap losses and price exposure kept distinct.

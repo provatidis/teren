@@ -167,6 +167,8 @@ The existing lending document has Single loan and Borrowing loops experiment rou
 
 `models/borrowing-loop-v1.js` owns pure construction, accrued balances, price sensitivity and the withdrawal-first unwind. `models/loop-lessons.js` owns reference scenarios and conceptual grading. Editorial definitions live in `learning/borrowing-loops.js`; presentation/links in `lib/loop-presentation.js` and `lib/loop-links.js`. `ui/borrowing-loops.js` renders with DOM nodes and guards stale clipboard results.
 
+Presentation tests cover signed sub-cent comparisons and distinct unwind-state labels. The UI separates starting-price construction from later price/time results, preserves opened rounds across edits and moves focus to the round field when a clicked minus/plus control reaches its limit. Browser checks exercise those bounds, supply-only results and blocked unwind labels at desktop and narrow mobile widths.
+
 `data/loop-state.js` isolates `teren-loop-draft-v1` in session storage and `teren-loop-learning-v1` in local storage. A separate session chapter preference supports Learn resumption. The shared lending progress parser accepts explicit chapter allowlists; its default remains the earlier four IDs. The shared lesson renderer receives chapter-specific model, links, grading, presentation and persistence functions.
 
 Tests compare geometric-series references against the step ledger across 1,000 varied setups, check conservation before/after costs, exact boundaries, both interest assumptions, withdrawal health before repayment, remaining debt, strict links and storage isolation. CI browser checks cover lessons, links, draft restoration, compounding, invalid inputs, blocked unwind and 390px/320px layouts against the generated build.

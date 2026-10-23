@@ -4,7 +4,7 @@ import { LOOP_DEFAULTS, LOOP_LIMITS, calculateLoop, validateLoop, loopAtPrice } 
 import { loopCase, checkLoopUnderstanding } from '../public/models/loop-lessons.js';
 import { LOOP_LESSONS } from '../public/learning/borrowing-loops.js';
 import { loopHash, readLoopHash, loopLessonFromHash } from '../public/lib/loop-links.js';
-import { loopMoney } from '../public/lib/loop-presentation.js';
+import { loopMoney, loopComparison, loopUnwindLabels } from '../public/lib/loop-presentation.js';
 import { LOOP_DRAFT_KEY, LOOP_LEARNING_KEY, readLoopDraft, saveLoopDraft, readLoopProgress, saveLoopProgress, readLendingChapter, saveLendingChapter } from '../public/data/loop-state.js';
 import { LOAN_DRAFT_KEY, LOAN_LEARNING_KEY, parseLendingProgress } from '../public/data/lending-state.js';
 
@@ -14,6 +14,32 @@ const memory = () => {
   const data = new Map();
   return { data, getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) };
 };
+
+test('holding comparisons keep the sign of real sub-cent differences and identify equality', () => {
+  const loss = loopComparison(0.001 - 5e-8, 0.001);
+  assert.equal(loss.relation, 'behind');
+  assert.ok(loss.difference < 0);
+  assert.match(loss.compact, /^−/);
+  assert.match(loss.label, /less than holding/);
+  const gain = loopComparison(0.001 + 5e-8, 0.001);
+  assert.equal(gain.relation, 'ahead');
+  assert.match(gain.compact, /^\+/);
+  const equal = loopComparison(10000, 10000);
+  assert.equal(equal.relation, 'equal');
+  assert.equal(equal.label, 'Matches holding');
+  const noise = loopComparison(10000 + Number.EPSILON * 10000, 10000);
+  assert.equal(noise.relation, 'equal');
+  assert.match(noise.label, /Nearly/);
+});
+
+test('unwind labels distinguish blocked, partial, completed and unnecessary previews', () => {
+  assert.match(loopUnwindLabels('blocked').net, /before liquidation/);
+  assert.match(loopUnwindLabels('blocked').debt, /still owed/);
+  assert.match(loopUnwindLabels('limited').net, /partial/);
+  assert.match(loopUnwindLabels('complete').eth, /freed/);
+  assert.match(loopUnwindLabels('no-debt').eth, /no sale needed/);
+  assert.throws(() => loopUnwindLabels('unknown'), RangeError);
+});
 
 test('one round moves borrowed cash into wallet ETH then collateral without creating equity', () => {
   const result = loop({ swapCost: 0 });
