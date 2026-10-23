@@ -1,6 +1,7 @@
 const borrowing = { title: 'Aave: borrowing and debt', url: 'https://aave.com/help/borrowing/borrow-tokens' };
 const health = { title: 'Aave: health factor and liquidations', url: 'https://aave.com/help/borrowing/liquidations' };
 const repayment = { title: 'Aave: repaying a loan', url: 'https://aave.com/help/borrowing/repay-tokens' };
+const withdrawal = { title: 'Aave: withdrawing supplied tokens', url: 'https://aave.com/help/supplying/withdraw-tokens' };
 
 export const LOOP_LESSONS = [
   {
@@ -76,6 +77,6 @@ export const LOOP_LESSONS = [
     applicationFeedback: 'The preview stops at or below the liquidation boundary. Actual liquidation or a different response would need its own assumptions; the outstanding debt is retained.',
     hint: 'Follow the debt that remains after each action, including before the sale.',
     deeper: ['The preview withdraws at most 95% of the value available above health factor 1. It keeps the intermediate health factor above 1, sells at the selected price less the assumed swap loss, then repays. This 95% is a numerical teaching convention, not an Aave withdrawal parameter or a safety recommendation.', 'It uses no flash loan or outside funds. It caps the illustration at 64 steps and never silently writes off unpaid debt. Gas, oracle changes, caps, liquidity limits, collateral-specific restrictions and competing liquidations are excluded.'],
-    sources: [repayment, health],
+    sources: [withdrawal, repayment, health],
   },
 ];

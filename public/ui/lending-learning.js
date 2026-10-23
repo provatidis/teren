@@ -51,10 +51,10 @@ export function initLendingLearning() {
     $('lend-prediction-feedback').textContent = draft.prediction === example.prediction
       ? 'Your prediction matches. ' + prediction : 'Compare this with your prediction: ' + prediction;
     $('lend-metrics').replaceChildren(...course.metrics(lesson.id, example.result).map(items => learningMetric(...items)));
-    const showFlow = chapter === 'loops' && lesson.id === 'build';
+    const showFlow = chapter === 'loops' && ['build', 'unwind'].includes(lesson.id);
     $('lend-money-flow').hidden = !showFlow;
     $('lend-metrics').hidden = showFlow;
-    if (showFlow) renderLoopMoneyFlow($('lend-money-flow'), example.result);
+    if (showFlow) renderLoopMoneyFlow($('lend-money-flow'), example.result, lesson.id);
     $('lend-observe').hidden = false;
     $('lend-assessment').hidden = false;
     $('lend-reveal').textContent = 'Revisit the result ↓';

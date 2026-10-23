@@ -164,6 +164,46 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       assert.match(await text('loop-flow-wallet'), /2.5 ETH/);
       assert.equal(await text('loop-flow-wallet-change'), '5,000 USDC → 2.5 ETH');
       assert.equal(await text('loop-flow-net'), 'Assets minus debt: $10,000.00');
+    } else if (id === 'unwind') {
+      assert.equal(await evaluate("document.getElementById('loop-flow-slider').max"), '7');
+      assert.equal(await text('loop-flow-debt'), '8,735.01 USDC');
+      assert.equal(await text('loop-flow-supplied'), '9.354403 ETH');
+      await moveFlow('ArrowRight');
+      assert.match(await text('loop-flow-wallet'), /3.70027 ETH/);
+      assert.equal(await text('loop-flow-debt'), '8,735.01 USDC');
+      assert.match(await text('loop-flow-health'), /1.04/);
+      await moveFlow('ArrowRight');
+      assert.match(await text('loop-flow-wallet'), /7,378.34 USDC/);
+      assert.equal(await text('loop-flow-debt'), '8,735.01 USDC');
+      assert.match(await text('loop-flow-costs'), /\$22.20/);
+      assert.equal(await text('loop-flow-net'), 'Assets minus debt: $9,951.59');
+      await moveFlow('ArrowRight');
+      assert.equal(await text('loop-flow-debt'), '1,356.67 USDC');
+      assert.equal(await text('loop-flow-wallet'), '0 USDC0 ETH');
+      assert.match(await text('loop-flow-health'), /6.67/);
+      assert.equal(await text('loop-flow-net'), 'Assets minus debt: $9,951.59');
+      await moveFlow('ArrowRight'); await moveFlow('ArrowRight');
+      assert.equal(await text('loop-flow-debt'), '1,356.67 USDC');
+      assert.match(await text('loop-flow-wallet'), /1,356.67 USDC/);
+      assert.match(await text('loop-flow-costs'), /\$26.28/);
+      await moveFlow('ArrowRight');
+      assert.equal(await text('loop-flow-debt'), '0 USDC');
+      assert.equal(await text('loop-flow-wallet'), '0 USDC0 ETH');
+      assert.equal(await text('loop-flow-supplied'), '4.973756 ETH');
+      assert.match(await text('loop-flow-health'), /No debt/);
+      await moveFlow('End');
+      assert.match(await text('loop-flow-wallet'), /4.973756 ETH/);
+      assert.equal(await text('loop-flow-supplied'), '0 ETH');
+      assert.equal(await text('loop-flow-net'), 'Assets minus debt: $9,947.51');
+      assert.match(await evaluate("document.getElementById('loop-flow-slider').getAttribute('aria-valuetext')"), /Withdraw rest, stage 8 of 8/);
+      await click('loop-flow-previous');
+      assert.equal(await text('loop-flow-supplied'), '4.973756 ETH');
+      assert.equal(await text('loop-flow-wallet'), '0 USDC0 ETH');
+      await click('loop-flow-next');
+      assert.equal(await evaluate('document.activeElement.id'), 'loop-flow-slider');
+      await moveFlow('Home');
+      assert.equal(await text('loop-flow-net'), 'Assets minus debt: $9,973.79');
+      assert.match(await text('loop-flow-costs'), /\$0.00/);
     }
     await click('lend-check');
     assert.equal(await text('lend-feedback-title'), 'Review your answers.');
@@ -240,6 +280,26 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
     await navigate(base + 'lending.html#loop-lesson=unwind');
     await click('lend-retry'); await choose('prediction', 'all'); await click('lend-reveal');
+    await evaluate("document.getElementById('loop-flow-slider').scrollIntoView({block:'center'})");
+    await settle(evaluate);
+    const unwindBox = await evaluate("(()=>{const r=document.getElementById('loop-flow-slider').getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height}})()");
+    const unwindPoint = fraction => ({ x: unwindBox.left + 26 + (unwindBox.width - 52) * fraction, y: unwindBox.top + unwindBox.height / 2, id: 0, radiusX: 2, radiusY: 2 });
+    const progressBefore = await text('lend-progress');
+    await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+    try {
+      await call('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [unwindPoint(0)] });
+      for (let stage = 1; stage <= 7; stage++) {
+        await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [unwindPoint(stage / 7)] });
+        await settle(evaluate);
+        assert.equal(await evaluate("document.getElementById('loop-flow-slider').value"), String(stage));
+      }
+      await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await settle(evaluate);
+    } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
+    assert.equal(await text('loop-flow-debt'), '0 USDC');
+    assert.match(await text('loop-flow-wallet'), /4.973756 ETH/);
+    assert.equal(await text('lend-progress'), progressBefore);
+    assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
     await choose('reason', 'backing'); await choose('application', 'blocked'); await click('lend-check'); await settle(evaluate);
     assert.equal(await evaluate('document.activeElement.id'), 'lend-feedback');
     assert.ok(await evaluate("document.getElementById('lend-next').getBoundingClientRect().bottom<=innerHeight"));

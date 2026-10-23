@@ -41,7 +41,10 @@
 .loop-flow-stops { display: flex; justify-content: space-between; list-style: none; padding: 0; margin: 0; gap: 8px; }
 .loop-flow-stops li { flex: 0 0 52px; font-size: 13px; line-height: 1.7; color: var(--muted); text-align: center; border-top: 3px solid transparent; padding-top: 3px; white-space: nowrap; }
 .loop-flow-stops li[data-current=true] { color: var(--text); font-weight: 600; border-color: var(--accent); }
+.loop-flow-stops-compact { padding: 0 18px; }
+.loop-flow-stops-compact li { flex-basis: 16px; }
 .loop-flow-copy { color: var(--muted); font-size: 15px; line-height: 1.6; min-height: 3.2em; margin: 0 0 18px; }
+.loop-flow-health { margin: -6px 0 18px; color: var(--muted); font-size: 14px; line-height: 1.7; }
 .loop-flow-balances { margin: 0; }
 .loop-flow-balances > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; padding: 14px 10px; border-top: 1px solid var(--border); border-left: 3px solid transparent; }
 .loop-flow-balances > div[data-changed=true] { border-left-color: var(--accent); background: var(--highlight); }
@@ -114,6 +117,11 @@
   .loop-compare-table th, .loop-compare-table td { padding: 12px 5px; }
   .loop-money-flow { padding: 18px 0; border-left: 0; border-right: 0; border-radius: 0; background: transparent; }
   .loop-flow-copy { min-height: 4.8em; }
+  .loop-flow-health { min-height: 3.4em; }
   .loop-flow-balances > div { padding: 12px 8px; }
 }
-@media (max-width: 360px) { .loop-card { padding: 16px; } .lending-tools a { font-size: 13px; padding: 10px 14px; } }
+@media (max-width: 360px) {
+  .loop-card { padding: 16px; }
+  .lending-tools a { font-size: 13px; padding: 10px 14px; }
+  .loop-money-flow[data-flow=unwind] .loop-flow-copy { min-height: 6.4em; }
+}
