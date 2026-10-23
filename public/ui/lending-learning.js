@@ -46,7 +46,7 @@ export function initLendingLearning() {
     $('lend-feedback').className = 'learn-feedback ' + (result.passed ? 'learn-pass' : 'learn-retry');
     $('lend-feedback-title').textContent = result.passed ? 'Both answers are correct.' : 'Review your answers.';
     const reasoning = draft.reason ? lesson.reasonFeedback[draft.reason] : 'Choose an explanation. ' + lesson.hint;
-    const application = draft.application ? lesson.applicationFeedback : 'Choose an answer for the changed situation. ' + lesson.hint;
+    const application = draft.application ? lesson.applicationFeedback : 'Choose an answer for the new situation. ' + lesson.hint;
     $('lend-feedback-copy').textContent = result.passed ? lesson.takeaway
       : [!result.reasoning ? reasoning : '', !result.application ? application : ''].filter(Boolean).join(' ');
     $('lend-continue').hidden = !result.passed;

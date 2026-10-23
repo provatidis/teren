@@ -1,5 +1,11 @@
 # Release history
 
+## 1.18.1 — 2026-10-23
+
+- Polish all four lending lessons with more natural questions, clearer references and simpler explanations. Define assets minus debt before using it and explain borrowing limits without an extra numerical comparison.
+- Clarify the lab’s chart, compounding and liquidation wording. State that the liquidation bonus is a percentage of the debt repaid and connect the field to that explanation for screen readers.
+- Keep predictions ungraded and preserve conceptual checks, answer identifiers, calculations, shared setups and saved progress.
+
 ## 1.18.0 — 2026-10-23
 
 - Explain lending liquidation with a separate single-event illustration: debt repaid, collateral removed, bonus cost, remaining balances and unpaid debt when collateral runs out. Keep pre-liquidation balances explicit. Event assumptions have their own draft and versioned share fields; older loans retain their calculations.
