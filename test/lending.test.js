@@ -169,6 +169,19 @@ test('lending progress rejects unrelated chapters and malformed values', () => {
   assert.deepEqual(readLendingProgress(() => storage).progress, parsed);
 });
 
+test('lending resumes a known lesson while preserving older progress and explicit lesson choices', () => {
+  const legacy = parseLendingProgress({ version: 1, completed: ['supply'], drafts: { supply: { prediction: 'earn', seed: 2 } } });
+  assert.equal(legacy.currentLesson, 'supply');
+  assert.deepEqual(legacy.completed, ['supply']);
+  const storage = memory();
+  saveLendingProgress({ ...legacy, currentLesson: 'conditions' }, () => storage);
+  const restored = readLendingProgress(() => storage).progress;
+  assert.equal(restored.currentLesson, 'conditions');
+  assert.equal(restored.drafts.supply.prediction, 'earn');
+  assert.equal(parseLendingProgress({ ...restored, currentLesson: 'unsupported' }).currentLesson, 'supply');
+  assert.equal(lendingLessonFromHash('#lesson=borrow'), 'borrow');
+});
+
 test('the four lessons reproduce their independent numerical reference cases', () => {
   close(lendingCase('supply').result.end.collateralTokens, 5.1);
   assert.equal(lendingCase('borrow').result.netAssets, 10000);

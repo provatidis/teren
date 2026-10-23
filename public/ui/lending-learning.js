@@ -1,10 +1,10 @@
-import { LENDING_LESSONS } from '../learning/lending-essentials.js?v=1.17.0';
-import { lendingCase, checkLendingUnderstanding } from '../models/lending-lessons.js?v=1.17.0';
-import { readLendingProgress, saveLendingProgress } from '../data/lending-state.js?v=1.17.0';
-import { loanHash } from '../lib/lending-links.js?v=1.17.0';
-import { lendingMetrics } from '../lib/lending-presentation.js?v=1.17.0';
-import { newChoiceSeed } from '../lib/learning-choices.js?v=1.17.0';
-import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js?v=1.17.0';
+import { LENDING_LESSONS } from '../learning/lending-essentials.js?v=1.17.1';
+import { lendingCase, checkLendingUnderstanding } from '../models/lending-lessons.js?v=1.17.1';
+import { readLendingProgress, saveLendingProgress } from '../data/lending-state.js?v=1.17.1';
+import { loanHash } from '../lib/lending-links.js?v=1.17.1';
+import { lendingMetrics } from '../lib/lending-presentation.js?v=1.17.1';
+import { newChoiceSeed } from '../lib/learning-choices.js?v=1.17.1';
+import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js?v=1.17.1';
 
 export function initLendingLearning() {
   const $ = id => document.getElementById(id);
@@ -21,6 +21,7 @@ export function initLendingLearning() {
     }
   }
   function persist() {
+    progress.currentLesson = lesson.id;
     progress.drafts[lesson.id] = draft;
     $('lend-storage').textContent = saveLendingProgress(progress)
       ? 'Lesson progress saved in this browser.' : 'Saving is unavailable. You can keep learning in this tab.';
@@ -131,5 +132,9 @@ export function initLendingLearning() {
   });
   if (matchMedia('(max-width: 750px)').matches) $('lend-course').open = false;
   navigation();
-  return { activate, focusLesson };
+  return {
+    activate,
+    focusLesson,
+    resumeLesson: () => progress.currentLesson,
+  };
 }

@@ -1,5 +1,5 @@
 import { EXPERIMENTS_KEY, MAX_LIBRARY_BYTES, emptyLibrary, readLibrary, writeLibrary, libraryJSON, parseLibrary, createExperiment, addExperiment, editExperiment, removeExperiment, mergeLibraries } from '../data/saved-experiments.js';
-import { experimentView, defaultExperimentName, comparisonContext, startingAssets } from '../lib/saved-experiments.js?v=1.17.0';
+import { experimentView, defaultExperimentName, comparisonContext, startingAssets } from '../lib/saved-experiments.js?v=1.17.1';
 import { usd, signedUSD, percent } from '../lib/format.js';
 import { STATE_COPY } from '../lib/range-presentation.js';
 import { downloadBlob } from '../lib/download.js';

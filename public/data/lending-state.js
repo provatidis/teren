@@ -1,4 +1,4 @@
-import { LOAN_DEFAULTS, LOAN_LIMITS, validateLoan } from '../models/collateral-loan-v1.js?v=1.17.0';
+import { LOAN_DEFAULTS, LOAN_LIMITS, validateLoan } from '../models/collateral-loan-v1.js?v=1.17.1';
 
 export const LOAN_DRAFT_KEY = 'teren-lending-draft-v1';
 export const LOAN_LEARNING_KEY = 'teren-lending-learning-v1';
@@ -21,8 +21,9 @@ export function saveLoanDraft(input, getStorage = () => globalThis.sessionStorag
 }
 
 export function parseLendingProgress(value) {
-  const clean = { version: 1, completed: [], drafts: {} };
+  const clean = { version: 1, completed: [], drafts: {}, currentLesson: 'supply' };
   if (value?.version !== 1) return clean;
+  if (LENDING_LESSON_IDS.includes(value.currentLesson)) clean.currentLesson = value.currentLesson;
   clean.completed = LENDING_LESSON_IDS.filter(id => Array.isArray(value.completed) && value.completed.includes(id));
   for (const id of LENDING_LESSON_IDS) {
     const draft = value.drafts?.[id];

@@ -18,9 +18,13 @@ Open [the lending lab](https://teren.sh/lending.html#experiment) directly or sta
 
 **Change the conditions** adjusts the later valuation price and elapsed days. Both rates use fixed simple interest: supply interest adds ETH, and borrow interest adds USDC debt. Borrowed USDC stays in the wallet. **Assets minus debt** includes that cash and its matching liability, so borrowing does not create profit. A health factor below 1 means eligible for liquidation; an endpoint does not reconstruct a path or execute a liquidation.
 
+Assumed APRs stay visible beside the conditions; **Edit rates** opens and focuses their controls. On mobile, a compact health factor and status follow you while editing, with **Full result** opening the detailed outcome. Invalid loan inputs offer a shortcut to the affected field, even when it is inside a closed disclosure. An incomplete response budget hides only the response comparison; the current loan remains visible.
+
 **Repay or add collateral?** compares two immediate responses with the same additional external budget at the chosen price. Repayment stops at the total debt and shows unused money. Added collateral increases the supplied ETH without reducing debt. Execution costs and delays are excluded, so the comparison does not promise that a response can happen before liquidation.
 
 The lab keeps the last valid working loan in this tab's session storage, separately from lesson examples and liquidity drafts. **Copy experiment link** preserves all inputs in a validated `#loan=collateral-loan-v1` link; if clipboard access fails, a selectable link appears. Lending is not yet part of the saved liquidity experiment library. Lesson progress uses its own local-storage key. **Explore this setup in Experiment** opens the exact example in a separate tab without replacing the working loan.
+
+**Learn** resumes the last opened lending lesson, including after a reload or a visit to Liquidity. Explicit `#lesson=...` links still select their named lesson, and **All lessons** keeps the whole sequence accessible. The current topic is labelled rather than linked, so selecting it cannot unexpectedly switch modes.
 
 USDC = $1 is an assumption. Rates, LTV and threshold are illustrative, not current Aave market quotes; Aave's indexed interest accounting is not reproduced. Looping, multiple collateral assets, live lending snapshots and verified lending history are later iterations. See [the model](models.md#collateralized-loan-model).
 

@@ -1,4 +1,4 @@
-import { LOAN_DEFAULTS, calculateLoan } from './collateral-loan-v1.js?v=1.17.0';
+import { LOAN_DEFAULTS, calculateLoan } from './collateral-loan-v1.js?v=1.17.1';
 
 const cases = {
   supply: { borrow: 0, days: 365, collateralEnabled: false },
