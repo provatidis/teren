@@ -131,3 +131,12 @@ footer{flex-direction:column; font-size:10px}
 .site-footer nav{display:flex;flex-wrap:wrap;gap:4px 20px}
 .site-footer a{display:inline-flex;align-items:center;min-height:44px;color:var(--muted)}
 .site-footer a:hover{color:var(--accent)}
+
+/* A labelled row keeps currency amounts intact on narrow screens. */
+@media(max-width:750px){
+ .stats{grid-template-columns:1fr}
+ .stat{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 12px;padding:14px 18px}
+ .stat+.stat{border-left:0;border-top:1px solid var(--border)}
+ .stat strong{font-size:22px;margin:0;white-space:nowrap;overflow-wrap:normal;text-align:right}
+ .stat-note{grid-column:1/-1}
+}

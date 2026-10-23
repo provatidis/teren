@@ -30,8 +30,8 @@
   <meta name="twitter:description" content="Explore full-range and concentrated liquidity, import pool and position snapshots, and experiment with virtual swaps in Teren.">
   <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
   <meta name="twitter:image:alt" content="Teren. Learn and experiment with DeFi, with a liquidity range scenario.">
-  <link rel="stylesheet" href="styles.css?v=1.16.0">
-  <script type="module" src="main.js?v=1.16.0"></script>
+  <link rel="stylesheet" href="styles.css?v=1.16.1">
+  <script type="module" src="main.js?v=1.16.1"></script>
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -46,7 +46,7 @@
     </section>
     <div id="workspace-tools" class="workspace-tools">
       <button id="workspace-tools-toggle" class="workspace-tools-toggle" type="button" aria-expanded="false" aria-controls="workspace-tool-links"><span id="workspace-tools-label">Explore experiment tools</span><span aria-hidden="true">⌄</span></button>
-    <nav id="workspace-tool-links" class="workspace-links" aria-label="Experiment tools"><a href="#lp-lab" data-workspaces="experiment">Full-range lab</a><a href="#range-lab" data-workspaces="experiment">Range lab</a><a href="#example-library" data-workspaces="experiment">Examples</a><a href="#saved-experiments" data-workspaces="experiment">Saved experiments</a><a href="#pool-lab" data-workspaces="inspect" hidden>Pool snapshot</a><a href="#position-lab" data-workspaces="inspect" hidden>V3 position</a><a href="#historical-case" data-workspaces="experiment inspect replay">Historical cases</a><a href="#swap-sandbox" data-workspaces="experiment mechanics">Pool mechanics</a><a href="#experiment" data-workspaces="inspect mechanics replay" hidden>Back to experiments</a></nav>
+    <nav id="workspace-tool-links" class="workspace-links" aria-label="Experiment tools"><a href="#lp-lab" data-workspaces="experiment">Full-range lab</a><a href="#range-lab" data-workspaces="experiment">Range lab</a><a href="#example-library" data-workspaces="experiment">Examples</a><a href="#saved-experiments" data-workspaces="experiment">Saved experiments</a><a href="#pool-lab" data-workspaces="inspect" hidden>V2 pool snapshot</a><a href="#position-lab" data-workspaces="inspect" hidden>V3 position</a><a href="#historical-case" data-workspaces="experiment inspect replay">Historical cases</a><a href="#swap-sandbox" data-workspaces="experiment mechanics">Pool mechanics</a><a href="#experiment" data-workspaces="inspect mechanics replay" hidden>Back to experiments</a></nav>
     </div>
     <div id="experiment-workspace" class="app-workspace">
     <div id="liquidity-labs" class="lab-group">
@@ -145,7 +145,7 @@
             <details id="cl-fee-details" class="cl-fee-details"><summary>Assumed fee income <span>Optional</span></summary>
               <p class="fine-print">Total fees accruing to each LP strategy after any protocol share, treated as USD cash. This lab does not forecast fees.</p>
               <div class="scenario-field"><label for="cl-fees">For your range <span>USD</span></label><input id="cl-fees" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="cl-fees-error cl-fee-help"><p id="cl-fees-error" class="field-error" hidden></p></div>
-              <div class="scenario-field"><label for="cl-full-fees">For the full-range LP <span>USD</span></label><input id="cl-full-fees" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="cl-full-fees-error cl-fee-help"><p id="cl-full-fees-error" class="field-error" hidden></p></div>
+              <div class="scenario-field"><label for="cl-full-fees">For the optional V2-style comparison <span>USD</span></label><input id="cl-full-fees" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="cl-full-fees-error cl-fee-help"><p id="cl-full-fees-error" class="field-error" hidden></p></div>
               <p id="cl-fee-help" class="fine-print">Fees remain separate cash. They do not compound or change the position's token amounts.</p>
             </details>
             <p id="cl-error" class="form-error" role="status"></p>
@@ -160,9 +160,14 @@
             <p id="cl-state-note" class="cl-state-note"></p>
             <div class="cl-totals">
               <div class="cl-total"><span class="label">Hold your starting mix</span><strong id="cl-hold-value">—</strong><span id="cl-hold-return" class="stat-note"></span><p id="cl-held-note"></p></div>
-              <div class="cl-total"><span class="label">V2-style 50/50 LP</span><strong id="cl-full-value">—</strong><span id="cl-full-return" class="stat-note"></span><p id="cl-full-note"></p></div>
               <div class="cl-total cl-total-range"><span class="label">Your range LP</span><strong id="cl-value">—</strong><span id="cl-return" class="stat-note"></span><p id="cl-fees-note"></p></div>
             </div>
+            <details id="cl-reference" class="cl-reference">
+              <summary>Compare with a V2-style 50/50 position</summary>
+              <p class="fine-print">This reference uses the same budget but starts with equal token values. Its starting tokens may differ from your range’s, so it has its own holding benchmark.</p>
+              <div class="cl-reference-totals"><div class="cl-total"><span class="label">V2-style 50/50 LP</span><strong id="cl-full-value">—</strong><span id="cl-full-return" class="stat-note"></span><p id="cl-full-note"></p></div><div class="cl-total"><span class="label">Hold the 50/50 starting mix</span><strong id="cl-full-hold">—</strong><p>Holding benchmark for the V2-style position.</p></div></div>
+              <p class="fine-print">Opening this comparison also adds its line to the chart below.</p>
+            </details>
             <div class="cl-price-explorer">
               <div class="cl-explorer-heading"><label for="cl-explorer">Explore the future price</label><strong id="cl-explorer-value"></strong></div>
               <input id="cl-explorer" type="range" min="1000" max="3000" step="any" value="2100" aria-describedby="cl-explorer-help">
@@ -173,7 +178,7 @@
               <p id="cl-explorer-help" class="sr-only">Use the price slider, the price checkpoints, or the future price input. You can also select a price on the chart.</p>
             </div>
             <p id="cl-verdict" class="scenario-verdict" aria-live="polite"></p>
-            <p class="cl-benchmark-note">Holding keeps your range's starting tokens. The full-range LP uses the same budget and starts 50/50, so its starting mix may differ.</p>
+            <p class="cl-benchmark-note">Holding keeps the exact ETH and USDC your range started with.</p>
             <div class="cl-position">
               <div><h3>Your range now holds</h3><p id="cl-final-assets"></p></div><span id="cl-asset-state" class="small-badge"></span>
               <svg class="cl-allocation-bar" role="img" aria-labelledby="cl-final-allocation-title">
@@ -188,20 +193,20 @@
               </p>
             </div>
             <figure class="cl-figure">
-              <div class="cl-chart-heading"><h3>Values across future ETH prices</h3><div class="cl-chart-legend"><span><i class="cl-legend-hold"></i>Hold starting mix</span><span><i class="cl-legend-full"></i>V2-style 50/50 LP</span><span><i class="cl-legend-range"></i>Your range LP</span></div></div>
+              <div class="cl-chart-heading"><h3>Values across future ETH prices</h3><div class="cl-chart-legend"><span><i class="cl-legend-hold"></i>Hold starting mix</span><span id="cl-legend-full" hidden><i class="cl-legend-full"></i>V2-style 50/50 LP</span><span><i class="cl-legend-range"></i>Your range LP</span></div></div>
               <svg id="cl-chart" viewBox="0 0 720 300" role="img" aria-labelledby="cl-chart-title cl-chart-desc">
                 <title id="cl-chart-title">Concentrated liquidity compared with holding and full-range liquidity</title><desc id="cl-chart-desc">The shaded band is the chosen range. Use the price slider to explore outcomes.</desc>
                 <rect id="cl-chart-band" class="cl-chart-band" y="26" height="220"/>
                 <g class="grid"><path d="M70 26H690 M70 136H690 M70 246H690"/></g>
                 <path id="cl-chart-lower" class="cl-boundary-line"/><path id="cl-chart-upper" class="cl-boundary-line"/><path id="cl-chart-marker" class="scenario-marker"/>
-                <path id="cl-chart-hold" class="cl-hold-line"/><path id="cl-chart-full" class="cl-full-line"/><path id="cl-chart-range" class="cl-range-line"/>
-                <circle id="cl-dot-hold" r="4" class="cl-hold-dot"/><circle id="cl-dot-full" r="4" class="cl-full-dot"/><circle id="cl-dot-range" r="5" class="cl-range-dot"/>
+                <path id="cl-chart-hold" class="cl-hold-line"/><path id="cl-chart-full" class="cl-full-line" hidden/><path id="cl-chart-range" class="cl-range-line"/>
+                <circle id="cl-dot-hold" r="4" class="cl-hold-dot"/><circle id="cl-dot-full" hidden r="4" class="cl-full-dot"/><circle id="cl-dot-range" r="5" class="cl-range-dot"/>
                 <text id="cl-y-high" x="62" y="30" text-anchor="end" class="chart-label"></text><text id="cl-y-mid" x="62" y="140" text-anchor="end" class="chart-label"></text><text x="62" y="250" text-anchor="end" class="chart-label">$0</text>
                 <text id="cl-x-low" x="70" y="273" class="chart-label"></text><text id="cl-x-mid" x="380" y="273" text-anchor="middle" class="chart-label"></text><text id="cl-x-high" x="690" y="273" text-anchor="end" class="chart-label"></text><text x="380" y="296" text-anchor="middle" class="chart-label chart-axis-title">Future ETH price →</text>
               </svg>
               <figcaption id="cl-chart-note" class="fine-print"></figcaption>
             </figure>
-            <div class="cl-metrics"><div><span class="label">Range IL · before fees</span><strong id="cl-il">—</strong><span class="fine-print">vs. holding its starting mix</span></div><div><span class="label">Range fees needed to match holding</span><strong id="cl-break-even">—</strong><button id="cl-match-fees" class="text-button" type="button">Use break-even fees</button></div><div><span class="label">50/50 holding benchmark</span><strong id="cl-full-hold">—</strong><span class="fine-print">for the full-range LP</span></div></div>
+            <div class="cl-metrics"><div><span class="label">Range IL · before fees</span><strong id="cl-il">—</strong><span class="fine-print">vs. holding its starting mix</span></div><div><span class="label">Range fees needed to match holding</span><strong id="cl-break-even">—</strong><button id="cl-match-fees" class="text-button" type="button">Use break-even fees</button></div></div>
             <p class="fine-print">Range status describes the endpoint. Assumed fees may include earlier time inside the range; they are held fixed across this comparison.</p>
           </div>
           <div class="card cl-share-card"><h3>Save or share the range scenario</h3><p class="body-copy">Name this setup and add notes, or share its range and both fee assumptions in a link.</p>
@@ -250,7 +255,7 @@
     </div>
     <div id="inspect-workspace" class="app-workspace" hidden>
     <section id="pool-lab" class="pool-section card" aria-label="Research snapshots">
-      <div class="source-tabs" role="tablist" aria-label="Snapshot sources"><button id="source-pool-tab" type="button" role="tab" aria-selected="true" aria-controls="pool-source" tabindex="0">Pool snapshot</button><button id="source-position-tab" type="button" role="tab" aria-selected="false" aria-controls="position-lab" tabindex="-1">V3 position</button></div>
+      <div class="source-tabs" role="tablist" aria-label="Snapshot sources"><button id="source-pool-tab" type="button" role="tab" aria-selected="true" aria-controls="pool-source" tabindex="0">V2 pool snapshot</button><button id="source-position-tab" type="button" role="tab" aria-selected="false" aria-controls="position-lab" tabindex="-1">V3 position</button></div>
       <div id="pool-source" role="tabpanel" aria-labelledby="source-pool-tab">
       <div class="pool-layout">
         <div>
@@ -452,7 +457,7 @@
           <details class="model-details period-details"><summary>How to read this replay</summary><div class="period-reading"><p><strong>Range status is a checkpoint fact.</strong> An outside sample shows that the position was outside at that block. A return sample is the first recorded in-range checkpoint after an outside sample; it does not identify the exact crossing time.</p><p><strong>Elapsed time and fee income measure different things.</strong> The range-time counter measures active seconds. Fee growth measures tokens earned through swaps. They include activity between samples; swaps within one block can earn fees without adding an active second.</p><p><strong>Earned tokens and their dollar value differ.</strong> Each interval adds the change in cumulative fee credits. Earlier fee tokens remain held, so their dollar value can move with ETH even while no new fees accrue. Fees are not compounded.</p><p><strong>Holding uses the starting principal tokens.</strong> Previously accrued fees and recorded owed balances are excluded from both strategies. Dollar comparisons use each selected pool price and USDC = $1; gas and incentives are excluded. This is a recorded period, not lifetime PnL or a forecast.</p></div></details>
         </div>
         <p class="period-reading"><a class="learn-explore" href="learn.html#applied=fees-over-time">Learn with these recorded cases →</a></p>
-        <div class="period-actions"><button id="period-apply" class="button secondary" type="button" disabled>Explore this checkpoint in Playground →</button><button id="period-export" class="button secondary" type="button" disabled>Export recorded case</button></div>
+        <div class="period-actions"><button id="period-apply" class="button secondary" type="button" disabled>Explore this checkpoint in Experiment →</button><button id="period-export" class="button secondary" type="button" disabled>Export recorded case</button></div>
       </section>
     </div>
     <footer class="site-footer">

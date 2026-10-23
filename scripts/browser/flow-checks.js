@@ -5,7 +5,7 @@ const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFram
 export async function checkExperimentFlow({ evaluate, click, fill, text, navigate, base, call }) {
   await navigate(base + '#experiment');
   await click('nav-inspect');
-  assert.deepEqual(await evaluate("[...document.querySelectorAll('.workspace-links a')].filter(a=>!a.hidden).map(a=>a.textContent)"), ['Pool snapshot', 'V3 position', 'Historical cases', 'Back to experiments']);
+  assert.deepEqual(await evaluate("[...document.querySelectorAll('.workspace-links a')].filter(a=>!a.hidden).map(a=>a.textContent)"), ['V2 pool snapshot', 'V3 position', 'Historical cases', 'Back to experiments']);
   await click('nav-experiment');
   await click('example-start'); await settle(evaluate);
   assert.equal(await text('scenario-lp-value'), '$5,000.00');
@@ -22,14 +22,15 @@ export async function checkExperimentFlow({ evaluate, click, fill, text, navigat
     for (const [fragment, prefix, field, value] of [['lp-lab', 'scenario', 'scenario-future', '4500'], ['range-lab', 'cl', 'cl-future', '2400']]) {
       await navigate(base + '#' + fragment);
       if (prefix === 'cl') await evaluate("document.getElementById('cl-setup-details').open=true");
-      await evaluate(`document.getElementById('${field}').focus();document.getElementById('${field}').scrollIntoView({block:'center'})`);
+      // Align the input below its scroll margin so the summary is in its sticky state.
+      await evaluate(`document.getElementById('${field}').focus();document.getElementById('${field}').scrollIntoView({block:'start'})`);
       await fill(field, value); await settle(evaluate);
       const bounds = await evaluate(`(() => {
         const feedback=document.getElementById('${prefix}-quick-result').getBoundingClientRect();
         const input=document.getElementById('${field}').getBoundingClientRect();
-        return {feedbackTop:feedback.top,feedbackBottom:feedback.bottom,inputTop:input.top,inputBottom:input.bottom,height:innerHeight,tabsBottom:document.querySelector('.lab-switch').getBoundingClientRect().bottom};
+        return {feedbackTop:feedback.top,feedbackBottom:feedback.bottom,inputTop:input.top,inputBottom:input.bottom,height:innerHeight,headerBottom:document.querySelector('.topbar').getBoundingClientRect().bottom};
       })()`);
-      assert.ok(bounds.feedbackTop >= bounds.tabsBottom + 10 && bounds.feedbackBottom <= bounds.height, 'The compact comparison stays visible below the lab tabs.');
+      assert.ok(bounds.feedbackTop >= bounds.headerBottom + 6 && bounds.feedbackBottom <= 220, 'Mobile navigation and feedback leave room for the working inputs: ' + JSON.stringify({width,prefix,...bounds}));
       assert.ok(bounds.inputTop >= bounds.feedbackBottom + 5 && bounds.inputBottom <= bounds.height, 'The summary must not cover the focused price field.');
       assert.ok((await text(prefix + '-quick-values')).includes(await text(prefix === 'cl' ? 'cl-value' : 'scenario-lp-value')), 'Compact and full outcomes agree after an edit.');
       await fill(prefix + '-investment', '');
@@ -42,7 +43,7 @@ export async function checkExperimentFlow({ evaluate, click, fill, text, navigat
       await click(prefix + '-show-results'); await settle(evaluate);
       assert.equal(await evaluate('document.activeElement.id'), prefix + '-results');
       const resultsTop = await evaluate(`document.getElementById('${prefix}-results').getBoundingClientRect().top`);
-      const tabsBottom = await evaluate("document.querySelector('.lab-switch').getBoundingClientRect().bottom");
+      const tabsBottom = await evaluate("document.querySelector('.topbar').getBoundingClientRect().bottom");
       assert.ok(resultsTop >= tabsBottom + 10, 'The full-result handoff clears sticky navigation.');
       if (prefix === 'cl') await evaluate("document.getElementById('cl-comparison-card').open=true");
       const body = prefix === 'cl' ? 'cl-comparisons' : 'scenario-comparisons';

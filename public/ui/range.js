@@ -5,10 +5,10 @@ import { readSharedScenario } from '../lib/link-router.js';
 import { rangeCSV } from '../lib/range-csv.js';
 import { fmt, usd, percent, signedUSD, compactUSD } from '../lib/format.js';
 import { STATE_COPY, rangePriceLabels, assetAmounts } from '../lib/range-presentation.js';
-import { rangeCardBlob } from '../lib/range-card.js?v=1.16.0';
+import { rangeCardBlob } from '../lib/range-card.js?v=1.16.1';
 import { downloadBlob } from '../lib/download.js';
 import { validateExperimentDraft } from '../data/saved-experiments.js';
-import { experimentOriginLabel } from '../lib/saved-experiments.js?v=1.16.0';
+import { experimentOriginLabel } from '../lib/saved-experiments.js?v=1.16.1';
 
 export function initRangeLab({ navigation }) {
   const { selectLab } = navigation;
@@ -75,6 +75,8 @@ export function initRangeLab({ navigation }) {
     $('cl-explorer-high').textContent = compactUSD(domain.high);
   }
   function renderChart(result) {
+    const includeReference = $('cl-reference').open;
+    for (const id of ['cl-chart-full', 'cl-dot-full', 'cl-legend-full']) $(id).toggleAttribute('hidden', !includeReference);
     const { low, high } = domain;
     const prices = [...new Set([
       ...Array.from({ length: 110 }, (_, i) => low + (high - low) * i / 109),
@@ -82,7 +84,7 @@ export function initRangeLab({ navigation }) {
     ])].filter((price) => price >= low && price <= high).sort((a, b) => a - b);
     const rows = prices.map((futurePrice) => calculateRange({ ...result, futurePrice }));
     const top = rows.at(-1);
-    const yMax = Math.max(top.holdValue, top.fullRange.lpValue, top.lpValue) * 1.12;
+    const yMax = Math.max(top.holdValue, includeReference ? top.fullRange.lpValue : 0, top.lpValue) * 1.12;
     const x = (price) => 70 + (price - low) / (high - low) * 620;
     const y = (value) => 246 - value / yMax * 220;
     const path = (read) => rows.map((row, i) => (i ? 'L' : 'M') + x(row.futurePrice) + ',' + y(read(row))).join(' ');
@@ -105,8 +107,8 @@ export function initRangeLab({ navigation }) {
     $('cl-x-low').textContent = compactUSD(low);
     $('cl-x-mid').textContent = compactUSD((low + high) / 2);
     $('cl-x-high').textContent = compactUSD(high);
-    $('cl-chart-title').textContent = 'At ' + usd(result.futurePrice) + ', holding the range’s starting tokens is ' + usd(result.holdValue) + ', full-range 50/50 LP is ' + usd(result.fullRange.lpValue) + ', and range LP is ' + usd(result.lpValue) + '.';
-    $('cl-chart-note').textContent = 'Shaded band = your chosen range. Assumed cash fees stay fixed: range ' + usd(result.fees) + '; full-range ' + usd(result.fullRangeFees) + '.';
+    $('cl-chart-title').textContent = 'At ' + usd(result.futurePrice) + ', holding the range’s starting tokens is ' + usd(result.holdValue) + ' and range LP is ' + usd(result.lpValue) + (includeReference ? '. The V2-style 50/50 LP is ' + usd(result.fullRange.lpValue) : '') + '.';
+    $('cl-chart-note').textContent = 'Shaded band = your chosen range. Assumed cash fees stay fixed: range ' + usd(result.fees) + (includeReference ? '; V2-style reference ' + usd(result.fullRangeFees) : '') + '.';
   }
   function renderComparisons(result) {
     $('cl-comparisons').replaceChildren();
@@ -212,6 +214,7 @@ export function initRangeLab({ navigation }) {
     $('cl-results').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   });
   $('cl-explorer').addEventListener('input', () => setFuturePrice(Number($('cl-explorer').value), false));
+  $('cl-reference').addEventListener('toggle', () => { if (current) renderChart(current); });
   $('cl-chart').addEventListener('click', (event) => {
     if (!current || !domain) return;
     const rect = $('cl-chart').getBoundingClientRect();

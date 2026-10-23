@@ -1,10 +1,10 @@
-import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js?v=1.16.0';
-import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js?v=1.16.0';
-import { appliedApplication, checkAppliedUnderstanding } from '../lib/applied-applications.js?v=1.16.0';
-import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.16.0';
-import { learningChoices, learningMetric, learningPitfall } from '../lib/learning-elements.js?v=1.16.0';
-import { POOL_PITFALLS } from '../learning/pool-pitfalls.js?v=1.16.0';
-import { readAppliedProgress, saveAppliedProgress } from '../data/applied-progress.js?v=1.16.0';
+import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js?v=1.16.1';
+import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js?v=1.16.1';
+import { appliedApplication, checkAppliedUnderstanding } from '../lib/applied-applications.js?v=1.16.1';
+import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.16.1';
+import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback } from '../lib/learning-elements.js?v=1.16.1';
+import { POOL_PITFALLS } from '../learning/pool-pitfalls.js?v=1.16.1';
+import { readAppliedProgress, saveAppliedProgress } from '../data/applied-progress.js?v=1.16.1';
 import { createAppliedRecordLoader } from '../data/applied-records.js';
 import { REPLAY_CASES } from '../data/replay-cases.js';
 import { periodPointView, periodIntervalView, periodMilestones, periodChartRange, periodDuration } from '../lib/period-presentation.js';
@@ -25,6 +25,7 @@ export function initAppliedLearning() {
   function focusTitle(id) { $(id).focus({ preventScroll: true }); $(id).scrollIntoView({ block: 'start', behavior: 'instant' }); }
   function updateNavigation() {
     $('applied-progress-count').textContent = progress.completed.length + ' of 3 checked';
+    if (appliedLessonFromHash(location.hash)) learningChapter('Recorded cases', progress.completed.length, 3);
     for (const link of document.querySelectorAll('[data-applied-id]')) {
       const active = link.dataset.appliedId === appliedLessonFromHash(location.hash);
       const complete = progress.completed.includes(link.dataset.appliedId);
@@ -119,8 +120,10 @@ export function initAppliedLearning() {
     if (!period || !draft.prediction) return;
     draft.revealed = true;
     const correct = draft.prediction === question.prediction;
-    $('applied-prediction-feedback').textContent = correct ? 'Your prediction matches the recorded result at the marked question checkpoint or interval.'
-      : 'At the marked question checkpoint or interval: ' + lesson.predictions.find(([id]) => id === question.prediction)[1] + '. Compare that with your prediction.';
+    const finding = lesson.id === 'fees-over-time' ? 'Fees accrued during this period without being collected.'
+      : lesson.id === 'between-samples' ? 'The position was active between the two outside-range samples in the question.'
+      : 'At the final checkpoint, ' + (question.prediction === 'lp' ? 'the LP including period fees' : 'holding the starting tokens') + ' has the higher value before costs.';
+    $('applied-prediction-feedback').textContent = (correct ? 'Your prediction matches. ' : 'Compare this with your prediction: ') + finding;
     $('applied-observe').hidden = false; $('applied-assessment').hidden = false;
     $('applied-reveal').textContent = 'Revisit the recorded result ↓';
     renderCheckpoint(); persist();
@@ -141,7 +144,7 @@ export function initAppliedLearning() {
     $('applied-next').textContent = next ? 'Next: ' + next.short + ' →' : 'Explore the full recorded case →';
     $('applied-reflection').hidden = !(result.passed && !next);
     if (result.passed && !progress.completed.includes(lesson.id)) progress.completed.push(lesson.id);
-    if (save) persist(); else updateNavigation();
+    if (save) { persist(); focusLearningFeedback('applied'); } else updateNavigation();
   }
   async function activate(focus = false) {
     const token = ++revision, id = appliedLessonFromHash(location.hash);

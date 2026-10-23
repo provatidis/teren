@@ -32,3 +32,11 @@ html{scroll-padding-top:calc(var(--header-height) + 12px)}
 
 .lab-group .scenario-section,#cl-results{scroll-margin-top:calc(var(--lab-tabs-height) + 24px)}
 .scenario-section :is(input,select,button,summary){scroll-margin-top:calc(var(--lab-tabs-height) + 24px)}
+
+/* Scroll the wordmark out of the way without changing the document's height. */
+@media(max-width:750px){
+  .topbar{top:-56px}
+  .topbar:has(.brand:focus-visible){top:0}
+  .lab-switch{position:static;box-shadow:none}
+}
+@media(max-width:360px){.topbar{top:-50px}}

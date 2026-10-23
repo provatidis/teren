@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 const settle=evaluate=>evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
 const wait=(evaluate,condition)=>evaluate('new Promise((resolve,reject)=>{const deadline=Date.now()+10000;const check=()=>{if('+condition+')resolve();else if(Date.now()>deadline)reject(new Error("Navigation check timed out"));else setTimeout(check,20)};check()})');
 async function headerVisible(evaluate){
- const geometry=await evaluate("(()=>{const r=document.querySelector('.topbar').getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height,viewport:innerHeight,overflow:document.documentElement.scrollWidth>innerWidth}})()");
- assert.ok(geometry.top>=-1&&geometry.bottom<=geometry.viewport,'Primary navigation stays visible.');assert.equal(geometry.overflow,false);return geometry;
+ const geometry=await evaluate("(()=>{const r=document.querySelector('.topbar').getBoundingClientRect(),n=document.querySelector('.product-nav').getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height,navTop:n.top,navBottom:n.bottom,viewport:innerHeight,overflow:document.documentElement.scrollWidth>innerWidth}})()");
+ assert.ok(geometry.navTop>=-1&&geometry.navBottom<=geometry.viewport,'Primary navigation stays visible.');assert.equal(geometry.overflow,false);return geometry;
 }
 async function targetClear(evaluate,id){
  await settle(evaluate);const header=await headerVisible(evaluate);
@@ -57,7 +57,7 @@ export async function checkMobileNavigation({evaluate,click,navigate,base,call})
  for(const [width,height] of [[390,844],[320,740]]){
    await call('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:true});
    await navigate(base+'#range-lab');await targetClear(evaluate,'range-lab');
-   const header=await headerVisible(evaluate);assert.ok(await evaluate("document.querySelector('.lab-switch').getBoundingClientRect().top")>=header.bottom+10);
+   const header=await headerVisible(evaluate);assert.ok(header.bottom<=70,'Scrolled mobile navigation is compact.');assert.equal(await evaluate("getComputedStyle(document.querySelector('.lab-switch')).position"),'static');
    await click('nav-inspect');await settle(evaluate);assert.ok(await evaluate('scrollY<=1'));
    await click('nav-experiment');await settle(evaluate);assert.ok(await evaluate('scrollY<=1'));
    await navigate(base+'learn.html#lesson=range-boundaries');await click('learn-resume');await targetClear(evaluate,'learn-lesson-title');

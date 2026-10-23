@@ -69,7 +69,13 @@ export async function checkMobileManagementLearning({evaluate,click,text,navigat
     for(let reset=0;reset<3&&(await text('manage-variation-label'))!=='Situation 1 of 3';reset++)await click('manage-variation');
     await evaluate("document.querySelector('input[name=manage-prediction][value=wide]').click()");await click('manage-reveal');
     await evaluate("document.querySelector('input[name=manage-reason][value=bounds]').click();document.querySelector('input[name=manage-application][value=unknown]').click()");await click('manage-check');
-    assert.equal(await text('manage-feedback-title'),'Both answers are correct.');assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
+    assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
+    assert.equal(await text('learn-current-chapter'), 'Range choices');
+    assert.equal(await text('learn-current-progress'), await text('manage-progress-count'));
+    assert.equal(await evaluate('document.activeElement.id'), 'manage-feedback');
+    await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+    assert.ok(await evaluate("(()=>{const r=document.getElementById('manage-next').getBoundingClientRect();return r.top>=document.querySelector('.topbar').getBoundingClientRect().bottom&&r.bottom<=innerHeight})()"), 'The next exercise is visible with its feedback.');
+assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
     await click('manage-topics');await evaluate("document.querySelector('[data-management-id=fee-tiers]').click()");
     assert.equal(await evaluate("document.getElementById('learn-course').open"),false);assert.equal(await text('manage-title'),'A higher fee rate is not a higher return');
     assert.equal(await evaluate("document.getElementById('manage-title').getBoundingClientRect().top>=document.querySelector('.topbar').getBoundingClientRect().bottom"),true);
