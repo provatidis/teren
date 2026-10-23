@@ -120,7 +120,7 @@ export function initAppliedLearning() {
     if (!period || !draft.prediction) return;
     draft.revealed = true;
     const correct = draft.prediction === question.prediction;
-    const finding = lesson.id === 'fees-over-time' ? 'Fees accrued during this period before they were collected.'
+    const finding = lesson.id === 'fees-over-time' ? 'Fees accrued during this period without being collected.'
       : lesson.id === 'between-samples' ? 'The position was active between the two outside-range samples in the question.'
       : 'At the final checkpoint, ' + (question.prediction === 'lp' ? 'the LP including period fees' : 'holding the starting tokens') + ' has the higher value before costs.';
     $('applied-prediction-feedback').textContent = (correct ? 'Your prediction matches. ' : 'Compare this with your prediction: ') + finding;

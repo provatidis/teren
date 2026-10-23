@@ -48,7 +48,7 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   await choose('applied-prediction','lp'); await click('applied-reveal'); await fill('applied-checkpoint','8');
   assert.match(await text('applied-metrics'),/−\$0.01/);
   assert.match(await text('applied-explanation'),/At the final question checkpoint[\s\S]*Other checkpoints can have a different result/);
-  assert.match(await text('applied-prediction-feedback'),/marked question checkpoint or interval/);
+  assert.match(await text('applied-prediction-feedback'),/At the final checkpoint.*higher value before costs/);
   await choose('applied-application','hold'); await choose('applied-reason','income'); await click('applied-check');
   assert.match(await text('applied-feedback-copy'),/Fees can be smaller/);
   assert.equal(await text('applied-feedback-title'),'Review your answers.');
