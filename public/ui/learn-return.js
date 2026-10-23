@@ -1,6 +1,6 @@
 import { readLearnReturn, saveLearnReturn, clearLearnReturn } from '../data/learn-return-drafts.js';
 
-// A temporary per-tab handoff, captured only when leaving for Learn.
+// A temporary per-tab handoff, captured when leaving for Learn or another topic.
 export function initLearnReturn({ fullRangeLab, rangeLab, navigation }) {
   const labs = { 'cp50-v1': fullRangeLab, 'cl-range-v1': rangeLab };
   const stored = readLearnReturn();
@@ -16,7 +16,8 @@ export function initLearnReturn({ fullRangeLab, rangeLab, navigation }) {
     const link = event.target.closest('a');
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank') return;
     const url = new URL(link.href), learn = new URL('learn.html', location.href);
-    if (url.origin !== learn.origin || url.pathname !== learn.pathname) return;
+    const lending = new URL('lending.html', location.href);
+    if (url.origin !== learn.origin || ![learn.pathname, lending.pathname].includes(url.pathname)) return;
     const drafts = Object.values(labs).map(lab => lab.getExperimentDraft()).filter(Boolean);
     if (drafts.length) {
       const selected = navigation.getSelectedLab() === 'range' ? 'cl-range-v1' : 'cp50-v1';

@@ -1,0 +1,86 @@
+.topic-switch{display:flex;align-items:center;gap:8px;margin:0 0 24px;font-size:14px}
+.topic-switch>span{color:var(--muted);margin-right:8px}
+.topic-switch a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 18px;border:1px solid transparent;border-radius:24px;color:var(--muted)}
+.topic-switch a[aria-current=page]{color:var(--text);border-color:var(--border-strong);background:var(--surface)}
+.topic-switch a:hover{color:var(--accent)}
+.loan-model-label{font-size:14px;line-height:1.8;color:var(--muted);margin:0 0 24px}
+.loan-layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:24px;align-items:start}
+.loan-analysis{display:grid;gap:20px;min-width:0}
+.loan-setup{padding:24px}
+.loan-setup>summary{cursor:pointer;line-height:1.8;min-height:44px}
+.loan-setup>summary strong{font-size:18px}
+.loan-setup>summary span{display:block;color:var(--muted);font-size:13px;margin:6px 0 0}
+.loan-fields{display:grid;gap:18px;margin-top:20px}
+.loan-fields .body-copy{margin:0}
+.loan-fields .scenario-field{margin:0}
+.loan-checkbox{display:flex;align-items:center;gap:12px;font-size:14px;line-height:1.6;min-height:44px}
+.loan-checkbox input{width:20px;height:20px;flex-shrink:0;accent-color:var(--accent)}
+.loan-assumptions{padding-top:18px;border-top:1px solid var(--border)}
+.loan-assumptions summary,.loan-interest summary{font-size:14px;color:var(--accent);cursor:pointer;min-height:44px;line-height:1.8}
+.loan-assumptions .scenario-field{margin-top:18px}
+.loan-conditions,.loan-risk,.loan-balances,.loan-responses,.loan-sharing{padding:26px}
+.loan-analysis h2{font-size:20px;letter-spacing:-.5px;line-height:1.4;margin:0 0 16px}
+.loan-conditions .card-heading h2{margin:0}
+.loan-condition-fields{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:20px}
+.loan-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.loan-presets button{min-height:44px;padding:8px;font-size:13px}
+#loan-slider{width:100%;accent-color:var(--accent);margin:10px 0 12px;min-height:36px}
+#loan-outcomes{display:grid;gap:20px}
+.loan-risk{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 24px;border-color:var(--accent);background:var(--highlight)}
+.loan-risk .eyebrow{font-size:12px;margin-bottom:10px}
+.loan-risk h2{margin-bottom:10px}
+.loan-risk .body-copy{margin:0;font-size:14px}
+.loan-health{font-size:42px;font-variant-numeric:tabular-nums;letter-spacing:-1px;align-self:start;color:var(--accent);white-space:nowrap}
+.loan-risk[data-state=eligible],.loan-risk[data-state=boundary]{border-color:#e5bd85;background:#392f28}
+.loan-risk[data-state=eligible] .loan-health,.loan-risk[data-state=boundary] .loan-health{color:#e5bd85}
+.loan-boundary,.loan-risk>.fine-print{grid-column:1/-1;font-size:13px;line-height:1.8;margin:12px 0 0}
+.loan-balance-list{margin:0}
+.loan-balance-list>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 20px;padding:18px 0;border-top:1px solid var(--border)}
+.loan-balance-list dt{font-size:15px;line-height:1.6}
+.loan-balance-list dd{margin:0;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.loan-balance-list .loan-balance-note{grid-column:1/-1;margin:0;font-size:13px;font-weight:400;white-space:normal;color:var(--muted);line-height:1.7}
+.loan-net dd{color:var(--accent)}
+.loan-interest{border-top:1px solid var(--border);padding-top:14px}
+.loan-interest dl{font-size:14px;line-height:1.8;margin:8px 0 0}
+.loan-interest dd{margin:0 0 16px;color:var(--muted)}
+.loan-responses>.scenario-field{max-width:320px;margin:22px 0}
+.loan-response-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.loan-response-grid>div{padding:18px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.loan-response-grid h3{font-size:15px;line-height:1.5;margin:0 0 16px}
+.loan-response-grid span{font-size:12px;color:var(--muted)}
+.loan-response-grid strong{display:block;font-size:28px;font-variant-numeric:tabular-nums;margin:8px 0;color:var(--accent)}
+.loan-response-grid p{font-size:12px;line-height:1.7;margin:6px 0;color:var(--muted)}
+.loan-sharing{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.loan-sharing .button{width:auto;min-height:44px}
+.loan-sharing input,.loan-sharing p{flex-basis:100%;min-width:0}
+.loan-method{margin-top:24px;padding:24px}
+.loan-method summary{font-size:16px;min-height:44px;cursor:pointer}
+.loan-method p{font-size:14px;line-height:1.9;color:var(--muted);max-width:900px}
+.loan-method a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.lending-lesson-list{list-style:none;padding:0;margin:18px -6px 0}
+.lending-lesson-list a{display:flex;align-items:center;gap:12px;padding:14px 8px;border:1px solid transparent;border-radius:10px;min-height:48px}
+.lending-lesson-list a[aria-current=step]{border-color:var(--accent);background:var(--highlight)}
+.lending-lesson-list .learn-step-copy strong{font-size:14px;line-height:1.6}
+.lending-lesson-list .learn-step-state{font-size:12px}
+.lending-lesson h2{font-size:32px;line-height:1.3;letter-spacing:-1px;margin:16px 0}
+.lending-lesson .learn-setup{font-size:14px;line-height:1.9}
+.lending-lesson .learn-metrics{grid-template-columns:1fr}
+.lending-lesson .learn-metric{border-bottom:1px solid var(--border);padding:14px 0}
+.lending-lesson .learn-metric strong{font-size:24px;overflow-wrap:anywhere}
+.lending-lesson .learn-metric .label,.lending-lesson .learn-metric-note{font-size:14px}
+.lending-lesson :is(button,summary),#lend-title,#lend-observe-title{scroll-margin-top:24px}
+#lend-topics{margin-left:auto}
+@media(min-width:751px){#lend-topics{display:none}}
+@media(max-width:1000px){.loan-layout{grid-template-columns:280px minmax(0,1fr)}.loan-response-grid{grid-template-columns:1fr}.loan-health{font-size:34px}}
+@media(max-width:750px){
+ .topic-switch{margin-bottom:18px;font-size:13px}.topic-switch a{padding:6px 16px}
+ .loan-layout{grid-template-columns:1fr;gap:16px}.loan-model-label{font-size:13px}
+ .loan-setup,.loan-conditions,.loan-risk,.loan-balances,.loan-responses,.loan-sharing,.loan-method{padding:20px}
+ .loan-condition-fields{grid-template-columns:1fr}.loan-condition-fields .scenario-field{margin:0}
+ .loan-risk{gap:16px;grid-template-columns:1fr}.loan-health{grid-row:2;font-size:38px}
+ .loan-balance-list>div{grid-template-columns:1fr;gap:6px}.loan-balance-list dd{font-size:24px}
+ .loan-balance-list .loan-balance-note{grid-column:auto}.loan-response-grid{grid-template-columns:1fr}
+ .loan-presets{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .lending-lesson h2{font-size:28px}.lending-lesson .learn-lesson-heading{flex-wrap:wrap}
+ .lending-lesson .learn-metric{grid-template-columns:1fr}.lending-lesson .learn-metric strong{text-align:left;font-size:22px}
+}

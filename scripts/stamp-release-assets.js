@@ -5,7 +5,7 @@ const { version } = JSON.parse(await readFile(new URL('../package.json', import.
 if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('Use a numeric release version.');
 const stamp = path => path.split('?')[0] + '?v=' + version;
 
-for (const name of ['main.js', 'learn-main.js']) {
+for (const name of ['main.js', 'learn-main.js', 'lending-main.js']) {
   const file = new URL(name, root);
   const source = await readFile(file, 'utf8');
   await writeFile(file, source.replace(/(from ['"])(\.\/ui\/[^'"]+)(['"])/g, (_, before, path, after) => before + stamp(path) + after));
@@ -13,6 +13,13 @@ for (const name of ['main.js', 'learn-main.js']) {
 // Teaching text and grading must update together. These modules are pure or editorial;
 // protocol adapters and RPC classes retain their shared, unversioned module identity.
 const teaching = {
+  'lending-main.js': ['./lib/lending-links.js'],
+  'ui/lending.js': ['../models/collateral-loan-v1.js', '../data/lending-state.js', '../lib/lending-links.js', '../lib/lending-presentation.js'],
+  'ui/lending-learning.js': ['../learning/lending-essentials.js', '../models/lending-lessons.js', '../data/lending-state.js', '../lib/lending-links.js', '../lib/lending-presentation.js', '../lib/learning-choices.js', '../lib/learning-elements.js'],
+  'models/lending-lessons.js': ['./collateral-loan-v1.js'],
+  'data/lending-state.js': ['../models/collateral-loan-v1.js'],
+  'lib/lending-links.js': ['../models/collateral-loan-v1.js'],
+
   'ui/full-range.js': ['../lib/result-card.js', '../lib/saved-experiments.js'],
   'ui/range.js': ['../lib/range-card.js', '../lib/saved-experiments.js'],
   'lib/result-card.js': ['./brand.js'],
@@ -36,12 +43,12 @@ for (const [name, imports] of Object.entries(teaching)) {
   await writeFile(file, source.replace(/(from ['"])([^'"]+)(['"])/g, (match, before, path, after) =>
     imports.includes(path.split('?')[0]) ? before + stamp(path) + after : match));
 }
-for (const name of ['index.html', 'learn.html', 'about.html', 'methods.html', '404.html']) {
+for (const name of ['index.html', 'learn.html', 'about.html', 'methods.html', 'lending.html', '404.html']) {
   const file = new URL(name, root);
   const source = await readFile(file, 'utf8');
   await writeFile(file, source.replace(/((?:href|src)=["])([^"]+)(["])/g, (match, before, path, after) => {
     const plain = path.split('?')[0];
-    return /(?:\.css|(?:^|\/)(?:learn-)?main\.js)$/.test(plain) ? before + stamp(path) + after : match;
+    return /(?:\.css|(?:^|\/)(?:(?:learn|lending)-)?main\.js)$/.test(plain) ? before + stamp(path) + after : match;
   }));
 }
 const styles = [new URL('styles.css', root), ...(await readdir(new URL('styles/', root))).filter(name => name.endsWith('.css')).map(name => new URL('styles/' + name, root))];

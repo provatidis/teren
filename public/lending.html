@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://ethereum-rpc.publicnode.com https://eth.drpc.org; base-uri 'none'; object-src 'none'; form-action 'self'">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101c27">
+    <meta name="description" content="Explore collateral, borrowing, interest and liquidation boundaries with a hypothetical lending lab and four short lessons.">
+    <title>Lending lab · Teren</title>
+    <meta name="application-name" content="Teren">
+    <meta name="apple-mobile-web-app-title" content="Teren">
+    <meta name="color-scheme" content="dark">
+    <link rel="canonical" href="https://teren.sh/lending.html">
+    <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" sizes="any">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180">
+    <link rel="manifest" href="site.webmanifest">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Teren">
+    <meta property="og:title" content="Teren · Learn, experiment, inspect">
+    <meta property="og:description" content="Explore collateral, borrowing, interest and liquidation boundaries with a hypothetical lending lab and four short lessons.">
+    <meta property="og:url" content="https://teren.sh/lending.html">
+    <meta property="og:image" content="https://teren.sh/assets/social-preview.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Teren. Learn and experiment with DeFi, with a liquidity range scenario.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Teren · Learn, experiment, inspect">
+    <meta name="twitter:description" content="Explore collateral, borrowing, interest and liquidation boundaries with a hypothetical lending lab and four short lessons.">
+    <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
+    <meta name="twitter:image:alt" content="Teren. Learn and experiment with DeFi, with a liquidity range scenario.">
+    <link rel="stylesheet" href="styles.css?v=1.17.0">
+    <script type="module" src="lending-main.js?v=1.17.0"></script>
+  </head>
+  <body class="lending-page">
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="topbar">
+      <a class="brand" href="./#experiment" aria-label="Teren home"><img class="brand-logo" src="assets/teren-logo.svg" width="145" height="40" alt=""></a>
+      <nav class="site-nav" aria-label="Teren">
+        <div class="product-nav"><a id="lending-nav-experiment" href="#experiment" aria-current="page">Experiment</a><a id="lending-nav-learn" href="#lesson=supply">Learn</a><a href="./#inspect" aria-label="Inspect liquidity records">Inspect</a>
+        </div>
+      </nav>
+    </header>
+    <main id="main-content" tabindex="-1">
+      <nav class="topic-switch" aria-label="DeFi topic"><span>Explore</span><a id="topic-liquidity" href="./#experiment">Liquidity</a><a href="#experiment" aria-current="page">Lending</a>
+      </nav>
+      <noscript>
+        <div class="notice">
+          <p>Enable JavaScript to use the lending lab and lessons. <a href="methods.html">Read the methods →</a></p>
+        </div>
+      </noscript>
+      <section class="intro">
+        <div>
+          <p id="lending-evidence" class="eyebrow evidence-badge">HYPOTHETICAL MODEL · LENDING</p>
+          <h1 id="lending-page-title" tabindex="-1">Understand a collateralized loan</h1>
+          <p id="lending-page-subtitle" class="subtitle">Supply ETH, borrow USDC and see how prices, interest and time change the position.</p>
+        </div>
+        <a id="lending-start" class="button secondary" href="#lesson=supply">Learn from the beginning →</a>
+      </section>
+      <div id="lending-route-note" class="notice" role="status" hidden>
+        <p>That lending lesson link could not be opened. <a href="#lesson=supply">Open the first lesson →</a></p>
+      </div>
+      <section id="lending-experiment" aria-label="Lending experiment">
+        <p class="loan-model-label">Aave v3-style collateral rules · Illustrative ETH/USDC inputs · USDC = $1</p>
+        <div id="loan-route-note" class="notice" role="status" hidden>
+          <p>This experiment link is incomplete or unsupported. Your current working setup is shown.</p>
+        </div>
+        <div class="loan-layout">
+          <div>
+            <details id="loan-setup" class="card loan-setup" open>
+              <summary><strong>Your starting loan</strong><span id="loan-setup-caption">5 ETH supplied · 5,000 USDC borrowed</span></summary>
+              <div class="loan-fields">
+                <p class="body-copy">ETH represents supplied WETH. Set the starting balances before changing prices or advancing time.</p>
+                <div class="scenario-field">
+                  <label for="loan-collateral">Supplied amount <span>ETH</span></label>
+                  <input id="loan-collateral" type="number" min="1e-06" max="1000000" step="any" value="5" aria-describedby="loan-collateral-error">
+                  <p id="loan-collateral-error" class="field-error" hidden></p>
+                </div>
+                <div class="scenario-field">
+                  <label for="loan-start">Starting ETH price <span>USD</span></label>
+                  <input id="loan-start" type="number" min="0.01" max="10000000" step="any" value="2000" aria-describedby="loan-start-error">
+                  <p id="loan-start-error" class="field-error" hidden></p>
+                </div>
+                <label class="loan-checkbox"><input id="loan-collateralEnabled" type="checkbox" checked> Use this supply as collateral</label>
+                <div class="scenario-field">
+                  <label for="loan-borrow">Borrowed amount <span>USDC</span></label>
+                  <input id="loan-borrow" type="number" min="0" max="1000000000" step="any" value="5000" aria-describedby="loan-borrow-error">
+                  <p id="loan-borrow-error" class="field-error" hidden></p>
+                </div>
+                <p id="loan-start-limit" class="fine-print"></p>
+                <details class="loan-assumptions">
+                  <summary>Rates and collateral rules</summary>
+                  <p class="fine-print">Teaching assumptions, not current market quotes. Both rates use fixed simple interest over a 365-day year.</p>
+                  <div class="scenario-field">
+                    <label for="loan-supplyAPR">Supply APR <span>% · assumed</span></label>
+                    <input id="loan-supplyAPR" type="number" min="0" max="50" step="any" value="2" aria-describedby="loan-supplyAPR-error">
+                    <p id="loan-supplyAPR-error" class="field-error" hidden></p>
+                  </div>
+                  <div class="scenario-field">
+                    <label for="loan-borrowAPR">Borrow APR <span>% · assumed</span></label>
+                    <input id="loan-borrowAPR" type="number" min="0" max="100" step="any" value="5" aria-describedby="loan-borrowAPR-error">
+                    <p id="loan-borrowAPR-error" class="field-error" hidden></p>
+                  </div>
+                  <div class="scenario-field">
+                    <label for="loan-maxLTV">Maximum starting LTV <span>%</span></label>
+                    <input id="loan-maxLTV" type="number" min="1" max="95" step="any" value="75" aria-describedby="loan-maxLTV-error">
+                    <p id="loan-maxLTV-error" class="field-error" hidden></p>
+                  </div>
+                  <div class="scenario-field">
+                    <label for="loan-threshold">Liquidation threshold <span>%</span></label>
+                    <input id="loan-threshold" type="number" min="1" max="99" step="any" value="80" aria-describedby="loan-threshold-error">
+                    <p id="loan-threshold-error" class="field-error" hidden></p>
+                  </div>
+                  <p class="fine-print">Maximum LTV (loan-to-value) limits a new loan as a share of collateral value. The liquidation threshold governs an existing loan.</p>
+                </details>
+              </div>
+            </details>
+          </div>
+          <div class="loan-analysis">
+            <section class="card loan-conditions" aria-labelledby="loan-conditions-title">
+              <div class="card-heading">
+                <h2 id="loan-conditions-title">Change the conditions</h2>
+                <span id="loan-quick-health" class="small-badge" role="status">Health factor 1.60</span>
+              </div>
+              <div class="loan-condition-fields">
+                <div class="scenario-field">
+                  <label for="loan-future">Later ETH valuation price <span>USD</span></label>
+                  <input id="loan-future" type="number" min="0.01" max="10000000" step="any" value="2000" aria-describedby="loan-future-error">
+                  <p id="loan-future-error" class="field-error" hidden></p>
+                </div>
+                <div class="scenario-field">
+                  <label for="loan-days">Time elapsed <span>days</span></label>
+                  <input id="loan-days" type="number" min="0" max="1825" step="any" value="0" aria-describedby="loan-days-error">
+                  <p id="loan-days-error" class="field-error" hidden></p>
+                </div>
+              </div>
+              <label class="sr-only" for="loan-slider">Explore the ETH valuation price</label>
+              <input id="loan-slider" type="range" min="500" max="3500" step="any" value="2000">
+              <div class="scenario-presets loan-presets" aria-label="ETH price changes">
+                <button type="button" data-loan-price="0.5" aria-pressed="false">−50%</button>
+                <button type="button" data-loan-price="0.75" aria-pressed="false">−25%</button>
+                <button type="button" data-loan-price="1" aria-pressed="true">Unchanged</button>
+                <button type="button" data-loan-price="1.25" aria-pressed="false">+25%</button>
+              </div>
+            </section>
+            <div id="loan-invalid" class="notice" role="status" hidden>
+              <p>Check the highlighted fields to see the result. If needed, open <strong>Your starting loan</strong> above.</p>
+            </div>
+            <div id="loan-outcomes">
+              <section id="loan-risk" class="card loan-risk" data-state="above" aria-labelledby="loan-state">
+                <div>
+                  <p class="eyebrow">HEALTH FACTOR</p>
+                  <h2 id="loan-state">Above the liquidation boundary</h2>
+                  <p id="loan-health-note" class="body-copy"></p>
+                </div>
+                <strong id="loan-health" class="loan-health">1.60</strong>
+                <p id="loan-boundary" class="loan-boundary"></p>
+                <p id="loan-initial-health" class="fine-print"></p>
+              </section>
+              <section class="card loan-balances" aria-labelledby="loan-balances-title">
+                <h2 id="loan-balances-title">Keep both sides in view</h2>
+                <dl class="loan-balance-list">
+                  <div>
+                    <dt>Supplied ETH</dt>
+                    <dd id="loan-collateral-value"></dd>
+                    <dd id="loan-collateral-tokens" class="loan-balance-note"></dd>
+                  </div>
+                  <div>
+                    <dt>Borrowed USDC in your wallet</dt>
+                    <dd id="loan-cash-value"></dd>
+                    <dd class="loan-balance-note">Kept unchanged; earns no interest here</dd>
+                  </div>
+                  <div>
+                    <dt>Subtract the debt</dt>
+                    <dd id="loan-debt-value"></dd>
+                    <dd id="loan-interest-debt" class="loan-balance-note"></dd>
+                  </div>
+                  <div class="loan-net">
+                    <dt>Assets minus debt</dt>
+                    <dd id="loan-net-assets"></dd>
+                    <dd id="loan-net-note" class="loan-balance-note"></dd>
+                  </div>
+                </dl>
+                <details class="loan-interest">
+                  <summary>Where interest appears</summary>
+                  <dl>
+                    <dt>Added to the supplied balance</dt>
+                    <dd id="loan-supply-interest"></dd>
+                    <dt>Added to debt</dt>
+                    <dd id="loan-borrow-interest"></dd>
+                  </dl>
+                </details>
+              </section>
+            </div>
+            <section class="card loan-responses" aria-labelledby="loan-responses-title">
+              <h2 id="loan-responses-title">Repay or add collateral?</h2>
+              <p class="body-copy">Compare an immediate change at the chosen price, using the same additional money from outside this setup.</p>
+              <div class="scenario-field">
+                <label for="loan-budget">Additional budget for either response <span>USD</span></label>
+                <input id="loan-budget" type="number" min="0" max="1000000000" step="any" value="500" aria-describedby="loan-budget-error">
+                <p id="loan-budget-error" class="field-error" hidden></p>
+              </div>
+              <div id="loan-response-results" class="loan-response-grid">
+                <div>
+                  <h3>Leave unchanged</h3>
+                  <span>Health factor</span><strong id="loan-response-unchanged"></strong>
+                  <p id="loan-response-unchanged-state"></p>
+                  <p id="loan-response-unchanged-debt"></p>
+                  <p>No additional funds used</p>
+                </div>
+                <div>
+                  <h3>Repay USDC debt</h3>
+                  <span>Health factor</span><strong id="loan-response-repay"></strong>
+                  <p id="loan-response-repay-state"></p>
+                  <p id="loan-response-repay-debt"></p>
+                  <p id="loan-repay-note"></p>
+                </div>
+                <div>
+                  <h3>Add ETH collateral</h3>
+                  <span>Health factor</span><strong id="loan-response-add"></strong>
+                  <p id="loan-response-add-state"></p>
+                  <p id="loan-response-add-debt"></p>
+                  <p id="loan-add-note"></p>
+                </div>
+              </div>
+              <p class="fine-print">Immediate hypothetical changes before any liquidation. Gas, swap costs and execution delays are excluded. A response is not guaranteed to execute before liquidation.</p>
+            </section>
+            <section class="card loan-sharing" aria-label="Keep this lending experiment">
+              <button id="loan-share" class="button secondary" type="button">Copy experiment link</button>
+              <button id="loan-reset" class="text-button" type="button">Reset loan</button>
+              <label class="sr-only" for="loan-share-url">Experiment link</label>
+              <input id="loan-share-url" type="text" readonly hidden>
+              <p id="loan-share-status" class="fine-print" role="status"></p>
+              <p id="loan-storage" class="fine-print" role="status">Working setup kept in this tab.</p>
+            </section>
+          </div>
+        </div>
+        <details class="card loan-method">
+          <summary>How this lending model works</summary>
+          <p>This is a hypothetical single-collateral loan based on Aave v3 collateral concepts. The rates, maximum LTV and liquidation threshold are editable teaching assumptions, not verified current Ethereum market parameters. No wallet or live lending data is used.</p>
+          <p>ETH represents supplied WETH, with wrapping costs excluded. USDC is fixed at $1. Borrowed USDC stays in the wallet without earning interest; it is not spent or reinvested. Supply interest increases ETH, and borrow interest increases USDC debt.</p>
+          <p>Both rates use simple interest: starting token amount × APR × days / 365. This keeps the lesson transparent; it does not reproduce Aave’s reserve indexes, variable rates, compounding or exact contract rounding.</p>
+          <p>Health factor = collateral value × liquidation threshold / debt value. Below 1, the position is eligible for liquidation. With no debt, there is no loan liquidation boundary. Initial borrowing is limited by maximum LTV; later price and interest changes may move a loan above that ratio.</p>
+          <p>Each result is an endpoint before liquidation. The model does not reconstruct the intervening path or execute a liquidation. It excludes oracle delays, market liquidity, caps, E-mode, additional assets and transaction costs. Inspect currently contains liquidity records; independently verified lending records are a later step.</p>
+          <p><a href="https://aave.com/help/supplying/toggle-collateral-status" target="_blank" rel="noopener noreferrer">Aave: collateral rules ↗</a> · <a href="https://aave.com/faq" target="_blank" rel="noopener noreferrer">Aave: borrowing and liquidation mechanics ↗</a></p>
+        </details>
+      </section>
+      <section id="lending-learn" hidden aria-label="Lending lessons">
+        <div class="learn-meta"><span>Four steps · Open any lesson</span><span id="lend-storage" role="status">Progress saves in this browser.</span>
+        </div>
+        <div class="learn-workspace">
+          <aside class="learn-sidebar">
+            <details id="lend-course" class="card learn-course" open>
+              <summary><span>All lending lessons</span><strong id="lend-progress">0 of 4 checked</strong><span class="learn-course-chevron">⌄</span></summary>
+              <nav aria-label="Lending lessons">
+                <ol id="lend-lesson-list" class="lending-lesson-list">
+                </ol>
+              </nav>
+              <a class="learn-sidebar-link" href="#experiment">Have your own question? Open Experiment →</a>
+            </details>
+            <p class="learn-independence">Lesson examples stay separate from your working loan.</p>
+          </aside>
+          <article class="learn-lesson lending-lesson" aria-labelledby="lend-title">
+            <div class="learn-lesson-heading">
+              <p id="lend-number" class="eyebrow"></p>
+              <span class="small-badge">Hypothetical example</span>
+              <button id="lend-topics" class="learn-text-button" type="button">All lessons ↑</button>
+            </div>
+            <p id="lend-adds" class="learn-level"></p>
+            <h2 id="lend-title" tabindex="-1"></h2>
+            <p id="lend-intro" class="learn-reading"></p>
+            <section class="card learn-experiment" aria-labelledby="lend-predict-title">
+              <p class="eyebrow">01 · PREDICT</p>
+              <h3 id="lend-predict-title">Before opening the result</h3>
+              <p id="lend-setup" class="learn-setup"></p>
+              <fieldset class="learn-fieldset">
+                <legend id="lend-question"></legend>
+                <div id="lend-prediction-choices" class="learn-choices">
+                </div>
+              </fieldset>
+              <button id="lend-reveal" class="button primary" type="button" disabled>Reveal the result →</button>
+              <p class="fine-print">Predictions are for exploring. They do not determine completion.</p>
+            </section>
+            <section id="lend-observe" class="card learn-results" aria-labelledby="lend-observe-title" hidden>
+              <p class="eyebrow">02 · OBSERVE</p>
+              <h3 id="lend-observe-title" tabindex="-1">Read the result</h3>
+              <p id="lend-prediction-feedback" class="learn-prediction-feedback" role="status"></p>
+              <div id="lend-metrics" class="learn-metrics">
+              </div>
+              <p id="lend-takeaway" class="learn-takeaway"></p>
+              <p id="lend-explanation" class="learn-reading"></p>
+              <aside class="learn-pitfall" aria-label="Common pitfall"><strong>Watch for this</strong>
+                <p id="lend-pitfall"></p>
+              </aside>
+              <a id="lend-explore" class="learn-explore" href="#experiment" target="_blank" rel="noopener noreferrer">Explore this setup in Experiment ↗</a>
+              <p class="fine-print">Opens this example’s exact inputs in a separate tab. All rates and collateral rules are teaching assumptions.</p>
+              <details id="lend-deeper" class="applied-deeper">
+                <summary>Go deeper: mechanics and sources</summary>
+                <div id="lend-deeper-copy">
+                </div>
+                <ul id="lend-sources">
+                </ul>
+              </details>
+            </section>
+            <section id="lend-assessment" class="card learn-assessment" aria-labelledby="lend-check-title" hidden>
+              <p class="eyebrow">03 · CHECK YOUR UNDERSTANDING</p>
+              <h3 id="lend-check-title">Explain the result and apply the idea</h3>
+              <form id="lend-form" novalidate>
+                <fieldset class="learn-fieldset">
+                  <legend id="lend-reasoning"></legend>
+                  <div id="lend-reason-choices" class="learn-choices">
+                  </div>
+                </fieldset>
+                <div class="learn-application-setup">
+                  <p class="eyebrow">APPLY · CHANGE THE SITUATION</p>
+                  <p id="lend-application-context"></p>
+                </div>
+                <fieldset class="learn-fieldset">
+                  <legend id="lend-application-question"></legend>
+                  <div id="lend-application-choices" class="learn-choices">
+                  </div>
+                </fieldset>
+                <details id="lend-hint" class="learn-hint">
+                  <summary>Need a hint?</summary>
+                  <p id="lend-hint-text"></p>
+                </details>
+                <button id="lend-check" class="button primary" type="submit">Check answers →</button>
+              </form>
+              <div id="lend-feedback" class="learn-feedback" tabindex="-1" aria-labelledby="lend-feedback-title" hidden>
+                <div role="status"><strong id="lend-feedback-title"></strong>
+                  <p id="lend-feedback-copy"></p>
+                </div>
+                <div id="lend-continue" class="learn-continue" hidden><a id="lend-next" class="button primary" href="#experiment">Continue →</a>
+                  <button id="lend-retry" class="learn-text-button" type="button">Try this lesson again ↻</button>
+                </div>
+              </div>
+            </section>
+          </article>
+        </div>
+      </section>
+      <footer class="site-footer">
+        <p>Teren · Look closely.</p>
+        <nav aria-label="Project information"><a href="methods.html">Methods ↗</a><a href="https://github.com/provatidis/teren" target="_blank" rel="noopener noreferrer">Source ↗</a><a href="about.html">About ↗</a><a href="https://github.com/provatidis/teren/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Feedback ↗</a>
+        </nav>
+      </footer>
+    </main>
+  </body>
+</html>

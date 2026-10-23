@@ -1,6 +1,6 @@
 # Lesson goals and misconceptions
 
-Reviewed 2026-10-13. Teren teaches liquidity mechanics, interpretation and the limits of evidence. Completion checks explanation and application; predictions are ungraded and no required question asks the learner to calculate or round a result. Numeric practice remains optional in the essentials and historical chapters.
+Liquidity review: 2026-10-13. Lending foundations added 2026-10-23. Teren teaches liquidity and lending mechanics, interpretation and the limits of evidence. Completion checks explanation and application; predictions are ungraded and no required question asks the learner to calculate or round a result. Numeric practice remains optional in the liquidity essentials and historical chapters.
 
 ## What the research establishes
 
@@ -37,6 +37,21 @@ The width and outside-value cases are calculated hypothetical endpoints from `cl
 Fee-tier variants provide either no earnings data or fictional fee totals after any protocol share. These figures are not derived from the rate alone. They are labelled teaching facts and never presented as a forecast or independently checked history.
 
 The three historical exercises continue to use the original two independently checked records. Their fixed question checkpoint or interval remains separate from exploration. Any changed setup is labelled a thought experiment.
+
+## Lending foundations
+
+The second topic introduces one collateral asset and one debt asset before any looping. Four fixed, directly accessible lessons follow **Predict → Observe → Explain → Apply**. Each uses the same pure `collateral-loan-v1` model as Experiment, and its handoff carries every input. Wrong predictions are welcome; completion checks the explanation and application, with clear corrective feedback and no calculation fields.
+
+| Step | Misconception to challenge | Changed situation |
+| --- | --- | --- |
+| Supply and collateral | Supplying requires borrowing; earning supply interest and enabling collateral are the same action. | Enable collateral without opening a loan; identify capacity versus actual debt. |
+| Borrowing and debt | Borrowed cash increases wealth; maximum LTV is the liquidation threshold. | A price decline passes the new-loan limit while remaining above the liquidation boundary. |
+| Prices, interest and time | An unchanged ETH price means an unchanged loan. | Lower ETH’s price after interest accrues; interpret collateral value against the same debt. |
+| Repay or add collateral | Adding collateral repays debt; both responses have the same effect for the same budget. | Repay all debt; distinguish absence of loan liquidation from absence of investment risk. |
+
+The interest lesson deliberately uses zero supply APR so only debt grows. It does not claim time always lowers health factor: different rates on both sides can change that conclusion. The response lesson displays the already-calculated outcomes. Optional reading explains collateral rules, both balance-sheet sides, variable real rates and execution limits using [Aave supply guidance](https://aave.com/help/supplying/supply-tokens), [collateral guidance](https://aave.com/help/supplying/toggle-collateral-status) and [the protocol FAQ](https://aave.com/faq).
+
+All lending figures are hypothetical teaching cases with fixed simple interest and USDC = $1, separate from the verified liquidity records. They are not quoted Aave market parameters. Unit tests cover reference outcomes and every reasoning/application combination; browser checks cover wrong predictions, completion, exact handoffs, independent storage and mobile navigation. These checks establish consistency, not measured teaching effectiveness.
 
 ## Primary references
 

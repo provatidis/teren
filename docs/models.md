@@ -83,6 +83,29 @@ break-even fees = holding value − LP before fees
 
 Fee income is an explicit assumption added as separate USD cash at the end; it does not compound or change the token amounts. It is held fixed across comparison rows and chart prices. The calculator does not estimate fees from volume, volatility, pool share, or a time horizon. Gas costs, incentives, depegging, and concentrated liquidity are excluded. These are hypothetical outcomes, not forecasts. Reference tests cover unchanged, falling, doubled, and quadrupled prices, asset-product preservation, fee break-even, input bounds, versioned links, and CSV output. The separate pool adapter validates recorded swap arithmetic against its supported protocol; this theoretical endpoint LP model is not a protocol-specific return forecast.
 
+## Collateralized loan model
+
+`collateral-loan-v1` is a hypothetical single-collateral, single-debt teaching model. ETH represents supplied WETH, and USDC is fixed at $1. Aave v3 concepts inform the separation of maximum LTV, collateral eligibility and liquidation threshold; all entered rules and rates are illustrative assumptions. This model does not claim exact Aave interest accounting or current market parameters.
+
+For original supplied ETH `C`, initial borrowed USDC `B`, future ETH price `P`, elapsed days `d`, annual supply/borrow rates `s` and `b`, and liquidation threshold `t` (rates and threshold as fractions):
+
+```text
+later supplied ETH = C × (1 + s × d / 365)
+later USDC debt    = B × (1 + b × d / 365)
+collateral value  = later supplied ETH × P
+health factor     = collateral value × t / later debt
+boundary price    = later debt / (later supplied ETH × t)
+assets minus debt = collateral value + B − later debt
+```
+
+Both balances use fixed simple APR over a 365-day year. Borrowed USDC remains in the wallet, earning nothing. The holding comparison retains the original ETH at `P`, so the difference is the value of supply interest minus borrow interest. Borrowing itself creates a matching asset and liability. It does not increase net assets at inception.
+
+When supply is not enabled as collateral, new borrowing is zero, but the supplied balance can still earn assumed interest. A new loan must fit original collateral value × maximum LTV; later prices or accrued interest may move it above that starting limit. Health factor below 1 means eligible for liquidation. Exactly 1 is the boundary. No debt has no loan liquidation boundary; this does not eliminate asset or protocol risks. The display preserves the side of 1 even when ordinary two-decimal rounding would hide it.
+
+Responses use the same external USD budget at the endpoint. Repayment is capped at debt, with unused money shown separately. Adding collateral buys ETH at `P`, adds it to the supplied balance and leaves debt unchanged. Neither response receives retroactive supply interest. At 5 ETH, $1,500/ETH, $5,000 debt and an 80% threshold, the unchanged health factor is 1.20. An additional $1,000 raises it to 1.50 by repayment or 1.36 by adding collateral.
+
+Results are endpoints before any liquidation, not a reconstruction of what would have survived the intervening path. The model excludes variable rates, reserve indexes, compounding, contract rounding, oracle delays, caps, E-mode, additional assets, liquidation execution, gas and swap costs. Borrowed cash is neither spent nor reinvested. Looping and independently verified lending history are not included. Primary references: [Aave collateral rules](https://aave.com/help/supplying/toggle-collateral-status), [supply mechanics](https://aave.com/help/supplying/supply-tokens) and [borrowing/liquidation overview](https://aave.com/faq).
+
 ## Fixed-position historical replay
 
 Release 1.8.0 shipped a verified case for Ethereum Uniswap v3 WETH/USDC position #1382030 in the 0.3% pool. Its nine checkpoints span blocks 26168526–26168941 and **4,992 seconds**, with unchanged liquidity, bounds and position accounting. The holding basket is the exact principal at the first checkpoint; previously accrued fees and recorded owed balances are excluded from both starting strategies.
