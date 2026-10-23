@@ -53,7 +53,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
   await fill('loop-rounds', '3');
   await fill('loop-days', '365');
   const compound = await text('loop-debt');
-  await evaluate("document.getElementById('loop-rates').open=true; const field=document.getElementById('loop-interestMode');field.value='simple';field.dispatchEvent(new Event('change',{bubbles:true}))");
+  await evaluate("{ document.getElementById('loop-rates').open=true; const field=document.getElementById('loop-interestMode');field.value='simple';field.dispatchEvent(new Event('change',{bubbles:true})); }");
   assert.notEqual(await text('loop-debt'), compound);
   await evaluate("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('Clipboard unavailable')}}})");
   await click('loop-share');
@@ -92,10 +92,10 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
   assert.equal(await evaluate("document.getElementById('loop-compare-warning').hidden"), false);
   assert.match(await text('loop-compare-rows'), /Eligible for liquidation/);
   await fill('loop-future', '1500');
-  await evaluate("const field=document.getElementById('loop-reference-rounds');field.value='3';field.dispatchEvent(new Event('change',{bubbles:true}))");
+  await evaluate("{ const field=document.getElementById('loop-reference-rounds');field.value='3';field.dispatchEvent(new Event('change',{bubbles:true})); }");
   assert.equal(await text('loop-reference-difference'), 'Matches the reference');
   assert.match(await text('loop-round-comparison-takeaway'), /same round count/);
-  await evaluate("const field=document.getElementById('loop-reference-rounds');field.value='0';field.dispatchEvent(new Event('change',{bubbles:true}))");
+  await evaluate("{ const field=document.getElementById('loop-reference-rounds');field.value='0';field.dispatchEvent(new Event('change',{bubbles:true})); }");
   await fill('loop-days', '365');
   assert.equal(await text('loop-reference-label'), 'Supply only');
   assert.match(await text('loop-compare-rows'), /No debt/);
