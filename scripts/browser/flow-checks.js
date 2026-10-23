@@ -22,14 +22,15 @@ export async function checkExperimentFlow({ evaluate, click, fill, text, navigat
     for (const [fragment, prefix, field, value] of [['lp-lab', 'scenario', 'scenario-future', '4500'], ['range-lab', 'cl', 'cl-future', '2400']]) {
       await navigate(base + '#' + fragment);
       if (prefix === 'cl') await evaluate("document.getElementById('cl-setup-details').open=true");
-      await evaluate(`document.getElementById('${field}').focus();document.getElementById('${field}').scrollIntoView({block:'center'})`);
+      // Align the input below its scroll margin so the summary is in its sticky state.
+      await evaluate(`document.getElementById('${field}').focus();document.getElementById('${field}').scrollIntoView({block:'start'})`);
       await fill(field, value); await settle(evaluate);
       const bounds = await evaluate(`(() => {
         const feedback=document.getElementById('${prefix}-quick-result').getBoundingClientRect();
         const input=document.getElementById('${field}').getBoundingClientRect();
         return {feedbackTop:feedback.top,feedbackBottom:feedback.bottom,inputTop:input.top,inputBottom:input.bottom,height:innerHeight,headerBottom:document.querySelector('.topbar').getBoundingClientRect().bottom};
       })()`);
-      assert.ok(bounds.feedbackTop >= bounds.headerBottom + 6 && bounds.feedbackBottom <= 220, 'Mobile navigation and feedback leave room for the working inputs.');
+      assert.ok(bounds.feedbackTop >= bounds.headerBottom + 6 && bounds.feedbackBottom <= 220, 'Mobile navigation and feedback leave room for the working inputs: ' + JSON.stringify({width,prefix,...bounds}));
       assert.ok(bounds.inputTop >= bounds.feedbackBottom + 5 && bounds.inputBottom <= bounds.height, 'The summary must not cover the focused price field.');
       assert.ok((await text(prefix + '-quick-values')).includes(await text(prefix === 'cl' ? 'cl-value' : 'scenario-lp-value')), 'Compact and full outcomes agree after an edit.');
       await fill(prefix + '-investment', '');
