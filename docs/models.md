@@ -2,15 +2,19 @@
 
 [Project overview](../README.md) · [Product decisions](../DECISIONS.md)
 
+Teren has two topics: liquidity and lending. Both provide hypothetical experiments and lessons. On-chain snapshots and historical records currently cover liquidity only.
+
 ## Protocol names and calculation versions
 
 The full-range lab and virtual pool use Uniswap v2-style mechanics. The price-range lab uses simplified Uniswap v3-style concentrated liquidity math, without native tick constraints or on-chain rounding. V3 also allows full-range positions; these names identify Teren’s models rather than an exclusive division between protocols. Inspect reads real Uniswap v2 pools or v3 positions, and the recorded historical cases are v3.
 
-`cp50-v1` and `cl-range-v1` are Teren model-revision identifiers. Their `v1` does not refer to Uniswap v1. They remain in links, exports and technical details so calculations remain reproducible; prominent labels name the protocol style instead.
+The lending lab uses Aave v3-style collateral concepts with editable teaching assumptions. It does not reproduce a live Aave account or current market rules.
+
+`cp50-v1`, `cl-range-v1` and `collateral-loan-v1` are Teren model-revision identifiers. Their `v1` does not refer to Uniswap v1 or Aave v1. They remain in links, exports and technical details so calculations remain reproducible; prominent labels name the protocol style instead.
 
 ## Three kinds of results
 
-- **Hypothetical models:** the full-range and range labs project endpoint balances from editable assumptions. Their fee income is an assumed USD cash amount.
+- **Hypothetical models:** the liquidity labs project endpoint balances with assumed USD cash fees. The lending lab calculates supply, debt, health factor and responses using fixed simple interest, with a separate assumed liquidation event and compounding reference. All use editable assumptions rather than forecasts.
 - **Recorded snapshots:** Inspect shows v2 reserves/quotes or v3 principal from exact contract integers at one block. Version-2 v3 snapshots also include fee accounting; older files without fee-growth data show it as unavailable. A snapshot alone does not establish fees earned over a chosen period or lifetime PnL.
 - **Verified historical accounting:** the shipped fixed-position cases compare multiple recorded checkpoints, with unchanged-position evidence and independent fee checks. It calculates earned fee tokens and cumulative time in range for that recorded period.
 

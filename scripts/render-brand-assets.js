@@ -1,5 +1,5 @@
 // Optional maintainer tool. Uses Sharp to rasterize committed SVG sources;
-// the website itself has no build step or runtime dependency.
+// the static website build has no application dependencies.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { calculateRange } from '../public/models/cl-range-v1.js';
@@ -30,13 +30,14 @@ const samples = Array.from({ length: 81 }, (_, index) => {
 const line = key => samples.map((sample, index) => `${index ? 'L' : 'M'}${x(sample.futurePrice).toFixed(2)},${y(sample[key]).toFixed(2)}`).join('');
 const social = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <title>Teren · Look closely</title>
-  <desc>Understand liquidity through lessons, experiments and evidence. A hypothetical range position compared with holding its starting tokens.</desc>
+  <desc>Learn and experiment with DeFi liquidity and lending. The illustration compares a hypothetical range position with holding its starting tokens.</desc>
   <rect width="1200" height="630" fill="#f6f4ee"/>
   <g transform="translate(64 62) scale(.62)">${wordmark.replaceAll('#f6f4ee', '#082b49')}</g>
   <g font-family="Arial, Helvetica, sans-serif" fill="#082b49">
     <text x="64" y="278" font-size="83" font-weight="700" letter-spacing="-3">Look closely.</text>
-    <text x="68" y="343" font-size="28">Understand liquidity through</text>
-    <text x="68" y="384" font-size="28">lessons, experiments and evidence.</text>
+    <text x="68" y="343" font-size="28">Understand DeFi through</text>
+    <text x="68" y="384" font-size="28">lessons and experiments.</text>
+    <text x="68" y="422" font-size="21" fill="#496173">Liquidity · Lending</text>
     <text x="68" y="458" font-size="18" fill="#496173">Learn · Experiment · Inspect</text>
     <rect x="754" y="172" width="394" height="332" rx="18" fill="#e8eef0" stroke="#9aaebc"/>
     <text x="784" y="209" font-size="15" font-weight="700" letter-spacing=".8">HYPOTHETICAL RANGE</text>
