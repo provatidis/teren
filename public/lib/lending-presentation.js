@@ -25,14 +25,14 @@ export function lendingMetrics(id, result) {
     ['Debt', usd(result.end.debt), 'No loan has been taken'],
   ];
   if (id === 'borrow') return [
-    ['Supplied ETH', usd(result.end.collateralValue), '5 ETH at the unchanged price'],
+    ['Supplied ETH', usd(result.end.collateralValue), '5 ETH at the same price'],
     ['Borrowed cash / debt', usd(result.borrowedCash) + ' / ' + usd(result.end.debt), 'Count both sides'],
     ['Assets minus debt', usd(result.netAssets), 'Includes the borrowed cash in the wallet'],
   ];
   if (id === 'conditions') return [
     ['Debt after one year', usd(result.end.debt), 'Includes assumed borrow interest'],
     ['Starting health factor', healthLabel(result.start.healthFactor), 'Before interest'],
-    ['Later health factor', healthLabel(result.end.healthFactor), 'ETH price unchanged'],
+    ['Health factor after one year', healthLabel(result.end.healthFactor), 'ETH price unchanged'],
   ];
   return [
     ['Leave unchanged', healthLabel(result.end.healthFactor), 'Health factor'],

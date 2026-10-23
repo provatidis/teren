@@ -34,13 +34,13 @@ export function initLending() {
       $('loan-chart-one').setAttribute('y', boundaryY + 5);
       $('loan-chart-top').textContent = healthLabel(curve.maxHealth);
       $('loan-chart-max').textContent = usd(curve.maxPrice) + '/ETH';
-      $('loan-chart-caption').textContent = 'At ' + usd(input.future) + '/ETH, health factor is ' + healthLabel(curve.selectedHealth) + '. Balances include ' + input.days + ' days of simple interest. This compares prices at fixed balances; it is not a price history.';
+      $('loan-chart-caption').textContent = 'At ' + usd(input.future) + '/ETH, health factor is ' + healthLabel(curve.selectedHealth) + '. Interest period: ' + input.days + ' days, using simple interest. Each point is a hypothetical ETH price with the same token balances.';
       $('loan-health-chart').setAttribute('aria-label', 'Health factor versus ETH price at fixed balances. Selected price ' + usd(input.future) + ', health factor ' + healthLabel(curve.selectedHealth) + '. Liquidation boundary ' + usd(curve.boundaryPrice) + ' per ETH.');
     }
     const interest = interestReference(input);
     $('loan-simple-debt').textContent = usd(interest.simpleDebt);
     $('loan-compound-debt').textContent = usd(interest.compoundedDebt);
-    $('loan-interest-difference').textContent = usd(interest.difference) + ' more debt under the continuous-compounding assumption over ' + input.days + ' days.';
+    $('loan-interest-difference').textContent = 'Continuous compounding adds ' + usd(interest.difference) + ' more debt over ' + input.days + ' days at this fixed APR.';
     $('loan-interest-alert').hidden = input.borrow === 0 || interest.difference < input.borrow * 0.01;
 
     const assumptions = readLiquidation();
@@ -60,16 +60,16 @@ export function initLending() {
     const event = invalid ? null : singleLiquidation(input, assumptions);
     $('loan-liquidation-result').hidden = event?.status !== 'executed';
     if (invalid) {
-      $('loan-liquidation-status').textContent = 'Complete the highlighted event assumptions. The loan balances above are still valid.';
+      $('loan-liquidation-status').textContent = 'Check the highlighted liquidation inputs. The loan balances above are still valid.';
       return;
     }
     if (event.status !== 'executed') {
-      $('loan-liquidation-status').textContent = result.end.status === 'no-debt' ? 'With no debt, there is no loan to liquidate.' : 'No liquidation at this endpoint. Choose an ETH price below the boundary to explore one event.';
+      $('loan-liquidation-status').textContent = result.end.status === 'no-debt' ? 'With no debt, there is no loan to liquidate.' : 'The loan is not eligible for liquidation at this price. Choose a price below the boundary to explore one event.';
       return;
     }
     $('loan-liquidation-status').textContent = event.exhausted && event.remainingDebt > 0
       ? 'All collateral is used in this example. Some debt remains unpaid; this does not model how a protocol resolves that shortfall.'
-      : 'One hypothetical event at ' + usd(input.future) + '/ETH. A real liquidation may execute at a different price or repay a different amount.';
+      : 'One hypothetical event at ' + usd(input.future) + '/ETH. In practice, the price and amount repaid can differ from this example.';
     $('loan-liquidation-repaid').textContent = usd(event.repaid);
     $('loan-liquidation-removed').textContent = formatTokenQuantity(event.removedTokens, 6) + ' ETH';
     $('loan-liquidation-removed-value').textContent = usd(event.removedValue) + ' at the chosen price';
@@ -77,9 +77,9 @@ export function initLending() {
     $('loan-liquidation-collateral').textContent = formatTokenQuantity(event.remainingTokens, 6) + ' ETH';
     $('loan-liquidation-debt').textContent = usd(event.remainingDebt);
     $('loan-liquidation-net').textContent = usd(event.netAssets);
-    $('loan-liquidation-loss').textContent = usd(event.penalty) + ' lower than the pre-liquidation balance. The loss equals the extra collateral taken as the bonus, before costs.';
+    $('loan-liquidation-loss').textContent = 'The bonus reduces assets minus debt by ' + usd(event.penalty) + ' in this event, before costs.';
     $('loan-liquidation-health').textContent = event.remainingHealth === null ? 'No debt remains after this event.'
-      : event.exhausted ? 'No supplied ETH remains. The illustration still records ' + usd(event.remainingDebt) + ' of unpaid debt.'
+      : event.exhausted ? 'No supplied ETH remains. There is still ' + usd(event.remainingDebt) + ' of unpaid debt in this example.'
       : 'Remaining health factor: ' + healthLabel(event.remainingHealth) + (event.remainingHealth < 1 ? '. Still below 1; another liquidation could be possible.' : '. Future price or interest changes can make it eligible again.');
   }
   function readInputs() {
