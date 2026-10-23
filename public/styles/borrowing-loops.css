@@ -31,14 +31,22 @@
 .loop-compare-table tbody tr:first-child td { color: var(--text); font-weight: 600; }
 .loop-money-flow { margin: 24px 0; padding: 22px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface); }
 .loop-money-flow h4 { margin: 0 0 12px; font-size: 20px; }
-.loop-flow-stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 20px 0; }
-.loop-flow-stages button { min-height: 48px; padding: 8px 5px; border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text); background: var(--surface); font: inherit; font-size: 14px; line-height: 1.5; cursor: pointer; }
-.loop-flow-stages button[aria-pressed=true] { background: var(--highlight); border-color: var(--accent); font-weight: 600; }
-.loop-flow-title { font-size: 17px; line-height: 1.7; font-weight: 600; margin: 0 0 8px; }
-.loop-flow-copy { color: var(--muted); font-size: 15px; line-height: 1.8; min-height: 5.4em; margin: 0 0 18px; }
+.loop-flow-timeline { margin: 20px 0 16px; }
+.loop-flow-selected { display: block; font-size: 16px; line-height: 1.7; font-weight: 600; margin-top: 4px; }
+.loop-flow-timeline input[type=range] { display: block; appearance: none; -webkit-appearance: none; width: 100%; height: 48px; margin: 4px 0 0; padding: 0 12px; background: transparent; border: 0; border-radius: 8px; }
+.loop-flow-timeline input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--border-strong); }
+.loop-flow-timeline input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--border-strong); }
+.loop-flow-timeline input[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 28px; height: 28px; border: 3px solid var(--text); border-radius: 50%; background: var(--accent-ink); margin-top: -11px; }
+.loop-flow-timeline input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px solid var(--text); border-radius: 50%; background: var(--accent-ink); }
+.loop-flow-stops { display: flex; justify-content: space-between; list-style: none; padding: 0; margin: 0; gap: 8px; }
+.loop-flow-stops li { flex: 0 0 52px; font-size: 13px; line-height: 1.7; color: var(--muted); text-align: center; border-top: 3px solid transparent; padding-top: 3px; white-space: nowrap; }
+.loop-flow-stops li[data-current=true] { color: var(--text); font-weight: 600; border-color: var(--accent); }
+.loop-flow-copy { color: var(--muted); font-size: 15px; line-height: 1.6; min-height: 3.2em; margin: 0 0 18px; }
 .loop-flow-balances { margin: 0; }
-.loop-flow-balances > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; padding: 14px 0; border-top: 1px solid var(--border); }
+.loop-flow-balances > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; padding: 14px 10px; border-top: 1px solid var(--border); border-left: 3px solid transparent; }
+.loop-flow-balances > div[data-changed=true] { border-left-color: var(--accent); background: var(--highlight); }
 .loop-flow-balances dt { color: var(--muted); font-size: 14px; line-height: 1.7; }
+.loop-flow-change { display: block; margin-top: 4px; color: var(--text); font-size: 13px; line-height: 1.7; }
 .loop-flow-balances dd { margin: 0; font-size: 17px; line-height: 1.5; font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
 .loop-flow-balances dd span { display: block; }
 .loop-flow-net { border-top: 1px solid var(--border); padding-top: 18px; font-size: 17px; font-weight: 600; line-height: 1.7; }
@@ -105,7 +113,7 @@
   .loop-compare-table { font-size: 13px; }
   .loop-compare-table th, .loop-compare-table td { padding: 12px 5px; }
   .loop-money-flow { padding: 18px 0; border-left: 0; border-right: 0; border-radius: 0; background: transparent; }
-  .loop-flow-stages { gap: 5px; }
-  .loop-flow-stages button { font-size: 13px; }
+  .loop-flow-copy { min-height: 4.8em; }
+  .loop-flow-balances > div { padding: 12px 8px; }
 }
 @media (max-width: 360px) { .loop-card { padding: 16px; } .lending-tools a { font-size: 13px; padding: 10px 14px; } }

@@ -1,5 +1,11 @@
 # Release history
 
+## 1.20.1 — 2026-10-23
+
+- Turn the first loop lesson's money flow into a four-stop slider, with named stages, keyboard controls and Previous/Next as an alternative. Keep exact action balances instead of inventing intermediate transaction states.
+- Highlight the balances changed by each action and label borrowed cash, new debt and ETH moving into collateral. Moving backward revisits the example; it does not reverse a loan.
+- Extend desktop keyboard and mobile touch-drag checks. Preserve lesson progress, calculations and links.
+
 ## 1.20.0 — 2026-10-23
 
 - Compare borrowing-round counts under identical starting capital, prices, time, rates and costs. Keep debt, health factor and liquidation boundaries beside net assets; distinguish supply only from holding.
