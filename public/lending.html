@@ -340,6 +340,22 @@
                 <p id="loop-borrowPercent-error" class="field-error" hidden>
                 </p>
               </div>
+              <button id="loop-compare-toggle" class="text-button loop-compare-toggle" type="button" aria-expanded="false" aria-controls="loop-compare-options">Compare round counts</button>
+              <div id="loop-compare-options" hidden>
+                <div class="scenario-field">
+                  <label for="loop-reference-rounds">Reference setup</label>
+                  <select id="loop-reference-rounds" aria-describedby="loop-compare-help">
+                    <option value="0">Supply only · no borrowing</option>
+                    <option value="1">1 round</option>
+                    <option value="2">2 rounds</option>
+                    <option value="3">3 rounds</option>
+                    <option value="4">4 rounds</option>
+                    <option value="5">5 rounds</option>
+                  </select>
+                </div>
+                <p id="loop-compare-help" class="fine-print">Only round count differs. Capital, prices, time, rates and costs stay the same for both.</p>
+                <button id="loop-compare-show" class="text-button" type="button">See the comparison ↓</button>
+              </div>
               <details class="loop-examples">
                 <summary>Try an example</summary>
                 <div class="loop-stages" role="group" aria-label="Loop examples">
@@ -449,6 +465,21 @@
               </p>
             </div>
             <div id="loop-results">
+              <section id="loop-round-comparison" class="card loop-card" aria-labelledby="loop-round-comparison-title" tabindex="-1" hidden>
+                <p class="eyebrow">SAME CONDITIONS</p>
+                <h2 id="loop-round-comparison-title">What changes with more rounds?</h2>
+                <p id="loop-round-comparison-context" class="body-copy"></p>
+                <p class="fine-print">Your setup’s assets minus debt · before liquidation</p>
+                <p id="loop-reference-difference" class="loop-comparison"></p>
+                <table class="loop-compare-table">
+                  <caption class="sr-only">Round counts compared at the same price and time, before liquidation or unwinding</caption>
+                  <thead><tr><th scope="col">Measure</th><th scope="col">Your setup<span id="loop-current-label"></span></th><th scope="col">Reference<span id="loop-reference-label"></span></th></tr></thead>
+                  <tbody id="loop-compare-rows"></tbody>
+                </table>
+                <p id="loop-round-comparison-takeaway" class="body-copy"></p>
+                <p id="loop-compare-warning" class="loan-attention" hidden>At least one setup is at or below its liquidation boundary. These are balances before liquidation, not an amount you could withdraw. A liquidation would change them.</p>
+                <p class="fine-print">Before liquidation or unwinding. The endpoints do not show whether liquidation happened earlier. Supply only earns the assumed supply interest; holding keeps ETH in a wallet.</p>
+              </section>
               <section id="loop-outcome" class="card loop-card" aria-labelledby="loop-outcome-title" tabindex="-1">
                 <p class="eyebrow">SAME ORIGINAL CAPITAL</p>
                 <h2 id="loop-outcome-title">Your loop compared with holding</h2>
@@ -639,6 +670,7 @@
               <p class="eyebrow">02 · OBSERVE</p>
               <h3 id="lend-observe-title" tabindex="-1">Read the result</h3>
               <p id="lend-prediction-feedback" class="learn-prediction-feedback" role="status"></p>
+              <div id="lend-money-flow" class="loop-money-flow" hidden></div>
               <div id="lend-metrics" class="learn-metrics">
               </div>
               <p id="lend-takeaway" class="learn-takeaway"></p>

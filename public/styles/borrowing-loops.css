@@ -19,6 +19,32 @@
 .loop-round-button:disabled { opacity: .45; cursor: default; }
 .loop-setup-caption { display: block; margin: 4px 0 0; color: var(--muted); font-size: 13px; }
 .loop-comparison { color: var(--text); font-size: 23px; line-height: 1.5; font-weight: 600; margin: 20px 0 6px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.loop-compare-toggle { min-height: 44px; margin: 0 0 8px; }
+#loop-compare-options { padding: 0 0 16px; border-bottom: 1px solid var(--border); }
+#loop-round-comparison .loop-comparison { margin-top: 6px; }
+.loop-compare-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 24px 0; font-size: 14px; line-height: 1.6; }
+.loop-compare-table th, .loop-compare-table td { padding: 14px 8px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.loop-compare-table th { font-weight: 500; color: var(--muted); }
+.loop-compare-table th:first-child { padding-left: 0; width: 34%; }
+.loop-compare-table td { font-variant-numeric: tabular-nums; }
+.loop-compare-table thead span { display: block; color: var(--text); font-weight: 600; margin-top: 6px; }
+.loop-compare-table tbody tr:first-child td { color: var(--text); font-weight: 600; }
+.loop-money-flow { margin: 24px 0; padding: 22px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface); }
+.loop-money-flow h4 { margin: 0 0 12px; font-size: 20px; }
+.loop-flow-stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 20px 0; }
+.loop-flow-stages button { min-height: 48px; padding: 8px 5px; border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text); background: var(--surface); font: inherit; font-size: 14px; line-height: 1.5; cursor: pointer; }
+.loop-flow-stages button[aria-pressed=true] { background: var(--highlight); border-color: var(--accent); font-weight: 600; }
+.loop-flow-title { font-size: 17px; line-height: 1.7; font-weight: 600; margin: 0 0 8px; }
+.loop-flow-copy { color: var(--muted); font-size: 15px; line-height: 1.8; min-height: 5.4em; margin: 0 0 18px; }
+.loop-flow-balances { margin: 0; }
+.loop-flow-balances > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; padding: 14px 0; border-top: 1px solid var(--border); }
+.loop-flow-balances dt { color: var(--muted); font-size: 14px; line-height: 1.7; }
+.loop-flow-balances dd { margin: 0; font-size: 17px; line-height: 1.5; font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
+.loop-flow-balances dd span { display: block; }
+.loop-flow-net { border-top: 1px solid var(--border); padding-top: 18px; font-size: 17px; font-weight: 600; line-height: 1.7; }
+.loop-flow-actions { display: flex; justify-content: space-between; gap: 12px; margin: -8px 0 18px; }
+.loop-flow-actions button { min-height: 44px; }
+.loop-flow-actions button:disabled { opacity: .5; cursor: default; }
 .loop-round summary strong { font-weight: 600; }
 .loop-round-caption, .loop-round-action { display: block; margin: 7px 0 0; font-size: 13px; line-height: 1.8; }
 .loop-round-caption { color: var(--muted); }
@@ -61,8 +87,8 @@
 .loop-unwind-steps { padding-left: 22px; }
 .loop-unwind-steps li { padding: 8px 0; }
 .loop-unwind-steps p { line-height: 1.8; font-size: 14px; margin: 0 0 6px; }
-#loop-outcome, #lending-loops :is(input, select, button, summary) { scroll-margin-top: calc(var(--lab-feedback-height, 0px) + 24px); }
-#loop-outcome:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+#loop-outcome, #loop-round-comparison, #lending-loops :is(input, select, button, summary) { scroll-margin-top: calc(var(--lab-feedback-height, 0px) + 24px); }
+#loop-outcome:focus-visible, #loop-round-comparison:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 @media (max-width: 1000px) { .loop-layout { grid-template-columns: 290px minmax(0, 1fr); } .loop-metrics { grid-template-columns: 1fr; } }
 @media (max-width: 750px) {
   .lending-page:is([data-lending-view=loops], [data-lending-view=loan]) .lending-intro .subtitle,
@@ -76,5 +102,10 @@
   .loop-step-facts { grid-template-columns: 1fr; }
   .loop-step-facts > div:last-child { grid-column: auto; }
   .loop-card h2 { font-size: 21px; }
+  .loop-compare-table { font-size: 13px; }
+  .loop-compare-table th, .loop-compare-table td { padding: 12px 5px; }
+  .loop-money-flow { padding: 18px 0; border-left: 0; border-right: 0; border-radius: 0; background: transparent; }
+  .loop-flow-stages { gap: 5px; }
+  .loop-flow-stages button { font-size: 13px; }
 }
 @media (max-width: 360px) { .loop-card { padding: 16px; } .lending-tools a { font-size: 13px; padding: 10px 14px; } }

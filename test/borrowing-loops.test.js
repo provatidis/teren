@@ -216,7 +216,7 @@ test('independent geometric references and balance conservation hold across vari
 
 test('strict loop links round trip all assumptions without touching loan routes', () => {
   const valid = loopHash(LOOP_DEFAULTS);
-  assert.deepEqual(readLoopHash(valid), { status: 'ready', input: LOOP_DEFAULTS });
+  assert.deepEqual(readLoopHash(valid), { status: 'ready', input: LOOP_DEFAULTS, comparisonRounds: null });
   assert.equal(readLoopHash('#experiment').status, 'none');
   for (const hash of [valid + '&rounds=2', valid + '&rpc=https://example.com', valid.replace('borrowing-loop-v1', 'other'), valid.replace('rounds=1', 'rounds='), valid.replace('&days=0', ''), valid.replace('interestMode=compound', 'interestMode=other')]) assert.equal(readLoopHash(hash).status, 'invalid');
   assert.equal(loopLessonFromHash('#loop-lesson=build'), 'build');

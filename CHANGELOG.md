@@ -1,5 +1,12 @@
 # Release history
 
+## 1.20.0 — 2026-10-23
+
+- Compare borrowing-round counts under identical starting capital, prices, time, rates and costs. Keep debt, health factor and liquidation boundaries beside net assets; distinguish supply only from holding.
+- Preserve the optional reference count in tab drafts and share links. Older links and saved progress remain compatible; reset and explicit single-setup links clear the comparison.
+- Add an optional four-stage money walkthrough to the first loop lesson, using the model's actual ledger. Show wallet assets, supplied collateral and debt without adding calculation questions or completion gates.
+- Align the replay heading with its checked-at-capture evidence, simplify a pool-ownership takeaway and correct the build documentation. Extend comparison, persistence and desktop/mobile interaction checks; the financial models and recorded evidence are unchanged.
+
 ## 1.19.1 — 2026-10-23
 
 - Lead borrowing-loop results with the difference from holding and the selected price/time. Identify zero rounds as supply only and show original capital beside its assumptions.

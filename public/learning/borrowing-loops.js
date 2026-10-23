@@ -11,7 +11,7 @@ export const LOOP_LESSONS = [
     question: 'After this round, what happens to assets minus debt?',
     predictions: [['same', 'It stays the same.'], ['more', 'It increases with the additional ETH.'], ['less', 'It decreases by the full amount borrowed.']],
     takeaway: 'The extra ETH is financed by debt. It is not new wealth.',
-    explanation: 'The result shows more supplied ETH and a matching USDC debt. The borrowed cash has been spent, so it is no longer in the wallet. With no costs or price change, assets minus debt stay at the original value.',
+    explanation: 'After the full round, more ETH is supplied and the USDC debt is still owed. The borrowed cash has been spent, so it is no longer in the wallet. With no costs or price change, assets minus debt stay at the original value.',
     pitfall: 'Counting both the purchased ETH and the USDC spent on it counts the same money twice. Swap costs would reduce net assets even before prices move.',
     reasoning: 'Why does owning more ETH leave net assets unchanged here?',
     reasons: [['debt', 'The purchased ETH comes with an equal debt.'], ['cash', 'The borrowed USDC remains available beside the purchased ETH.'], ['price', 'Supplying more ETH lowers the price of the original ETH.']],

@@ -1,8 +1,9 @@
 import { LOOP_DEFAULTS, LOOP_LIMITS, calculateLoop, validateLoop, loopAtPrice } from '../models/borrowing-loop-v1.js';
+import { calculateLoopComparison } from '../models/loop-comparison.js';
 import { readLoopDraft, saveLoopDraft } from '../data/loop-state.js';
 import { loopHash, readLoopHash } from '../lib/loop-links.js';
 import { healthLabel, loanStatus } from '../lib/lending-presentation.js';
-import { loopTokens, loopMoney, loopComparison, loopUnwindLabels } from '../lib/loop-presentation.js';
+import { loopTokens, loopMoney, loopComparison, loopUnwindLabels, loopRoundLabel } from '../lib/loop-presentation.js';
 import { fmt, compactUSD, formatTokenQuantity } from '../lib/format.js';
 
 const money = loopMoney;
@@ -13,6 +14,7 @@ export function initBorrowingLoops() {
   const keys = [...Object.keys(LOOP_LIMITS), 'interestMode'];
   const stored = readLoopDraft();
   let current = null, firstInvalid, revision = 0;
+  let comparisonRounds = stored.comparisonRounds;
 
   function node(tag, copy, className) {
     const element = document.createElement(tag);
@@ -71,6 +73,35 @@ export function initBorrowingLoops() {
       details.append(list);
       return details;
     }));
+  }
+  function renderComparison(pair) {
+    if (!pair) return;
+    const { current: setup, reference } = pair;
+    const input = setup.input;
+    $('loop-current-label').textContent = loopRoundLabel(input.rounds);
+    $('loop-reference-label').textContent = loopRoundLabel(reference.input.rounds);
+    $('loop-round-comparison-context').textContent = 'Both start with ' + loopTokens(input.collateral) +
+      ' at ' + money(input.start) + '/ETH. Compare them at ' + money(input.future) + '/ETH' +
+      (input.days === 0 ? ', with no time elapsed.' : ', after ' + formatTokenQuantity(input.days, 2) + (input.days === 1 ? ' day.' : ' days.'));
+    $('loop-reference-difference').textContent = loopComparison(setup.end.netAssets, reference.end.netAssets, 'the reference').label;
+    const rows = [
+      ['Assets minus debt', result => money(result.end.netAssets)],
+      ['Supplied ETH', result => loopTokens(result.end.collateralTokens)],
+      ['USDC debt', result => money(result.end.debt)],
+      ['Health factor', result => healthLabel(result.end.healthFactor)],
+      ['Liquidation boundary', result => result.end.boundaryPrice === null ? 'No debt' : money(result.end.boundaryPrice) + '/ETH'],
+      ['Loan status', result => loanStatus(result.end)],
+    ];
+    $('loop-compare-rows').replaceChildren(...rows.map(([label, value]) => {
+      const row = node('tr'), heading = node('th', label);
+      heading.scope = 'row';
+      row.append(heading, node('td', value(setup)), node('td', value(reference)));
+      return row;
+    }));
+    $('loop-round-comparison-takeaway').textContent = input.rounds === comparisonRounds
+      ? 'Both use the same round count, so their results match. Change either count to explore the difference.'
+      : 'More rounds buy more ETH with more debt. A price move acts on that larger ETH balance. Interest rates and swap costs affect the result too.';
+    $('loop-compare-warning').hidden = ![setup, reference].some(result => ['eligible', 'boundary'].includes(result.end.status));
   }
   function renderChart(result) {
     const input = result.input, left = 94, right = 600, top = 28, bottom = 246;
@@ -131,6 +162,13 @@ export function initBorrowingLoops() {
     $('loop-share-url').hidden = true;
     $('loop-share-status').textContent = '';
     const input = read(), errors = validateLoop(input);
+    const comparing = comparisonRounds !== null;
+    $('loop-compare-toggle').setAttribute('aria-expanded', String(comparing));
+    $('loop-compare-toggle').textContent = comparing ? 'Stop comparing' : 'Compare round counts';
+    $('loop-compare-options').hidden = !comparing;
+    $('loop-round-comparison').hidden = !comparing;
+    if (comparing) $('loop-reference-rounds').value = comparisonRounds;
+    $('loop-share').textContent = comparing ? 'Copy comparison link' : 'Copy loop link';
     if (errors.borrowPercent && Number.isFinite(input.borrowPercent) && Number.isFinite(input.maxLTV) && input.borrowPercent > input.maxLTV) {
       errors.borrowPercent = 'Use ' + formatTokenQuantity(input.maxLTV, 4) + '% or less. Edit maximum LTV in Original capital and assumptions to change that limit.';
     }
@@ -155,11 +193,12 @@ export function initBorrowingLoops() {
       if (errors.collateral || errors.start) $('loop-setup-caption').textContent = 'Check original capital inputs';
       return;
     }
-    current = calculateLoop(input);
+    const pair = comparing ? calculateLoopComparison(input, comparisonRounds) : null;
+    current = pair ? pair.current : calculateLoop(input);
     const result = current, end = result.end, comparison = loopComparison(end.netAssets, result.holdingValue);
     $('loop-quick-result').dataset.state = end.status;
-    $('loop-quick-value').textContent = comparison.compact;
-    $('loop-quick-state').textContent = 'Health factor: ' + healthLabel(end.healthFactor);
+    $('loop-quick-value').textContent = pair ? loopComparison(end.netAssets, pair.reference.end.netAssets, 'reference').compact : comparison.compact;
+    $('loop-quick-state').textContent = (pair ? loopRoundLabel(input.rounds) + ' vs ' + loopRoundLabel(comparisonRounds).toLowerCase() + ' · ' : '') + 'Health factor: ' + healthLabel(end.healthFactor);
     $('loop-outcome-title').textContent = input.rounds ? 'Your loop compared with holding' : 'Supply only compared with holding';
     $('loop-capital-note').textContent = 'Both start with ' + loopTokens(input.collateral) + ' worth ' + money(result.ownCapital) + '. No outside capital is added.';
     $('loop-result-context').textContent = 'At ' + money(input.future) + '/ETH' + (input.days === 0 ? ', with no time elapsed.' : ', after ' + formatTokenQuantity(input.days, 2) + (input.days === 1 ? ' day.' : ' days.'));
@@ -194,20 +233,20 @@ export function initBorrowingLoops() {
     $('loop-rate-summary').textContent = fmt(input.supplyAPR) + '% supply · ' + fmt(input.borrowAPR) + '% borrow APR · ' + (input.interestMode === 'compound' ? 'continuous compounding' : 'simple interest') + ' · fixed rates';
     for (const button of document.querySelectorAll('[data-loop-rounds]')) button.setAttribute('aria-pressed', String(Number(button.dataset.loopRounds) === input.rounds));
     for (const button of document.querySelectorAll('[data-loop-price]')) button.setAttribute('aria-pressed', String(input.future === input.start * Number(button.dataset.loopPrice)));
-    renderLedger(result); renderChart(result); renderUnwind(result);
-    if (save) $('loop-storage').textContent = saveLoopDraft(input)
+    renderComparison(pair); renderLedger(result); renderChart(result); renderUnwind(result);
+    if (save) $('loop-storage').textContent = saveLoopDraft(input, undefined, comparisonRounds)
       ? 'Working loop kept in this tab, separately from your single loan. Copy a link to keep or share it.'
       : 'Tab storage is unavailable. Copy a loop link to keep your setup.';
   }
   function focus(id) {
     const target = $(id);
     for (let parent = target.parentElement; parent; parent = parent.parentElement) if (parent.tagName === 'DETAILS') parent.open = true;
-    requestAnimationFrame(() => { target.focus({ preventScroll: true }); target.scrollIntoView({ block: id === 'loop-outcome' ? 'start' : 'center', behavior: 'instant' }); });
+    requestAnimationFrame(() => { target.focus({ preventScroll: true }); target.scrollIntoView({ block: ['loop-outcome', 'loop-round-comparison'].includes(id) ? 'start' : 'center', behavior: 'instant' }); });
   }
   function restore() {
     const shared = readLoopHash(location.hash);
     $('loop-route-note').hidden = shared.status !== 'invalid';
-    if (shared.status === 'ready') { write(shared.input); render(true); }
+    if (shared.status === 'ready') { comparisonRounds = shared.comparisonRounds; write(shared.input); render(true); }
   }
   write(stored.input); render();
   $('loop-storage').textContent = stored.status === 'unavailable'
@@ -225,16 +264,26 @@ export function initBorrowingLoops() {
   for (const button of document.querySelectorAll('[data-loop-rounds]')) button.addEventListener('click', () => { $('loop-rounds').value = button.dataset.loopRounds; render(true); });
   for (const button of document.querySelectorAll('[data-loop-price]')) button.addEventListener('click', () => { $('loop-future').value = Number($('loop-start').value) * Number(button.dataset.loopPrice); render(true); });
   $('loop-fix-input').addEventListener('click', () => { if (firstInvalid) focus('loop-' + firstInvalid); });
-  $('loop-show-result').addEventListener('click', () => focus(firstInvalid ? 'loop-' + firstInvalid : 'loop-outcome'));
-  $('loop-reset').addEventListener('click', () => { write(LOOP_DEFAULTS); render(true); $('loop-share-status').textContent = 'Default loop restored.'; });
+  const showResult = () => focus(firstInvalid ? 'loop-' + firstInvalid : comparisonRounds === null ? 'loop-outcome' : 'loop-round-comparison');
+  $('loop-show-result').addEventListener('click', showResult);
+  $('loop-compare-show').addEventListener('click', showResult);
+  $('loop-compare-toggle').addEventListener('click', () => {
+    comparisonRounds = comparisonRounds === null ? (Number($('loop-rounds').value) === 1 ? 3 : 1) : null;
+    render(true);
+  });
+  $('loop-reference-rounds').addEventListener('change', () => {
+    comparisonRounds = Number($('loop-reference-rounds').value);
+    render(true);
+  });
+  $('loop-reset').addEventListener('click', () => { comparisonRounds = null; write(LOOP_DEFAULTS); render(true); $('loop-share-status').textContent = 'Default loop restored.'; });
   $('loop-share').addEventListener('click', async () => {
     if (!current) return;
-    const url = new URL(location.href); url.hash = loopHash(current.input);
+    const url = new URL(location.href); url.hash = loopHash(current.input, comparisonRounds);
     const copiedRevision = revision;
     $('loop-share-url').value = url.href;
     try {
       await navigator.clipboard.writeText(url.href);
-      if (revision === copiedRevision) $('loop-share-status').textContent = 'Loop link copied.';
+      if (revision === copiedRevision) $('loop-share-status').textContent = comparisonRounds === null ? 'Loop link copied.' : 'Comparison link copied.';
     } catch {
       if (revision !== copiedRevision) return;
       $('loop-share-url').hidden = false;

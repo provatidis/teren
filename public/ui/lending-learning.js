@@ -8,6 +8,7 @@ import { loanHash } from '../lib/lending-links.js';
 import { loopHash } from '../lib/loop-links.js';
 import { lendingMetrics } from '../lib/lending-presentation.js';
 import { loopLessonMetrics } from '../lib/loop-presentation.js';
+import { renderLoopMoneyFlow } from '../lib/loop-money-flow.js';
 import { newChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js';
 
@@ -50,6 +51,10 @@ export function initLendingLearning() {
     $('lend-prediction-feedback').textContent = draft.prediction === example.prediction
       ? 'Your prediction matches. ' + prediction : 'Compare this with your prediction: ' + prediction;
     $('lend-metrics').replaceChildren(...course.metrics(lesson.id, example.result).map(items => learningMetric(...items)));
+    const showFlow = chapter === 'loops' && lesson.id === 'build';
+    $('lend-money-flow').hidden = !showFlow;
+    $('lend-metrics').hidden = showFlow;
+    if (showFlow) renderLoopMoneyFlow($('lend-money-flow'), example.result);
     $('lend-observe').hidden = false;
     $('lend-assessment').hidden = false;
     $('lend-reveal').textContent = 'Revisit the result ↓';

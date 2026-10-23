@@ -22,7 +22,7 @@ export const LESSONS = [
     reasons: [['ownership', 'A share of both token balances when I withdraw.'], ['dollars', 'My deposited dollar value plus my share of swap fees.'], ['eth', 'My deposited token amounts plus my share of swap fees.']],
     hint: 'Divide your ETH deposit by original ETH + your ETH deposit, then multiply by 100.',
     explanation: 'The deposit is proportional, so it leaves the pool price unchanged. Your ownership is a share of the enlarged balances, including your deposit. Future trades change the reserves you share; LP ownership does not guarantee a fixed withdrawal value.',
-    takeaway: 'The denominator includes your deposit. LP tokens are a claim on changing assets.',
+    takeaway: 'Your deposit becomes part of the bigger pool. LP tokens are a claim on changing assets.',
   },
   {
     id: 'token-balances', protocol: 'Uniswap v2-style', title: 'Token balances after a price change', short: 'Changing token balances', concept: 'Allocation', skill: 'Explain what a price move does to token quantities.',
