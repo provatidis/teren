@@ -1,5 +1,12 @@
 # Release history
 
+## 1.23.0 — 2026-10-24
+
+- Establish four visual lesson pilots: build a loop, unwind it, changing token balances, and narrow versus wide ranges. Show the starting state and offer an optional prediction before exploration. Explanation and changed-situation checks still determine completion.
+- Replace the loop sliders with one named action at a time, replay, Back and grouped direct step access. Keep completed balances readable, preserve reduced-motion support, and keep the unwind's collateral constraint and health factor visible.
+- Show both LP token quantities with starting markers and trade direction. Compare two range bands on one price scale, with boundary shortcuts and single-token endpoints. All frames use the existing hypothetical models; no new fees or historical paths are inferred.
+- Keep exploratory prices separate from the question and its Experiment handoff. Preserve editable question prices, existing answers and completion. Check native keyboard/touch controls, fixed question scope, reduced motion and restoration without a prediction.
+
 ## 1.22.0 — 2026-10-24
 
 - Open the build and unwind lessons with **Follow the money**, before any answer is required. Keep reflection and conceptual checks below the visual; preserve existing answers, completion and Experiment handoffs.

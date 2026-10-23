@@ -6,7 +6,7 @@ const fees={title:'Uniswap: swap fees and fee tiers',url:'https://developers.uni
 const change={title:'Uniswap: changing a position’s range',url:'https://support.uniswap.org/hc/en-us/articles/20915975893645-How-to-change-the-price-range-of-a-liquidity-position'};
 export const MANAGEMENT_LESSONS = Object.freeze([
   {id:'range-width',short:'Narrow and wide ranges',title:'Does a tighter range always win?',adds:'Start by changing only the range width.',
-    intro:'Two hypothetical positions have the same starting budget and price. One uses a narrow range, the other a wider range. Each uses the token mix needed for its own bounds. Compare where they remain active; no earned fees are predicted.',
+    intro:'Keep the starting budget and price the same. Change the range, then see where each position can take part in swaps.',
     reasoning:'Why can a wider range remain active after a narrower range stops?',
     reasons:[['bounds','The wider boundaries include more possible prices.'],['budget','The wider position uses more capital to stay active.'],['protection','The wider position follows a different pool price.']],
     hint:'Look at the shown price and each pair of bounds. Active means eligible to earn from swaps.',
