@@ -1,4 +1,4 @@
-name: Test and publish Passiko
+name: Test and publish Teren
 
 on:
   push:

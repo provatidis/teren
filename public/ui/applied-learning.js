@@ -1,10 +1,10 @@
-import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js?v=1.15.2';
-import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js?v=1.15.2';
-import { appliedApplication, checkAppliedUnderstanding } from '../lib/applied-applications.js?v=1.15.2';
-import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.15.2';
-import { learningChoices, learningMetric, learningPitfall } from '../lib/learning-elements.js?v=1.15.2';
-import { POOL_PITFALLS } from '../learning/pool-pitfalls.js?v=1.15.2';
-import { readAppliedProgress, saveAppliedProgress } from '../data/applied-progress.js?v=1.15.2';
+import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js?v=1.16.0';
+import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js?v=1.16.0';
+import { appliedApplication, checkAppliedUnderstanding } from '../lib/applied-applications.js?v=1.16.0';
+import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.16.0';
+import { learningChoices, learningMetric, learningPitfall } from '../lib/learning-elements.js?v=1.16.0';
+import { POOL_PITFALLS } from '../learning/pool-pitfalls.js?v=1.16.0';
+import { readAppliedProgress, saveAppliedProgress } from '../data/applied-progress.js?v=1.16.0';
 import { createAppliedRecordLoader } from '../data/applied-records.js';
 import { REPLAY_CASES } from '../data/replay-cases.js';
 import { periodPointView, periodIntervalView, periodMilestones, periodChartRange, periodDuration } from '../lib/period-presentation.js';
@@ -161,7 +161,7 @@ export function initAppliedLearning() {
     if (!lesson.reasons.some(([value]) => value === draft.reason)) draft.reason = '';
     $('learn-page-title').textContent = APPLIED_CHAPTER;
     $('learn-page-subtitle').textContent = 'Apply Uniswap v3 liquidity mechanics to two verified historical cases. Predict, observe, explain and apply.';
-    document.title = lesson.short + ' · Passiko Learn';
+    document.title = lesson.short + ' · Teren Learn';
     $('applied-number').textContent = 'APPLIED ' + (APPLIED_LESSONS.indexOf(lesson) + 1) + ' OF 3';
     $('applied-title').textContent = lesson.title; $('applied-adds').textContent = 'Uniswap v3 · Recorded case · ' + lesson.adds; $('applied-intro').textContent = lesson.intro;
     $('applied-question').textContent = lesson.question; $('applied-reason-question').textContent = lesson.reasoning;

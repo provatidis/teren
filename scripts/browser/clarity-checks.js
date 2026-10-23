@@ -4,9 +4,9 @@ export async function checkProjectInformation({ evaluate, navigate, base }) {
   for (const page of ['', 'learn.html']) {
     await navigate(base + page);
     const links = await evaluate("Array.from(document.querySelectorAll('.site-footer a')).map(a => ({href:a.getAttribute('href'),target:a.target,rel:a.rel}))");
-    assert.deepEqual(links.slice(0, 3).map(link => link.href), ['methods.html', 'https://github.com/provatidis/passiko', 'about.html']);
+    assert.deepEqual(links.slice(0, 3).map(link => link.href), ['methods.html', 'https://github.com/provatidis/teren', 'about.html']);
     assert.ok(links.every(link => link.target === '_blank' && link.rel.includes('noopener')));
-    assert.ok(links[3].href.startsWith('https://github.com/provatidis/passiko/issues/new?'));
+    assert.ok(links[3].href.startsWith('https://github.com/provatidis/teren/issues/new?'));
   }
   for (const [id, protocol] of [['swap-impact','v2'],['pool-share','v2'],['range-boundaries','v3']]) {
     await navigate(base+'learn.html#lesson='+id);

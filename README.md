@@ -1,10 +1,10 @@
-# Passiko
+# Teren
 
-*See for yourself.*
+*Look closely.*
 
 A DeFi playground for learning liquidity mechanics and testing assumptions. Compare providing liquidity with holding the same starting tokens, or inspect a real Uniswap position at a recorded block.
 
-[Open Experiment](https://provatidis.github.io/passiko/) · [Learn](https://provatidis.github.io/passiko/learn.html) · [Inspect a position](https://provatidis.github.io/passiko/#position-lab)
+[Open Experiment](https://teren.sh/) · [Learn](https://teren.sh/learn.html) · [Inspect a position](https://teren.sh/#position-lab)
 
 - **Experiment:** full-range and concentrated-liquidity calculators, ordered examples, and saved comparisons.
 - **Learn:** six essentials lessons, a final challenge, three practical range exercises and three exercises using verified historical cases. Every topic is available directly.
@@ -36,6 +36,7 @@ Open http://127.0.0.1:3000/ after starting the development server. Browser inter
 - [Historical replay method and recorded evidence](docs/replay.md)
 - [Chain reads, fee accounting and snapshot validation](docs/data.md)
 - [Architecture, local checks and deployment](docs/development.md)
+- [Custom domain and repository cutover](docs/domain-setup.md)
 - [Product decisions](DECISIONS.md)
 - [Release history](CHANGELOG.md)
 

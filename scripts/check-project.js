@@ -67,6 +67,13 @@ async function checkAsset(source) {
 }
 for (const document of ['index.html', 'learn.html', 'about.html', 'methods.html', '404.html']) {
   const markup = await readFile(resolve(root, document), 'utf8');
+  assert.match(markup, /<title>[^<]*Teren[^<]*<\/title>/, document + ': use the current public name.');
+  assert.doesNotMatch(markup, /Passiko|ehipassiko|passiko-logo|download="passiko-/i, document + ': remove the former visible identity.');
+  if (document !== '404.html') {
+    const pageURL = new URL(document === 'index.html' ? './' : document, site).href;
+    assert.ok(markup.includes('<link rel="canonical" href="' + pageURL + '"'), document + ': canonical URLs must use the same site.');
+    assert.ok(markup.includes('<meta property="og:url" content="' + pageURL + '"'), document + ': sharing URLs must match the canonical page.');
+  }
   const policy = markup.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
   assert.ok(policy, document + ': provide the production CSP in HTML.');
   assert.ok(markup.indexOf('http-equiv="Content-Security-Policy"') < markup.indexOf('<link'), 'CSP must precede resource loading.');
@@ -102,6 +109,9 @@ function pngSize(bytes) {
 assert.deepEqual(pngSize(social),[Number(metadata['og:image:width']),Number(metadata['og:image:height'])]);
 assert.deepEqual(pngSize(await readFile(resolve(root,'assets/apple-touch-icon.png'))),[180,180]);
 const manifest = JSON.parse(await readFile(resolve(root,'site.webmanifest'),'utf8'));
+assert.equal(manifest.short_name, 'Teren');
+assert.equal(metadata['application-name'], manifest.short_name);
+assert.equal(metadata['og:site_name'], manifest.short_name);
 assert.equal(new URL(manifest.id,site).href,canonical);
 assert.equal(new URL(manifest.start_url,site).href,canonical);
 assert.equal(new URL(manifest.scope,site).href,canonical);

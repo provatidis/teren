@@ -15,6 +15,8 @@ for (const name of ['main.js', 'learn-main.js']) {
 const teaching = {
   'ui/full-range.js': ['../lib/result-card.js', '../lib/saved-experiments.js'],
   'ui/range.js': ['../lib/range-card.js', '../lib/saved-experiments.js'],
+  'lib/result-card.js': ['./brand.js'],
+  'lib/range-card.js': ['./brand.js'],
   'ui/saved-experiments.js': ['../lib/saved-experiments.js'],
   'ui/learning.js': ['../lib/result-card.js', '../learning/liquidity-essentials.js', '../learning/deeper-reading.js', '../lib/lesson-walkthrough.js', '../lib/lesson-narration.js', '../models/lesson-experiments.js', '../models/lesson-application.js', '../lib/lesson-application-copy.js', '../lib/learning-choices.js', '../data/learning-progress.js', '../lib/management-links.js', '../lib/learning-elements.js', '../learning/pool-pitfalls.js'],
   'ui/applied-learning.js': ['../learning/applied-liquidity.js', '../lib/applied-lessons.js', '../lib/applied-applications.js', '../lib/learning-choices.js', '../data/applied-progress.js', '../lib/learning-elements.js', '../learning/pool-pitfalls.js'],

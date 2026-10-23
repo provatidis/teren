@@ -1,5 +1,5 @@
 import { EXPERIMENTS_KEY, MAX_LIBRARY_BYTES, emptyLibrary, readLibrary, writeLibrary, libraryJSON, parseLibrary, createExperiment, addExperiment, editExperiment, removeExperiment, mergeLibraries } from '../data/saved-experiments.js';
-import { experimentView, defaultExperimentName, comparisonContext, startingAssets } from '../lib/saved-experiments.js?v=1.15.2';
+import { experimentView, defaultExperimentName, comparisonContext, startingAssets } from '../lib/saved-experiments.js?v=1.16.0';
 import { usd, signedUSD, percent } from '../lib/format.js';
 import { STATE_COPY } from '../lib/range-presentation.js';
 import { downloadBlob } from '../lib/download.js';
@@ -200,7 +200,7 @@ export function initSavedExperiments({ fullRangeLab, rangeLab }) {
     }
     catch (error) { status(error.message, true); }
   });
-  $('experiments-export').addEventListener('click', () => downloadBlob(new Blob([libraryJSON(library)], { type: 'application/json' }), 'passiko-experiments-v1.json'));
+  $('experiments-export').addEventListener('click', () => downloadBlob(new Blob([libraryJSON(library)], { type: 'application/json' }), 'teren-experiments-v1.json'));
   $('experiments-file').addEventListener('change', async () => {
     const file = $('experiments-file').files[0]; $('experiments-file').value = ''; if (!file) return;
     status('Reading experiment file…');
@@ -211,7 +211,7 @@ export function initSavedExperiments({ fullRangeLab, rangeLab }) {
       status(outcome.added === 0 ? 'All imported experiments are already in this library.' : 'Imported ' + outcome.added + ' experiment' + (outcome.added === 1 ? '' : 's') + (outcome.copies ? '. Conflicting IDs were kept as separate copies' : '') + (persisted ? '.' : '. Kept for this tab only; export to keep them.'));
     } catch (error) { status(error.message + ' Your current experiments are unchanged.', true); }
   });
-  $('experiments-export-recovery').addEventListener('click', () => downloadBlob(new Blob([saved.raw], { type: 'application/json' }), 'passiko-experiments-recovery.json'));
+  $('experiments-export-recovery').addEventListener('click', () => downloadBlob(new Blob([saved.raw], { type: 'application/json' }), 'teren-experiments-recovery.json'));
   $('experiments-discard').addEventListener('click', () => {
     try { globalThis.localStorage.removeItem(EXPERIMENTS_KEY); saved = { library: emptyLibrary(), status: 'empty', raw: null }; library = saved.library; recovery = false; temporary = false; render(); status('Unreadable saved library discarded. Your snapshots, lessons and sandbox are unchanged.'); }
     catch { status('Browser storage is unavailable; the saved copy could not be discarded.', true); }

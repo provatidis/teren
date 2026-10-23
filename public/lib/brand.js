@@ -8,9 +8,9 @@ function loadLogo() {
       image.onload = () => resolve(image);
       image.onerror = () => {
         logoPromise = null;
-        reject(new Error('The Passiko logo could not be loaded. Try exporting again.'));
+        reject(new Error('The Teren logo could not be loaded. Try exporting again.'));
       };
-      image.src = new URL('../assets/passiko-logo.svg', import.meta.url).href;
+      image.src = new URL('../assets/teren-logo.svg', import.meta.url).href;
     });
   }
   return logoPromise;

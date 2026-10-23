@@ -1,4 +1,4 @@
-# Using Passiko
+# Using Teren
 
 [Project overview](../README.md) · [Product decisions](../DECISIONS.md)
 
@@ -33,7 +33,7 @@ Playground's **Choose an example** library follows ten ordered cases. Each state
 | 09 | Applied cases | Fees through a recorded period | Period fees, cumulative time in range and a holding comparison |
 | 10 | Applied cases | Leaving a range and returning | Outside intervals, fee pauses and activity between sampled prices |
 
-Every stage and lesson is directly accessible; variations practice the same concept rather than representing difficulty levels. Advanced users can open [the recorded in-range snapshot](https://provatidis.github.io/passiko/#example=in-range-position), [fee-accounting snapshot](https://provatidis.github.io/passiko/#example=position-fees), [in-range replay](https://provatidis.github.io/passiko/#historical-case) or [exit-and-return replay](https://provatidis.github.io/passiko/#historical-case=range-return) without completing earlier lessons. The example definitions live in [public/learning/example-path.js](../public/learning/example-path.js).
+Every stage and lesson is directly accessible; variations practice the same concept rather than representing difficulty levels. Advanced users can open [the recorded in-range snapshot](https://teren.sh/#example=in-range-position), [fee-accounting snapshot](https://teren.sh/#example=position-fees), [in-range replay](https://teren.sh/#historical-case) or [exit-and-return replay](https://teren.sh/#historical-case=range-return) without completing earlier lessons. The example definitions live in [public/learning/example-path.js](../public/learning/example-path.js).
 
 Examples 01–05 carry hypothetical, versioned assumptions through scenario links. Examples 06–08 select Inspect's position source and save the chosen recorded snapshot; calculator inputs change only when the user applies it. Examples 09–10 open the recorded-period workspace. It does not replace the latest position snapshot or automatically change calculator inputs. Examples do not change virtual balances or lesson completion.
 
@@ -53,7 +53,7 @@ These are verified fixed-position replays. They have no editable historical boun
 
 ## Saved experiments
 
-Choose **Save experiment** in either liquidity lab to keep its current model, exact numeric assumptions, name and optional notes. The [Saved experiments library](https://provatidis.github.io/passiko/#saved-experiments) can search names/notes, filter by model, edit names and notes, and reopen any setup. Reopening loads a working copy; input edits leave the original record intact, and saving again creates a variation. Removal has an Undo action until another record is removed or the tab reloads.
+Choose **Save experiment** in either liquidity lab to keep its current model, exact numeric assumptions, name and optional notes. The [Saved experiments library](https://teren.sh/#saved-experiments) can search names/notes, filter by model, edit names and notes, and reopen any setup. Reopening loads a working copy; input edits leave the original record intact, and saving again creates a variation. Removal has an Undo action until another record is removed or the tab reloads.
 
 Select two or three records to compare. Outcomes are recalculated from the saved model inputs, rather than storing potentially stale derived results. The comparison shows each LP value, holding value and difference, with expandable assumptions and notes. Its context distinguishes identical starting baskets and future prices, different future-price scenarios, and different budgets/prices/token mixes. A concentrated range and a 50/50 position can have different starting tokens even with equal budgets; each uses its own holding benchmark. Fee inputs remain assumed USD cash, with USDC = $1 and the existing model exclusions.
 
@@ -65,7 +65,7 @@ Storage failures keep changes for the current tab and explicitly request an expo
 
 ## Learn: Liquidity essentials
 
-Open [Learn](https://provatidis.github.io/passiko/learn.html) for six independent foundation lessons, a final challenge, **Choosing and managing a range**, then **Fees, time and range exits**. The two later chapters each have three exercises. Every topic is available directly, including shareable lesson fragments such as learn.html#lesson=range-boundaries. Exercises follow **Predict → Observe → Explain → Apply**. Predictions are ungraded. After viewing the calculated outcome, explain the mechanism and apply it to a setup with one changed assumption. Both conceptual answers must be correct to mark the exercise checked; no calculation or rounding is required. Token explanations follow the selected price direction, including an unchanged price. Incorrect reasoning receives an explanation of the misconception; token reserves change through swaps, not newly created ETH or USDC. Each result starts with a short takeaway before the detailed explanation. A short sourced pitfall remains visible in the normal lesson flow: slippage, withdrawal expectations, recovery, inactive positions, fee assumptions or limits of a short record. Hints and three repeatable variations support practice; completion records understanding checks, not simulated profit.
+Open [Learn](https://teren.sh/learn.html) for six independent foundation lessons, a final challenge, **Choosing and managing a range**, then **Fees, time and range exits**. The two later chapters each have three exercises. Every topic is available directly, including shareable lesson fragments such as learn.html#lesson=range-boundaries. Exercises follow **Predict → Observe → Explain → Apply**. Predictions are ungraded. After viewing the calculated outcome, explain the mechanism and apply it to a setup with one changed assumption. Both conceptual answers must be correct to mark the exercise checked; no calculation or rounding is required. Token explanations follow the selected price direction, including an unchanged price. Incorrect reasoning receives an explanation of the misconception; token reserves change through swaps, not newly created ETH or USDC. Each result starts with a short takeaway before the detailed explanation. A short sourced pitfall remains visible in the normal lesson flow: slippage, withdrawal expectations, recovery, inactive positions, fee assumptions or limits of a short record. Hints and three repeatable variations support practice; completion records understanding checks, not simulated profit.
 
 The lessons cover swap impact, proportional pool ownership, changing token balances, impermanent loss versus dollar profit, fee break-even, and concentrated range boundaries. The final challenge compares the same starting tokens, checks why an all-ETH benchmark describes a different strategy, differentiates additional fees from the total break-even target in its optional worked example, and can export a PNG result card and a reproducible playground link.
 
@@ -77,7 +77,7 @@ Content lives in public/learning/, pure experiment/assessment logic in public/mo
 
 ## Practical learning: choosing and managing a range
 
-Open [range choices](https://provatidis.github.io/passiko/learn.html#manage=range-width) after the essentials challenge, or open any exercise directly. The sequence adds range width, then fee tiers and APR, then exits, returns and management costs. Each exercise has three repeatable situations. Read the supplied setup, predict, reveal the outcome, explain it and answer a changed situation. No calculation field is present.
+Open [range choices](https://teren.sh/learn.html#manage=range-width) after the essentials challenge, or open any exercise directly. The sequence adds range width, then fee tiers and APR, then exits, returns and management costs. Each exercise has three repeatable situations. Read the supplied setup, predict, reveal the outcome, explain it and answer a changed situation. No calculation field is present.
 
 The width exercise calculates two continuous range positions with the same budget and starting price, each funded with its own required token mix. It compares active status, not earned fees or a shared holding basket. The fee-tier exercise uses unknown earnings or explicitly supplied fictional fee totals; the totals are teaching facts, not estimates, imports or verified history. The management exercise calculates principal at two outside prices with unchanged liquidity and shows why an inside return can reactivate it. USDC is assumed to stay at $1. It explains the actions and possible costs of changing a real v3 range; it does not simulate rebalancing or reimburse past losses.
 
@@ -85,7 +85,7 @@ Playground links open these hypothetical range setups in separate tabs, preservi
 
 ## Applied learning: fees, time and range exits
 
-Open [the applied chapter](https://provatidis.github.io/passiko/learn.html#applied=fees-over-time) after range choices or use any exercise directly. The sequence adds one idea at a time: new fee tokens in the in-range baseline; active time between two outside samples in the exit-and-return case; then that case’s final LP-versus-holding result. Each exercise asks for a prediction, reveals validated bundled records, then checks an explanation of the record and an application of the idea to a clearly labelled thought experiment.
+Open [the applied chapter](https://teren.sh/learn.html#applied=fees-over-time) after range choices or use any exercise directly. The sequence adds one idea at a time: new fee tokens in the in-range baseline; active time between two outside samples in the exit-and-return case; then that case’s final LP-versus-holding result. Each exercise asks for a prediction, reveals validated bundled records, then checks an explanation of the record and an application of the idea to a clearly labelled thought experiment.
 
 The question, prediction feedback and final-period conclusion refer to a marked checkpoint or interval. The slider and milestone buttons explore the rest of the record without changing the assessment; **Return to the question checkpoint** restores its observation. Predictions do not need to be correct to learn from the result. Both conceptual answers must be correct to mark an exercise checked; optional numeric practice never affects completion. All three exercises remain directly accessible, and replaying a question retains previous completion.
 
@@ -110,7 +110,7 @@ Applied progress uses `passiko-applied-liquidity-v1`, independently of the uncha
 
 ## Methods and feedback
 
-The footer on Experiment and Learn opens [Methods](https://provatidis.github.io/passiko/methods.html), [About](https://provatidis.github.io/passiko/about.html), source and feedback in a separate tab, keeping the current experiment open. Methods explains hypothetical inputs, snapshot validation and independently checked historical accounting. Feedback opens a prefilled GitHub issue and requires a GitHub account to post.
+The footer on Experiment and Learn opens [Methods](https://teren.sh/methods.html), [About](https://teren.sh/about.html), source and feedback in a separate tab, keeping the current experiment open. Methods explains hypothetical inputs, snapshot validation and independently checked historical accounting. Feedback opens a prefilled GitHub issue and requires a GitHub account to post.
 
 On mobile, use **Explore experiment tools** or **Explore inspect tools** to reveal the secondary destinations. Primary Experiment, Learn and Inspect navigation stays visible. Practical lesson situations change the supplied facts and may change the correct follow-up; hints remain available and no calculation is required.
 
@@ -120,4 +120,4 @@ On mobile, use **Explore experiment tools** or **Explore inspect tools** to reve
 - **Price range · V3-style** and practical range exercises use simplified Uniswap v3-style concentrated liquidity math. Price bounds are continuous inputs here; native v3 positions use tick boundaries.
 - **Inspect** labels real v2 pool snapshots separately from v3 positions. Both historical cases use real v3 positions.
 
-Uniswap v3 can also provide full-range liquidity. The lab labels identify the calculations Passiko uses. The `v1` in `cp50-v1` or `cl-range-v1` identifies Passiko’s model revision; it does not mean Uniswap v1.
+Uniswap v3 can also provide full-range liquidity. The lab labels identify the calculations Teren uses. The `v1` in `cp50-v1` or `cl-range-v1` identifies Teren’s model revision; it does not mean Uniswap v1.

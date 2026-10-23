@@ -7,8 +7,8 @@
 Requires Node.js 22 or newer. No dependencies or installation step are needed.
 
 ```sh
-git clone https://github.com/provatidis/passiko.git
-cd passiko
+git clone https://github.com/provatidis/teren.git
+cd teren
 npm start
 ```
 
@@ -74,34 +74,35 @@ The cl-range-v1 model, links, CSV, presentation helpers and result cards are sep
 
 ## Browser identity and sharing
 
-The open-frame p is supplied as an SVG favicon and a 16/32/48-pixel ICO fallback. Opaque 180-pixel Apple touch and 192/512-pixel maskable app icons with inset artwork accompany a manifest scoped to the project directory. The outlined lowercase wordmark in `public/assets/passiko-logo.svg` is shared by all page headers and exported result cards, with no font download. Forest green, soft sage and warm paper define the identity. The manifest supplies home-screen identity; the app continues to read live chain data only when requested.
+Teren uses a custom lowercase wordmark in page headers and exported result cards. `public/assets/teren-logo.svg` contains the outlined light lettering; `teren-logo-ink.svg` is its navy version for light backgrounds. `teren-mark.svg` is the separate open-t symbol. Ink-blue surfaces, warm white text and sea-glass accents define the interface. Gold ETH/WETH and striped blue USDC remain distinct from the brand colors.
 
-Canonical, Open Graph and large-image social-card metadata use the published Pages URL. The 1200×630 preview is a committed PNG generated from an editable SVG. Its chart illustrates the default cl-range-v1 scenario before fees. Scenario fragments share the same site preview. A branded 404 page keeps its links inside /passiko/, while a skip link and JavaScript-disabled notice provide clear entry points. The active skip link preserves shared scenario fragments when moving keyboard focus to the main content.
+The symbol is supplied as an SVG favicon and a 16/32/48-pixel ICO fallback. Opaque 180-pixel Apple touch and 192/512-pixel maskable app icons keep the mark inside the central safe area. The manifest identifies the site at its own root. There is no font download, service worker or application build step.
 
-The structure check verifies linked files, metadata, PNG/ICO dimensions and manifest paths. The local server supplies correct image/manifest types and also serves /passiko/ to mirror Pages links; missing resources keep HTTP status 404.
+Canonical, Open Graph and large-image social metadata use `https://teren.sh/`. The 1200×630 social preview uses the same wordmark and a calculated, hypothetical `cl-range-v1` illustration before fees. Scenario fragments share this site preview. The 404 page uses root-relative asset and home URLs so deeply nested missing paths also work on the custom domain and local server. Ordinary page links are relative. The active skip link preserves shared scenario fragments when moving keyboard focus to the main content.
 
-To regenerate the committed raster assets after editing the SVG sources, run node scripts/render-brand-assets.js in an environment with the optional Sharp graphics tool. SHARP_MODULE can point to its module entry file when Sharp is supplied externally. This is a maintainer-only tool, not a website dependency or required build step.
+The structure check verifies linked files, metadata, PNG/ICO dimensions and manifest paths. The local server supplies correct image/manifest types and preserves HTTP status 404 for missing resources.
 
-## Online preview with GitHub Pages
+To regenerate the committed favicon, ink wordmark, social SVG and raster assets after editing the two source SVGs, run `node scripts/render-brand-assets.js` with the optional Sharp graphics tool. `SHARP_MODULE` can point to its module entry file when Sharp is supplied externally. This is a maintainer tool, not a website dependency. The renderer calculates the social illustration using the existing range model.
 
-The workflow in `.github/workflows/pages.yml` tests the project and publishes only `public/` whenever `main` changes. It also runs tests on pull requests without publishing them. No hosting credentials or backend server are needed.
+## Publishing with GitHub Pages
 
-Enable it once in the repository's **Settings → Pages → Build and deployment → Source → GitHub Actions**. If the first workflow run happened before Pages was enabled, open **Actions → Test and publish Passiko → Run workflow** and select `main`.
+The workflow in `.github/workflows/pages.yml` tests the project and publishes only `public/` whenever `main` changes. Pull requests run the same checks without publishing. Hosting stays on GitHub Pages; Cloudflare manages the `teren.sh` domain and DNS. The public domain is independent of the repository name.
 
-After a successful deployment, the preview is available at https://provatidis.github.io/passiko/. Subsequent pushes to `main` update the same address. Repository settings and the GitHub plan must permit Pages publishing.
+The publishing source is **Settings → Pages → Build and deployment → Source → GitHub Actions**. The intended public address is `https://teren.sh/`. See [domain setup](domain-setup.md) for the cutover sequence and DNS records. A `CNAME` file does not configure a custom domain for this Actions-based deployment; the domain must be saved in GitHub Pages settings.
 
-### Existing clones and shared scenarios
+### Repository name and saved work
 
-The repository was renamed from `GPTCloudTest` to `degenerator`, then to `passiko` for release 1.10.0. Update existing clones with:
+Keep the existing repository and its history. After renaming it to `teren`, update existing clones:
 
 ```sh
-git remote set-url origin https://github.com/provatidis/passiko.git
+git remote set-url origin https://github.com/provatidis/teren.git
 ```
 
-GitHub redirects old repository links, but does not automatically redirect the old Pages site. For a previously shared scenario, replace `/GPTCloudTest/` or `/degenerator/` in the URL with `/passiko/` and retain the entire `#scenario=...` fragment. Asset and home links are relative, and new scenario links use the current site address.
+Historical names remain in the changelog and compatibility identifiers. There is no separately maintained legacy website or redirect repository. Existing scenario fragments can be appended to `https://teren.sh/`; newly shared links use the current page address. Local checkout directories can keep their names.
 
-The sandbox key remains `defi-sandbox-v1`; the `degenerator-*` keys for saved experiments, lesson progress, pool/position snapshots and same-tab Learn drafts also stay unchanged. Exported experiment libraries retain their version-1 `degenerator-experiments` kind, so older backups still import. Visible names and new download filenames use Passiko. Keeping these identifiers preserves saved work on the same `provatidis.github.io` origin. A different origin, including a custom domain, has separate browser storage. Existing local checkout directories can keep their names. If a cloud checkout directory is renamed, update its working-directory and startup configuration to the actual path.
+The sandbox key remains `defi-sandbox-v1`. The `degenerator-*` keys, `passiko-applied-liquidity-v1` and `passiko-range-learning-v1` also stay unchanged. Exported experiment libraries retain their version-1 `degenerator-experiments` kind, so earlier backups still import. Visible names and new download filenames use Teren.
 
+These unchanged identifiers preserve saved work on the same origin. **Moving to `teren.sh` creates a different browser-storage origin:** lesson progress, sandbox balances, working drafts and snapshots do not move automatically. Export saved experiments and any pool/position JSON you want to keep before changing the published domain; import those files on Teren afterward. Exported experiments do not include lesson progress or sandbox balances. Keep this distinction explicit during the cutover.
 
 ## Working drafts during a Learn visit
 
