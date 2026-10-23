@@ -117,6 +117,11 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
   assert.equal(await evaluate("document.getElementById('loop-round-comparison').hidden"), true);
 
   const choose = (group, value) => evaluate(`document.querySelector('input[name="lend-${group}"][value="${value}"]').click()`);
+  const moveFlow = async key => {
+    await evaluate("document.getElementById('loop-flow-slider').focus()");
+    await call('Input.dispatchKeyEvent', { type: 'keyDown', key, code: key });
+    await call('Input.dispatchKeyEvent', { type: 'keyUp', key, code: key });
+  };
   const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'falls'], ['unwind', 'all', 'backing', 'blocked']];
   for (const [index, [id, prediction, reason, application]] of lessons.entries()) {
     await navigate(base + 'lending.html#loop-lesson=' + id);
@@ -128,19 +133,37 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     if (id === 'build') {
       assert.equal(await text('loop-flow-supplied'), '5 ETH');
       assert.equal(await text('loop-flow-debt'), '0 USDC');
-      await click('loop-flow-next');
+      assert.equal(await evaluate("document.getElementById('loop-flow-slider').step"), '1');
+      await moveFlow('ArrowRight');
       assert.match(await text('loop-flow-wallet'), /5,000 USDC/);
       assert.equal(await text('loop-flow-debt'), '5,000 USDC');
-      await click('loop-flow-next');
+      assert.match(await text('loop-flow-debt-change'), /\+5,000 USDC owed/);
+      assert.equal(await text('loop-flow-supplied-change'), 'Unchanged');
+      await moveFlow('ArrowRight');
       assert.match(await text('loop-flow-wallet'), /2.5 ETH/);
       assert.equal(await text('loop-flow-supplied'), '5 ETH');
       assert.equal(await text('loop-flow-net'), 'Assets minus debt: $10,000.00');
-      await click('loop-flow-next');
+      assert.equal(await text('loop-flow-wallet-change'), '5,000 USDC → 2.5 ETH');
+      assert.equal(await text('loop-flow-debt-change'), 'Unchanged');
+      await moveFlow('End');
       assert.equal(await text('loop-flow-supplied'), '7.5 ETH');
       assert.equal(await text('loop-flow-debt'), '5,000 USDC');
-      assert.equal(await evaluate('document.activeElement.dataset.flowStage'), '3');
+      assert.equal(await evaluate('document.activeElement.id'), 'loop-flow-slider');
+      assert.match(await evaluate("document.getElementById('loop-flow-slider').getAttribute('aria-valuetext')"), /Supply, stage 4 of 4/);
+      assert.equal(await text('loop-flow-supplied-change'), '+2.5 ETH moved in');
+      await moveFlow('ArrowRight');
+      assert.equal(await evaluate("document.getElementById('loop-flow-slider').value"), '3');
+      await moveFlow('Home');
+      assert.equal(await text('loop-flow-debt'), '0 USDC');
+      assert.equal(await text('loop-flow-wallet-change'), 'Starting balance');
+      await moveFlow('ArrowLeft');
+      assert.equal(await evaluate("document.getElementById('loop-flow-slider').value"), '0');
+      await click('loop-flow-next'); await click('loop-flow-next'); await click('loop-flow-next');
+      assert.equal(await evaluate('document.activeElement.id'), 'loop-flow-slider');
       await click('loop-flow-previous');
       assert.match(await text('loop-flow-wallet'), /2.5 ETH/);
+      assert.equal(await text('loop-flow-wallet-change'), '5,000 USDC → 2.5 ETH');
+      assert.equal(await text('loop-flow-net'), 'Assets minus debt: $10,000.00');
     }
     await click('lend-check');
     assert.equal(await text('lend-feedback-title'), 'Review your answers.');
@@ -190,8 +213,30 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
     assert.ok(await evaluate("Array.from(document.querySelectorAll('#loop-price-chart .chart-label')).every(e=>Number.parseFloat(getComputedStyle(e).fontSize)*document.getElementById('loop-price-chart').getBoundingClientRect().width/620>=11.9)"));
     await navigate(base + 'lending.html#loop-lesson=build');
-    await click('loop-flow-next'); await click('loop-flow-next');
-    assert.match(await text('loop-flow-wallet'), /2.5 ETH/);
+    await evaluate("document.getElementById('loop-flow-slider').scrollIntoView({block:'center'})");
+    await settle(evaluate);
+    const sliderBox = await evaluate("(()=>{const r=document.getElementById('loop-flow-slider').getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height}})()");
+    assert.ok(sliderBox.height >= 44);
+    // Drag the native thumb through all four stops with actual touch input.
+    const point = fraction => ({ x: sliderBox.left + 26 + (sliderBox.width - 52) * fraction, y: sliderBox.top + sliderBox.height / 2, id: 0, radiusX: 2, radiusY: 2 });
+    await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+    try {
+      // Touch moves can be coalesced to animation frames; let each stop render.
+      await call('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(0)] });
+      await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(1 / 3)] });
+      await settle(evaluate);
+      assert.equal(await evaluate("document.getElementById('loop-flow-slider').value"), '1');
+      await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(2 / 3)] });
+      await settle(evaluate);
+      assert.match(await text('loop-flow-wallet'), /2.5 ETH/);
+      await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(1)] });
+      await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await settle(evaluate);
+    } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
+    assert.equal(await text('loop-flow-supplied'), '7.5 ETH');
+    assert.equal(await text('loop-flow-net'), 'Assets minus debt: $10,000.00');
+    await click('loop-flow-previous');
+    assert.equal(await text('loop-flow-debt-change'), 'Unchanged');
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
     await navigate(base + 'lending.html#loop-lesson=unwind');
     await click('lend-retry'); await choose('prediction', 'all'); await click('lend-reveal');
