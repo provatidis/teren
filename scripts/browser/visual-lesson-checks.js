@@ -16,6 +16,8 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
   await navigate(base + 'learn.html#lesson=token-balances');
   await resetVariation('learn');
+  assert.match(await evaluate("document.querySelector('.scene-prediction-question').textContent"), /\$4,000.00/);
+  assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
   assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false);
   const saved = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");
   const figure = await evaluate("document.querySelector('.scene-token-figure').outerHTML");
@@ -51,6 +53,8 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
 
   await navigate(base + 'learn.html#manage=range-width');
   await resetVariation('manage');
+  assert.match(await evaluate("document.querySelector('#manage-range-scene .scene-prediction-question').textContent"), /\$2,300.00/);
+  assert.equal(await evaluate("document.querySelector('#manage-range-scene .scene-prediction-question').checkVisibility()"), true);
   assert.equal(await evaluate("document.getElementById('manage-reveal').disabled"), false);
   const rangeSaved = await evaluate("localStorage.getItem('passiko-range-learning-v1')");
   for (const [price, narrow, wide] of [[1400, 'Outside range', 'Outside range'], [1900, 'At boundary', 'Inside range'], [2000, 'Inside range', 'Inside range'], [2300, 'Outside range', 'Inside range'], [2500, 'Outside range', 'At boundary'], [2800, 'Outside range', 'Outside range']]) {
@@ -72,6 +76,8 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   for (const [id, reason, application] of [['build', 'debt', 'supplied'], ['unwind', 'backing', 'blocked']]) {
     await navigate(base + 'lending.html#loop-lesson=' + id);
     await click('lend-reveal'); await click('lend-retry');
+    assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), await text('lend-question'));
+    assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
     assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
     const before = await evaluate("localStorage.getItem('teren-loop-learning-v1')");
     await click('loop-flow-next');

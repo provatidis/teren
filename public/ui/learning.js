@@ -1,5 +1,6 @@
 import { optionalPrediction, sceneNode } from '../lib/lesson-scene.js';
 import { createTokenBalanceScene } from '../lib/liquidity-lesson-scenes.js';
+import { createFoundationScene } from '../lib/foundation-lesson-scenes.js';
 import { stageForLesson } from '../learning/example-path.js';
 import { DEEPER_READING } from '../learning/deeper-reading.js';
 import { lessonWalkthrough } from '../lib/lesson-walkthrough.js';
@@ -22,8 +23,12 @@ import { tokenBalanceNarration, benchmarkNarration, lessonReasonFeedback } from 
 export function initLearning() {
   const $ = id => document.getElementById(id);
   const predictionField = $('learn-prediction-field'), controls = $('learn-controls');
-  let tokenScene;
-  const visualLesson = () => lesson?.id === 'token-balances';
+  let lessonScene;
+  const foundationLesson = () => ['swap-impact', 'pool-share'].includes(lesson?.id);
+  const visualLesson = () => foundationLesson() || lesson?.id === 'token-balances';
+  const questionLabel = () => lesson.id === 'swap-impact' ? fmt(draft.inputs.amount, 0) + ' ETH swap'
+    : lesson.id === 'pool-share' ? fmt(draft.inputs.depositEth, 0) + ' ETH deposit'
+      : usd(draft.inputs.futurePrice) + ' example';
   const restored = readProgress();
   const progress = restored.progress;
   let available = restored.available;
@@ -122,10 +127,13 @@ export function initLearning() {
     const model = lesson.protocol + (lesson.id === 'range-boundaries' ? ' · Price range' : ['swap-impact', 'pool-share'].includes(lesson.id) ? ' · Virtual pool' : ' · Full-range 50/50');
     $('learn-model').textContent = model + ' · Illustrative inputs · USDC = $1';
     if (visualLesson()) {
-      $('learn-prediction-question').textContent = 'If ETH moves to ' + usd(s.futurePrice) + ', will your liquidity hold less, more, or the same ETH?';
-      tokenScene = createTokenBalanceScene(s, optionalPrediction(predictionField));
-      $('learn-token-scene').replaceChildren(tokenScene.element);
-      $('learn-run').textContent = 'Explain the ' + usd(s.futurePrice) + ' example →';
+      $('learn-prediction-question').textContent = foundationLesson() ? lesson.prediction
+        : 'If ETH moves to ' + usd(s.futurePrice) + ', will your liquidity hold less, more, or the same ETH?';
+      const prediction = optionalPrediction(predictionField);
+      lessonScene = foundationLesson() ? createFoundationScene(lesson.id, s, draft.variant, prediction)
+        : createTokenBalanceScene(s, prediction);
+      $('learn-scene').replaceChildren(lessonScene.element);
+      $('learn-run').textContent = 'Explain the ' + questionLabel() + ' →';
     }
   }
   function invalidate() {
@@ -204,7 +212,10 @@ export function initLearning() {
     }
     $('learn-metrics').replaceChildren(...metrics); $('learn-visual').replaceChildren(...visual);
     const predicted = lesson.predictions.find(([id]) => id === outcome.prediction)?.[1];
-    $('learn-prediction-feedback').textContent = !draft.prediction ? 'At the question price: ' + predicted + '.' : draft.prediction === outcome.prediction ? 'Your prediction matches the result.' : 'The result differs from your prediction: ' + predicted + '. Compare it with your prediction.';
+    $('learn-prediction-feedback').textContent = !draft.prediction
+      ? (foundationLesson() ? 'For the question setup: ' : 'At the question price: ') + predicted + '.'
+      : draft.prediction === outcome.prediction ? 'Your prediction matches the result.'
+        : 'The result differs from your prediction: ' + predicted + '. Compare it with your prediction.';
     const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
     $('learn-explanation').textContent = (tokenCopy ? tokenCopy.exchange + (tokenCopy.direction === 'same' ? '' : ' Trading to align pool and market prices is called arbitrage.') + ' Neither token is created by the pool.' : null) || benchmarkNarration(lesson.id, outcome) || lesson.explanation;
     $('learn-reason-question').textContent = tokenCopy?.reasoning || lesson.reasoning;
@@ -218,7 +229,7 @@ export function initLearning() {
     learningPitfall($('learn-pitfall'),POOL_PITFALLS[lesson.id]);
     renderDeeper();
     $('learn-results').hidden = false; $('learn-assessment').hidden = false;
-    $('learn-run').textContent = visualLesson() ? 'Explain the ' + usd(s.futurePrice) + ' example →' : 'Run again →';
+    $('learn-run').textContent = visualLesson() ? 'Explain the ' + questionLabel() + ' →' : 'Run again →';
     $('learn-input-status').textContent = '';
     const home = new URL('./', location.href);
     if (lesson.id === 'range-boundaries') home.hash = rangeHash(r);
@@ -265,20 +276,24 @@ export function initLearning() {
     $('learn-input-status').textContent = ''; $('learn-run').disabled = !draft.prediction && !visualLesson(); $('learn-run').textContent = 'Run experiment →';
     choices('learn-predictions', 'learn-prediction', lesson.predictions, draft.prediction);
     choices('learn-reasons', 'learn-reason', lesson.reasons, draft.reason);
-    $('learn-token-scene').hidden = !visualLesson();
+    $('learn-scene').hidden = !visualLesson();
+    $('learn-setup').hidden = foundationLesson();
     $('learn-metrics').hidden = visualLesson(); $('learn-visual').hidden = visualLesson();
-    $('learn-experiment-title').textContent = visualLesson() ? 'Watch the token mix' : 'Your experiment';
+    $('learn-experiment-title').textContent = {
+      'swap-impact': 'Follow the swap', 'pool-share': 'Watch your pool share', 'token-balances': 'Watch the token mix',
+    }[lesson.id] || 'Your experiment';
     if (visualLesson()) {
       const settings = sceneNode('details', undefined, 'scene-question-settings');
-      settings.append(sceneNode('summary', 'Change the question price'), controls);
+      const label = lesson.id === 'swap-impact' ? 'trade size' : lesson.id === 'pool-share' ? 'deposit' : 'price';
+      settings.append(sceneNode('summary', 'Change the question ' + label), controls);
       $('learn-controls-home').replaceChildren(settings);
     } else {
       $('learn-prediction-home').append(predictionField);
       $('learn-controls-home').replaceChildren(controls);
-      $('learn-token-scene').replaceChildren(); tokenScene = null;
+      $('learn-scene').replaceChildren(); lessonScene = null;
     }
     renderControls(); updateSetup(); updateProgress();
-    if (draft.ran) { if (visualLesson()) tokenScene.show(draft.inputs.futurePrice); renderResults(); if (checkLessonUnderstanding(id, draft.inputs, draft.variant, draft.reason, draft.application).passed) showCheck(false); }
+    if (draft.ran) { if (visualLesson()) lessonScene.showQuestion(); renderResults(); if (checkLessonUnderstanding(id, draft.inputs, draft.variant, draft.reason, draft.application).passed) showCheck(false); }
     persist();
     return true;
   }
@@ -305,7 +320,7 @@ export function initLearning() {
   }
   $('learn-run').addEventListener('click', () => {
     draft.prediction = selection('learn-prediction'); if (!draft.prediction && !visualLesson()) return;
-    if (visualLesson()) tokenScene.show(draft.inputs.futurePrice);
+    if (visualLesson()) lessonScene.showQuestion();
     draft.ran = true; renderResults(); persist();
     $('learn-results-title').focus({ preventScroll: true });
     $('learn-results').scrollIntoView({ block: 'start', behavior: 'instant' });

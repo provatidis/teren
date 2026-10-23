@@ -1,5 +1,12 @@
 # Release history
 
+## 1.24.0 — 2026-10-24
+
+- Extend the visual lessons to swaps and providing liquidity. Follow ETH into the pool and USDC out, then compare small and large trades by their average execution price. Step through a matching deposit and a separate trader’s later swap, with the ownership percentage visible beside both token balances.
+- Keep the prediction question visible in all six visual lessons. Answer choices remain optional; exploration and explanations are available immediately. Retain the conceptual checks, saved answers, completion and existing Experiment links.
+- Keep exploratory amounts separate from the lesson question. Each starts from the original pool; replay does not accumulate trades. Explicit question edits invalidate earlier answers, while opening an explanation restores its question amount.
+- Check exact swap quotes, retained fees, proportional ownership, keyboard actions, reduced motion, restoration and stable touch controls at 390px and 320px. These are hypothetical v2-style teaching scenes; recorded evidence is unchanged.
+
 ## 1.23.0 — 2026-10-24
 
 - Establish four visual lesson pilots: build a loop, unwind it, changing token balances, and narrow versus wide ranges. Show the starting state and offer an optional prediction before exploration. Explanation and changed-situation checks still determine completion.
