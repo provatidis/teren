@@ -1,8 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-const { version } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
-const { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } = await import('../public/models/range-decisions.js?v=' + version);
+import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../public/models/range-decisions.js';
 import { MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../public/learning/choosing-ranges.js';
 import { managementLessonFromHash } from '../public/lib/management-links.js';
 import { MANAGEMENT_KEY, emptyManagementProgress, parseManagementProgress, readManagementProgress, saveManagementProgress } from '../public/data/management-progress.js';

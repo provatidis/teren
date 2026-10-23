@@ -1,9 +1,9 @@
-import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js?v=1.17.1';
-import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../models/range-decisions.js?v=1.17.1';
-import { managementLessonFromHash } from '../lib/management-links.js?v=1.17.1';
-import { readManagementProgress, saveManagementProgress } from '../data/management-progress.js?v=1.17.1';
-import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js?v=1.17.1';
-import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback } from '../lib/learning-elements.js?v=1.17.1';
+import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js';
+import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../models/range-decisions.js';
+import { managementLessonFromHash } from '../lib/management-links.js';
+import { readManagementProgress, saveManagementProgress } from '../data/management-progress.js';
+import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
+import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback } from '../lib/learning-elements.js';
 import { rangeHash } from '../lib/range-links.js';
 
 export function initManagementLearning() {

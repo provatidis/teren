@@ -1,0 +1,26 @@
+name: Recheck recorded chain evidence
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Re-read both historical cases and compare their evidence
+        run: npm run check:records
+      - name: Publish the verification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: record-verification
+          path: record-verification.json
+          if-no-files-found: error

@@ -17,19 +17,33 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['22', '24']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: ${{ matrix.node }}
       - name: Check project structure and module boundaries
         run: npm run check
       - name: Test calculation models, snapshots, and browser storage
         run: npm test
+      - name: Build content-hashed static site
+        run: npm run build
       - name: Test desktop and mobile interactions and downloads
+        if: matrix.node == '24'
         env:
           CHROMIUM_BIN: /usr/bin/google-chrome
+          SITE_DIR: dist
         run: npm run test:browser
+      - name: Keep the tested website for deployment
+        if: matrix.node == '24'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tested-site
+          path: dist
+          include-hidden-files: true
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
@@ -43,13 +57,16 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: tested-site
+          path: dist
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload the static website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: public
+          path: dist
       - name: Publish the website
         id: deployment
         uses: actions/deploy-pages@v4

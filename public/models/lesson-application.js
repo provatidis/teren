@@ -1,4 +1,4 @@
-import { runLesson } from './lesson-experiments.js?v=1.17.1';
+import { runLesson } from './lesson-experiments.js';
 
 // Change one assumption. Expected answers come from the same calculations as the lesson.
 export function lessonApplication(id, outcome) {

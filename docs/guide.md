@@ -16,17 +16,23 @@ Open [the lending lab](https://teren.sh/lending.html#experiment) directly or sta
 
 **Your starting loan** sets supplied ETH (representing WETH), its starting price, whether it backs the loan and the amount of USDC borrowed. **Rates and collateral rules** contains editable teaching assumptions. Maximum starting LTV limits a new loan; the liquidation threshold governs an existing loan. The starting loan must be valid before later conditions can be explored. The setup collapses on phones and summarizes the starting balances.
 
-**Change the conditions** adjusts the later valuation price and elapsed days. Both rates use fixed simple interest: supply interest adds ETH, and borrow interest adds USDC debt. Borrowed USDC stays in the wallet. **Assets minus debt** includes that cash and its matching liability, so borrowing does not create profit. A health factor below 1 means eligible for liquidation; an endpoint does not reconstruct a path or execute a liquidation.
+**Change the conditions** adjusts the later valuation price and elapsed days. Both rates use fixed simple interest: supply interest adds ETH, and borrow interest adds USDC debt. Borrowed USDC stays in the wallet. **Assets minus debt** includes that cash and its matching liability, so borrowing does not create profit. A health factor below 1 means eligible for liquidation. **Balances before liquidation** labels the unchanged endpoint; **What would liquidation take?** opens a separate single-event illustration at that price.
 
 Assumed APRs stay visible beside the conditions; **Edit rates** opens and focuses their controls. On mobile, a compact health factor and status follow you while editing, with **Full result** opening the detailed outcome. Invalid loan inputs offer a shortcut to the affected field, even when it is inside a closed disclosure. An incomplete response budget hides only the response comparison; the current loan remains visible.
 
-**Repay or add collateral?** compares two immediate responses with the same additional external budget at the chosen price. Repayment stops at the total debt and shows unused money. Added collateral increases the supplied ETH without reducing debt. Execution costs and delays are excluded, so the comparison does not promise that a response can happen before liquidation.
+**See health factor across prices** keeps the accrued token balances fixed while changing only ETH’s valuation price. It shows the health-factor-1 boundary and the currently selected price; it is a sensitivity chart, not recorded price history.
+
+**What would liquidation take?** uses an editable requested repayment fraction and bonus. The liquidator repays debt and takes matching collateral plus the bonus. The result shows debt repaid, ETH removed, extra value taken, remaining balances and the effect on net assets. Repayment is capped by available collateral; a crash can leave unpaid debt after all collateral is removed. The percentages are illustrative, not current Aave close-factor or bonus rules. The example excludes earlier events, gas and later protocol handling of shortfalls. Event assumptions have a separate tab draft and are retained in copied loan links.
+
+**Compare interest assumptions** shows the main model’s simple-interest debt beside continuous compounding at the same constant borrow APR. At high rates or long durations, a visible prompt points to the difference. Neither calculation forecasts changing rates or reproduces Aave’s exact reserve-index accounting.
+
+**Repay or add collateral?** compares two immediate responses before any liquidation with the same additional external budget at the chosen price. Repayment stops at the total debt and shows unused money. Added collateral increases the supplied ETH without reducing debt. Execution costs and delays are excluded, so the comparison does not promise that a response can happen before liquidation.
 
 The lab keeps the last valid working loan in this tab's session storage, separately from lesson examples and liquidity drafts. **Copy experiment link** preserves all inputs in a validated `#loan=collateral-loan-v1` link; if clipboard access fails, a selectable link appears. Lending is not yet part of the saved liquidity experiment library. Lesson progress uses its own local-storage key. **Explore this setup in Experiment** opens the exact example in a separate tab without replacing the working loan.
 
 **Learn** resumes the last opened lending lesson, including after a reload or a visit to Liquidity. Explicit `#lesson=...` links still select their named lesson, and **All lessons** keeps the whole sequence accessible. The current topic is labelled rather than linked, so selecting it cannot unexpectedly switch modes.
 
-USDC = $1 is an assumption. Rates, LTV and threshold are illustrative, not current Aave market quotes; Aave's indexed interest accounting is not reproduced. Looping, multiple collateral assets, live lending snapshots and verified lending history are later iterations. See [the model](models.md#collateralized-loan-model).
+USDC = $1 is an assumption. Rates, LTV and threshold are illustrative, not current Aave market quotes; Aave's indexed interest accounting is not reproduced. Looping, multiple collateral assets, live lending snapshots and independently checked lending history are later iterations. See [the model](models.md#collateralized-loan-model).
 
 ## Starting and comparing an experiment
 
@@ -69,7 +75,7 @@ Use **Start**, **Outside sample**, **Between samples**, **Return sample** and **
 
 Expand **Tokens and verification** for the full UTC window, token balances, the selected block/hash and exact fee/time integers. **How to read this replay** explains sampling, fee tokens versus dollar valuation and the holding benchmark. **Export recorded case** downloads the checkpoint snapshots, counters and verification evidence as JSON. **Explore this checkpoint in Playground** starts a new hypothetical range experiment from the selected checkpoint's principal, price and bounds, with zero assumed future fees. Already collectable tokens stay outside both strategies in that new comparison.
 
-These are verified fixed-position replays. They have no editable historical bounds or date window and do not provide arbitrary-range backtesting or lifetime PnL. Valuations use the selected pool ratio and USDC = $1; gas and incentives are excluded. See [the replay method and limitations](replay.md) for the fee checks, rounding tolerance and capture procedure.
+These are fixed-position records checked against chain reads and collect simulations at capture. The browser revalidates bundled arithmetic; it does not re-query Ethereum. Capture dates and providers are in **Tokens and verification**, alongside the reproduction procedure. They have no editable historical bounds or date window and do not provide arbitrary-range backtesting or lifetime PnL. Valuations use the selected pool ratio and USDC = $1; gas and incentives are excluded. See [the replay method and limitations](replay.md) for the fee checks, rounding tolerance and capture procedure.
 
 ## Saved experiments
 
@@ -130,7 +136,7 @@ Applied progress uses `passiko-applied-liquidity-v1`, independently of the uncha
 
 ## Methods and feedback
 
-The footer on Experiment and Learn opens [Methods](https://teren.sh/methods.html), [About](https://teren.sh/about.html), source and feedback in a separate tab, keeping the current experiment open. Methods explains hypothetical inputs, snapshot validation and independently checked historical accounting. Feedback opens a prefilled GitHub issue and requires a GitHub account to post.
+The footer links to [Methods](https://teren.sh/methods.html), [About](https://teren.sh/about.html) and source in separate tabs, keeping the current experiment open. Methods explains hypothetical inputs, snapshot validation and historical accounting checked at capture. **Email feedback** opens a message to hello@teren.sh without a GitHub account. **Report an issue** opens a prefilled GitHub issue for visitors who prefer it.
 
 On mobile, use **Explore experiment tools** or **Explore inspect tools** to reveal the secondary destinations. Primary Experiment, Learn and Inspect navigation stays visible. Practical lesson situations change the supplied facts and may change the correct follow-up; hints remain available and no calculation is required.
 

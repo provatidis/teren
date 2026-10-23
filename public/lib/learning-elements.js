@@ -1,4 +1,4 @@
-import { orderedLearningChoices } from './learning-choices.js?v=1.17.1';
+import { orderedLearningChoices } from './learning-choices.js';
 
 export function learningChapter(chapter, completed, total) {
   document.getElementById('learn-current-chapter').textContent = chapter;

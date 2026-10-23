@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve, sep, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), 'public');
+const root = resolve(dirname(fileURLToPath(import.meta.url)), process.env.SITE_DIR || 'public');
 const types = {
   '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml',
   '.json': 'application/json', '.webmanifest': 'application/manifest+json',

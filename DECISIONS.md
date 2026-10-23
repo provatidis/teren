@@ -22,3 +22,7 @@ Technical references: [models](docs/models.md), [data](docs/data.md), [developme
 - Learn completion checks explanation and application of the concept. Predictions are ungraded; calculations and rounding practice stay optional in Go deeper. A changed historical setup is a labelled thought experiment, separate from verified accounting.
 
 - Practical range lessons follow the essentials before historical accounting. Fee-rate examples use explicitly supplied fictional totals; no fee forecast is inferred from endpoint prices. Each range keeps its own starting basket. Essential misconceptions stay visible in the normal lesson flow.
+
+- Review blind spots with each mechanism release: identify interpretations that could remain wrong even if arithmetic passes, test boundary cases, and report unmeasured learning or execution assumptions. Keep a short open list in `docs/review.md`; passing tests establish consistency, not teaching effectiveness.
+- Keep the endpoint loan model compatible. Illustrate liquidation as an explicitly assumed event with separate state and versioned link fields. Preserve remaining debt when collateral is exhausted; distinguish repayment from the bonus cost.
+- Production assets use generated content hashes throughout the dependency graph. Source stays readable, the published site remains static, and CI tests the generated output on supported Node versions.

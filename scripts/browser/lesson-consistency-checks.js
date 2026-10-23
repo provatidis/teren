@@ -1,7 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-
-const { version } = JSON.parse(await readFile(new URL('../../package.json', import.meta.url), 'utf8'));
 
 export async function checkLessonConsistency({ evaluate, click, fill, text, navigate, base, call, nextEvent }) {
   const choose = (name, value) => evaluate(`document.querySelector('input[name="${name}"][value="${value}"]').click()`);
@@ -10,9 +7,12 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   await choose('learn-reason','rebalance'); await choose('learn-application','more'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   const entries = await evaluate("performance.getEntriesByType('resource').map(entry=>entry.name)");
+  const buildResponse = await fetch(base + 'build-manifest.json');
+  const manifest = buildResponse.ok ? await buildResponse.json() : null;
   for (const path of ['models/lesson-experiments.js','models/learning-answer.js','models/lesson-application.js','learning/liquidity-essentials.js','lib/lesson-narration.js','lib/lesson-application-copy.js','lib/learning-choices.js','data/learning-progress.js']) {
-    assert.ok(entries.some(url=>url.endsWith('/' + path + '?v=' + version)), path + ' must load its current release.');
-    assert.ok(!entries.some(url=>url.endsWith('/' + path)), path + ' must not reuse an older unversioned teaching module.');
+    const expected = manifest ? manifest.assets[path] : path;
+    assert.ok(entries.some(url=>url.endsWith('/' + expected)), path + ' must load its canonical build identity.');
+    if (manifest) assert.ok(!entries.some(url=>url.endsWith('/' + path)), path + ' must not mix hashed and unversioned modules.');
   }
   for (const [price, prediction, answer, direction] of [['4000','less','.884','less ETH and more USDC'],['1000','more','1.768','more ETH and less USDC'],['2000','same','1.25','both token quantities stay the same']]) {
     await navigate(base + 'learn.html#lesson=token-balances');

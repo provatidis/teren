@@ -1,7 +1,9 @@
-import { LOAN_DEFAULTS, LOAN_LIMITS, validateLoan } from '../models/collateral-loan-v1.js?v=1.17.1';
+import { LOAN_DEFAULTS, LOAN_LIMITS, validateLoan } from '../models/collateral-loan-v1.js';
+import { LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation } from '../models/loan-explanations.js';
 
 export const LOAN_DRAFT_KEY = 'teren-lending-draft-v1';
 export const LOAN_LEARNING_KEY = 'teren-lending-learning-v1';
+export const LIQUIDATION_DRAFT_KEY = 'teren-liquidation-draft-v1';
 export const LENDING_LESSON_IDS = ['supply', 'borrow', 'conditions', 'respond'];
 
 export function readLoanDraft(getStorage = () => globalThis.sessionStorage) {
@@ -17,6 +19,20 @@ export function readLoanDraft(getStorage = () => globalThis.sessionStorage) {
 export function saveLoanDraft(input, getStorage = () => globalThis.sessionStorage) {
   if (Object.keys(validateLoan(input)).length) return false;
   try { getStorage().setItem(LOAN_DRAFT_KEY, JSON.stringify({ version: 1, input })); return true; }
+  catch { return false; }
+}
+
+export function readLiquidationDraft(getStorage = () => globalThis.sessionStorage) {
+  try {
+    const saved = JSON.parse(getStorage().getItem(LIQUIDATION_DRAFT_KEY));
+    if (saved?.version !== 1 || Object.keys(validateLiquidation(saved.input)).length) return { ...LIQUIDATION_DEFAULTS };
+    return Object.fromEntries(Object.keys(LIQUIDATION_LIMITS).map(key => [key, saved.input[key]]));
+  } catch { return { ...LIQUIDATION_DEFAULTS }; }
+}
+
+export function saveLiquidationDraft(input, getStorage = () => globalThis.sessionStorage) {
+  if (Object.keys(validateLiquidation(input)).length) return false;
+  try { getStorage().setItem(LIQUIDATION_DRAFT_KEY, JSON.stringify({ version: 1, input })); return true; }
   catch { return false; }
 }
 

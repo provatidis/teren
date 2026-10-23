@@ -61,6 +61,10 @@ The browser opens the bundled cases without RPC calls. Export includes all check
 
 Source references: [Uniswap range counters](https://github.com/Uniswap/v3-core/blob/main/contracts/interfaces/pool/IUniswapV3PoolDerivedState.sol), [fee-growth rules](https://github.com/Uniswap/v3-core/blob/main/contracts/libraries/Tick.sol), [NFT accounting events](https://github.com/Uniswap/v3-periphery/blob/main/contracts/interfaces/INonfungiblePositionManager.sol).
 
+## Recheck the bundled evidence in CI
+
+The manually triggered **Recheck recorded chain evidence** workflow runs `npm run check:records`. It recaptures both windows, checks fresh contract/collection/event evidence, and compares every canonical checkpoint with the bundled record, excluding provider labels and capture timestamps. It uploads `record-verification.json` with the run time, providers and per-case matches or errors. The original files are not overwritten. Public archive availability can fail the run; it is separate from ordinary release CI. No new run is implied by a “checked at capture” label.
+
 ## Next validation cases
 
 Compare two existing ranges over the same period in the ETH/USDC 0.05% pool, retaining each position's starting basket and verification evidence. Arbitrary hypothetical bounds need historical tick/swap reconstruction and an explicit assumption about the effect of adding liquidity. Hourly pool price and global fee growth alone do not establish their fee allocation.

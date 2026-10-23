@@ -30,8 +30,8 @@
     <meta name="twitter:description" content="Explore collateral, borrowing, interest and liquidation boundaries with a hypothetical lending lab and four short lessons.">
     <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
     <meta name="twitter:image:alt" content="Teren. Learn and experiment with DeFi, with a liquidity range scenario.">
-    <link rel="stylesheet" href="styles.css?v=1.17.1">
-    <script type="module" src="lending-main.js?v=1.17.1"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="lending-main.js"></script>
   </head>
   <body class="lending-page">
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -146,7 +146,7 @@
                 <button type="button" data-loan-price="1" aria-pressed="true">Unchanged</button>
                 <button type="button" data-loan-price="1.25" aria-pressed="false">+25%</button>
               </div>
-              <div class="loan-rate-summary"><p id="loan-rates">Assumed APRs: 2% supply · 5% borrow</p><button id="loan-edit-rates" class="text-button" type="button">Edit rates ↑</button></div>
+              <div class="loan-rate-summary"><p id="loan-rates">Simple APR assumptions: 2% supply · 5% borrow</p><button id="loan-edit-rates" class="text-button" type="button">Edit rates ↑</button></div>
             </section>
             <div id="loan-invalid" class="notice" role="status" hidden>
               <p id="loan-error-summary">Check the highlighted loan fields to see the result.</p><button id="loan-fix-input" class="text-button" type="button">Go to field ↑</button>
@@ -161,9 +161,28 @@
                 <strong id="loan-health" class="loan-health">1.60</strong>
                 <p id="loan-boundary" class="loan-boundary"></p>
                 <p id="loan-initial-health" class="fine-print"></p>
+                <details id="loan-chart-details" class="loan-chart-details">
+                  <summary>See health factor across prices</summary>
+                  <p class="body-copy">Hold the accrued token balances fixed and change ETH’s price. Below the dashed line, liquidation is possible.</p>
+                  <figure>
+                    <svg id="loan-health-chart" viewBox="0 0 620 250" role="img" aria-label="Health factor at different ETH prices">
+                      <path id="loan-chart-danger" class="loan-chart-danger"/>
+                      <path id="loan-chart-boundary" class="loan-chart-boundary"/>
+                      <path id="loan-chart-line" class="curve-line"/>
+                      <circle id="loan-chart-dot" r="6" class="curve-dot"/>
+                      <text id="loan-chart-top" x="12" y="24" class="chart-label"></text>
+                      <text id="loan-chart-one" x="12" class="chart-label">1</text>
+                      <text x="12" y="202" class="chart-label">0</text>
+                      <text x="65" y="236" class="chart-label">$0</text>
+                      <text id="loan-chart-max" x="590" y="236" text-anchor="end" class="chart-label"></text>
+                    </svg>
+                    <figcaption id="loan-chart-caption" class="fine-print"></figcaption>
+                  </figure>
+                </details>
               </section>
               <section class="card loan-balances" aria-labelledby="loan-balances-title">
                 <h2 id="loan-balances-title">Keep both sides in view</h2>
+                <p id="loan-balance-context" class="body-copy">These are balances before any liquidation.</p>
                 <dl class="loan-balance-list">
                   <div>
                     <dt>Supplied ETH</dt>
@@ -195,11 +214,42 @@
                     <dd id="loan-borrow-interest"></dd>
                   </dl>
                 </details>
+                <details id="loan-compounding" class="loan-interest">
+                  <summary>Compare interest assumptions</summary>
+                  <p class="body-copy">The main model adds interest to the starting balance. Continuous compounding also charges interest on earlier interest, at the same constant APR.</p>
+                  <dl><dt>USDC debt · simple interest</dt><dd id="loan-simple-debt"></dd><dt>USDC debt · continuous compounding</dt><dd id="loan-compound-debt"></dd></dl>
+                  <p id="loan-interest-difference" class="body-copy"></p>
+                  <p class="fine-print">This reference holds the borrow APR fixed. Actual Aave debt uses reserve indexes and an approximation; changing rates and update history matter.</p>
+                </details>
+                <p id="loan-interest-alert" class="loan-attention" hidden>At this rate and duration, compounding changes debt noticeably. <button id="loan-open-compounding" class="text-button" type="button">Compare interest assumptions ↑</button></p>
               </section>
+              <details id="loan-liquidation" class="card loan-liquidation">
+                <summary><strong>What would liquidation take?</strong><span id="loan-liquidation-caption">Explore one hypothetical event at the chosen price.</span></summary>
+                <p class="body-copy">A liquidator repays part of your debt and receives collateral worth that repayment plus a bonus. The bonus comes from your collateral.</p>
+                <p class="fine-print">This is one event at your chosen ETH price, after the selected time. The percentages below are teaching assumptions, not Aave’s current liquidation rules.</p>
+                <div class="loan-liquidation-inputs">
+                  <div class="scenario-field"><label for="liquidation-repayPercent">Debt repayment requested <span>% of debt</span></label><input id="liquidation-repayPercent" type="number" min="1" max="100" step="any" value="50" aria-describedby="liquidation-repayPercent-error"><p id="liquidation-repayPercent-error" class="field-error" hidden></p></div>
+                  <div class="scenario-field"><label for="liquidation-bonusPercent">Extra collateral taken <span>% bonus</span></label><input id="liquidation-bonusPercent" type="number" min="0" max="30" step="any" value="5" aria-describedby="liquidation-bonusPercent-error"><p id="liquidation-bonusPercent-error" class="field-error" hidden></p></div>
+                </div>
+                <p id="loan-liquidation-status" class="loan-attention" role="status"></p>
+                <div id="loan-liquidation-result" hidden>
+                  <dl class="loan-balance-list">
+                    <div><dt>USDC debt repaid by the liquidator</dt><dd id="loan-liquidation-repaid"></dd></div>
+                    <div><dt>ETH collateral removed</dt><dd id="loan-liquidation-removed"></dd><dd id="loan-liquidation-removed-value" class="loan-balance-note"></dd></div>
+                    <div><dt>Extra value taken as the bonus</dt><dd id="loan-liquidation-penalty"></dd><dd class="loan-balance-note">The rest of the removed value pays down debt.</dd></div>
+                    <div><dt>Supplied ETH remaining</dt><dd id="loan-liquidation-collateral"></dd></div>
+                    <div><dt>USDC debt remaining</dt><dd id="loan-liquidation-debt"></dd></div>
+                    <div class="loan-net"><dt>Assets minus debt after this event</dt><dd id="loan-liquidation-net"></dd><dd id="loan-liquidation-loss" class="loan-balance-note"></dd></div>
+                  </dl>
+                  <p id="loan-liquidation-health" class="body-copy"></p>
+                </div>
+                <p class="fine-print">The borrowed cash stays in your wallet. This event adds no outside funds and includes no gas costs. It does not reconstruct earlier liquidations, execution delays, or later protocol handling of a shortfall.</p>
+                <a href="https://aave.com/help/borrowing/liquidations" target="_blank" rel="noopener noreferrer">How Aave liquidations work ↗</a>
+              </details>
             </div>
             <section class="card loan-responses" aria-labelledby="loan-responses-title">
               <h2 id="loan-responses-title">Repay or add collateral?</h2>
-              <p class="body-copy">Compare an immediate change at the chosen price, using the same additional money from outside this setup.</p>
+              <p class="body-copy">Compare responses before any liquidation, using the same additional money from outside this setup.</p>
               <div class="scenario-field">
                 <label for="loan-budget">Additional budget for either response <span>USD</span></label>
                 <input id="loan-budget" type="number" min="0" max="1000000000" step="any" value="500" aria-describedby="loan-budget-error">
@@ -246,7 +296,7 @@
           <p>ETH represents supplied WETH, with wrapping costs excluded. USDC is fixed at $1. Borrowed USDC stays in the wallet without earning interest; it is not spent or reinvested. Supply interest increases ETH, and borrow interest increases USDC debt.</p>
           <p>Both rates use simple interest: starting token amount × APR × days / 365. This keeps the lesson transparent; it does not reproduce Aave’s reserve indexes, variable rates, compounding or exact contract rounding.</p>
           <p>Health factor = collateral value × liquidation threshold / debt value. Below 1, the position is eligible for liquidation. With no debt, there is no loan liquidation boundary. Initial borrowing is limited by maximum LTV; later price and interest changes may move a loan above that ratio.</p>
-          <p>Each result is an endpoint before liquidation. The model does not reconstruct the intervening path or execute a liquidation. It excludes oracle delays, market liquidity, caps, E-mode, additional assets and transaction costs. Inspect currently contains liquidity records; independently verified lending records are a later step.</p>
+          <p>The separate liquidation illustration applies one event at your chosen price, using the requested repayment percentage and bonus. Available collateral caps the repayment. It separates debt repayment from the bonus cost and leaves unpaid debt visible if collateral runs out. It does not enforce Aave’s close-factor or dust rules or resolve protocol shortfalls.</p><p>The main loan result is an endpoint before liquidation. The model does not reconstruct the intervening path or execute a liquidation. It excludes oracle delays, market liquidity, caps, E-mode, additional assets and transaction costs. Inspect currently contains liquidity records; independently verified lending records are a later step.</p>
           <p><a href="https://aave.com/help/supplying/toggle-collateral-status" target="_blank" rel="noopener noreferrer">Aave: collateral rules ↗</a> · <a href="https://aave.com/faq" target="_blank" rel="noopener noreferrer">Aave: borrowing and liquidation mechanics ↗</a></p>
         </details>
       </section>
@@ -345,7 +395,7 @@
       </section>
       <footer class="site-footer">
         <p>Teren · Look closely.</p>
-        <nav aria-label="Project information"><a href="methods.html">Methods ↗</a><a href="https://github.com/provatidis/teren" target="_blank" rel="noopener noreferrer">Source ↗</a><a href="about.html">About ↗</a><a href="https://github.com/provatidis/teren/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Feedback ↗</a>
+        <nav aria-label="Project information"><a href="methods.html">Methods ↗</a><a href="https://github.com/provatidis/teren" target="_blank" rel="noopener noreferrer">Source ↗</a><a href="about.html">About ↗</a><a href="mailto:hello@teren.sh?subject=Teren%20feedback">Email feedback</a><a href="https://github.com/provatidis/teren/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Report an issue ↗</a>
         </nav>
       </footer>
     </main>

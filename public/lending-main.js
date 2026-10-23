@@ -1,7 +1,7 @@
-import { initPageAccess } from './ui/page-access.js?v=1.17.1';
-import { initLending } from './ui/lending.js?v=1.17.1';
-import { initLendingLearning } from './ui/lending-learning.js?v=1.17.1';
-import { lendingLessonFromHash } from './lib/lending-links.js?v=1.17.1';
+import { initPageAccess } from './ui/page-access.js';
+import { initLending } from './ui/lending.js';
+import { initLendingLearning } from './ui/lending-learning.js';
+import { lendingLessonFromHash } from './lib/lending-links.js';
 
 initPageAccess();
 initLending();

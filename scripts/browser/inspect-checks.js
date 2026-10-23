@@ -8,7 +8,7 @@ export async function checkMobileInspect({ evaluate, call, click, fill, navigate
   await call('Emulation.setDeviceMetricsOverride', { width:390, height:844, deviceScaleFactor:1, mobile:true });
   // Replay an actual previous navigation module against the current markup.
   // No-store keeps this fixture out of subsequent fresh-release checks.
-  await call('Fetch.enable', { patterns:[{ urlPattern:'*ui/workspaces.js*', resourceType:'Script' }] });
+  await call('Fetch.enable', { patterns:[{ urlPattern:'*ui/workspaces*.js*', resourceType:'Script' }] });
   try {
     const paused = nextEvent('Fetch.requestPaused');
     const loading = navigate(base + '#lp-lab');

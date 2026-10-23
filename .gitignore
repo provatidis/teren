@@ -2,3 +2,5 @@ node_modules/
 *.log
 .env
 coverage/
+dist/
+record-verification.json
