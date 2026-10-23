@@ -654,8 +654,13 @@
             <p id="lend-adds" class="learn-level"></p>
             <h2 id="lend-title" tabindex="-1"></h2>
             <p id="lend-intro" class="learn-reading"></p>
+            <section id="lend-visual" class="card learn-flow-card" aria-labelledby="lend-flow-title" hidden>
+              <h3 id="lend-flow-title">Follow the money</h3>
+              <p class="loop-flow-instruction">Drag or use Next to follow each move.</p>
+              <div id="lend-money-flow" class="loop-money-flow" hidden></div>
+            </section>
             <section class="card learn-experiment" aria-labelledby="lend-predict-title">
-              <p class="eyebrow">01 · PREDICT</p>
+              <p id="lend-predict-label" class="eyebrow">01 · PREDICT</p>
               <h3 id="lend-predict-title">Before opening the result</h3>
               <p id="lend-setup" class="learn-setup"></p>
               <fieldset class="learn-fieldset">
@@ -664,13 +669,12 @@
                 </div>
               </fieldset>
               <button id="lend-reveal" class="button primary" type="button" disabled>Reveal the result →</button>
-              <p class="fine-print">Your prediction helps you explore the idea. You can complete the lesson even if it is wrong.</p>
+              <p id="lend-predict-note" class="fine-print">Your prediction helps you explore the idea. You can complete the lesson even if it is wrong.</p>
             </section>
             <section id="lend-observe" class="card learn-results" aria-labelledby="lend-observe-title" hidden>
-              <p class="eyebrow">02 · OBSERVE</p>
+              <p id="lend-observe-label" class="eyebrow">02 · OBSERVE</p>
               <h3 id="lend-observe-title" tabindex="-1">Read the result</h3>
               <p id="lend-prediction-feedback" class="learn-prediction-feedback" role="status"></p>
-              <div id="lend-money-flow" class="loop-money-flow" hidden></div>
               <div id="lend-metrics" class="learn-metrics">
               </div>
               <p id="lend-takeaway" class="learn-takeaway"></p>
@@ -689,7 +693,7 @@
               </details>
             </section>
             <section id="lend-assessment" class="card learn-assessment" aria-labelledby="lend-check-title" hidden>
-              <p class="eyebrow">03 · CHECK YOUR UNDERSTANDING</p>
+              <p id="lend-check-label" class="eyebrow">03 · CHECK YOUR UNDERSTANDING</p>
               <h3 id="lend-check-title">Explain the result and apply the idea</h3>
               <form id="lend-form" novalidate>
                 <fieldset class="learn-fieldset">

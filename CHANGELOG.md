@@ -1,5 +1,12 @@
 # Release history
 
+## 1.22.0 — 2026-10-24
+
+- Open the build and unwind lessons with **Follow the money**, before any answer is required. Keep reflection and conceptual checks below the visual; preserve existing answers, completion and Experiment handoffs.
+- Show wallet tokens, ETH backing the loan and debt as distinct areas. Label transfers with directional arrows, show both sides of borrowing, and keep swaps separate from repayment. Use brief, user-triggered motion with a static reduced-motion alternative; revisiting earlier stages does not animate an undo.
+- Shorten the surrounding explanation and place detailed changes, health factor and costs in an optional disclosure. Keep the fixed-price assumptions and the limits of real withdrawals beside the example.
+- Check upfront access, stage preservation, reduced motion, keyboard navigation and mobile touch dragging alongside the existing accounting tests. Financial models and recorded evidence are unchanged.
+
 ## 1.21.0 — 2026-10-23
 
 - Extend **Follow the money** to the unwinding lesson. Eight slider stops separate two withdrawals, sales and repayments, then the final transfer of debt-free ETH to the wallet.
