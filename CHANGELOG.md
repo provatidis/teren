@@ -1,5 +1,13 @@
 # Release history
 
+## 1.18.0 — 2026-10-23
+
+- Explain lending liquidation with a separate single-event illustration: debt repaid, collateral removed, bonus cost, remaining balances and unpaid debt when collateral runs out. Keep pre-liquidation balances explicit. Event assumptions have their own draft and versioned share fields; older loans retain their calculations.
+- Add a health-factor price chart and continuous-compounding debt reference, with clear fixed-balance and fixed-rate scope. Surface large interest-model differences and clarify lesson explanations.
+- Replace manual release queries with a dependency-free build that hashes all modules/styles and preloads entry dependencies. Check Node 22/24 and run the browser suite against the exact deployed build.
+- Label historical records as checked at capture, expose capture dates/providers and add a manual chain-evidence verification workflow with comparison reports. Add fee-target context, RPC privacy disclosure and email feedback at hello@teren.sh.
+- Record review questions and known blind spots for recurring discussion before further model expansion.
+
 ## 1.17.1 — 2026-10-23
 
 - Shorten the lending entry and keep health factor and liquidation status visible while editing on mobile. Show assumed APRs beside the time controls, with a direct shortcut to edit them.

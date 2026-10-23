@@ -106,6 +106,25 @@ Responses use the same external USD budget at the endpoint. Repayment is capped 
 
 Results are endpoints before any liquidation, not a reconstruction of what would have survived the intervening path. The model excludes variable rates, reserve indexes, compounding, contract rounding, oracle delays, caps, E-mode, additional assets, liquidation execution, gas and swap costs. Borrowed cash is neither spent nor reinvested. Looping and independently verified lending history are not included. Primary references: [Aave collateral rules](https://aave.com/help/supplying/toggle-collateral-status), [supply mechanics](https://aave.com/help/supplying/supply-tokens) and [borrowing/liquidation overview](https://aave.com/faq).
 
+### Single liquidation event and interest reference
+
+`single-liquidation-v1` is a separate hypothetical event applied to an eligible `collateral-loan-v1` endpoint. At selected price `P`, let supplied collateral value be `V`, debt `D`, requested repayment fraction `q`, and bonus fraction `b`:
+
+```text
+repaid = min(D × q, V / (1 + b))
+removed collateral value = repaid × (1 + b)
+remaining debt = D − repaid
+remaining ETH = supplied ETH − removed collateral value / P
+net assets after = remaining ETH × P + unchanged borrowed cash − remaining debt
+net assets before − net assets after = repaid × b
+```
+
+No event is calculated at health factor exactly 1 or above, or with no debt. Repayment is limited by available collateral; explicit exhaustion sets remaining ETH to zero and leaves unpaid debt visible. This is not a complete Aave liquidation engine: requested fractions and bonuses are teaching assumptions, with no close-factor/dust-policy enforcement, oracle path, transaction ordering, gas or subsequent deficit handling. A single event may leave a position eligible.
+
+The price chart fixes accrued balances and varies only ETH price. Its straight line expresses health factor’s proportionality to collateral price with fixed debt; it is not a price path or evidence that earlier liquidation was avoided.
+
+The optional debt reference is `B × exp(b × d / 365)`, continuous compounding at the entered constant borrow APR. The main model remains simple interest. This reference exposes the increasing difference at high rates and long durations; it does not reproduce Aave’s interest approximation, reserve-index updates or changing rates.
+
 ## Fixed-position historical replay
 
 Release 1.8.0 shipped a verified case for Ethereum Uniswap v3 WETH/USDC position #1382030 in the 0.3% pool. Its nine checkpoints span blocks 26168526–26168941 and **4,992 seconds**, with unchanged liquidity, bounds and position accounting. The holding basket is the exact principal at the first checkpoint; previously accrued fees and recorded owed balances are excluded from both starting strategies.

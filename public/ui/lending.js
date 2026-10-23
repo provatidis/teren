@@ -1,7 +1,8 @@
-import { LOAN_DEFAULTS, LOAN_LIMITS, calculateLoan, validateLoan } from '../models/collateral-loan-v1.js?v=1.17.1';
-import { readLoanDraft, saveLoanDraft } from '../data/lending-state.js?v=1.17.1';
-import { loanHash, readLoanHash } from '../lib/lending-links.js?v=1.17.1';
-import { healthLabel, loanStatus, loanMoney as usd } from '../lib/lending-presentation.js?v=1.17.1';
+import { LOAN_DEFAULTS, LOAN_LIMITS, calculateLoan, validateLoan } from '../models/collateral-loan-v1.js';
+import { readLoanDraft, saveLoanDraft, readLiquidationDraft, saveLiquidationDraft } from '../data/lending-state.js';
+import { LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation, singleLiquidation, interestReference, healthPriceCurve } from '../models/loan-explanations.js';
+import { loanHash, readLoanHash } from '../lib/lending-links.js';
+import { healthLabel, loanStatus, loanMoney as usd } from '../lib/lending-presentation.js';
 import { signedUSD, formatTokenQuantity } from '../lib/format.js';
 
 export function initLending() {
@@ -10,7 +11,77 @@ export function initLending() {
   let current;
   let firstInvalid;
   let revision = 0;
+  let wasEligible = false;
   const keys = Object.keys(LOAN_LIMITS);
+  const liquidationKeys = Object.keys(LIQUIDATION_LIMITS);
+  const readLiquidation = () => Object.fromEntries(liquidationKeys.map(key => [key, $('liquidation-' + key).value === '' ? NaN : Number($('liquidation-' + key).value)]));
+  function writeLiquidation(input) {
+    for (const key of liquidationKeys) $('liquidation-' + key).value = input[key];
+  }
+  function renderExplanations(input, result, save) {
+    const curve = healthPriceCurve(input);
+    $('loan-chart-details').hidden = !curve;
+    if (curve) {
+      const x = price => 65 + price / curve.maxPrice * 525;
+      const y = health => 200 - health / curve.maxHealth * 170;
+      const boundaryY = y(1);
+      const rightHealth = result.end.collateralTokens * curve.maxPrice * input.threshold / 100 / result.end.debt;
+      $('loan-chart-line').setAttribute('d', 'M65 200 L590 ' + y(rightHealth));
+      $('loan-chart-boundary').setAttribute('d', 'M65 ' + boundaryY + ' H590');
+      $('loan-chart-danger').setAttribute('d', 'M65 ' + boundaryY + ' H590 V200 H65 Z');
+      $('loan-chart-dot').setAttribute('cx', x(input.future));
+      $('loan-chart-dot').setAttribute('cy', y(curve.selectedHealth));
+      $('loan-chart-one').setAttribute('y', boundaryY + 5);
+      $('loan-chart-top').textContent = healthLabel(curve.maxHealth);
+      $('loan-chart-max').textContent = usd(curve.maxPrice) + '/ETH';
+      $('loan-chart-caption').textContent = 'At ' + usd(input.future) + '/ETH, health factor is ' + healthLabel(curve.selectedHealth) + '. Balances include ' + input.days + ' days of simple interest. This compares prices at fixed balances; it is not a price history.';
+      $('loan-health-chart').setAttribute('aria-label', 'Health factor versus ETH price at fixed balances. Selected price ' + usd(input.future) + ', health factor ' + healthLabel(curve.selectedHealth) + '. Liquidation boundary ' + usd(curve.boundaryPrice) + ' per ETH.');
+    }
+    const interest = interestReference(input);
+    $('loan-simple-debt').textContent = usd(interest.simpleDebt);
+    $('loan-compound-debt').textContent = usd(interest.compoundedDebt);
+    $('loan-interest-difference').textContent = usd(interest.difference) + ' more debt under the continuous-compounding assumption over ' + input.days + ' days.';
+    $('loan-interest-alert').hidden = input.borrow === 0 || interest.difference < input.borrow * 0.01;
+
+    const assumptions = readLiquidation();
+    const errors = validateLiquidation(assumptions);
+    for (const key of liquidationKeys) {
+      $('liquidation-' + key + '-error').textContent = errors[key] || '';
+      $('liquidation-' + key + '-error').hidden = !errors[key];
+      $('liquidation-' + key).setAttribute('aria-invalid', String(!!errors[key]));
+    }
+    const invalid = Object.keys(errors).length > 0;
+    if (invalid) { current = null; $('loan-share').disabled = true; }
+    if (save && !invalid) saveLiquidationDraft(assumptions);
+    const eligible = result.end.status === 'eligible';
+    if (eligible && !wasEligible) $('loan-liquidation').open = true;
+    wasEligible = eligible;
+    $('loan-liquidation-caption').textContent = eligible ? 'At this price, a liquidator could act. See what one event changes.' : 'Explore one hypothetical event at the chosen price.';
+    const event = invalid ? null : singleLiquidation(input, assumptions);
+    $('loan-liquidation-result').hidden = event?.status !== 'executed';
+    if (invalid) {
+      $('loan-liquidation-status').textContent = 'Complete the highlighted event assumptions. The loan balances above are still valid.';
+      return;
+    }
+    if (event.status !== 'executed') {
+      $('loan-liquidation-status').textContent = result.end.status === 'no-debt' ? 'With no debt, there is no loan to liquidate.' : 'No liquidation at this endpoint. Choose an ETH price below the boundary to explore one event.';
+      return;
+    }
+    $('loan-liquidation-status').textContent = event.exhausted && event.remainingDebt > 0
+      ? 'All collateral is used in this example. Some debt remains unpaid; this does not model how a protocol resolves that shortfall.'
+      : 'One hypothetical event at ' + usd(input.future) + '/ETH. A real liquidation may execute at a different price or repay a different amount.';
+    $('loan-liquidation-repaid').textContent = usd(event.repaid);
+    $('loan-liquidation-removed').textContent = formatTokenQuantity(event.removedTokens, 6) + ' ETH';
+    $('loan-liquidation-removed-value').textContent = usd(event.removedValue) + ' at the chosen price';
+    $('loan-liquidation-penalty').textContent = usd(event.penalty);
+    $('loan-liquidation-collateral').textContent = formatTokenQuantity(event.remainingTokens, 6) + ' ETH';
+    $('loan-liquidation-debt').textContent = usd(event.remainingDebt);
+    $('loan-liquidation-net').textContent = usd(event.netAssets);
+    $('loan-liquidation-loss').textContent = usd(event.penalty) + ' lower than the pre-liquidation balance. The loss equals the extra collateral taken as the bonus, before costs.';
+    $('loan-liquidation-health').textContent = event.remainingHealth === null ? 'No debt remains after this event.'
+      : event.exhausted ? 'No supplied ETH remains. The illustration still records ' + usd(event.remainingDebt) + ' of unpaid debt.'
+      : 'Remaining health factor: ' + healthLabel(event.remainingHealth) + (event.remainingHealth < 1 ? '. Still below 1; another liquidation could be possible.' : '. Future price or interest changes can make it eligible again.');
+  }
   function readInputs() {
     const input = Object.fromEntries(keys.map(key => [key, $('loan-' + key).value === '' ? NaN : Number($('loan-' + key).value)]));
     input.collateralEnabled = $('loan-collateralEnabled').checked;
@@ -47,7 +118,7 @@ export function initLending() {
       ? 'Complete the starting collateral, price and maximum LTV to see the borrowing limit.'
       : usd(input.collateralEnabled ? input.collateral * input.start * input.maxLTV / 100 : 0) + ' maximum new borrowing at the starting price.';
     $('loan-rates').textContent = errors.supplyAPR || errors.borrowAPR ? 'Check the assumed interest rates.'
-      : 'Assumed APRs: ' + formatTokenQuantity(input.supplyAPR, 2) + '% supply · ' + formatTokenQuantity(input.borrowAPR, 2) + '% borrow';
+      : 'Simple APR assumptions: ' + formatTokenQuantity(input.supplyAPR, 2) + '% supply · ' + formatTokenQuantity(input.borrowAPR, 2) + '% borrow';
     $('loan-show-result').textContent = invalidLoan ? 'Check inputs ↑' : 'Full result ↓';
     current = invalid ? null : calculateLoan(input);
     if (invalidLoan) {
@@ -71,7 +142,7 @@ export function initLending() {
     $('loan-health-note').textContent = end.status === 'no-debt'
       ? 'No debt means no loan liquidation boundary. The supply still has asset and protocol risks.'
       : end.status === 'eligible'
-        ? 'Health factor is below 1. This shows eligibility before any liquidation; it does not simulate what a liquidator takes.'
+        ? 'A liquidator could repay debt and take collateral plus a bonus. The balances below assume this has not happened yet.'
         : end.status === 'boundary'
           ? 'Health factor is exactly 1. A further adverse change would make this loan eligible for liquidation.'
           : 'Below 1, this position becomes eligible for liquidation.';
@@ -85,6 +156,11 @@ export function initLending() {
     $('loan-interest-debt').textContent = 'Includes ' + usd(result.borrowInterest) + ' of assumed interest';
     $('loan-net-assets').textContent = usd(result.netAssets);
     $('loan-net-note').textContent = signedUSD(result.interestDifference) + ' versus holding the original ETH at this price, before costs and any liquidation.';
+    $('loan-balances-title').textContent = end.status === 'eligible' ? 'Balances before liquidation' : 'Keep both sides in view';
+    $('loan-balance-context').textContent = end.status === 'eligible'
+      ? 'Liquidation is possible here. These are the balances before a liquidator acts; explore one event below.'
+      : 'Borrowed cash comes with a matching debt. Interest and ETH’s price change the balance.';
+    $('loan-balance-context').classList.toggle('loan-attention', end.status === 'eligible');
     $('loan-supply-interest').textContent = formatTokenQuantity(result.supplyInterestTokens, 6) + ' ETH (' + usd(result.supplyInterestTokens * input.future) + ' at this price)';
     $('loan-borrow-interest').textContent = formatTokenQuantity(result.borrowInterest, 2) + ' USDC';
     $('loan-slider').min = Math.min(input.start * 0.25, input.future);
@@ -100,6 +176,7 @@ export function initLending() {
     }
     $('loan-repay-note').textContent = usd(responses.repay.spent) + ' repaid · ' + usd(responses.repay.unused) + ' budget left';
     $('loan-add-note').textContent = formatTokenQuantity(result.input.budget / input.future, 6) + ' ETH added at this price';
+    renderExplanations({ ...input, budget: result.input.budget }, result, save);
     if (save && !invalid) $('loan-storage').textContent = saveLoanDraft(input)
       ? 'Working setup kept in this tab. Copy a link to keep or share it.'
       : 'Tab storage is unavailable. Copy an experiment link to keep this setup.';
@@ -107,7 +184,11 @@ export function initLending() {
   function restoreLocation() {
     const shared = readLoanHash(location.hash);
     $('loan-route-note').hidden = shared.status !== 'invalid';
-    if (shared.status === 'ready') { writeInputs(shared.input); render(true); }
+    if (shared.status === 'ready') {
+      writeInputs(shared.input);
+      writeLiquidation(shared.liquidation || LIQUIDATION_DEFAULTS);
+      render(true);
+    }
   }
   function focusField(key) {
     const field = $('loan-' + key);
@@ -120,6 +201,7 @@ export function initLending() {
     });
   }
   writeInputs(stored.input);
+  writeLiquidation(readLiquidationDraft());
   render();
   $('loan-storage').textContent = stored.status === 'unavailable'
     ? 'The previous tab draft could not be read. Default inputs are shown; copy a link to keep your work.'
@@ -127,12 +209,18 @@ export function initLending() {
   restoreLocation();
   if (matchMedia('(max-width: 750px)').matches) $('loan-setup').open = false;
   for (const key of keys) $('loan-' + key).addEventListener('input', () => render(true));
+  for (const key of liquidationKeys) $('liquidation-' + key).addEventListener('input', () => render(true));
   $('loan-collateralEnabled').addEventListener('change', () => render(true));
   $('loan-slider').addEventListener('input', () => { $('loan-future').value = $('loan-slider').value; render(true); });
   for (const button of document.querySelectorAll('[data-loan-price]')) button.addEventListener('click', () => {
     $('loan-future').value = Number($('loan-start').value) * Number(button.dataset.loanPrice); render(true);
   });
   $('loan-edit-rates').addEventListener('click', () => focusField('supplyAPR'));
+  $('loan-open-compounding').addEventListener('click', () => {
+    $('loan-compounding').open = true;
+    $('loan-compounding').querySelector('summary').focus();
+    $('loan-compounding').scrollIntoView({ block: 'start', behavior: 'instant' });
+  });
   $('loan-fix-input').addEventListener('click', () => { if (firstInvalid) focusField(firstInvalid); });
   $('loan-show-result').addEventListener('click', () => {
     if (firstInvalid) { focusField(firstInvalid); return; }
@@ -141,12 +229,13 @@ export function initLending() {
   });
   $('loan-reset').addEventListener('click', () => {
     writeInputs(LOAN_DEFAULTS);
+    writeLiquidation(LIQUIDATION_DEFAULTS);
     render(true);
     $('loan-share-status').textContent = 'Default loan restored.';
   });
   $('loan-share').addEventListener('click', async () => {
     if (!current) return;
-    const url = new URL(location.href); url.hash = loanHash(current.input);
+    const url = new URL(location.href); url.hash = loanHash(current.input, readLiquidation());
     const copiedRevision = revision;
     $('loan-share-url').value = url.href;
     try {

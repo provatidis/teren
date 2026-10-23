@@ -1,6 +1,6 @@
 // Keep legacy storage and format identifiers so existing work survives rebranding.
-import { LESSON_IDS, VARIANTS, validateLessonInputs } from '../models/lesson-experiments.js?v=1.17.1';
-import { validChoiceSeed } from '../lib/learning-choices.js?v=1.17.1';
+import { LESSON_IDS, VARIANTS, validateLessonInputs } from '../models/lesson-experiments.js';
+import { validChoiceSeed } from '../lib/learning-choices.js';
 export const LEARNING_KEY = 'degenerator-learning-liquidity-v1';
 export function emptyProgress() { return { version: 1, completed: [], lastLesson: LESSON_IDS[0], drafts: {} }; }
 export function parseProgress(value) {

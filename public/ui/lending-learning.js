@@ -1,10 +1,10 @@
-import { LENDING_LESSONS } from '../learning/lending-essentials.js?v=1.17.1';
-import { lendingCase, checkLendingUnderstanding } from '../models/lending-lessons.js?v=1.17.1';
-import { readLendingProgress, saveLendingProgress } from '../data/lending-state.js?v=1.17.1';
-import { loanHash } from '../lib/lending-links.js?v=1.17.1';
-import { lendingMetrics } from '../lib/lending-presentation.js?v=1.17.1';
-import { newChoiceSeed } from '../lib/learning-choices.js?v=1.17.1';
-import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js?v=1.17.1';
+import { LENDING_LESSONS } from '../learning/lending-essentials.js';
+import { lendingCase, checkLendingUnderstanding } from '../models/lending-lessons.js';
+import { readLendingProgress, saveLendingProgress } from '../data/lending-state.js';
+import { loanHash } from '../lib/lending-links.js';
+import { lendingMetrics } from '../lib/lending-presentation.js';
+import { newChoiceSeed } from '../lib/learning-choices.js';
+import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js';
 
 export function initLendingLearning() {
   const $ = id => document.getElementById(id);

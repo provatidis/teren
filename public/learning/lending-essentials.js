@@ -68,7 +68,7 @@ export const LENDING_LESSONS = [
     predictions: [['higher', 'It rises.'], ['same', 'It stays the same.'], ['lower', 'It falls.']],
     takeaway: 'Watch both collateral and debt. Unchanged prices do not mean an unchanged loan.',
     explanation: 'The collateral remains worth $10,000, while the debt grows from 5,000 to 5,500 USDC. The health factor falls, although this example is still above the liquidation boundary. With different supply and borrow rates, interest can have a different net effect.',
-    pitfall: 'A displayed rate is not a promise for the whole period. A real loan’s rates and collateral rules can change.',
+    pitfall: 'This example uses simple interest. Real debt can compound, and rates or collateral rules can change. A long period at a high rate makes the difference much larger.',
     reasoning: 'What makes the health factor fall in this example?',
     reasons: [['interest', 'Debt grows while the collateral amount and price stay unchanged.'], ['cash', 'The borrowed USDC in the wallet disappears as time passes.'], ['threshold', 'Waiting reduces the configured liquidation threshold.']],
     reasonFeedback: {
@@ -112,7 +112,8 @@ export const LENDING_LESSONS = [
     deeper: [
       'The response budget is additional money outside the original setup. The repayment option keeps any unused budget if it exceeds the debt. The collateral option converts the whole budget to ETH at the selected price.',
       'The comparison excludes gas, swap costs, market liquidity and execution ordering. Actual repayment, collateral supply and withdrawal depend on the protocol’s current rules and available liquidity.',
-      'This release tests a single collateral asset and one debt. Looping, E-mode, liquidation execution and historical loan records are separate future extensions.',
+      'In a liquidation, someone repays debt and receives collateral plus a bonus. The repayment reduces what is owed; the extra collateral taken as the bonus reduces net assets. Experiment shows a separate, hypothetical single-event illustration.',
+      'The model tests one collateral asset and one debt. Looping, E-mode and historical loan records need separate extensions.',
     ], sources: [loanSource, collateralSource],
   },
 ];

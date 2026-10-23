@@ -51,6 +51,8 @@ The second topic introduces one collateral asset and one debt asset before any l
 
 The interest lesson deliberately uses zero supply APR so only debt grows. It does not claim time always lowers health factor: different rates on both sides can change that conclusion. The response lesson displays the already-calculated outcomes. Optional reading explains collateral rules, both balance-sheet sides, variable real rates and execution limits using [Aave supply guidance](https://aave.com/help/supplying/supply-tokens), [collateral guidance](https://aave.com/help/supplying/toggle-collateral-status) and [the protocol FAQ](https://aave.com/faq).
 
+The lending lab additionally illustrates one liquidation event: debt repayment offsets part of the collateral removed, while the bonus reduces net assets. The compounding reference exposes how a fixed simple-interest assumption diverges over longer periods. These illustrations require no calculation from the learner.
+
 All lending figures are hypothetical teaching cases with fixed simple interest and USDC = $1, separate from the verified liquidity records. They are not quoted Aave market parameters. Unit tests cover reference outcomes and every reasoning/application combination; browser checks cover wrong predictions, completion, exact handoffs, independent storage and mobile navigation. These checks establish consistency, not measured teaching effectiveness.
 
 ## Primary references

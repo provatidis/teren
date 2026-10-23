@@ -14,7 +14,7 @@ npm start
 
 For an existing clone, pull the latest `main` and run `npm start` from its checkout directory. No installation step is needed.
 
-The HTTP server defaults to loopback port 3000. Set `HOST` and `PORT` to change its binding. It serves only the `public/` directory. To verify it:
+The HTTP server defaults to loopback port 3000. Set `HOST` and `PORT` to change its binding. It serves `public/` by default. Set `SITE_DIR=dist` after `npm run build` to inspect the production output. To verify it:
 
 ```sh
 curl --fail http://127.0.0.1:3000/
@@ -34,7 +34,7 @@ For a local browser smoke test, install Chromium or set `CHROMIUM_BIN` to its ex
 
 Set `TEST_BASE_URL` to a deployed site or a local server with a project subpath to test that target instead of starting the Node server. The browser smoke test checks that the home link, scripts, styles, and swaps work at that base URL.
 
-When changing the package version, run `npm run release:assets` before the checks. This stamps page entry points, UI-controller imports, mutable teaching/assessment modules and stylesheet imports so a browser retaining the previous release fetches the new UI. The structure check rejects stale release queries. Storage keys, exported schemas and model versions are independent of these asset URLs.
+Run `npm run build` before publication. The dependency-free builder hashes every JS/CSS asset after rewriting its dependencies, then rewrites HTML entries and preloads each entry’s transitive module graph. Shared dependencies keep one URL and identity. Source imports remain canonical and have no release queries; the old hand-maintained stamper is removed. `dist/build-manifest.json` identifies the release and every output asset. Original source paths remain as compatibility aliases for previously cached entries. An old open tab may require a reload after deployment if its earlier hashed assets are no longer published. Hashes prevent mixing changed dependencies within the new build; this is not indefinite retention of older releases. Storage keys and model versions are independent of asset URLs.
 
 ## Focused workspaces and historical records
 
@@ -54,11 +54,12 @@ The period model lives in `public/models/fixed-position-period.js`; record valid
 - public/styles/: shared foundation and components followed by feature styles. public/styles.css preserves the existing cascade order.
 - public/index.html, public/learn.html and public/lending.html: semantic, static markup with one module entry point per document. Each feature owns its IDs; the structure check rejects duplicates.
 - scripts/: development, integration and browser checks; test/: reference calculations and adapter/storage contracts.
-- server.js: a local static server; GitHub Pages deploys public/ directly.
+- scripts/lib/build-site.js and scripts/build-site.js: generate a static `dist/` with dependency-derived asset hashes and module preloads.
+- server.js: a local static server for source or generated output.
 
 Run npm run check to verify module paths, circular dependencies, architectural boundaries, stylesheet imports, unique HTML IDs and document entry points. CI runs this before calculation and browser tests. Existing scenario.js, amm.js and storage.js exports and storage keys remain compatible.
 
-The structure review keeps the current dependency-free deployment. Explicit startup removes cross-controller import side effects; feature styles reduce collisions as labs grow. Shared tab behavior handles keyboard navigation consistently across the sandbox, labs and snapshot sources. ABI decoding, block pinning and snapshot-file/storage handling are shared by both protocol adapters; protocol identity checks remain adapter-specific. Static HTML remains appropriate at this size. Split markup or add a build step when repeated page layouts actually need it. A framework, database or application backend is not needed for read-only, public-chain imports.
+The structure review keeps the current dependency-free deployment. Explicit startup removes cross-controller import side effects; feature styles reduce collisions as labs grow. Shared tab behavior handles keyboard navigation consistently across the sandbox, labs and snapshot sources. ABI decoding, block pinning and snapshot-file/storage handling are shared by both protocol adapters; protocol identity checks remain adapter-specific. Static HTML remains appropriate at this size. The build now handles cache coherence and preload hints; a future markup composition step should be driven by repeated layout costs. A framework, database or application backend is not needed for read-only, public-chain imports.
 
 ## Architecture and extension policy
 
@@ -86,7 +87,7 @@ To regenerate the committed favicon, ink wordmark, social SVG and raster assets 
 
 ## Publishing with GitHub Pages
 
-The workflow in `.github/workflows/pages.yml` tests the project and publishes only `public/` whenever `main` changes. Pull requests run the same checks without publishing. Hosting stays on GitHub Pages; Cloudflare manages the `teren.sh` domain and DNS. The public domain is independent of the repository name.
+The workflow in `.github/workflows/pages.yml` checks models and the build on Node 22 and 24. Node 24 also runs the full desktop/mobile browser suite against `dist/`, then uploads the exact tested site. Deployment publishes that artifact whenever `main` changes. Pull requests run the same checks without publishing. Hosting stays on GitHub Pages; Cloudflare manages the `teren.sh` domain and DNS. The public domain is independent of the repository name.
 
 The publishing source is **Settings → Pages → Build and deployment → Source → GitHub Actions**. The intended public address is `https://teren.sh/`. See [domain setup](domain-setup.md) for the cutover sequence and DNS records. A `CNAME` file does not configure a custom domain for this Actions-based deployment; the domain must be saved in GitHub Pages settings.
 
@@ -118,27 +119,27 @@ Clicking a same-tab Learn or Lending link captures validated liquidity calculato
 
 `public/lib/lesson-narration.js` narrates the calculated setup and explains each incorrect foundation reason. Token-transfer direction follows the selected price; an unchanged price has a distinct explanation. Benchmarks, total fee targets and additional fees stay explicit. Applied corrective feedback remains scoped to the marked question checkpoint or interval.
 
-`public/models/learning-answer.js` checks the same decimal rounding used in displayed outcomes, with explicit whole-number requirements. It accepts equivalent extra precision without accepting an adjacent incorrectly rounded number. Lesson and progress identifiers are unchanged. The release stamper versions mutable teaching definitions, narration and grading together, while protocol adapter/RPC module identities remain shared. Unit checks cover all distractors, price directions, widths and variations; browser checks verify current versioned teaching imports and cover desktop/mobile feedback.
+`public/models/learning-answer.js` checks the same decimal rounding used in displayed outcomes, with explicit whole-number requirements. It accepts equivalent extra precision without accepting an adjacent incorrectly rounded number. Lesson and progress identifiers are unchanged. The builder versions every dependency by content and preserves shared protocol adapter/RPC identities. Unit checks cover all distractors, price directions, widths and variations; browser checks verify the built teaching module identities and cover desktop/mobile feedback.
 
 ## Understanding checks
 
 Essentials and applied exercises require an explanation and a transfer answer after changing one assumption. The pure `models/lesson-application.js` derives changed hypothetical outcomes from the selected variation; `lib/lesson-application-copy.js` supplies its questions. `lib/applied-applications.js` defines explicitly hypothetical applications beside fixed recorded questions. The required checkers accept choice identifiers only; predictions and optional numeric answers do not control completion, Continue, or result-card eligibility. The existing numeric checkers remain available only for optional practice within Go deeper.
 
-Choice order is shuffled once per draft and group, then remains stable through checks and reloads. Progress version 1 and existing keys remain unchanged. Parsers add bounded application identifiers and a validated uint32 choice seed while retaining older completion, inputs, predictions, reasoning and numeric practice. A legacy draft has no invented transfer answer. The release stamper updates the changed progress parsers, choice-order helper, teaching copy and checkers together. Browser checks cover conceptual-only completion, incorrect prediction, both kinds of feedback, optional calculation isolation, restoration and desktop/mobile layouts.
+Choice order is shuffled once per draft and group, then remains stable through checks and reloads. Progress version 1 and existing keys remain unchanged. Parsers add bounded application identifiers and a validated uint32 choice seed while retaining older completion, inputs, predictions, reasoning and numeric practice. A legacy draft has no invented transfer answer. The content-hashed build updates the changed progress parsers, choice-order helper, teaching copy and checkers together. Browser checks cover conceptual-only completion, incorrect prediction, both kinds of feedback, optional calculation isolation, restoration and desktop/mobile layouts.
 
 ## Practical range learning
 
 `models/range-decisions.js` defines three bounded variations for each practical topic and grades only explanation/application choices. Width and outside-principal results use the existing continuous range model. Fee totals are explicitly supplied fictional facts; there is no fee estimator or replay request. `learning/choosing-ranges.js` keeps teaching text and presentation separate from grading. `ui/management-learning.js` owns the chapter, and `lib/management-links.js` accepts only strict `#manage=<id>` routes. Composition stays in `learn-main.js`; controllers do not import one another.
 
-The new `passiko-range-learning-v1` key stores bounded variants, choices and a validated ordering seed. Earlier lesson keys, IDs and completion remain unchanged. Navigation moves from essentials to range choices to recorded history; every topic remains directly accessible. `lib/learning-elements.js` shares radio rendering and metric elements across the three controllers, while editorial pitfalls in `learning/pool-pitfalls.js` appear in the normal results flow. The release stamper versions these imports together. Tests cover model conservation, boundary eligibility, fee-rate counterexamples, unknown earnings, outside exposure, automatic return, independent progress, mixed-route rejection, all variations, wrong predictions, feedback, restoration and desktop/mobile chapter switching.
+The new `passiko-range-learning-v1` key stores bounded variants, choices and a validated ordering seed. Earlier lesson keys, IDs and completion remain unchanged. Navigation moves from essentials to range choices to recorded history; every topic remains directly accessible. `lib/learning-elements.js` shares radio rendering and metric elements across the three controllers, while editorial pitfalls in `learning/pool-pitfalls.js` appear in the normal results flow. The builder hashes these imports through the complete graph. Tests cover model conservation, boundary eligibility, fee-rate counterexamples, unknown earnings, outside exposure, automatic return, independent progress, mixed-route rejection, all variations, wrong predictions, feedback, restoration and desktop/mobile chapter switching.
 
 ## Clear entry and project information
 
-`ui/workspaces.js` controls a mobile-only tools disclosure without duplicating destinations or changing fragment routing. Desktop links remain visible. The disclosure closes after a selection and returns keyboard focus before hiding its links. About and Methods are static HTML, share identity metadata/CSP and need no JavaScript. The release stamper and project check include both pages.
+`ui/workspaces.js` controls a mobile-only tools disclosure without duplicating destinations or changing fragment routing. Desktop links remain visible. The disclosure closes after a selection and returns keyboard focus before hiding its links. About and Methods are static HTML, share identity metadata/CSP and need no JavaScript. The builder and project check include both pages.
 
 `managementApplication` supplies situation-specific follow-ups. Width totals combine calculated principal with supplied fee/cost assumptions; fee-tier totals are explicitly fictional teaching facts; removal and fee collection remain distinct actions. These values do not modify historical records or estimate earned fees. Completed topics remain saved; a restored draft is checked against its displayed situation.
 
-For coverage diagnostics, use the same release-qualified module URL as production consumers. Node treats a bare URL and a URL with `?v=` as separate instances; an unused copy can otherwise obscure the exercised grader in its per-file report. The range-learning test reads the package version for that import. Answer-combination tests and browser restoration checks remain the primary evidence for grading behavior, rather than a project-wide coverage percentage.
+For coverage diagnostics, import the same canonical source URL used by the model consumers. Production asset hashes are generated from that source graph. Answer-combination tests and browser restoration checks remain the primary evidence for grading behavior, rather than a project-wide coverage percentage.
 
 ## Lending foundations
 
@@ -148,6 +149,14 @@ For coverage diagnostics, use the same release-qualified module URL as productio
 
 `data/lending-state.js` validates a per-tab `teren-lending-draft-v1` session draft and independent `teren-lending-learning-v1` local progress. Invalid edits do not overwrite the last valid working setup. Explicit valid links override the draft; unsupported links leave it intact and explain the failure. Lesson handoffs open a separate tab. The existing liquidity Learn-return handoff also captures departures to Lending; no older key or schema changes.
 
-The release stamper and structure checker include the third entry point and its mutable teaching dependencies. Reference tests cover debt/cash conservation, simple interest on each token balance, LTV versus liquidation threshold, exact boundaries, full/partial repayment, same-budget responses, links, storage and all conceptual answer combinations. CI also checks the complete lessons, shares, recovery from invalid inputs, topic draft isolation and desktop/390px/320px layouts.
+The builder and structure checker include the third entry point and all of its dependencies. Reference tests cover debt/cash conservation, simple interest on each token balance, LTV versus liquidation threshold, exact boundaries, full/partial repayment, same-budget responses, links, storage and all conceptual answer combinations. CI also checks the complete lessons, shares, recovery from invalid inputs, topic draft isolation and desktop/390px/320px layouts.
 
 The `#learn` lending route resumes an allowlisted `currentLesson`, added to the existing version-1 progress object without changing prior drafts or completion. Explicit lesson routes take precedence. The active topic is a label rather than a link on all three interactive pages. Mobile lending feedback uses the shared measured header/feedback offsets; shortcuts reveal enclosing disclosures before focusing a field. Response-budget validation is separate from presentation of the existing loan: invalid budgets suppress response cards and sharing, while the current loan is recalculated with no response applied. A render revision guards delayed clipboard feedback after edits. Browser checks cover these flows and ensure focused fields/results are not covered by sticky feedback.
+
+## Lending explanations and model review
+
+`models/loan-explanations.js` adds a separate `single-liquidation-v1` illustration, a fixed-balance health/price curve and a continuous-compounding debt reference. It does not change `collateral-loan-v1`. Liquidation bonus and repayment fraction use an independent session draft. Optional versioned event fields extend loan links; older links restore their original loan with default event assumptions. Invalid event inputs hide only the event and disable sharing; invalid response budgets still preserve the loan outcome.
+
+The build tests cover parent hash invalidation, deterministic output, shared dependency identity, missing imports and cycles. Loan reference tests cover balance conservation, capped repayment, remaining debt, zero bonus, full repayment and boundaries. CI browser checks add event sharing/drafts, independent validation, compounding differences and chart readability at 390px/320px.
+
+Review [open blind spots](review.md) before a mechanism release. Report which misleading interpretation was tested as well as which calculation checks passed.

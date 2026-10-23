@@ -134,10 +134,12 @@ export function initPositionPeriod({ rangeLab }) {
       $('period-title').textContent = 'Position #' + first.tokenId + ' · ' + periodDuration(last.block.timestamp - first.block.timestamp);
       $('period-description').textContent = 'Recorded Ethereum WETH/USDC · ' + first.position.fee / 10000 + '% pool · unchanged liquidity and bounds.';
       $('period-window').textContent = utc(first.block.timestamp) + ' → ' + utc(last.block.timestamp);
+      $('period-captured').textContent = record.capturedAt;
+      $('period-providers').textContent = [...new Set([...record.points.map(point => point.snapshot.provider), ...record.eventQueries.map(query => query.provider)])].join(' · ');
       buildMilestones(); render();
       const dates = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
         .formatRange(new Date(first.block.timestamp * 1000), new Date(last.block.timestamp * 1000));
-      $('period-status').textContent = (invalid ? 'That case is unavailable. Showing the baseline. ' : '') + dates + ' · ' + period.points.length + ' checkpoints · independently checked fees';
+      $('period-status').textContent = (invalid ? 'That case is unavailable. Showing the baseline. ' : '') + dates + ' · ' + period.points.length + ' checkpoints · checked at capture on ' + record.capturedAt.slice(0, 10);
       $('period-export').disabled = false; $('period-apply').disabled = false;
       // Loading reveals a much taller panel; resolve deep-link scrolling afterward.
       requestAnimationFrame(() => {

@@ -5,10 +5,9 @@ import { resolve, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../public/', import.meta.url));
-const { version } = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 function assetPath(specifier) {
   const [path, query] = specifier.split('?');
-  if (query) assert.equal(query, 'v=' + version, 'Restamp release assets with npm run release:assets.');
+  assert.ok(!query, 'Use canonical source imports; npm run build hashes the entire dependency graph.');
   return path;
 }
 async function filesIn(directory) {
@@ -87,7 +86,7 @@ for (const document of ['index.html', 'learn.html', 'about.html', 'methods.html'
     if (source && !tag[0].includes('rel="canonical"')) {
       await checkAsset(source);
       if (tag[0].startsWith('<script') || tag[0].includes('rel="stylesheet"')) {
-        assert.equal(new URL(source, site).search, '?v=' + version, document + ': stamp entries with npm run release:assets.');
+        assert.equal(new URL(source, site).search, '', document + ': keep source assets canonical; build generates content hashes.');
       }
     }
   }
@@ -134,7 +133,7 @@ assert.match(html,/<a class="skip-link" href="#main-content">/);
 assert.match(html,/<main id="main-content" tabindex="-1">/);
 assert.match(html,/<noscript>/);
 const learn = await readFile(resolve(root, 'learn.html'), 'utf8');
-assert.match(learn, /<script type=\"module\" src=\"learn-main.js(?:\?v=[0-9.]+)?\">/);
+assert.match(learn, /<script type=\"module\" src=\"learn-main.js\">/);
 assert.match(learn, /id=\"learn-lesson-list\"/);
 assert.match(learn, /href=\"learn.html\" aria-current=\"page\"/);
 assert.match(html, /href=\"learn.html\"/);
