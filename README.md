@@ -8,6 +8,8 @@ A place to understand DeFi through short lessons and experiments you can change.
 
 Start with a lesson or open the setup you want to test. Lessons use predictions, explanations and changed situations to check understanding; required answers involve no calculations. Links open Experiment in a separate tab so you can explore the idea without replacing your working draft.
 
+Visual lessons let you follow swaps, pool ownership and borrowing loops one action at a time, or explore token balances and price ranges with a slider. The prediction question stays visible, and answering it is optional.
+
 ## Two topics
 
 **[Liquidity](https://teren.sh/#experiment)** compares full-range and concentrated-liquidity positions with holding their starting tokens. Change prices, bounds and assumed cash fees, save comparisons, or try virtual swaps and deposits. Learn has six foundation lessons and a final challenge, followed by three range-choice exercises and three exercises using recorded historical cases.

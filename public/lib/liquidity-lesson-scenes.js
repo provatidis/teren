@@ -51,7 +51,7 @@ export function createTokenBalanceScene(input, prediction) {
   element.append(figure, '\n', prediction, '\n', explorer.element, '\n', exchange, '\n',
     node('p', 'Each price is compared with the same starting position. Swaps change the balances; this model leaves out fees.', 'fine-print'));
   explorer.show(input.initialPrice);
-  return { element, show: explorer.show };
+  return { element, show: explorer.show, showQuestion: () => explorer.show(target) };
 }
 
 export function createRangeWidthScene(outcome, prediction) {

@@ -1,0 +1,32 @@
+.lesson-scene .foundation-pool { margin-top: 18px; }
+.foundation-pool .scene-figure-title { margin-bottom: 10px; }
+.foundation-flow { font-size: 14px; line-height: 1.7; min-height: 3.4em; margin: 0 0 12px; color: var(--text); }
+.foundation-pool .scene-token-row { padding: 10px 12px; margin: 8px 0; }
+.foundation-pool .scene-token-track { margin-bottom: 4px; }
+.foundation-pool .scene-token-fill { position: relative; overflow: hidden; }
+.foundation-owned { position: absolute; top: 0; right: 0; height: 100%; background: repeating-linear-gradient(135deg, #172635 0 2px, transparent 2px 5px); border-left: 1px solid #172635; }
+.foundation-pool-price { font-size: 14px; line-height: 1.7; margin: 14px 0 0; font-variant-numeric: tabular-nums; }
+.foundation-pool-share { font-size: 14px; line-height: 1.7; min-height: 3.4em; margin: 8px 0 0; font-weight: 600; }
+.foundation-pool .scene-key { margin: 8px 0 0; }
+.foundation-outcome { margin: 20px 0; padding: 18px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); }
+.foundation-outcome h4 { margin: 0 0 18px; font-size: 16px; line-height: 1.6; }
+.foundation-outcome p { font-size: 14px; line-height: 1.7; }
+.foundation-outcome .scene-consequence { margin-bottom: 0; }
+.foundation-outcome .fine-print { font-size: 13px; }
+.foundation-comparison-row { margin: 16px 0; }
+.foundation-comparison-row p { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 6px; font-size: 13px; line-height: 1.6; }
+.foundation-comparison-row strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.foundation-comparison-track { height: 10px; border-radius: 3px; background: var(--border); }
+.foundation-comparison-track > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+.foundation-comparison-row:nth-of-type(1) .foundation-comparison-track > span { background: var(--muted); }
+.foundation-outcome .foundation-share { font-weight: 600; font-size: 18px; margin: 0 0 12px; }
+.foundation-pool[data-motion=true] .scene-token-fill { animation: foundation-transfer-cue .5s ease-out; }
+@keyframes foundation-transfer-cue { from { opacity: .35; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .foundation-pool[data-motion=true] .scene-token-fill { animation: none; }
+}
+@media (max-width: 750px) {
+  .foundation-outcome { padding: 12px; }
+  .foundation-pool .scene-token-heading { font-size: 14px; }
+  .foundation-pool .scene-token-row { padding: 8px 10px; }
+}

@@ -8,8 +8,13 @@ export function sceneNode(tag, copy, className) {
 
 export function optionalPrediction(fieldset) {
   const details = sceneNode('details', undefined, 'scene-prediction');
+  const summary = sceneNode('summary');
+  summary.append(
+    sceneNode('span', fieldset.querySelector('legend').textContent, 'scene-prediction-question'), ' ',
+    sceneNode('span', 'Choose an answer · optional', 'scene-prediction-invite'),
+  );
   details.append(
-    sceneNode('summary', 'Pause to predict · optional'), '\n',
+    summary, '\n',
     fieldset, '\n',
     sceneNode('p', 'A guess gives you something to compare. You can also explore without answering.', 'fine-print'),
   );
@@ -18,14 +23,24 @@ export function optionalPrediction(fieldset) {
 
 // Exploration is ephemeral: it never edits a lesson's question, answers or draft.
 export function createPriceExplorer({ id, min, max, step, start, target, format, shortcuts, onChange }) {
+  return createSceneExplorer({ id, min, max, step, start, target, format, shortcuts, onChange,
+    labelText: 'Explore an ETH price',
+    valueText: price => format(price) + ' per ETH',
+    scopeText: price => price === target
+      ? 'Showing the question price. The checks below use ' + format(target) + '.'
+      : 'Exploring another price. The checks below still use ' + format(target) + '.',
+  });
+}
+
+export function createSceneExplorer({ id, min, max, step, start, target, format, shortcuts, onChange, labelText, valueText = format, scopeText }) {
   const element = sceneNode('div', undefined, 'scene-price-control');
   const heading = sceneNode('div', undefined, 'scene-price-heading');
-  const label = sceneNode('label', 'Explore an ETH price'); label.htmlFor = id;
+  const label = sceneNode('label', labelText); label.htmlFor = id;
   const output = sceneNode('output'); output.htmlFor = id; output.id = id + '-value';
   output.setAttribute('aria-live', 'off');
   heading.append(label, ' ', output);
   const slider = sceneNode('input');
-  // Saved questions may sit between the usual steps. Keep every named price
+  // Saved questions may sit between the usual steps. Keep every named value
   // exact; otherwise the browser silently rounds a shortcut's value.
   const onStep = value => Math.abs((value - min) / step - Math.round((value - min) / step)) < 1e-8;
   const exactStep = [start, target, ...shortcuts.map(item => item.value)].every(onStep) ? step : 'any';
@@ -42,15 +57,13 @@ export function createPriceExplorer({ id, min, max, step, start, target, format,
   const status = sceneNode('p', '', 'sr-only'); status.setAttribute('role', 'status');
   function show(value, announce = false) {
     slider.value = String(value);
-    const price = Number(slider.value);
-    output.textContent = format(price);
-    slider.setAttribute('aria-valuetext', format(price) + ' per ETH');
-    for (const item of buttons) item.button.setAttribute('aria-pressed', String(item.value === price));
-    scope.textContent = price === target
-      ? 'Showing the question price. The checks below use ' + format(target) + '.'
-      : 'Exploring another price. The checks below still use ' + format(target) + '.';
-    const description = onChange(price);
-    if (announce) status.textContent = format(price) + '. ' + description;
+    const selected = Number(slider.value);
+    output.textContent = format(selected);
+    slider.setAttribute('aria-valuetext', valueText(selected));
+    for (const item of buttons) item.button.setAttribute('aria-pressed', String(item.value === selected));
+    scope.textContent = scopeText(selected);
+    const description = onChange(selected);
+    if (announce) status.textContent = format(selected) + '. ' + description;
   }
   slider.addEventListener('input', () => show(Number(slider.value)));
   element.append(heading, '\n', slider, '\n', links, '\n', scope, '\n', status);
@@ -74,7 +87,7 @@ export function createActionPlayer({ id, stages, onShow }) {
   const choices = sceneNode('div', undefined, 'scene-step-groups');
   let group, groupName;
   const stops = stages.map((stage, i) => {
-    const name = stage.pass || (stage.action === 'start' ? 'Starting position' : stage.action === 'release' ? 'Finish' : 'One round');
+    const name = stage.group || stage.pass || (stage.action === 'start' ? 'Starting position' : stage.action === 'release' ? 'Finish' : 'One round');
     if (name !== groupName) {
       groupName = name;
       group = sceneNode('div', undefined, 'scene-step-group');
@@ -110,5 +123,5 @@ export function createActionPlayer({ id, stages, onShow }) {
   actions.append(previous, ' ', replay, ' ', next);
   element.append(selected, '\n', actions, '\n', jump, '\n', status);
   show(0, false, false);
-  return element;
+  return { element, show };
 }

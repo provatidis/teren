@@ -6,6 +6,13 @@
 .scene-essential-note { border-left: 3px solid var(--accent); padding-left: 14px; font-size: 14px; line-height: 1.8; margin: 18px 0; }
 .scene-prediction, .scene-question-settings { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 18px 0; }
 .scene-prediction > summary, .scene-question-settings > summary, .scene-jump > summary { cursor: pointer; color: var(--accent); font-size: 14px; line-height: 1.6; min-height: 44px; padding: 12px 0; }
+.scene-prediction > summary { list-style: none; }
+.scene-prediction > summary::-webkit-details-marker { display: none; }
+.scene-prediction-question { display: block; color: var(--text); font-size: 15px; line-height: 1.6; margin-bottom: 6px; }
+.scene-prediction-invite { display: block; font-size: 13px; }
+.scene-prediction-invite::before { content: '▸ '; }
+.scene-prediction[open] .scene-prediction-invite::before { content: '▾ '; }
+.scene-prediction legend { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .scene-prediction .learn-fieldset { margin: 12px 0; }
 .scene-question-settings .learn-controls { margin-top: 20px; }
 .scene-price-control { margin: 18px 0; }
@@ -49,7 +56,7 @@
 .scene-range-bounds { display: flex; justify-content: space-between; gap: 8px; }
 .scene-range-bounds button { min-height: 44px; font-size: 13px; line-height: 1.6; text-decoration: underline; text-underline-offset: 3px; }
 .scene-range-tokens { margin: 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
-#learn-token-scene + .button, #lend-visual > .button { margin-top: 16px; }
+#learn-scene + .button, #lend-visual > .button { margin-top: 16px; }
 #lend-visual .loop-flow-balances { margin-top: 20px; }
 #lend-visual .loop-flow-health { padding-left: 12px; border-left: 3px solid var(--accent); }
 @media (max-width: 750px) {

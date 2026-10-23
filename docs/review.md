@@ -67,3 +67,10 @@ Carry both asset and debt exposure through every loop. Separate borrowed cash, r
 - Keep the unwind's unpaid debt and collateral constraint visible. A sale changes wallet assets before repayment changes debt; final release follows repayment. Brief motion adds no interpolated financial state and is optional. Rapid input cancels earlier cues rather than queuing actions.
 - Review mobile scene/control proximity, meaningful keyboard focus, 44px targets, copied-text spacing and restoration without a prediction. The native price slider must stay still during touch dragging.
 - Retained blind spot: cleaner visuals do not establish comprehension. Before rolling this out to all lessons, use changed-direction and paused-action prompts to check the actual mechanism explanation. Fixed prices, simplified withdrawal rules and unmodelled real execution remain teaching limitations.
+
+## Visual liquidity foundations · 1.24.0
+
+- Keep the starting pool price distinct from the average received on a finite swap. Larger trades receive more total USDC but less per ETH against the same reserves. The full ETH input remains in reserves, including the 0.3% retained fee.
+- A matching deposit preserves price and obtains a fraction of the enlarged pool. A later trade changes token amounts without changing that fraction. Another provider’s later deposit is a different event and can reduce the fraction; the changed-situation question checks this distinction.
+- Show the ownership percentage beside the bars and identify the later trader explicitly. Token labels, shapes, dashed start markers and hatching must remain readable without motion or color alone. Prediction questions stay visible while choices remain optional. Exploration must preserve assessed inputs and saved answers.
+- Retained blind spots: proportional ownership omits LP-token mint/burn rounding; the single hypothetical trade is not a fee-income estimate. A useful learner check is to ask what happens to the share percentage after a swap versus another deposit, and why the two answers differ. Passing accounting and interaction tests does not establish that learning outcome.
