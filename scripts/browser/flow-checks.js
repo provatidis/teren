@@ -59,7 +59,7 @@ export async function checkExperimentFlow({ evaluate, click, fill, text, navigat
   }
   await navigate(base + '#historical-case');
   assert.equal(await evaluate("document.getElementById('nav-inspect').getAttribute('aria-current')"), 'page');
-  assert.equal(await text('workspace-eyebrow'), 'UNISWAP V3 · VERIFIED HISTORY');
+  assert.equal(await text('workspace-eyebrow'), 'UNISWAP V3 · CHECKED AT CAPTURE');
   const progress = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");
   await evaluate("localStorage.removeItem('degenerator-learning-liquidity-v1')");
   await navigate(base + 'learn.html#lesson=swap-impact');
