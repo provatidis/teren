@@ -2,6 +2,8 @@
 
 [Project overview](../README.md) · [Product decisions](../DECISIONS.md)
 
+These adapters serve Liquidity’s Inspect workspace. Lending currently uses hypothetical inputs and has no live snapshot or historical-accounting adapter.
+
 ## Pool snapshots
 
 The pool lab reads one supported deployment: Ethereum mainnet Uniswap v2 WETH/USDC. **Fetch latest snapshot** contacts [PublicNode](https://ethereum.publicnode.com/), with [dRPC](https://drpc.org/docs/ethereum-api) as a backup, and reads a finalized block. Every contract read uses that block number, and the block hash is checked again before accepting the result.

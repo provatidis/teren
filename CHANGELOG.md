@@ -1,5 +1,10 @@
 # Release history
 
+## 1.18.2 — 2026-10-23
+
+- Update About and README around liquidity and lending as two topics, with direct routes to both labs and lesson sequences.
+- Refresh GitHub’s project description, homepage sharing metadata, the app description and social preview. Align the guide and model/data introductions with the current scope; recorded snapshots and historical accounting remain specific to liquidity.
+
 ## 1.18.1 — 2026-10-23
 
 - Polish all four lending lessons with more natural questions, clearer references and simpler explanations. Define assets minus debt before using it and explain borrowing limits without an extra numerical comparison.

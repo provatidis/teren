@@ -2,20 +2,27 @@
 
 *Look closely.*
 
-A DeFi playground for learning liquidity and lending mechanics. Test a price range, explore a collateralized loan, or inspect a real Uniswap position at a recorded block.
+A place to understand DeFi through short lessons and experiments you can change. Teren currently covers **liquidity** and **lending**: how token balances change, what fees mean, how debt grows and what makes liquidation possible.
 
-[Liquidity](https://teren.sh/) · [Lending](https://teren.sh/lending.html) · [Learn](https://teren.sh/learn.html) · [Inspect a position](https://teren.sh/#position-lab)
+[Open Teren](https://teren.sh/) · [Liquidity lessons](https://teren.sh/learn.html) · [Lending lessons](https://teren.sh/lending.html#learn) · [About](https://teren.sh/about.html)
 
-- **Experiment:** full-range and concentrated-liquidity calculators, ordered examples, and saved comparisons.
-- **Learn:** six essentials lessons, a final challenge, three practical range exercises and three exercises using verified historical cases. Every topic is available directly.
-- **Inspect:** Ethereum WETH/USDC pool and v3 NFT snapshots, principal, fee accounting and JSON exports.
-- **Historical cases:** start with an in-range baseline, then follow a 33-hour position through exits and returns. Inspect interval fees, active/outside time and the holding comparison.
-- **Pool mechanics:** a separate virtual swap and liquidity sandbox, linked from Experiment and Learn.
-- **Lending:** an ETH/USDC loan lab and four conceptual lessons: supply, borrow, change conditions, then compare repayment with adding collateral. Explore a single liquidation event, health factor across prices and a compounding reference. Prices, rates and liquidation settings are hypothetical inputs.
+Start with a lesson or open the setup you want to test. Lessons use predictions, explanations and changed situations to check understanding; required answers involve no calculations. Links open Experiment in a separate tab so you can explore the idea without replacing your working draft.
 
-The liquidity calculators use hypothetical prices and assumed cash fees. The lending lab uses fixed simple interest and Aave v3-style collateral concepts, with editable teaching assumptions rather than current market quotes. Snapshots record on-chain state at one block. Historical liquidity cases calculate earned fee tokens and time in range from recorded periods, with independent accounting checks. These tools do not reconstruct a position’s lifetime profit; the fixed-position replay is not an arbitrary-range backtester. The interface identifies which kind of result you are viewing.
+## Two topics
 
-No wallet connection or transactions. The site runs on GitHub Pages; saved work stays in your browser unless exported.
+**[Liquidity](https://teren.sh/#experiment)** compares full-range and concentrated-liquidity positions with holding their starting tokens. Change prices, bounds and assumed cash fees, save comparisons, or try virtual swaps and deposits. Learn has six foundation lessons and a final challenge, followed by three range-choice exercises and three exercises using recorded historical cases.
+
+**[Lending](https://teren.sh/lending.html#experiment)** explores supplying ETH and borrowing USDC. Change price and time, compare repayment with adding collateral, and see health factor across prices, a single liquidation illustration and a compounding reference. Four lessons progress through supply, debt, changing conditions and responses. The main model uses fixed simple interest and Aave v3-style collateral concepts; rates and rules are editable teaching assumptions.
+
+## Models and recorded evidence
+
+- **Hypothetical experiments:** liquidity fee income, prices and lending rates/rules are inputs. Outcomes describe those assumptions; they are not live quotes or forecasts.
+- **[Snapshots](https://teren.sh/#inspect):** Inspect reads Ethereum mainnet WETH/USDC Uniswap v2 pools and v3 NFT positions at a recorded block. It shows principal, fee accounting where available and exportable JSON. A snapshot does not establish lifetime profit.
+- **[Historical liquidity cases](https://teren.sh/#historical-case):** two unchanged v3 positions over about 83 minutes and 33 hours, with earned fee tokens, time in range and a comparison with holding the exact starting principal tokens. Chain reads, event queries and independent collection simulations checked the records at capture. The browser validates the bundled arithmetic without re-querying Ethereum. These are fixed-position records, not an arbitrary-range backtester.
+
+Recorded evidence currently covers liquidity only. Lending has no live position imports or verified historical records, and borrowing loops are not included. See [Methods](https://teren.sh/methods.html) for what each kind of result can establish.
+
+No wallet connection or transactions. The static site runs on GitHub Pages. Working drafts and learning progress stay in your browser; links and exports let you keep or share supported setups. Feedback is welcome at [hello@teren.sh](mailto:hello@teren.sh) or through [GitHub issues](https://github.com/provatidis/teren/issues).
 
 ## Run locally
 

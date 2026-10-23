@@ -27,7 +27,7 @@ These facts explain why an endpoint status or sampled price line cannot establis
 
 ## Learn from these records
 
-The [Fees, time and range exits chapter](https://teren.sh/learn.html#applied=fees-over-time) uses these unchanged records for three guided prediction-and-explanation exercises. Assessment targets come from the existing period accounting: final baseline fee value, the exit-and-return case’s 2,724 active seconds between blocks 26084375–26085000, and its final LP-minus-holding result before costs. Checkpoint exploration stays independent of the fixed question. Playground handoffs start a separate principal-only hypothetical experiment with zero assumed future fees.
+The [Fees, time and range exits chapter](https://teren.sh/learn.html#applied=fees-over-time) uses these unchanged records for three guided prediction-and-explanation exercises. Assessment targets come from the existing period accounting: final baseline fee value, the exit-and-return case’s 2,724 active seconds between blocks 26084375–26085000, and its final LP-minus-holding result before costs. Checkpoint exploration stays independent of the fixed question. Experiment handoffs start a separate principal-only hypothetical experiment with zero assumed future fees.
 
 ## Calculations and checks
 

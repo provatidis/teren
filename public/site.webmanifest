@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Teren · Look closely",
   "short_name": "Teren",
-  "description": "Explore liquidity ranges, public position snapshots and virtual swaps.",
+  "description": "Learn and experiment with DeFi liquidity and lending, and inspect recorded liquidity evidence.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
