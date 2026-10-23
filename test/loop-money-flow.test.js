@@ -108,6 +108,10 @@ test('learning flows use ledger balances and distinguish sale, repayment and the
   }
   const stages = loopFlowStages(loopCase('unwind').result, 'unwind').stages;
   assert.equal(stages.length, 8);
+  assert.deepEqual(stages.map(stage => stage.action), ['start', 'withdraw', 'sell', 'repay', 'withdraw', 'sell', 'repay', 'release']);
+  assert.deepEqual(loopFlowStages(loopCase('build').result, 'build').stages.map(stage => stage.action), ['start', 'borrow', 'buy', 'supply']);
+  assert.equal(stages[4].pass, 'Pass 2 of 2');
+  assert.equal(stages[7].pass, '');
   assert.equal(stages[2].changes.debt, 'Unchanged');
   assert.match(stages[6].copy, /still supplied/);
   assert.match(stages[7].copy, /now in your wallet/);

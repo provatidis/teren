@@ -24,6 +24,8 @@ export function initLendingLearning() {
   };
   let chapter = 'essentials', course = courses.essentials, progress = course.progress;
   let lesson, draft, example;
+  const visualLesson = () => chapter === 'loops' && ['build', 'unwind'].includes(lesson?.id);
+  const revealLabel = () => visualLesson() ? 'Compare your answer →' : 'Reveal the result →';
   const fresh = () => ({ prediction: '', reason: '', application: '', revealed: false, seed: newChoiceSeed() });
   function navigation() {
     $('lend-progress').textContent = progress.completed.length + ' of ' + course.lessons.length + ' checked';
@@ -49,15 +51,13 @@ export function initLendingLearning() {
     draft.revealed = true;
     const prediction = lesson.predictions.find(([id]) => id === example.prediction)[1];
     $('lend-prediction-feedback').textContent = draft.prediction === example.prediction
-      ? 'Your prediction matches. ' + prediction : 'Compare this with your prediction: ' + prediction;
+      ? (visualLesson() ? 'Yes. ' : 'Your prediction matches. ') + prediction
+      : (visualLesson() ? 'Compare this with what you saw: ' : 'Compare this with your prediction: ') + prediction;
     $('lend-metrics').replaceChildren(...course.metrics(lesson.id, example.result).map(items => learningMetric(...items)));
-    const showFlow = chapter === 'loops' && ['build', 'unwind'].includes(lesson.id);
-    $('lend-money-flow').hidden = !showFlow;
-    $('lend-metrics').hidden = showFlow;
-    if (showFlow) renderLoopMoneyFlow($('lend-money-flow'), example.result, lesson.id);
+    $('lend-metrics').hidden = visualLesson();
     $('lend-observe').hidden = false;
     $('lend-assessment').hidden = false;
-    $('lend-reveal').textContent = 'Revisit the result ↓';
+    $('lend-reveal').textContent = visualLesson() ? 'Revisit the explanation ↓' : 'Revisit the result ↓';
     persist();
   }
   function check(save = true) {
@@ -100,6 +100,20 @@ export function initLendingLearning() {
     $('lend-title').textContent = lesson.title;
     $('lend-adds').textContent = lesson.adds;
     for (const key of ['intro', 'setup', 'question', 'takeaway', 'explanation', 'pitfall', 'reasoning']) $('lend-' + key).textContent = lesson[key];
+    const showFlow = visualLesson();
+    $('lend-adds').hidden = showFlow;
+    $('lend-visual').hidden = !showFlow;
+    $('lend-money-flow').hidden = !showFlow;
+    $('lend-setup').hidden = showFlow;
+    $('lend-predict-label').textContent = showFlow ? 'REFLECT' : '01 · PREDICT';
+    $('lend-predict-title').textContent = showFlow ? 'What did you notice?' : 'Before opening the result';
+    $('lend-predict-note').textContent = showFlow
+      ? 'Revisit any stage to help you answer. Getting this wrong does not block completion.'
+      : 'Your prediction helps you explore the idea. You can complete the lesson even if it is wrong.';
+    $('lend-observe-label').textContent = showFlow ? 'CONNECT THE IDEA' : '02 · OBSERVE';
+    $('lend-observe-title').textContent = showFlow ? 'What to take away' : 'Read the result';
+    $('lend-check-label').textContent = showFlow ? 'CHECK YOUR UNDERSTANDING' : '03 · CHECK YOUR UNDERSTANDING';
+    if (showFlow) renderLoopMoneyFlow($('lend-money-flow'), example.result, lesson.id);
     $('lend-application-context').textContent = lesson.applicationContext;
     $('lend-application-question').textContent = lesson.applicationQuestion;
     $('lend-hint-text').textContent = lesson.hint;
@@ -122,14 +136,14 @@ export function initLendingLearning() {
             draft.revealed = false; draft.reason = ''; draft.application = '';
             for (const radio of document.querySelectorAll('input[name="lend-reason"],input[name="lend-application"]')) radio.checked = false;
             $('lend-observe').hidden = true; $('lend-assessment').hidden = true;
-            $('lend-reveal').disabled = false; $('lend-reveal').textContent = 'Reveal the result →';
+            $('lend-reveal').disabled = false; $('lend-reveal').textContent = revealLabel();
           }
           persist();
         },
       });
     }
     $('lend-observe').hidden = true; $('lend-assessment').hidden = true; clearFeedback();
-    $('lend-reveal').disabled = !draft.prediction; $('lend-reveal').textContent = 'Reveal the result →';
+    $('lend-reveal').disabled = !draft.prediction; $('lend-reveal').textContent = revealLabel();
     if (draft.revealed) {
       reveal();
       if (course.check(id, draft.reason, draft.application).passed) check(false);

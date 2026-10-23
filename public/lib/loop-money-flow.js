@@ -1,7 +1,7 @@
-import { loopMoney, loopTokens } from './loop-presentation.js';
-import { formatTokenQuantity } from './format.js';
+import { loopMoney } from './loop-presentation.js';
 import { healthLabel } from './lending-presentation.js';
 import { loopFlowStages } from './loop-flow-stages.js';
+import { createLoopFlowDiagram } from './loop-flow-diagram.js';
 
 // Read balances from the model's ledger, including wallet assets between actions.
 export function renderLoopMoneyFlow(container, result, lesson = 'build') {
@@ -13,7 +13,6 @@ export function renderLoopMoneyFlow(container, result, lesson = 'build') {
     if (className) element.className = className;
     return element;
   };
-  const heading = node('h4', 'Follow the money');
   const intro = node('p', flow.intro, 'fine-print');
   const controls = node('div', undefined, 'loop-flow-timeline');
   const label = node('label', flow.sliderLabel, 'sr-only'); label.htmlFor = 'loop-flow-slider';
@@ -32,22 +31,26 @@ export function renderLoopMoneyFlow(container, result, lesson = 'build') {
   const keyboardHelp = node('span', ' Arrow keys move one stage. Home and End go to the first and last stages.', 'sr-only');
   help.append(keyboardHelp);
   controls.append(label, selected, slider, stops, help);
-  const copy = node('p', undefined, 'loop-flow-copy');
+  const copy = node('p', undefined, 'loop-flow-copy'); copy.id = 'loop-flow-copy';
+  const diagram = createLoopFlowDiagram();
   const health = node('p', undefined, 'loop-flow-health'); health.id = 'loop-flow-health'; health.hidden = !isUnwind;
-  const balances = node('dl', undefined, 'loop-flow-balances');
-  const values = {}, changes = {}, rows = {};
+  const details = node('details', undefined, 'loop-flow-details');
+  details.append(node('summary', 'Balance details and assumptions'));
+  const changes = {}, balanceChanges = node('dl', undefined, 'loop-flow-changes');
   for (const [key, label] of [['wallet', 'In your wallet'], ['supplied', 'Supplied as collateral'], ['debt', 'Debt still owed']]) {
-    const row = node('div'), value = node('dd'), change = node('small', undefined, 'loop-flow-change');
-    value.id = 'loop-flow-' + key;
+    const row = node('div'), change = node('dd');
     change.id = 'loop-flow-' + key + '-change';
-    values[key] = value; changes[key] = change; rows[key] = row;
-    const term = node('dt', label); term.append(change);
-    row.append(term, value); balances.append(row);
+    changes[key] = change;
+    row.append(node('dt', label), change); balanceChanges.append(row);
   }
   const net = node('p', undefined, 'loop-flow-net');
   net.id = 'loop-flow-net';
   const costs = node('p', undefined, 'fine-print'); costs.id = 'loop-flow-costs'; costs.hidden = !isUnwind;
   const note = node('p', flow.note, 'fine-print');
+  details.append(balanceChanges, health, costs, note);
+  const limit = node('p', isUnwind
+    ? 'Teaching example. Real withdrawals also depend on protocol rules and available funds.'
+    : 'The price stays fixed here. More ETH would mean a bigger gain or loss if its price moved.', 'fine-print');
   const actions = node('div', undefined, 'loop-flow-actions');
   const previous = node('button', '← Previous', 'text-button'); previous.type = 'button'; previous.id = 'loop-flow-previous';
   const next = node('button', 'Next: Borrow →', 'text-button'); next.type = 'button'; next.id = 'loop-flow-next';
@@ -55,21 +58,18 @@ export function renderLoopMoneyFlow(container, result, lesson = 'build') {
   const announcement = node('p', '', 'sr-only'); announcement.setAttribute('role', 'status');
   let index = 0;
   function show(stageIndex, announce = true) {
+    const animate = stageIndex === index + 1;
     index = stageIndex;
     const stage = stages[index], p = stage.position;
     slider.value = String(index);
     const progress = 'Stage ' + (index + 1) + ' of ' + stages.length;
     slider.setAttribute('aria-valuetext', stage.label + ', ' + progress.toLowerCase() + '. ' + stage.title);
     selected.textContent = progress + ' · ' + stage.label;
+    if (stage.pass) selected.append(' ', node('span', stage.pass, 'loop-flow-pass'));
     markers.forEach((marker, i) => { marker.dataset.current = String(i === index); });
     copy.textContent = stage.copy;
-    for (const key of Object.keys(values)) {
-      changes[key].textContent = stage.changes[key];
-      rows[key].dataset.changed = String(index > 0 && stage.changes[key] !== 'Unchanged');
-    }
-    values.wallet.replaceChildren(node('span', formatTokenQuantity(p.cash, 2) + ' USDC'), node('span', loopTokens(p.walletETH)));
-    values.supplied.textContent = loopTokens(p.collateralTokens);
-    values.debt.textContent = formatTokenQuantity(p.debt, 2) + ' USDC';
+    for (const key of Object.keys(changes)) changes[key].textContent = stage.changes[key];
+    diagram.show(stage, animate);
     if (isUnwind) {
       health.textContent = p.debt === 0 ? 'No debt left to back.' : 'Health factor: ' + healthLabel(p.healthFactor) + ' · Supplied ETH backs debt.';
       costs.textContent = 'Swap losses during unwind so far: ' + loopMoney(stage.costs);
@@ -84,6 +84,6 @@ export function renderLoopMoneyFlow(container, result, lesson = 'build') {
   previous.addEventListener('click', () => { show(index - 1); if (previous.disabled) slider.focus({ preventScroll: true }); });
   next.addEventListener('click', () => { show(index + 1); if (next.disabled) slider.focus({ preventScroll: true }); });
   container.dataset.flow = lesson;
-  container.replaceChildren(heading, intro, controls, actions, copy, health, balances, net, costs, note, announcement);
+  container.replaceChildren(intro, controls, actions, diagram.element, copy, net, limit, details, announcement);
   show(0, false);
 }

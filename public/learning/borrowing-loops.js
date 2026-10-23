@@ -7,13 +7,13 @@ export const LOOP_LESSONS = [
   {
     id: 'build', short: 'Build one loop', title: 'More ETH, with more debt beside it',
     adds: 'Borrow once, buy ETH, then supply it.',
-    intro: 'A borrowing loop uses a loan to buy more of the collateral asset. Supplying that purchase can support another loan. Follow the cash as it moves.',
+    intro: 'Use a loan to buy more ETH, then supply that ETH to back the loan. Follow one round below.',
     setup: 'Start with 5 ETH at $2,000 each. Borrow 5,000 USDC, spend it buying ETH, and supply the purchased ETH. Keep the price unchanged. For this first example, ignore interest and swap costs.',
     question: 'After this round, what happens to assets minus debt?',
     predictions: [['same', 'It stays the same.'], ['more', 'It increases with the additional ETH.'], ['less', 'It decreases by the full amount borrowed.']],
     takeaway: 'The extra ETH is financed by debt. It is not new wealth.',
-    explanation: 'After the full round, more ETH is supplied and the USDC debt is still owed. The borrowed cash has been spent, so it is no longer in the wallet. With no costs or price change, assets minus debt stay at the original value.',
-    pitfall: 'Counting both the purchased ETH and the USDC spent on it counts the same money twice. Swap costs would reduce net assets even before prices move.',
+    explanation: 'You end with more ETH and a matching USDC debt. At this unchanged price, with no costs, what you own minus what you owe stays the same.',
+    pitfall: 'The USDC was spent on ETH. Counting both would count the same money twice.',
     reasoning: 'Why does owning more ETH leave net assets unchanged here?',
     reasons: [['debt', 'The purchased ETH comes with an equal debt.'], ['cash', 'The borrowed USDC remains available beside the purchased ETH.'], ['price', 'Supplying more ETH lowers the price of the original ETH.']],
     reasonFeedback: {
@@ -57,13 +57,13 @@ export const LOOP_LESSONS = [
   {
     id: 'unwind', short: 'Explore unwinding', title: 'Collateral is not all available to sell at once',
     adds: 'Withdraw some ETH, sell it, then repay debt.',
-    intro: 'ETH backing a loan is different from ETH freely held in a wallet. An unwind needs a sequence that keeps enough collateral behind the remaining debt.',
+    intro: 'To close the loop, move ETH back to your wallet and use some of it to repay the loan. The order matters.',
     setup: 'Use the three-round loop at its unchanged starting price. The preview withdraws part of the available collateral, sells it for USDC and repays debt. It repeats at one fixed price, with an assumed 0.3% loss on each swap and no outside money.',
     question: 'How does this preview release the supplied ETH?',
     predictions: [['stages', 'It withdraws and repays in stages, then releases the remainder.'], ['all', 'It withdraws all ETH first, then repays from the sale.'], ['cancel', 'Withdrawing the ETH cancels the matching debt.']],
     takeaway: 'Repaying debt frees collateral. Selling collateral also has a cost.',
-    explanation: 'Each withdrawal leaves enough collateral for the debt still owed under the preview’s health-factor rule. Selling the withdrawn ETH produces USDC to repay debt, which makes another withdrawal possible. Once debt reaches zero, the remaining ETH is no longer backing a loan.',
-    pitfall: 'This is a teaching sequence at one fixed price. Available liquidity, fees, gas, protocol rules and transaction ordering can prevent a real unwind from following it.',
+    explanation: 'Withdraw some ETH, sell it for USDC, then repay. Less debt lets you withdraw more ETH. After the debt is cleared, one final withdrawal brings the rest to your wallet.',
+    pitfall: 'Selling ETH does not repay the loan. The USDC must leave your wallet in a separate repayment.',
     reasoning: 'Why can’t the preview withdraw all collateral first?',
     reasons: [['backing', 'The unpaid debt still needs collateral backing.'], ['rate', 'Withdrawing first would change the entered interest rate.'], ['price', 'ETH must rise in price before any repayment is possible.']],
     reasonFeedback: {

@@ -79,3 +79,11 @@ Three directly accessible lessons follow lending essentials. They use `borrowing
 | Explore unwinding | All collateral can be withdrawn first; withdrawing cancels debt. | Start below the liquidation boundary; the withdrawal-first preview stops. |
 
 The first lesson removes costs and interest to isolate matching debt. The second compares the same original capital with more ETH exposure; no arithmetic is required from the learner. The last explains intermediate collateral constraints and labels the unwind as an assumed sequence, not guaranteed execution. Automated checks cover every answer combination and numerical references. They do not establish learning effectiveness.
+
+## Visual loop pilot · 1.22.0
+
+Build and unwind now begin with the explainer, without requiring an answer to unlock it. The learner controls the pace through fixed ledger stages. Three consistent areas separate wallet assets, ETH backing the loan (collateral), and debt. Arrows label transfers; swaps change wallet assets, and borrowing highlights cash and debt together. Every paused frame remains readable with motion disabled. Backward navigation revisits a frame rather than showing a loan being reversed.
+
+Reflection follows the visual and remains ungraded. Explanation and changed-situation questions still determine completion; no calculations are required. Choosing an answer or opening its explanation preserves the current frame. The stage itself is temporary, and lesson reloads start the visual at the beginning while retaining saved answers and completion. Detailed balance changes, health factor and costs are available in a disclosure. Fixed-price assumptions and real-withdrawal limitations remain visible.
+
+This is a focused pilot, not evidence that animation improves learning. In an observed session, pause after selling ETH and ask what changed in the wallet and whether the debt changed. After the final repayment, ask where the remaining ETH is. Look for an explanation of the mechanism rather than recall of the displayed numbers.

@@ -53,3 +53,9 @@ Carry both asset and debt exposure through every loop. Separate borrowed cash, r
 - Check that only sales incur the assumed swap loss, withdrawals and repayments conserve net assets, and the final wallet transfer appears only after full repayment. Blocked and partial previews retain unpaid debt. The action ledger does not alter the existing aggregate results.
 - Retained blind spots: the fixed-price preview still excludes gas, liquidity restrictions, protocol-specific execution and liquidation ordering. Its final transfer is an assumed available withdrawal, not a claim that a real pool can execute it. A health factor above 1 is not a guarantee of a safe strategy.
 - Next learning evidence: pause just after a sale and ask what is in the wallet and whether debt has changed. Then pause after repayment and ask where the remaining ETH is. No calculation or rounding is needed.
+
+## Visual loop review · 1.22.0
+
+- The diagram is available before answering. Its arrows explain asset transfers, not execution or a continuous transaction simulation. Borrowed tokens do not come from the debt card; that card records an obligation. Only adjacent forward steps animate, and reduced-motion mode keeps the same labels and balances.
+- Keep a short explanation beside each scene, with detailed accounting available below. The three areas and their labels carry meaning without relying on color or animation. Saved completion and answers remain compatible.
+- Retained blind spots: the example still uses a fixed price and teaching withdrawal rule. It does not establish liquidity availability or successful execution. One person's preference for visuals is design input, not learning evidence; the next observed session should test the sale-versus-repayment and wallet-versus-collateral distinctions without asking for arithmetic.
