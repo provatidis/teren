@@ -125,7 +125,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     const id = key === 'ArrowRight' ? 'loop-flow-next' : 'loop-flow-previous';
     if (await evaluate(`document.getElementById('${id}').disabled`)) return;
     await evaluate(`document.getElementById('${id}').focus()`);
-    await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+    await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' });
     await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
   };
   const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'falls'], ['unwind', 'all', 'backing', 'blocked']];
