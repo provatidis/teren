@@ -78,6 +78,44 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
   await click('lending-tool-loops');
   assert.equal(await evaluate("document.getElementById('loop-days').value"), '365');
 
+  await click('loop-reset');
+  await fill('loop-rounds', '3');
+  await fill('loop-future', '1500');
+  await click('loop-compare-toggle');
+  assert.equal(await evaluate("document.getElementById('loop-reference-rounds').value"), '1');
+  assert.equal(await text('loop-reference-difference'), '$942.16 less than the reference');
+  assert.match(await text('loop-compare-rows'), /\$5,296.59/);
+  assert.match(await text('loop-compare-rows'), /\$6,238.75/);
+  await click('loop-show-result'); await settle(evaluate);
+  assert.equal(await evaluate('document.activeElement.id'), 'loop-round-comparison');
+  await fill('loop-future', '100');
+  assert.equal(await evaluate("document.getElementById('loop-compare-warning').hidden"), false);
+  assert.match(await text('loop-compare-rows'), /Eligible for liquidation/);
+  await fill('loop-future', '1500');
+  await evaluate("const field=document.getElementById('loop-reference-rounds');field.value='3';field.dispatchEvent(new Event('change',{bubbles:true}))");
+  assert.equal(await text('loop-reference-difference'), 'Matches the reference');
+  assert.match(await text('loop-round-comparison-takeaway'), /same round count/);
+  await evaluate("const field=document.getElementById('loop-reference-rounds');field.value='0';field.dispatchEvent(new Event('change',{bubbles:true}))");
+  await fill('loop-days', '365');
+  assert.equal(await text('loop-reference-label'), 'Supply only');
+  assert.match(await text('loop-compare-rows'), /No debt/);
+  await navigate(base + 'lending.html#loops');
+  assert.equal(await evaluate("document.getElementById('loop-reference-rounds').value"), '0');
+  assert.equal(await evaluate("document.getElementById('loop-compare-options').hidden"), false);
+  await evaluate("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('Clipboard unavailable')}}})");
+  await click('loop-share');
+  const comparisonLink = await evaluate("document.getElementById('loop-share-url').value");
+  assert.match(comparisonLink, /compare=0/);
+  await click('loop-reset');
+  assert.equal(await evaluate("document.getElementById('loop-round-comparison').hidden"), true);
+  await navigate(comparisonLink);
+  assert.equal(await text('loop-reference-label'), 'Supply only');
+  await navigate(comparisonLink + '&compare=1');
+  assert.equal(await evaluate("document.getElementById('loop-route-note').hidden"), false);
+  assert.equal(await text('loop-reference-label'), 'Supply only');
+  await navigate(shared);
+  assert.equal(await evaluate("document.getElementById('loop-round-comparison').hidden"), true);
+
   const choose = (group, value) => evaluate(`document.querySelector('input[name="lend-${group}"][value="${value}"]').click()`);
   const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'falls'], ['unwind', 'all', 'backing', 'blocked']];
   for (const [index, [id, prediction, reason, application]] of lessons.entries()) {
@@ -86,6 +124,24 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     assert.equal(await text('lend-number'), 'LOOPING ' + (index + 1) + ' OF 3');
     await choose('prediction', prediction); await click('lend-reveal');
     assert.match(await text('lend-prediction-feedback'), /Compare this with your prediction/);
+    assert.equal(await evaluate("document.getElementById('lend-money-flow').hidden"), id !== 'build');
+    if (id === 'build') {
+      assert.equal(await text('loop-flow-supplied'), '5 ETH');
+      assert.equal(await text('loop-flow-debt'), '0 USDC');
+      await click('loop-flow-next');
+      assert.match(await text('loop-flow-wallet'), /5,000 USDC/);
+      assert.equal(await text('loop-flow-debt'), '5,000 USDC');
+      await click('loop-flow-next');
+      assert.match(await text('loop-flow-wallet'), /2.5 ETH/);
+      assert.equal(await text('loop-flow-supplied'), '5 ETH');
+      assert.equal(await text('loop-flow-net'), 'Assets minus debt: $10,000.00');
+      await click('loop-flow-next');
+      assert.equal(await text('loop-flow-supplied'), '7.5 ETH');
+      assert.equal(await text('loop-flow-debt'), '5,000 USDC');
+      assert.equal(await evaluate('document.activeElement.dataset.flowStage'), '3');
+      await click('loop-flow-previous');
+      assert.match(await text('loop-flow-wallet'), /2.5 ETH/);
+    }
     await click('lend-check');
     assert.equal(await text('lend-feedback-title'), 'Review your answers.');
     await choose('reason', reason); await choose('application', application); await click('lend-check');
@@ -114,6 +170,12 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await click('loop-show-result'); await settle(evaluate);
     assert.equal(await evaluate('document.activeElement.id'), 'loop-outcome');
     assert.ok(await evaluate("document.getElementById('loop-outcome').getBoundingClientRect().top>=document.getElementById('loop-quick-result').getBoundingClientRect().bottom"));
+    await click('loop-compare-toggle');
+    await click('loop-show-result'); await settle(evaluate);
+    assert.equal(await evaluate('document.activeElement.id'), 'loop-round-comparison');
+    assert.ok(await evaluate("document.getElementById('loop-round-comparison').getBoundingClientRect().top>=document.getElementById('loop-quick-result').getBoundingClientRect().bottom"));
+    assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
+    await click('loop-compare-toggle');
     await fill('loop-rounds', '5');
     await evaluate("document.getElementById('loop-setup').open=true");
     await fill('loop-threshold', '70');
@@ -127,6 +189,10 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await settle(evaluate);
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
     assert.ok(await evaluate("Array.from(document.querySelectorAll('#loop-price-chart .chart-label')).every(e=>Number.parseFloat(getComputedStyle(e).fontSize)*document.getElementById('loop-price-chart').getBoundingClientRect().width/620>=11.9)"));
+    await navigate(base + 'lending.html#loop-lesson=build');
+    await click('loop-flow-next'); await click('loop-flow-next');
+    assert.match(await text('loop-flow-wallet'), /2.5 ETH/);
+    assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
     await navigate(base + 'lending.html#loop-lesson=unwind');
     await click('lend-retry'); await choose('prediction', 'all'); await click('lend-reveal');
     await choose('reason', 'backing'); await choose('application', 'blocked'); await click('lend-check'); await settle(evaluate);

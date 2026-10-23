@@ -1,5 +1,6 @@
 import { LOOP_DEFAULTS, LOOP_LIMITS, validateLoop } from '../models/borrowing-loop-v1.js';
 import { parseLendingProgress } from './lending-state.js';
+import { validReferenceRounds } from '../models/loop-comparison.js';
 
 export const LOOP_DRAFT_KEY = 'teren-loop-draft-v1';
 export const LOOP_LEARNING_KEY = 'teren-loop-learning-v1';
@@ -9,16 +10,20 @@ const CHAPTER_KEY = 'teren-lending-chapter-v1';
 export function readLoopDraft(getStorage = () => globalThis.sessionStorage) {
   try {
     const raw = getStorage().getItem(LOOP_DRAFT_KEY);
-    if (!raw) return { input: { ...LOOP_DEFAULTS }, status: 'empty' };
+    if (!raw) return { input: { ...LOOP_DEFAULTS }, comparisonRounds: null, status: 'empty' };
     const saved = JSON.parse(raw);
     if (saved.version !== 1 || Object.keys(validateLoop(saved.input)).length) throw new Error('Unsupported draft');
-    return { input: Object.fromEntries([...Object.keys(LOOP_LIMITS), 'interestMode'].map(key => [key, saved.input[key]])), status: 'ready' };
-  } catch { return { input: { ...LOOP_DEFAULTS }, status: 'unavailable' }; }
+    return {
+      input: Object.fromEntries([...Object.keys(LOOP_LIMITS), 'interestMode'].map(key => [key, saved.input[key]])),
+      comparisonRounds: validReferenceRounds(saved.comparisonRounds) ? saved.comparisonRounds : null,
+      status: 'ready',
+    };
+  } catch { return { input: { ...LOOP_DEFAULTS }, comparisonRounds: null, status: 'unavailable' }; }
 }
 
-export function saveLoopDraft(input, getStorage = () => globalThis.sessionStorage) {
-  if (Object.keys(validateLoop(input)).length) return false;
-  try { getStorage().setItem(LOOP_DRAFT_KEY, JSON.stringify({ version: 1, input })); return true; }
+export function saveLoopDraft(input, getStorage = () => globalThis.sessionStorage, comparisonRounds = null) {
+  if (Object.keys(validateLoop(input)).length || (comparisonRounds !== null && !validReferenceRounds(comparisonRounds))) return false;
+  try { getStorage().setItem(LOOP_DRAFT_KEY, JSON.stringify({ version: 1, input, comparisonRounds })); return true; }
   catch { return false; }
 }
 

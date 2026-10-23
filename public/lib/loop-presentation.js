@@ -6,22 +6,24 @@ export const loopMoney = value => (value < 0 ? '−' : '') + loanMoney(Math.abs(
 
 // Ignore only floating-point noise relative to the compared balances.
 // A small real loss must keep its sign even when it is less than one cent.
-export function loopComparison(value, holding) {
+export function loopComparison(value, holding, benchmark = 'holding') {
   const raw = value - holding;
   const tolerance = Number.EPSILON * Math.max(1, Math.abs(value), Math.abs(holding)) * 8;
   const difference = Math.abs(raw) <= tolerance ? 0 : raw;
   if (difference === 0) {
     const exact = raw === 0;
-    return { difference, relation: 'equal', label: exact ? 'Matches holding' : 'Nearly the same as holding', compact: exact ? 'Same as holding' : 'Nearly the same as holding' };
+    return { difference, relation: 'equal', label: exact ? 'Matches ' + benchmark : 'Nearly the same as ' + benchmark, compact: exact ? 'Same as ' + benchmark : 'Nearly the same as ' + benchmark };
   }
   const amount = loopMoney(Math.abs(difference));
   return {
     difference,
     relation: difference > 0 ? 'ahead' : 'behind',
-    label: amount + (difference > 0 ? ' more than holding' : ' less than holding'),
-    compact: (difference > 0 ? '+' : '−') + amount + ' vs holding',
+    label: amount + (difference > 0 ? ' more than ' : ' less than ') + benchmark,
+    compact: (difference > 0 ? '+' : '−') + amount + ' vs ' + benchmark,
   };
 }
+
+export const loopRoundLabel = rounds => rounds === 0 ? 'Supply only' : rounds + (rounds === 1 ? ' round' : ' rounds');
 
 export function loopUnwindLabels(status) {
   if (status === 'blocked') return {
