@@ -9,6 +9,7 @@ import { loopHash } from '../lib/loop-links.js';
 import { lendingMetrics } from '../lib/lending-presentation.js';
 import { loopLessonMetrics } from '../lib/loop-presentation.js';
 import { renderLoopMoneyFlow } from '../lib/loop-money-flow.js';
+import { createLendingScene } from '../lib/lending-lesson-scenes.js';
 import { optionalPrediction } from '../lib/lesson-scene.js';
 import { newChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js';
@@ -25,8 +26,9 @@ export function initLendingLearning() {
       route: '#loop-lesson=', label: 'LOOPING', experiment: '#loops' },
   };
   let chapter = 'essentials', course = courses.essentials, progress = course.progress;
-  let lesson, draft, example;
-  const visualLesson = () => chapter === 'loops' && ['build', 'unwind'].includes(lesson?.id);
+  let lesson, draft, example, foundationScene;
+  const foundationLesson = () => chapter === 'essentials' && ['supply', 'borrow'].includes(lesson?.id);
+  const visualLesson = () => foundationLesson() || chapter === 'loops' && ['build', 'unwind'].includes(lesson?.id);
   const revealLabel = () => visualLesson() ? 'Explain this example →' : 'Reveal the result →';
   const fresh = () => ({ prediction: '', reason: '', application: '', revealed: false, seed: newChoiceSeed() });
   function navigation() {
@@ -108,11 +110,17 @@ export function initLendingLearning() {
     $('lend-money-flow').hidden = !showFlow;
     $('lend-setup').hidden = showFlow;
     $('lend-predict-card').hidden = showFlow;
-    $('lend-explanation').hidden = showFlow;
+    $('lend-explanation').hidden = showFlow && !foundationLesson();
     $('lend-observe-label').textContent = showFlow ? 'CONNECT THE IDEA' : '02 · OBSERVE';
     $('lend-observe-title').textContent = showFlow ? 'What to take away' : 'Read the result';
     $('lend-check-label').textContent = showFlow ? 'CHECK YOUR UNDERSTANDING' : '03 · CHECK YOUR UNDERSTANDING';
-    if (showFlow) {
+    foundationScene = null;
+    if (foundationLesson()) {
+      foundationScene = createLendingScene(example.result, lesson.id, optionalPrediction(predictionField));
+      $('lend-money-flow').replaceChildren(foundationScene.element);
+      $('lend-money-flow').removeAttribute('data-flow');
+      $('lend-visual').append(revealButton);
+    } else if (showFlow) {
       renderLoopMoneyFlow($('lend-money-flow'), example.result, lesson.id, optionalPrediction(predictionField));
       $('lend-visual').append(revealButton);
     } else {
@@ -150,6 +158,7 @@ export function initLendingLearning() {
     $('lend-observe').hidden = true; $('lend-assessment').hidden = true; clearFeedback();
     $('lend-reveal').disabled = !draft.prediction && !visualLesson(); $('lend-reveal').textContent = revealLabel();
     if (draft.revealed) {
+      foundationScene?.showQuestion();
       reveal();
       if (course.check(id, draft.reason, draft.application).passed) check(false);
     }
@@ -171,6 +180,7 @@ export function initLendingLearning() {
   }
   buildNavigation();
   $('lend-reveal').addEventListener('click', () => {
+    foundationScene?.showQuestion();
     reveal(); $('lend-observe-title').focus({ preventScroll: true });
     $('lend-observe').scrollIntoView({ block: 'start', behavior: 'instant' });
   });

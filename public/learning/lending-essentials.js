@@ -1,4 +1,5 @@
 const supplySource = { title: 'Aave: supplying tokens', url: 'https://aave.com/help/supplying/supply-tokens' };
+const receiptSource = { title: 'Aave v3: supplied balances and receipt tokens', url: 'https://aave.com/docs/aave-v3/smart-contracts/tokenization' };
 const collateralSource = { title: 'Aave: collateral and borrowing limits', url: 'https://aave.com/help/supplying/toggle-collateral-status' };
 const loanSource = { title: 'Aave: borrowing, interest and liquidations', url: 'https://aave.com/faq' };
 
@@ -6,12 +7,12 @@ export const LENDING_LESSONS = [
   {
     id: 'supply', short: 'Supply and collateral', title: 'Supplying and borrowing are separate choices',
     adds: 'Supply ETH without borrowing.',
-    intro: 'Supplying tokens makes them available to borrowers. Enabling them as collateral gives them another job: backing your own loan.',
+    intro: 'Follow ETH from your wallet into a lending pool. Then compare earning interest with enabling the supply to back a loan.',
     setup: 'Supply 5 ETH at $2,000 per ETH without using it as collateral. Borrow nothing. Let one year pass at an assumed 2% annual interest rate (APR), using simple interest. Keep ETH’s price unchanged.',
-    question: 'What happens to your supplied ETH over the year while collateral is disabled?',
+    question: 'With collateral off, what changes over the year?',
     predictions: [['earn', 'It earns interest without increasing your borrowing capacity.'], ['capacity', 'It increases your borrowing capacity without earning interest.'], ['neither', 'Its token balance and your borrowing capacity stay unchanged.']],
     takeaway: 'A supply can earn interest without backing a loan. Borrowing creates a separate obligation.',
-    explanation: 'The model adds 0.1 ETH of supply interest. Because this supply is not enabled as collateral, its borrowing limit is zero. There is no debt and no loan liquidation boundary. Its dollar value can still change with ETH’s price.',
+    explanation: 'Interest adds to the supplied ETH. Enabling collateral can make borrowing possible, but it does not take out a loan. With no debt, there is no loan liquidation boundary; ETH’s price can still change.',
     pitfall: 'Even without debt, the token’s price can fall, the protocol can have problems, or funds may be unavailable when you want to withdraw.',
     reasoning: 'Why can this supply earn interest without giving you borrowing capacity?',
     reasons: [['separate', 'Supply interest and borrowing capacity are controlled separately.'], ['ownership', 'Enabling collateral transfers ownership to another borrower.'], ['conversion', 'Supply interest must first be converted into USDC.']],
@@ -26,20 +27,20 @@ export const LENDING_LESSONS = [
     applicationFeedback: 'Enabling collateral makes borrowing possible. Debt appears when you actually borrow. Enabling collateral does not change the supply rate in this example.',
     hint: 'Think about two separate choices: supplying ETH to earn interest, and enabling it to back a loan.',
     deeper: [
-      'Aave v3 accounts for a supplied balance separately from its use as collateral. An asset must be eligible and enabled to contribute to borrowing capacity.',
+      'The supplied ETH shown here is a claim on the lending pool, separate from spendable ETH in the wallet. Aave v3 uses receipt tokens to track that claim and its accrued interest. An asset must be eligible and enabled to contribute to borrowing capacity.',
       'The 2% rate here is a teaching assumption. This model uses simple interest over 365 days. Actual supply rates vary, and live accounting uses reserve indexes.',
       'This example has no debt. With an existing loan, disabling collateral or withdrawing a supply may be blocked if the remaining collateral is insufficient.',
-    ], sources: [supplySource, collateralSource],
+    ], sources: [supplySource, collateralSource, receiptSource],
   },
   {
     id: 'borrow', short: 'Borrow without counting it as profit', title: 'Borrowed tokens come with a matching debt',
     adds: 'Take a loan before changing prices or advancing time.',
-    intro: 'Borrowing gives you tokens to use and creates a debt to repay. Assets minus debt means the value of what you own after subtracting what you owe.',
+    intro: 'Watch borrowed cash arrive alongside a debt to repay. Assets minus debt means the value of what you own after subtracting what you owe.',
     setup: 'Supply 5 ETH at $2,000 per ETH as collateral. Borrow 5,000 USDC and keep it in your wallet. No time passes. A new loan can be up to 75% of collateral value: the maximum loan-to-value ratio (LTV). The liquidation threshold is 80%. Both are teaching assumptions.',
-    question: 'What happens to your assets minus debt immediately after borrowing?',
+    question: 'Does borrowing change your assets minus debt?',
     predictions: [['more', 'The total increases by the borrowed USDC.'], ['same', 'The total stays the same before costs.'], ['less', 'The total decreases by the borrowed USDC.']],
     takeaway: 'Borrowing adds cash and debt together. The borrowed cash is not profit.',
-    explanation: 'The supplied ETH is worth $10,000. You receive $5,000 in your wallet and owe $5,000, so assets minus debt stay at $10,000 before costs. Maximum LTV limits new borrowing. The liquidation threshold is a separate rule for assessing an existing loan.',
+    explanation: 'The 75% borrowing limit applies to new loans. The 80% liquidation threshold is a separate rule for existing debt. A price fall can take the debt past the borrowing limit without yet making the loan eligible for liquidation.',
     pitfall: 'Borrowing more brings the loan closer to its liquidation boundary. The borrowing limit tells you what the rules allow; it does not recommend an amount.',
     reasoning: 'Why does receiving the USDC leave assets minus debt unchanged?',
     reasons: [['liability', 'The new cash comes with an equal debt to repay.'], ['collateral', 'The supplied ETH loses an equal amount of value.'], ['fee', 'The borrowed amount is immediately paid as a fee.']],
