@@ -6,7 +6,7 @@ const ready = (evaluate, id) => wait(evaluate, "document.getElementById('histori
 const choose = (evaluate, id) => evaluate("(()=>{const select=document.getElementById('period-case');select.value=" + JSON.stringify(id) + ";select.dispatchEvent(new Event('change',{bubbles:true}))})()");
 
 export async function checkReplay({ evaluate, click, fill, text, navigate, base, downloadFile, call }) {
-  await navigate(base + '#historical-case=range-return'); await ready(evaluate, '1375047');
+  await navigate(base + 'liquidity.html#historical-case=range-return'); await ready(evaluate, '1375047');
   const keys = ['defi-sandbox-v1','degenerator-learning-liquidity-v1','degenerator-experiments-v1','degenerator-pool-snapshot-v1','degenerator-v3-position-snapshot-v1'];
   const stored = await evaluate(JSON.stringify(keys) + '.map(key=>localStorage.getItem(key))');
   assert.equal(await text('period-fees'), '$0.45'); assert.equal(await text('period-range-time'), '41.7%');
@@ -37,7 +37,7 @@ export async function checkReplay({ evaluate, click, fill, text, navigate, base,
   assert.deepEqual(await evaluate(JSON.stringify(keys) + '.map(key=>localStorage.getItem(key))'), stored);
 
   // A delayed response for the previous choice must not replace the latest case.
-  await navigate(base + '#historical-case'); await ready(evaluate, '1382030');
+  await navigate(base + 'liquidity.html#historical-case'); await ready(evaluate, '1382030');
   await evaluate("(()=>{const original=window.fetch;window.restoreReplayFetch=()=>window.fetch=original;window.fetch=(url,options)=>String(url).endsWith('/uniswap-v3-position-range-return.json')?new Promise(resolve=>{window.releaseReplay=async()=>{const response=await original(url,options);await response.clone().text();resolve(response)}}):original(url,options)})()");
   await choose(evaluate, 'range-return'); await wait(evaluate, "typeof window.releaseReplay==='function'");
   await choose(evaluate, 'in-range'); await ready(evaluate, '1382030');
@@ -47,22 +47,22 @@ export async function checkReplay({ evaluate, click, fill, text, navigate, base,
   assert.match(await text('period-title'), /1382030/); assert.equal(await text('period-fees'), '$2.36');
 
   // Failed data loads hide old results, disable handoffs and allow an actual retry.
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   await evaluate("(()=>{const original=window.fetch;let failed=false;window.restoreReplayFetch=()=>window.fetch=original;window.fetch=(url,options)=>{if(!failed&&String(url).endsWith('/uniswap-v3-position-range-return.json')){failed=true;return Promise.resolve({ok:false,status:503})}return original(url,options)}})()");
   await evaluate("document.querySelector('.workspace-links a[href=\"#historical-case\"]').click()"); await ready(evaluate, '1382030');
   await choose(evaluate, 'range-return'); await wait(evaluate, "!document.getElementById('period-retry').hidden");
   assert.equal(await evaluate("document.getElementById('period-result').hidden && document.getElementById('period-export').disabled && document.getElementById('period-apply').disabled"), true);
   await click('period-retry'); await ready(evaluate, '1375047'); await evaluate('window.restoreReplayFetch()');
-  await navigate(base + '#historical-case=unsupported'); await ready(evaluate, '1382030');
+  await navigate(base + 'liquidity.html#historical-case=unsupported'); await ready(evaluate, '1382030');
   assert.match(await text('period-status'), /unavailable.*baseline/);
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: verified crossing case, interval fees, hidden active time, keyboard checkpoints, exact export, principal-only handoff, state isolation, case races and retry');
 }
 
 export async function checkMobileReplay({ evaluate, click, fill, text, navigate, base, call }) {
   for (const [width,height] of [[390,844],[320,740]]) {
     await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: true });
-    await navigate(base + '#historical-case=range-return'); await ready(evaluate, '1375047');
+    await navigate(base + 'liquidity.html#historical-case=range-return'); await ready(evaluate, '1375047');
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
     const geometry = await evaluate("({header:document.querySelector('.topbar').getBoundingClientRect().bottom,top:document.getElementById('historical-case').getBoundingClientRect().top})");
     assert.ok(geometry.top >= geometry.header + 10);

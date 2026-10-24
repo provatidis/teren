@@ -11,7 +11,7 @@ export async function checkMobileInspect({ evaluate, call, click, fill, navigate
   await call('Fetch.enable', { patterns:[{ urlPattern:'*ui/workspaces*.js*', resourceType:'Script' }] });
   try {
     const paused = nextEvent('Fetch.requestPaused');
-    const loading = navigate(base + '#lp-lab');
+    const loading = navigate(base + 'liquidity.html#lp-lab');
     const request = await paused;
     await call('Fetch.fulfillRequest', { requestId:request.requestId, responseCode:200,
       responseHeaders:[{ name:'Content-Type',value:'text/javascript' },{ name:'Cache-Control',value:'no-store' }], body:Buffer.from(legacy).toString('base64') });
@@ -40,7 +40,7 @@ export async function checkMobileInspect({ evaluate, call, click, fill, navigate
     for (const [width,height] of [[390,844],[320,740]]) {
       await call('Emulation.setDeviceMetricsOverride', { width,height,deviceScaleFactor:1,mobile:true });
       for (const [fragment,field,value] of [['lp-lab','scenario-future','4500'],['range-lab','cl-future','2400']]) {
-        await navigate(base + '#' + fragment);
+        await navigate(base + 'liquidity.html#' + fragment);
         if (fragment === 'range-lab') await evaluate("document.getElementById('cl-setup-details').open=true");
         await fill(field,value);
         await evaluate(`document.getElementById('${field}').focus();document.getElementById('${field}').scrollIntoView({block:'center'})`);

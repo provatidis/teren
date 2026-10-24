@@ -1,3 +1,4 @@
+import { saveLearningLocation } from '../data/learning-location.js';
 import { optionalPrediction, sceneNode } from '../lib/lesson-scene.js';
 import { createTokenBalanceScene } from '../lib/liquidity-lesson-scenes.js';
 import { createFoundationScene } from '../lib/foundation-lesson-scenes.js';
@@ -52,7 +53,7 @@ export function initLearning() {
     $('learn-progress-count').textContent = count + ' of 7 checked';
     $('learn-progress').value = count;
     $('learn-progress').setAttribute('aria-label', count + ' of 7 exercises checked');
-    $('learn-course-status').textContent = count === 7 ? 'All essentials exercises checked. Continue with range choices or revisit an experiment.' : 'Six lessons and a final challenge. Open any topic.';
+    $('learn-course-status').textContent = count === 7 ? 'All essentials exercises checked. Continue with range choices or revisit an experiment.' : 'Swaps and ownership, then comparisons and price ranges.';
     for (const link of document.querySelectorAll('[data-lesson-id]')) {
       const id = link.dataset.lessonId;
       const active = !managementLessonFromHash(location.hash) && !appliedLessonFromHash(location.hash) && id === lesson?.id;
@@ -235,7 +236,7 @@ export function initLearning() {
     $('learn-results').hidden = false; $('learn-assessment').hidden = false;
     $('learn-run').textContent = visualLesson() ? 'Explain the ' + questionLabel() + ' →' : 'Run again →';
     $('learn-input-status').textContent = '';
-    const home = new URL('./', location.href);
+    const home = new URL('liquidity.html', location.href);
     if (lesson.id === 'range-boundaries') home.hash = rangeHash(r);
     else if (r) home.hash = scenarioHash(s);
     else home.hash = 'swap-sandbox';
@@ -259,6 +260,7 @@ export function initLearning() {
     const id = valid ? requested : progress.lastLesson;
     $('learn-route-note').hidden = !location.hash || valid;
     lesson = LESSONS.find(item => item.id === id);
+    saveLearningLocation('learn.html#lesson=' + id);
     const index = LESSON_IDS.indexOf(id);
     draft = progress.drafts[id] || { variant: 0, inputs: lessonSetup(id), prediction: '', answer: '', reason: '', application: '', choiceSeed: newChoiceSeed(), ran: false };
     if (!validChoiceSeed(draft.choiceSeed)) draft.choiceSeed = newChoiceSeed();
@@ -266,7 +268,7 @@ export function initLearning() {
     if (!lesson.predictions.some(([value]) => value === draft.prediction)) draft.prediction = '';
     if (!lesson.reasons.some(([value]) => value === draft.reason)) draft.reason = '';
     if (!draft.prediction && !visualLesson()) draft.ran = false;
-    $('learn-level').textContent = lesson.protocol + ' · Stage ' + stageForLesson(lesson.id).level + ' · ' + stageForLesson(lesson.id).title;
+    $('learn-level').textContent = lesson.protocol + ' · ' + stageForLesson(lesson.id).title;
     $('learn-lesson-title').textContent = lesson.title; document.title = lesson.short + ' · Teren Learn';
     $('learn-lesson-number').textContent = index === 6 ? 'FINAL CHALLENGE · 7 OF 7' : 'LESSON ' + (index + 1) + ' OF 7';
     $('learn-concept').textContent = lesson.concept; $('learn-skill').textContent = lesson.skill;
@@ -358,7 +360,7 @@ export function initLearning() {
     if (lesson.id !== 'final-challenge' || !outcome || !checkLessonUnderstanding(lesson.id, draft.inputs, draft.variant, draft.reason, draft.application).passed) return;
     const token = generation; $('learn-card-status').textContent = 'Creating your result card…';
     try {
-      const blob = await resultCardBlob(outcome.setup, new URL('./', location.href).href);
+      const blob = await resultCardBlob(outcome.setup, new URL('liquidity.html', location.href).href);
       if (generation !== token) return;
       if (cardURL) URL.revokeObjectURL(cardURL);
       cardURL = URL.createObjectURL(blob); $('learn-card-image').src = cardURL; $('learn-card-download').href = cardURL;

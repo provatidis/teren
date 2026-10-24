@@ -1,5 +1,14 @@
 # Using Teren
 
+## Start from Home
+
+Home introduces Liquidity and Borrowing & leverage. Choose **Learn step by step** or open the lab directly; every lesson and advanced tool stays accessible. Phones have a shortcut to each topic above the cards. The Teren logo returns Home, and **Continue learning** reopens the most recently visited lesson in this browser after it has been opened in this release. It is a navigation bookmark, not a completion mark.
+
+Inside a topic, the mode links stay within it: Liquidity has Learn, Experiment and Inspect; Lending has Learn and Experiment. Switch topics in the header. Valid liquidity drafts survive a same-tab visit to Home, Learn or Lending. An explicit shared scenario takes precedence when reopening the lab.
+
+The liquidity lab now lives at `liquidity.html`. Existing links such as `/#scenario=...`, `/#inspect` and `/#historical-case` still open the corresponding liquidity view and preserve their fragment. Home links and lesson links remain directly shareable.
+
+
 [Project overview](../README.md) · [Product decisions](../DECISIONS.md)
 
 ## Finding a tool and returning to your setup
@@ -8,7 +17,7 @@ Choose **Liquidity** or **Lending** in the topic switch. Experiment and Learn fo
 
 | Topic | Experiment | Learn |
 | --- | --- | --- |
-| Liquidity | [Full-range and price-range labs](https://teren.sh/#experiment) | [Foundations, range choices and recorded cases](https://teren.sh/learn.html) |
+| Liquidity | [Full-range and price-range labs](https://teren.sh/liquidity.html#experiment) | [Foundations, range choices and recorded cases](https://teren.sh/learn.html) |
 | Lending | [Collateralized-loan lab](https://teren.sh/lending.html#experiment) | [Supply, borrow, change conditions and respond](https://teren.sh/lending.html#learn) |
 
 The top navigation stays visible while scrolling. **Experiment** opens the chosen topic’s calculator workspace; **Learn** opens its lessons. **Inspect** opens liquidity’s pool/position workspace. Within Liquidity, the tool links follow the current workspace: calculator tools in Experiment, snapshot sources in Inspect, and a return to experiments from recorded history or Pool mechanics. Historical cases belong to Inspect and remain directly accessible from Experiment. Existing tool and shared-scenario links still open their targets directly.
@@ -96,7 +105,7 @@ Liquidity’s **Choose an example** library follows ten ordered cases. Each stat
 | 09 | Applied cases | Fees through a recorded period | Period fees, cumulative time in range and a holding comparison |
 | 10 | Applied cases | Leaving a range and returning | Outside intervals, fee pauses and activity between sampled prices |
 
-Every stage and lesson is directly accessible; variations practice the same concept rather than representing difficulty levels. Advanced users can open [the recorded in-range snapshot](https://teren.sh/#example=in-range-position), [fee-accounting snapshot](https://teren.sh/#example=position-fees), [in-range replay](https://teren.sh/#historical-case) or [exit-and-return replay](https://teren.sh/#historical-case=range-return) without completing earlier lessons. The example definitions live in [public/learning/example-path.js](../public/learning/example-path.js).
+Every stage and lesson is directly accessible; variations practice the same concept rather than representing difficulty levels. Advanced users can open [the recorded in-range snapshot](https://teren.sh/liquidity.html#example=in-range-position), [fee-accounting snapshot](https://teren.sh/liquidity.html#example=position-fees), [in-range replay](https://teren.sh/liquidity.html#historical-case) or [exit-and-return replay](https://teren.sh/liquidity.html#historical-case=range-return) without completing earlier lessons. The example definitions live in [public/learning/example-path.js](../public/learning/example-path.js).
 
 Examples 01–05 carry hypothetical, versioned assumptions through scenario links. Examples 06–08 select Inspect's position source and save the chosen recorded snapshot; calculator inputs change only when the user applies it. Examples 09–10 open the recorded-period workspace. It does not replace the latest position snapshot or automatically change calculator inputs. Examples do not change virtual balances or lesson completion.
 
@@ -116,7 +125,7 @@ These are fixed-position records checked against chain reads and collect simulat
 
 ## Saved experiments
 
-Choose **Save experiment** in either liquidity lab to keep its current model, exact numeric assumptions, name and optional notes. The [Saved experiments library](https://teren.sh/#saved-experiments) can search names/notes, filter by model, edit names and notes, and reopen any setup. Reopening loads a working copy; input edits leave the original record intact, and saving again creates a variation. Removal has an Undo action until another record is removed or the tab reloads.
+Choose **Save experiment** in either liquidity lab to keep its current model, exact numeric assumptions, name and optional notes. The [Saved experiments library](https://teren.sh/liquidity.html#saved-experiments) can search names/notes, filter by model, edit names and notes, and reopen any setup. Reopening loads a working copy; input edits leave the original record intact, and saving again creates a variation. Removal has an Undo action until another record is removed or the tab reloads.
 
 Select two or three records to compare. Outcomes are recalculated from the saved model inputs, rather than storing potentially stale derived results. The comparison shows each LP value, holding value and difference, with expandable assumptions and notes. Its context distinguishes identical starting baskets and future prices, different future-price scenarios, and different budgets/prices/token mixes. A concentrated range and a 50/50 position can have different starting tokens even with equal budgets; each uses its own holding benchmark. Fee inputs remain assumed USD cash, with USDC = $1 and the existing model exclusions.
 

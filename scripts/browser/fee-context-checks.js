@@ -6,7 +6,7 @@ export async function checkFeeContext({ evaluate, click, fill, text, navigate, b
   const window = (prefix, days) => evaluate(`{const select=document.getElementById('${prefix}-fee-window');select.value='${days}';select.dispatchEvent(new Event('change',{bubbles:true}));}`);
   const wait = condition => evaluate(`new Promise((resolve,reject)=>{const until=Date.now()+10000;const check=()=>{if(${condition})resolve();else if(Date.now()>until)reject(new Error('Fee context did not settle'));else setTimeout(check,20)};check()})`);
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
-  await navigate(base + '#lp-lab');
+  await navigate(base + 'liquidity.html#lp-lab');
   await click('scenario-reset'); await fill('scenario-future', '4000'); await fill('scenario-fees', '100');
   await evaluate("{const original=window.fetch;window.feeRecordRequests=0;window.failFeeRecord=true;window.fetch=(url,options)=>{if(String(url).includes('/examples/uniswap-v3-position-')){window.feeRecordRequests++;if(window.failFeeRecord)return Promise.resolve({ok:false});}return original(url,options)};}");
   const hash = await evaluate('location.hash');

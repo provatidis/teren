@@ -25,20 +25,20 @@ export async function checkProjectInformation({ evaluate, navigate, base }) {
   assert.match(await evaluate('document.body.textContent'), /Confirming its claimed contract state independently requires reading Ethereum/);
   assert.match(await evaluate('document.body.textContent'), /does not backtest that range against the record/);
   await navigate(base + 'learn.html#lesson=swap-impact');
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   assert.match(await evaluate("document.getElementById('lab-full-tab').textContent"),/V2-style/);
   assert.match(await evaluate("document.getElementById('lab-range-tab').textContent"),/V3-style/);
   await navigate(base+'learn.html#lesson=swap-impact');
   const levels = await evaluate("Array.from(document.querySelectorAll('h1,h2,h3')).filter(e=>e.getClientRects().length).map(e=>Number(e.tagName.slice(1)))");
   for (let index = 1; index < levels.length; index++) assert.ok(levels[index] <= levels[index - 1] + 1, 'Visible headings do not skip a level.');
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: static About/Methods, evidence boundaries, feedback/source access, separate-tab preservation and lesson heading order');
 }
 
 export async function checkMobileTools({ evaluate, click, navigate, base, call }) {
   for (const width of [390, 320]) {
     await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
-    await navigate(base + '#experiment');
+    await navigate(base + 'liquidity.html#experiment');
     assert.equal(await evaluate("document.getElementById('workspace-tools-toggle').getAttribute('aria-expanded')"), 'false');
     assert.equal(await evaluate("document.querySelector('.workspace-links').getClientRects().length"), 0);
     await click('workspace-tools-toggle');
@@ -57,6 +57,6 @@ export async function checkMobileTools({ evaluate, click, navigate, base, call }
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
     }
   }
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: compact mobile tools, changing workspace destinations, lab handoff and static information at 390px/320px');
 }

@@ -7,7 +7,7 @@ export async function checkExamples({ evaluate, click, fill, text, navigate, bas
   const wait = condition => evaluate('new Promise((resolve,reject)=>{const deadline=Date.now()+10000;const check=()=>{if(' + condition + ')resolve();else if(Date.now()>deadline)reject(new Error("Example check timed out"));else setTimeout(check,20)};check()})');
   const keys = ['defi-sandbox-v1','degenerator-learning-liquidity-v1','degenerator-pool-snapshot-v1','degenerator-v3-position-snapshot-v1'];
   const saved = await evaluate(JSON.stringify(keys) + '.map(key=>localStorage.getItem(key))');
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   assert.equal(await evaluate("document.getElementById('example-library').open"), false);
   await evaluate("document.querySelector('#example-library > summary').click()");
   assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('[data-example-level]')).map(el=>el.textContent)"), ['1 · Foundations','2 · Comparisons','3 · Ranges','4 · Applied cases']);
@@ -27,7 +27,7 @@ export async function checkExamples({ evaluate, click, fill, text, navigate, bas
   await wait("document.getElementById('cl-future').value==='2200'");
   assert.equal(await text('cl-state'), 'At the upper edge');
   assert.equal(await text('cl-asset-state'), 'All USDC');
-  await navigate(base+'#example=in-range-position');
+  await navigate(base + 'liquidity.html#example=in-range-position');
   await wait("document.getElementById('position-heading-id').textContent==='Position #1382030' && document.getElementById('position-lab').getAttribute('aria-busy')==='false'");
   assert.equal(await text('position-state'), 'In range');
   assert.equal(await text('position-principal'), '$47,793.97');
@@ -40,7 +40,7 @@ export async function checkExamples({ evaluate, click, fill, text, navigate, bas
   assert.equal(await evaluate("localStorage.getItem('defi-sandbox-v1')"), saved[0]);
   assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), saved[1]);
 
-  await navigate(base+'#example=position-fees');
+  await navigate(base + 'liquidity.html#example=position-fees');
   await wait("document.getElementById('position-fees').open && document.getElementById('position-fee-walkthrough').open && document.getElementById('position-lab').getAttribute('aria-busy')==='false'");
   assert.equal(await evaluate("document.querySelectorAll('#example-cards a').length"), 5);
   assert.equal(await evaluate("document.querySelector('[data-example-id=position-fees]').hash"), '#example=position-fees');
@@ -81,7 +81,7 @@ export async function checkExamples({ evaluate, click, fill, text, navigate, bas
 
   // Unreadable and newer-version saves remain until the user discards each one.
   await evaluate("localStorage.setItem('degenerator-pool-snapshot-v1','{');localStorage.setItem('degenerator-v3-position-snapshot-v1',"+JSON.stringify(JSON.stringify({...outside,version:99}))+")");
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   assert.match(await text('pool-status'), /unreadable/);
   assert.equal(await evaluate("document.getElementById('pool-clear-saved').hidden"), false);
   await click('pool-clear-saved');
@@ -94,6 +94,6 @@ export async function checkExamples({ evaluate, click, fill, text, navigate, bas
   assert.equal(await evaluate("localStorage.getItem('defi-sandbox-v1')"), saved[0]);
   assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), saved[1]);
   for (const [index,key] of keys.entries()) await evaluate(saved[index]===null ? 'localStorage.removeItem('+JSON.stringify(key)+')' : 'localStorage.setItem('+JSON.stringify(key)+','+JSON.stringify(saved[index])+')');
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: ordered examples, direct advanced entry, explicit range handoff, typed transport fallback and scoped save recovery');
 }

@@ -16,8 +16,9 @@ export function initLearnReturn({ fullRangeLab, rangeLab, navigation }) {
     const link = event.target.closest('a');
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.target === '_blank') return;
     const url = new URL(link.href), learn = new URL('learn.html', location.href);
+    const home = new URL('./', location.href);
     const lending = new URL('lending.html', location.href);
-    if (url.origin !== learn.origin || ![learn.pathname, lending.pathname].includes(url.pathname)) return;
+    if (url.origin !== learn.origin || ![learn.pathname, lending.pathname, home.pathname, home.pathname + 'index.html'].includes(url.pathname)) return;
     const drafts = Object.values(labs).map(lab => lab.getExperimentDraft()).filter(Boolean);
     if (drafts.length) {
       const selected = navigation.getSelectedLab() === 'range' ? 'cl-range-v1' : 'cp50-v1';

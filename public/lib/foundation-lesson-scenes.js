@@ -123,9 +123,9 @@ export function createFoundationScene(id, input, variant, prediction) {
     format: amount => fmt(amount, 0) + ' ETH',
     shortcuts: [
       { label: 'Small · 1 ETH', value: 1 },
-      { label: 'Question amount', value: target },
+      { label: 'Lesson setup · ' + fmt(target, 0) + ' ETH', value: target },
     ],
-    scopeText: amount => (amount === target ? 'Showing the question amount. ' : 'Exploring another amount. ')
+    scopeText: amount => (amount === target ? 'Showing the lesson setup. ' : 'Exploring another amount. ')
       + 'The checks use a ' + fmt(target, 0) + ' ETH ' + (deposit ? 'deposit, with matching USDC.' : 'swap.'),
     onChange(amount) {
       frame = calculate(amount);

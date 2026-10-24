@@ -64,7 +64,7 @@ async function checkAsset(source) {
   assert.ok(!relative(root, path).startsWith('..'));
   await access(path);
 }
-for (const document of ['index.html', 'learn.html', 'about.html', 'methods.html', 'lending.html', '404.html']) {
+for (const document of ['index.html', 'liquidity.html', 'learn.html', 'about.html', 'methods.html', 'lending.html', '404.html']) {
   const markup = await readFile(resolve(root, document), 'utf8');
   assert.match(markup, /<title>[^<]*Teren[^<]*<\/title>/, document + ': use the current public name.');
   assert.doesNotMatch(markup, /Passiko|ehipassiko|passiko-logo|download="passiko-/i, document + ': remove the former visible identity.');
@@ -92,7 +92,9 @@ for (const document of ['index.html', 'learn.html', 'about.html', 'methods.html'
   }
 }
 const scripts = [...html.matchAll(/<script[^>]+src="([^"]+)"[^>]*><\/script>/g)].map(match => match[1]);
-assert.deepEqual(scripts.map(assetPath), ['main.js'], 'Compose startup through one entry point.');
+assert.deepEqual(scripts.map(assetPath), ['home-main.js'], 'Home has a lightweight entry point.');
+const liquidity = await readFile(resolve(root, 'liquidity.html'), 'utf8');
+assert.match(liquidity, /<script type="module" src="main.js">/);
 const metadata = Object.fromEntries([...html.matchAll(/<meta (?:name|property)="([^"]+)" content="([^"]*)"/g)].map(match => [match[1], match[2]]));
 for (const field of ['description','og:title','og:description','og:image:alt','twitter:title','twitter:description','twitter:image:alt']) assert.ok(metadata[field]?.trim(), 'Missing identity metadata: ' + field);
 assert.equal(metadata['og:url'],canonical);
@@ -136,5 +138,5 @@ const learn = await readFile(resolve(root, 'learn.html'), 'utf8');
 assert.match(learn, /<script type=\"module\" src=\"learn-main.js\">/);
 assert.match(learn, /id=\"learn-lesson-list\"/);
 assert.match(learn, /href=\"learn.html\" aria-current=\"page\"/);
-assert.match(html, /href=\"learn.html\"/);
+assert.match(html, /href=\"learn.html#lesson=swap-impact\"/);
 console.log('PASS: module boundaries, assets, metadata, icon dimensions, manifest scope and accessible entry points');

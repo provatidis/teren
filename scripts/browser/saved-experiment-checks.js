@@ -23,7 +23,7 @@ export async function checkSavedExperiments({ evaluate, click, fill, text, navig
     assert.equal(await evaluate("document.getElementById('experiment-dialog').open"),false);
   }
   await evaluate('localStorage.removeItem('+JSON.stringify(key)+')');
-  await navigate(base+'#lp-lab');
+  await navigate(base + 'liquidity.html#lp-lab');
   assert.equal(await text('experiments-count'),'0 saved');
   await fill('scenario-investment','');assert.equal(await evaluate("document.getElementById('scenario-save').disabled"),true);
   await fill('scenario-investment','5000');await fill('scenario-fees','0');
@@ -38,7 +38,7 @@ export async function checkSavedExperiments({ evaluate, click, fill, text, navig
   await fill('experiment-name','Price doubles · assumed fees');await fill('experiment-notes','An assumption, not a yield forecast.');await click('experiment-save-confirm');
   assert.equal(await evaluate("document.getElementById('experiment-dialog').open"),false,'A stale close notification must not discard the new editor.');
   const fees=(await library()).experiments[0];
-  await navigate(base+'#saved-experiments');assert.equal(await cards(),2);
+  await navigate(base + 'liquidity.html#saved-experiments');assert.equal(await cards(),2);
   assert.deepEqual((await library()).experiments.map(entry=>entry.inputs.fees),[500,0]);
   await select(baseline.id);await select(fees.id);await click('experiments-compare');
   assert.match(await text('experiments-comparison-context'),/share the same starting token basket/);
@@ -65,11 +65,11 @@ export async function checkSavedExperiments({ evaluate, click, fill, text, navig
   assert.equal(position.inputs.fees,20);assert.equal(position.inputs.fullRangeFees,7);
   await fill('cl-lower','2400');await save('cl-save','Edited bounds');
   assert.equal((await library()).experiments[0].origin,null,'Editing imported bounds removes source attribution.');
-  await navigate(base+'#saved-experiments');
+  await navigate(base + 'liquidity.html#saved-experiments');
   await action(position.id,'Open in lab');assert.match(await text('cl-origin'),/26168941/);
   assert.equal(await evaluate("document.getElementById('cl-fees').value"),'20');
   assert.equal(await evaluate("document.getElementById('cl-full-fees').value"),'7');
-  await navigate(base+'#saved-experiments');
+  await navigate(base + 'liquidity.html#saved-experiments');
   await select(fees.id);await select(position.id);await click('experiments-compare');
   assert.match(await text('experiments-comparison-context'),/different budgets, prices or token mixes/);
   await select(baseline.id);
@@ -108,12 +108,12 @@ export async function checkSavedExperiments({ evaluate, click, fill, text, navig
   assert.equal(await evaluate("localStorage.getItem('defi-sandbox-v1')"),previous[1]);
   assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"),previous[2]);
   for(const[index,name]of keys.entries())await evaluate(previous[index]===null?'localStorage.removeItem('+JSON.stringify(name)+')':'localStorage.setItem('+JSON.stringify(name)+','+JSON.stringify(previous[index])+')');
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: named experiments, notes, immutable working copies, exact source context, comparison fairness, selection cap, safe text, search, export/import conflict preservation, undo, quota and scoped recovery');
 }
 
 export async function checkMobileSavedExperiments({ evaluate, click, fill, text, navigate, base, call }) {
-  await navigate(base+'#lp-lab');
+  await navigate(base + 'liquidity.html#lp-lab');
   await click('scenario-save');assert.equal(await evaluate("document.getElementById('experiment-dialog').open"),true);
   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
   await fill('experiment-name','Mobile setup');await fill('experiment-notes','A note saved from a small screen.');await click('experiment-save-confirm');
@@ -121,7 +121,7 @@ export async function checkMobileSavedExperiments({ evaluate, click, fill, text,
   await fill('scenario-fees','500');await click('scenario-save');await fill('experiment-name','Mobile fee variation');await click('experiment-save-confirm');
   assert.equal(await evaluate("document.getElementById('experiment-dialog').open"),false);
   assert.equal(await evaluate("JSON.parse(localStorage.getItem('degenerator-experiments-v1')).experiments.length"),2);
-  await navigate(base+'#saved-experiments');
+  await navigate(base + 'liquidity.html#saved-experiments');
   assert.equal(await evaluate("document.getElementById('saved-experiments').open"),true);
   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
   await evaluate("document.querySelectorAll('[data-compare-id]').forEach(input=>input.click())");await click('experiments-compare');
@@ -133,6 +133,6 @@ export async function checkMobileSavedExperiments({ evaluate, click, fill, text,
   await waitFor(evaluate,"!document.getElementById('experiment-dialog').open&&document.activeElement.id==='scenario-save'");
   assert.equal(await evaluate("document.getElementById('experiment-dialog').open"),false);
   assert.equal(await evaluate('document.activeElement.id'),'scenario-save');
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: mobile named saving, notes, library navigation, working-copy reopening and dialog layout');
 }

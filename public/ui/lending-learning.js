@@ -1,3 +1,4 @@
+import { saveLearningLocation } from '../data/learning-location.js';
 import { LENDING_LESSONS } from '../learning/lending-essentials.js';
 import { LOOP_LESSONS } from '../learning/borrowing-loops.js';
 import { lendingCase, checkLendingUnderstanding } from '../models/lending-lessons.js';
@@ -94,6 +95,7 @@ export function initLendingLearning() {
     }
     lesson = course.lessons.find(item => item.id === id);
     if (!lesson) return;
+    saveLearningLocation('lending.html#' + (name === 'loops' ? 'loop-lesson=' : 'lesson=') + id);
     draft = progress.drafts[id] || fresh();
     example = course.example(id);
     for (const [key, choices] of [['prediction', lesson.predictions], ['reason', lesson.reasons], ['application', lesson.applications]]) {

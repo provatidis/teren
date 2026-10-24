@@ -1,3 +1,4 @@
+import { saveLearningLocation } from '../data/learning-location.js';
 import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js';
 import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js';
 import { appliedApplication, checkAppliedUnderstanding } from '../lib/applied-applications.js';
@@ -109,11 +110,11 @@ export function initAppliedLearning() {
         : 'At this checkpoint: principal minus holding ' + signedUSD(view.principalGapUSD) + ', plus period fees ' + usd(view.feesUSD) + ', gives ' + signedUSD(view.gapUSD) + ' before costs.';
     $('applied-accounting').textContent = 'This checkpoint’s principal: ' + tokens(view.principal.amount0, view.principal.amount1) + '. Holding: ' + tokens(view.holding.amount0, view.holding.amount1) + '. Period fees: ' + tokens(view.earned0, view.earned1) + '.';
     evidence([['Position', '#' + snapshot.tokenId + ' · Ethereum WETH/USDC · Uniswap v3 0.3%'], ['Selected checkpoint', utc(snapshot.block.timestamp) + ' · block ' + snapshot.block.number], ['Block hash', snapshot.block.hash], ['Period fee base units', view.earned0 + ' USDC; ' + view.earned1 + ' WETH'], ['Cumulative time', view.secondsInRange + ' seconds in range / ' + view.durationSeconds + ' elapsed'], ['Independent fee check', 'Read-only collect difference; at most one base unit of rounding per token']]);
-    const home = new URL('./', location.href);
+    const home = new URL('liquidity.html', location.href);
     try { home.hash = rangeHash(positionScenario(snapshot)); $('applied-explore').href = home.href; $('applied-explore').hidden = false; }
     catch { $('applied-explore').hidden = true; }
     const record = REPLAY_CASES.find(item => item.id === lesson.caseId);
-    $('applied-inspect').href = new URL('./' + record.hash, location.href).href;
+    $('applied-inspect').href = new URL('liquidity.html' + record.hash, location.href).href;
     drawChart(index);
   }
   function reveal() {
@@ -140,7 +141,7 @@ export function initAppliedLearning() {
       : 'Your explanation fits the record. ' + applicationFeedback;
     $('applied-continue').hidden = !result.passed;
     const next = APPLIED_LESSONS[APPLIED_LESSONS.indexOf(lesson) + 1];
-    $('applied-next').href = next ? '#applied=' + next.id : './#historical-case=range-return';
+    $('applied-next').href = next ? '#applied=' + next.id : 'liquidity.html#historical-case=range-return';
     $('applied-next').textContent = next ? 'Next: ' + next.short + ' →' : 'Explore the full recorded case →';
     $('applied-reflection').hidden = !(result.passed && !next);
     if (result.passed && !progress.completed.includes(lesson.id)) progress.completed.push(lesson.id);
@@ -150,6 +151,7 @@ export function initAppliedLearning() {
     const token = ++revision, id = appliedLessonFromHash(location.hash);
     $('learn-applied').hidden = !id; updateNavigation();
     if (!id) return;
+    saveLearningLocation('learn.html#applied=' + id);
     lesson = APPLIED_LESSONS.find(item => item.id === id); period = null; question = null; application = null;
     if (!matchMedia('(max-width: 750px)').matches) {
       const sidebar = document.querySelector('.learn-sidebar'), selected = document.querySelector('[data-applied-id="' + id + '"]');

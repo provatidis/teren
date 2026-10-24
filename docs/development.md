@@ -34,7 +34,7 @@ For a local browser smoke test, install Chromium or set `CHROMIUM_BIN` to its ex
 
 Set `TEST_BASE_URL` to a deployed site or a local server with a project subpath to test that target instead of starting the Node server. The browser smoke test checks that the home link, scripts, styles, and swaps work at that base URL.
 
-Run `npm run build` before publication. The dependency-free builder hashes every JS/CSS asset after rewriting its dependencies, then rewrites HTML entries and preloads each entry’s transitive module graph. Shared dependencies keep one URL and identity. Source imports remain canonical and have no release queries; the old hand-maintained stamper is removed. `dist/build-manifest.json` identifies the release and every output asset. Original source paths remain as compatibility aliases for previously cached entries. An old open tab may require a reload after deployment if its earlier hashed assets are no longer published. Hashes prevent mixing changed dependencies within the new build; this is not indefinite retention of older releases. Storage keys and model versions are independent of asset URLs.
+Run `npm run build` before publication. The dependency-free builder hashes every JS/CSS asset after rewriting its dependencies, flattens plain local CSS imports in cascade order with nested URL rebasing, then rewrites HTML entries and preloads each entry’s transitive module graph. Unsupported CSS import forms fail before output is replaced. Shared dependencies keep one URL and identity. Source imports remain canonical and have no release queries; the old hand-maintained stamper is removed. `dist/build-manifest.json` identifies the release and every output asset. Original source paths remain as compatibility aliases for previously cached entries. An old open tab may require a reload after deployment if its earlier hashed assets are no longer published. Hashes prevent mixing changed dependencies within the new build; this is not indefinite retention of older releases. Storage keys and model versions are independent of asset URLs.
 
 ## Focused workspaces and historical records
 
@@ -52,7 +52,7 @@ The period model lives in `public/models/fixed-position-period.js`; record valid
 - public/learning/: essential and applied lesson definitions, optional deeper reading and the ten-example progression.
 - public/examples/: bundled pool/position snapshots and the verified fixed-position period record; these open without RPC requests.
 - public/styles/: shared foundation and components followed by feature styles. public/styles.css preserves the existing cascade order.
-- public/index.html, public/learn.html and public/lending.html: semantic, static markup with one module entry point per document. Each feature owns its IDs; the structure check rejects duplicates.
+- public/index.html, public/liquidity.html, public/learn.html and public/lending.html: semantic, static markup with one module entry point per document. Each feature owns its IDs; the structure check rejects duplicates.
 - scripts/: development, integration and browser checks; test/: reference calculations and adapter/storage contracts.
 - scripts/lib/build-site.js and scripts/build-site.js: generate a static `dist/` with dependency-derived asset hashes and module preloads.
 - server.js: a local static server for source or generated output.
@@ -195,3 +195,12 @@ Tests compare geometric-series references against the step ledger across 1,000 v
 ### Native touch regression checks
 
 The token-balance and range-width pilot checks repeat fresh-page drags three times at each phone width. `scripts/browser/touch-range.js` enables touch mode before scrolling and measuring, waits for stable geometry and an unobscured hit target, and checks trusted touch/input events as well as the final value and stationary control. Failures include event traces. It never retries a failed gesture or writes the expected end value. Passing repetitions reduces uncertainty about the intermittent failure; it does not prove all Android/Chrome combinations reliable.
+
+
+## Home and topic navigation · 1.31.0
+
+`index.html` is a lightweight topic entry with `home-main.js` and `home.css`. Its dependency graph contains no financial models, records or live adapters. `liquidity.html` retains the existing liquidity composition root and fragment router. `lib/entry-links.js` recognises existing root liquidity fragments; Home uses `location.replace` to preserve the search and fragment at the direct lab document without a Back-button redirect loop. Home anchors remain on Home. New lesson handoffs use the direct document.
+
+`data/learning-location.js` stores only an allowlisted lesson route in `teren-learning-location-v1`; it cannot alter answers or completion. Blocked/corrupt storage leaves Home usable. Existing lesson progress remains in its original keys. The small route catalogue is checked against all five lesson chapters in unit tests. Returning through Home uses the existing per-tab liquidity draft handoff, with explicit scenarios taking precedence.
+
+`styles/navigation.css` places topic choice before the topic's available modes. Current topics are non-actionable; only the other topic is a link. `styles.css` and `home.css` remain readable import lists in source; each production entry points at a flattened content-hashed stylesheet. Nested CSS URLs are rebased relative to the receiving stylesheet. The builder preserves canonical source aliases for previously cached entries.

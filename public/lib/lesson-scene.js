@@ -38,6 +38,9 @@ export function createSceneExplorer({ id, min, max, step, start, target, format,
   const label = sceneNode('label', labelText); label.htmlFor = id;
   const output = sceneNode('output'); output.htmlFor = id; output.id = id + '-value';
   output.setAttribute('aria-live', 'off');
+  // Reserve the largest label so changing digits cannot push the slider down.
+  const characters = Math.max(...[min, max, start, target, ...shortcuts.map(item => item.value)].map(value => format(value).length));
+  output.style.minWidth = (characters + 1) + 'ch';
   heading.append(label, ' ', output);
   const slider = sceneNode('input');
   // Saved questions may sit between the usual steps. Keep every named value
