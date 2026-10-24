@@ -1,4 +1,9 @@
 .period-card{margin:0 0 24px;scroll-margin-top:24px}
+.period-details>summary{display:flex;align-items:center;min-height:44px;line-height:1.6;cursor:pointer}
+.period-details>summary::before{content:'▸';margin-right:10px}
+.period-details[open]>summary::before{content:'▾'}
+.period-details>summary::-webkit-details-marker{display:none}
+.period-details>summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:4px}
 .period-case-picker{display:flex;align-items:center;gap:16px;margin:0 0 14px}.period-case-picker label{font-size:15px}.period-case-picker select{max-width:100%;min-height:46px;border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);background:var(--surface)}
 .period-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin:30px 0}.period-metrics strong,.period-time strong{display:block;margin-top:10px;font-size:26px;font-weight:500;font-variant-numeric:tabular-nums}
 .period-slider-label{display:block;font-size:15px;margin:24px 0 16px}.period-checkpoint-heading{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin:18px 0}.period-checkpoint-heading .small-badge{white-space:normal;font-size:14px;line-height:1.5}.period-checkpoint-heading [data-state=inside]{color:var(--accent)}.period-checkpoint-heading [data-state=above],.period-checkpoint-heading [data-state=below]{color:#f2ca85}

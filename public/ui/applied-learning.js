@@ -2,7 +2,7 @@ import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.
 import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js';
 import { appliedApplication, checkAppliedUnderstanding } from '../lib/applied-applications.js';
 import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
-import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback } from '../lib/learning-elements.js';
+import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson } from '../lib/learning-elements.js';
 import { POOL_PITFALLS } from '../learning/pool-pitfalls.js';
 import { readAppliedProgress, saveAppliedProgress } from '../data/applied-progress.js';
 import { createAppliedRecordLoader } from '../data/applied-records.js';
@@ -245,4 +245,5 @@ export function initAppliedLearning() {
   });
   window.addEventListener('hashchange', () => activate(true));
   activate();
+  if (appliedLessonFromHash(location.hash)) focusInitialLesson('applied-title');
 }

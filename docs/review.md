@@ -4,6 +4,31 @@
 
 Review this list before expanding a mechanism. Discuss newly found omissions with the owner, including an omission that is deliberately retained. Passing arithmetic and browser tests does not establish that people learn the intended idea.
 
+## Whole-app review · 1.28.1 · 2026-10-24
+
+**Assessment:** Teren has a coherent product: learn a mechanism, change its assumptions, and distinguish the resulting hypothesis from recorded evidence. The strongest teaching is now the visible movement of tokens and debt. The weakest part is consistency of access and presentation as the course grows. Another mechanism is less valuable immediately than making the existing interpretation lessons as clear as the newer visual ones.
+
+The review followed desktop and narrow-phone journeys through liquidity and lending experiments, all five lesson chapters, recorded position import, historical replay, the sandbox, and About/Methods. It included lesson definitions and assessment structure, keyboard/focus behavior, narrow-screen outlines and labels, the build graph, read-only RPC handling and model tests. A live app import of NFT #37 completed at Ethereum block 26262078, including fee accounting. This checks the import workflow; it is not an independent reproduction of that snapshot or a recheck of the historical cases. The review did not include a full assistive-technology certification or a learner study.
+
+| Area | Finding and treatment |
+| --- | --- |
+| Entry and navigation | Direct lesson URLs previously opened at the course introduction. At 390px, the first swap diagram began about 1,105px down. Direct entry now focuses the requested lesson, bringing that diagram to about 468px. Generic entry still offers an overview; reload and Back retain the reading position. |
+| Continuity | Selecting the already-current liquidity lesson could close the topic list without returning to the lesson. It now moves focus and scroll without recreating the scene, changing its explored amount or touching answers. |
+| Learning orientation | The essentials banner counted six lessons while progress counted seven including the challenge. Both now use seven, and the overview explicitly identifies thirteen liquidity exercises. Compact mobile chapter links retain touch targets and direct advanced access. |
+| Chart interpretation | The loop chart's title described net value while the bars encoded gain/loss. Its title now names gain/loss and the adjacent note identifies the displayed totals as after debt and before liquidation. The dollar scale and calculations are unchanged. |
+| First use and evidence access | An empty position importer offered to refresh or open “another” position. It now says “Open a position” until one is loaded. The two historical evidence disclosures now have 44px targets and explicit focus treatment. |
+| Teaching and wording | Explanations distinguish owned assets from debts, maximum LTV from liquidation eligibility, dollar profit from the holding benchmark, and assumed fees from recorded income. Required checks involve interpretation, not calculations. Eleven of twenty exercises use the newer visual patterns; older comparison and evidence lessons still have a different pace and denser presentation. |
+| Trust and model scope | Hypothetical endpoints, recorded snapshots and accounting checked at capture remain distinct. The reviewed health-factor and swap-impact explanations agree with the linked Aave and Uniswap guidance. No new calculation defect was identified in this review; that is not an external audit or a fresh verification of recorded contract state. |
+| Accessibility | Reviewed views had named controls, ordered main-content headings and no horizontal page overflow at narrow widths. Existing token shapes/hatching, native controls and reduced-motion behavior are retained. Browser checks and manual keyboard inspection do not substitute for a screen-reader user test or establish universal WCAG conformance. |
+| Performance | The pre-polish build preloads its module graph: about 80KiB gzip of JavaScript for Experiment, 85KiB for liquidity Learn and 58KiB for Lending. These are local compression estimates, not measured transfer sizes or throttled-device timings. Content hashes address mixed-release assets. There is no evidence here that a framework migration would improve the experience. |
+| Engineering and security | Pure financial models remain separate from UI and transport. Live RPC requests use the read-only allowlist, omit credentials/referrers and restart a failed capture on the fallback provider. CSP and content hashes remain in place. The growing CSS cascade and uneven controller formatting are maintenance concerns; a broad rewrite during visual polishing would add risk without fixing a demonstrated user problem. |
+
+**Recommended next iteration:** make loss-versus-profit, break-even fees and the final challenge use one clear comparison of starting capital, holding, LP principal and assumed fees. Keep the holding basket exact and avoid making a fee target look attainable merely because it can be entered. Continue the existing visuals before adding another DeFi pathway.
+
+**Unresolved blind spots:** learning effectiveness is still unmeasured; wallet/chain coverage remains narrow; the two short historical cases do not establish typical returns; the lending models do not establish real transaction execution. A useful observed task is to ask someone to explain a loss while health factor stays above 1, then explain which balance grows when price is held still and interest accrues. Preserve these as evidence gaps rather than adding more cautionary text to every screen.
+
+References checked in this review: [Aave health factor and liquidations](https://aave.com/help/borrowing/liquidations), [Uniswap price impact and slippage](https://support.uniswap.org/hc/en-us/articles/8643794102669-Price-Impact-vs-Price-Slippage), [W3C target-size guidance](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html). Small controls can qualify for spacing exceptions; the larger disclosure targets are a usability improvement, not a claim that every previous target failed WCAG.
+
 ## Questions for a mechanism release
 
 - What conclusion could a learner draw from the headline number that the model cannot support? Put the decisive assumption beside that result.

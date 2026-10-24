@@ -30,6 +30,8 @@ Hints are part of learning, and predictions remain ungraded. Wrong answers descr
 
 Every topic is directly accessible. Three repeatable situations in each practical topic change the observation, while retaining the conceptual scope. An unchanged-price width situation explicitly says both positions are active, rather than implying one has exited.
 
+Direct lesson links open at the requested heading, below the primary navigation. The generic Learn entry keeps its chapter overview. Reload and browser Back retain the reading position. Selecting the current liquidity topic returns to its heading without resetting the exploration or answers. Essentials counts six foundation lessons and its final challenge as seven exercises, consistently with its progress indicator.
+
 ## Evidence boundaries
 
 The width and outside-value cases are calculated hypothetical endpoints from `cl-range-v1`. They do not reconstruct a trading path, predict fees or model native ticks. Equal budgets across widths use different initial token mixes, so each position has its own holding benchmark. Price inputs and bounds are visible before predicting.

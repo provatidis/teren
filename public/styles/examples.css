@@ -31,8 +31,8 @@
  .example-levels{grid-template-columns:repeat(2,minmax(0,1fr))}
  .example-cards{grid-template-columns:1fr}
  .example-card{padding:18px}
- .learn-entry-links{gap:10px}
- .learn-entry-links a{flex-basis:100%}
+ .learn-entry-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:16px}
+ .learn-entry-links a{display:flex;align-items:center;min-height:44px;line-height:1.5;padding:6px 0;border-bottom:1px solid var(--border)}
 }
 
 .example-cards:has(>li:only-child){grid-template-columns:1fr}

@@ -7,8 +7,8 @@ const changeText = value => value === 0 ? 'No change' : (value < 0 ? 'Loss: ' : 
 
 function stressFigure() {
   const element = node('figure', undefined, 'stress-figure');
-  element.append(node('figcaption', 'Value after subtracting debt', 'scene-figure-title'),
-    node('p', 'Before any liquidation.', 'stress-before'));
+  element.append(node('figcaption', 'Gain or loss from the start', 'scene-figure-title'),
+    node('p', 'Totals are after debt, before any liquidation.', 'stress-before'));
   const rows = {};
   for (const [id, label] of [['holding', 'Hold'], ['loop', 'Loop']]) {
     const row = node('div', undefined, 'stress-row'); row.dataset.strategy = id;

@@ -33,6 +33,7 @@ export function initPositionSnapshots({ rangeLab, positionFees }) {
     $('position-result').hidden = false;
     $('position-id').value = current.tokenId;
     $('position-heading-id').textContent = 'Position #' + current.tokenId;
+    $('position-setup-label').textContent = 'Refresh or open another position';
     $('position-setup-overview').textContent = 'Position #' + current.tokenId;
     $('position-fee').textContent = fmt(current.position.fee / 10000, current.position.fee === 100 ? 2 : 1) + '% pool fee';
     $('position-block').textContent = 'Block ' + current.block.number + ' · ' + new Date(current.block.timestamp * 1000).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
