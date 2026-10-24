@@ -86,7 +86,8 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
       if (id === 'final-challenge') await mode('Assumed fees');
       const slider = id === 'loss-vs-profit' ? 'comparison-price' : 'comparison-fees';
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      assert.ok(await evaluate(`document.getElementById('${slider}').getBoundingClientRect().bottom-document.querySelector('.comparison-figure').getBoundingClientRect().top <= innerHeight-document.querySelector('.topbar').getBoundingClientRect().height`), 'Figure and active control must fit together.');
+      const fit = await evaluate(`({height:document.getElementById('${slider}').getBoundingClientRect().bottom-document.querySelector('.comparison-figure').getBoundingClientRect().top,available:innerHeight-document.querySelector('.topbar').getBoundingClientRect().height})`);
+      assert.ok(fit.height <= fit.available, `${id} at ${width}px: figure/control height ${fit.height} must fit in ${fit.available}px.`);
       await evaluate(`document.getElementById('${slider}').focus()`);
       for (const key of ['End', 'Home']) {
         await call('Input.dispatchKeyEvent', { type: 'keyDown', key, code: key });

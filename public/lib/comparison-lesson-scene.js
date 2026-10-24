@@ -36,7 +36,7 @@ export function createComparisonScene(id, input, prediction) {
   verdict.append(profit, '\n', holding);
   const basket = sceneNode('p', '', 'scene-key');
   const scope = sceneNode('p', '', 'scene-question-scope'); scope.id = 'comparison-scope';
-  figure.append(title, '\n', rows.start.row, '\n', rows.hold.row, '\n', rows.lp.row, '\n', parts, '\n', verdict);
+  figure.append(title, '\n', rows.start.row, '\n', rows.hold.row, '\n', rows.lp.row, '\n', parts);
 
   function draw() {
     const state = comparisonSceneState(input, price, fees), r = state.result;
@@ -106,7 +106,7 @@ export function createComparisonScene(id, input, prediction) {
   element.append(figure, '\n', prediction, '\n');
   if (priceControl) element.append(priceControl.element, '\n');
   if (feeControl) element.append(feeControl.element, '\n');
-  element.append(scope, '\n', basket, '\n', sceneNode('p', withFees
+  element.append(verdict, '\n', scope, '\n', basket, '\n', sceneNode('p', withFees
     ? 'Fees here are hypothetical cash added to the LP, after any protocol share. Matching holding is a target, not a forecast. Gas and other costs are excluded.'
     : 'Each price is a separate hypothetical outcome. Dollar profit and performance against holding answer different questions.', 'scene-essential-note'));
   for (const control of element.querySelectorAll('input[type=range]')) control.setAttribute('aria-describedby', scope.id);
