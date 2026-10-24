@@ -1,6 +1,7 @@
 import { optionalPrediction, sceneNode } from '../lib/lesson-scene.js';
 import { createTokenBalanceScene } from '../lib/liquidity-lesson-scenes.js';
 import { createFoundationScene } from '../lib/foundation-lesson-scenes.js';
+import { createComparisonScene, comparisonQuestion } from '../lib/comparison-lesson-scene.js';
 import { stageForLesson } from '../learning/example-path.js';
 import { DEEPER_READING } from '../learning/deeper-reading.js';
 import { lessonWalkthrough } from '../lib/lesson-walkthrough.js';
@@ -25,10 +26,11 @@ export function initLearning() {
   const predictionField = $('learn-prediction-field'), controls = $('learn-controls');
   let lessonScene;
   const foundationLesson = () => ['swap-impact', 'pool-share'].includes(lesson?.id);
-  const visualLesson = () => foundationLesson() || lesson?.id === 'token-balances';
+  const comparisonLesson = () => ['loss-vs-profit', 'fee-break-even', 'final-challenge'].includes(lesson?.id);
+  const visualLesson = () => foundationLesson() || lesson?.id === 'token-balances' || comparisonLesson();
   const questionLabel = () => lesson.id === 'swap-impact' ? fmt(draft.inputs.amount, 0) + ' ETH swap'
     : lesson.id === 'pool-share' ? fmt(draft.inputs.depositEth, 0) + ' ETH deposit'
-      : usd(draft.inputs.futurePrice) + ' example';
+      : comparisonLesson() ? 'question setup' : usd(draft.inputs.futurePrice) + ' example';
   const restored = readProgress();
   const progress = restored.progress;
   let available = restored.available;
@@ -128,9 +130,11 @@ export function initLearning() {
     $('learn-model').textContent = model + ' · Illustrative inputs · USDC = $1';
     if (visualLesson()) {
       $('learn-prediction-question').textContent = foundationLesson() ? lesson.prediction
+        : comparisonLesson() ? comparisonQuestion(lesson.id, s)
         : 'If ETH moves to ' + usd(s.futurePrice) + ', will your liquidity hold less, more, or the same ETH?';
       const prediction = optionalPrediction(predictionField);
       lessonScene = foundationLesson() ? createFoundationScene(lesson.id, s, draft.variant, prediction)
+        : comparisonLesson() ? createComparisonScene(lesson.id, s, prediction)
         : createTokenBalanceScene(s, prediction);
       $('learn-scene').replaceChildren(lessonScene.element);
       $('learn-run').textContent = 'Explain the ' + questionLabel() + ' →';
@@ -213,7 +217,7 @@ export function initLearning() {
     $('learn-metrics').replaceChildren(...metrics); $('learn-visual').replaceChildren(...visual);
     const predicted = lesson.predictions.find(([id]) => id === outcome.prediction)?.[1];
     $('learn-prediction-feedback').textContent = !draft.prediction
-      ? (foundationLesson() ? 'For the question setup: ' : 'At the question price: ') + predicted + '.'
+      ? (foundationLesson() || comparisonLesson() ? 'For the question setup: ' : 'At the question price: ') + predicted + '.'
       : draft.prediction === outcome.prediction ? 'Your prediction matches the result.'
         : 'The result differs from your prediction: ' + predicted + '. Compare it with your prediction.';
     const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
@@ -281,10 +285,12 @@ export function initLearning() {
     $('learn-metrics').hidden = visualLesson(); $('learn-visual').hidden = visualLesson();
     $('learn-experiment-title').textContent = {
       'swap-impact': 'Follow the swap', 'pool-share': 'Watch your pool share', 'token-balances': 'Watch the token mix',
+      'loss-vs-profit': 'Profit compared with what?', 'fee-break-even': 'Watch fees close the gap', 'final-challenge': 'Bring the comparison together',
     }[lesson.id] || 'Your experiment';
     if (visualLesson()) {
       const settings = sceneNode('details', undefined, 'scene-question-settings');
-      const label = lesson.id === 'swap-impact' ? 'trade size' : lesson.id === 'pool-share' ? 'deposit' : 'price';
+      const label = lesson.id === 'swap-impact' ? 'trade size' : lesson.id === 'pool-share' ? 'deposit'
+        : ['fee-break-even', 'final-challenge'].includes(lesson.id) ? 'price and fees' : 'price';
       settings.append(sceneNode('summary', 'Change the question ' + label), controls);
       $('learn-controls-home').replaceChildren(settings);
     } else {

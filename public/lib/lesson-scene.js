@@ -42,7 +42,7 @@ export function createSceneExplorer({ id, min, max, step, start, target, format,
   const slider = sceneNode('input');
   // Saved questions may sit between the usual steps. Keep every named value
   // exact; otherwise the browser silently rounds a shortcut's value.
-  const onStep = value => Math.abs((value - min) / step - Math.round((value - min) / step)) < 1e-8;
+  const onStep = value => step === 'any' || Math.abs((value - min) / step - Math.round((value - min) / step)) < 1e-8;
   const exactStep = [start, target, ...shortcuts.map(item => item.value)].every(onStep) ? step : 'any';
   Object.assign(slider, { type: 'range', id, min, max, step: exactStep, value: start });
   const links = sceneNode('div', undefined, 'scene-shortcuts');

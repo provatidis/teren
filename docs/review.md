@@ -29,6 +29,13 @@ The review followed desktop and narrow-phone journeys through liquidity and lend
 
 References checked in this review: [Aave health factor and liquidations](https://aave.com/help/borrowing/liquidations), [Uniswap price impact and slippage](https://support.uniswap.org/hc/en-us/articles/8643794102669-Price-Impact-vs-Price-Slippage), [W3C target-size guidance](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html). Small controls can qualify for spacing exceptions; the larger disclosure targets are a usability improvement, not a claim that every previous target failed WCAG.
 
+## Comparison lessons · 1.29.0
+
+- The recommended comparison treatment now covers loss versus profit, break-even fees and the final challenge, bringing fourteen of twenty exercises onto the visual patterns. Separate starting capital, the exact holding basket, LP principal and hypothetical cash fees. One fixed dollar scale prevents rescaling from disguising changes.
+- Targeted misconceptions: dollar profit need not beat holding; a fee target does not predict earnings; matching holding after a price fall can still leave a dollar loss. The exact target is selectable without asking the learner to calculate or round it. Price and fee exploration does not change the conceptual question or its handoff.
+- Retained blind spot: a slider can make an arbitrary fee assumption feel attainable. The nearby explanation identifies the target as hypothetical; the app still has no evidence that a real position would earn it. An observed learner should be able to explain a profitable LP that trails holding, then say what extra evidence is needed to judge the fee target. Automated checks do not establish this understanding.
+- Next presentation gap: range composition and exits/returns, followed by the distinction between sampled historical prices and recorded accounting. These remain accessible in their current lessons; no mechanism expansion is part of this release.
+
 ## Questions for a mechanism release
 
 - What conclusion could a learner draw from the headline number that the model cannot support? Put the decisive assumption beside that result.

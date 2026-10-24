@@ -1,5 +1,12 @@
 # Release history
 
+## 1.29.0 — 2026-10-24
+
+- Make loss versus profit, break-even fees and the final challenge visual. Compare starting capital, the exact holding basket and LP principal on one fixed dollar scale; add hypothetical cash fees as a separate striped segment.
+- Progress from changing price, to adding fees at a fixed price, to changing either assumption in the final challenge. Preserve both values when switching its active control. The exact **Match holding** shortcut is a required total, not an earnings forecast.
+- Make predictions optional while retaining conceptual checks, prior completion, result cards and exact Experiment handoffs. Exploration stays separate from the assessed setup; explanation and revealed-lesson reload restore its price and fees.
+- Add benchmark, fee-target, conservation, restoration and mobile interaction checks. Keep financial models, storage formats and recorded evidence unchanged.
+
 ## 1.28.1 — 2026-10-24
 
 - Open direct lesson links at their heading across liquidity, practical ranges, historical exercises and both lending chapters. Preserve the overview for generic Learn links and the reading position on reload or browser history.
