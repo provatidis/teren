@@ -3,6 +3,7 @@ const receiptSource = { title: 'Aave v3: supplied balances and receipt tokens', 
 const collateralSource = { title: 'Aave: collateral and borrowing limits', url: 'https://aave.com/help/supplying/toggle-collateral-status' };
 const loanSource = { title: 'Aave: borrowing, interest and liquidations', url: 'https://aave.com/faq' };
 const healthSource = { title: 'Aave: health factor and liquidations', url: 'https://aave.com/help/borrowing/liquidations' };
+const repaySource = { title: 'Aave: repaying debt', url: 'https://aave.com/help/borrowing/repay-tokens' };
 
 export const LENDING_LESSONS = [
   {
@@ -94,10 +95,10 @@ export const LENDING_LESSONS = [
     adds: 'Compare responses with the same additional budget.',
     intro: 'Repayment reduces what you owe. Adding collateral increases what backs the debt. Use the same extra budget to compare their effects.',
     setup: 'Your 5 ETH collateral is now valued at $1,500 per ETH, with 5,000 USDC owed and an 80% liquidation threshold. Compare using an additional $1,000 to repay debt or to buy and supply more ETH. Assume immediate execution with no costs.',
-    question: 'Which response gives the higher health factor in this example?',
+    question: 'With $1,000 extra, which gives a higher health factor?',
     predictions: [['add', 'Adding $1,000 of ETH collateral.'], ['repay', 'Repaying $1,000 of USDC debt.'], ['same', 'They give the same health factor.']],
     takeaway: 'Repayment reduces debt. Adding collateral leaves the debt in place. Both responses use money from outside this setup.',
-    explanation: 'Here, repayment raises the health factor from 1.20 to 1.50. Adding the same dollar value of collateral raises it to 1.36. These figures compare the health factor immediately after each response, before costs. They do not predict future returns.',
+    explanation: 'Here, the same extra money improves the health factor more when used to repay debt. Adding collateral leaves you with more ETH and the same debt. Neither action creates a profit: you brought in new money. The comparison shows the immediate effect, before costs.',
     pitfall: 'Adding collateral does not stop interest on the debt. If the loan is already eligible for liquidation, a liquidator may act before your response goes through.',
     reasoning: 'What is different about repayment?',
     reasons: [['debt', 'It reduces the amount of debt you owe.'], ['rate', 'It changes the interest rate charged on the remaining debt.'], ['price', 'It raises the value of every ETH already supplied.']],
@@ -115,7 +116,8 @@ export const LENDING_LESSONS = [
       'The response budget is additional money outside the original setup. The repayment option keeps any unused budget if it exceeds the debt. The collateral option converts the whole budget to ETH at the selected price.',
       'The comparison excludes gas, swap costs, market liquidity and execution ordering. Actual repayment, collateral supply and withdrawal depend on the protocol’s current rules and available liquidity.',
       'In a liquidation, someone repays debt and receives collateral plus a bonus. The repayment reduces what is owed; the extra collateral taken as the bonus reduces net assets. Experiment shows a separate, hypothetical single-event illustration.',
-      'The model tests one collateral asset and one debt. Looping, E-mode and historical loan records need separate extensions.',
-    ], sources: [loanSource, collateralSource],
+      'Repayment lowers the debt balance on which future interest accrues; it does not change the rate here. Adding ETH leaves that debt in place and increases exposure to ETH’s price. A higher health factor is not a prediction of returns.',
+      'This model tests one collateral asset and one debt. Borrowing loops have their own chapter and model; E-mode and historical loan records are outside this comparison.',
+    ], sources: [repaySource, healthSource, collateralSource],
   },
 ];

@@ -85,7 +85,7 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
   }
   assert.deepEqual(await isolated(), working, 'The working loan, loop and loop progress stay unchanged.');
   assert.deepEqual(JSON.parse(await saved()).completed, completed, 'Existing completion survives retrying a visual lesson.');
-  await navigate(base + 'lending.html#lesson=respond');
+  await navigate(base + 'lending.html#loop-lesson=stress');
   assert.equal(await evaluate("document.getElementById('lend-prediction-field').closest('.scene-prediction')===null"), true);
   assert.ok(await evaluate("document.getElementById('lend-question').getBoundingClientRect().width") > 100);
   await navigate(base + 'lending.html#loop-lesson=build');

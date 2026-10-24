@@ -1,5 +1,11 @@
 # Release history
 
+## 1.27.0 — 2026-10-24
+
+- Make the repayment lesson visual: compare repaying USDC debt with buying and supplying more ETH, using one outside-budget slider and two columns on the same dollar scale. Keep the original loan visible through reference marks.
+- Show full repayment without selling or withdrawing the supplied ETH, and retain cash beyond the debt instead of spending it twice. Explain that fresh outside money is not profit and that adding collateral keeps both debt and ETH price exposure.
+- Complete the four visual lending essentials with optional predictions, conceptual checks, compatible progress and the fixed $1,000 Experiment handoff. Add reference/conservation tests and desktop/mobile checks for the comparison, touch dragging, restoration and state isolation.
+
 ## 1.26.0 — 2026-10-24
 
 - Make the prices/interest/time lesson visual. Explore a year of debt interest at a fixed ETH price, then change the price while keeping the accrued token balances fixed. Two bars on one dollar scale compare counted collateral backing with debt; equal bars mean health factor 1.
