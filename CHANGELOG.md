@@ -1,5 +1,9 @@
 # Release history
 
+## 1.31.3 · 2026-10-25
+
+- Remove browser-default outlines around non-interactive heading destinations when opening or navigating lessons. Keep heading focus and scroll placement, with visible focus indicators on controls and feedback cards.
+
 ## 1.31.2 · 2026-10-24
 
 - Align ETH and USDC identity in liquidity and lending lessons with Home and the labs: gold ETH, striped blue USDC, with diamond/circle markers and token labels retained.
