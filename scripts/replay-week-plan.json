@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "id": "weth-usdc-week-2026-10-12",
+  "startUTC": "2026-10-12T00:00:00.000Z",
+  "endUTC": "2026-10-19T00:00:00.000Z",
+  "initialCandidates": ["1375047", "1382030"],
+  "fallback": {
+    "firstTokenId": "1375000",
+    "lastTokenId": "1375499",
+    "order": "ascending",
+    "reason": "The two original candidates failed eligibility. Inspect a fixed 500-ID interval beginning at the lower original ID rounded down to the nearest 1,000."
+  },
+  "pool": "Ethereum Uniswap v3 WETH/USDC 0.3%",
+  "selection": "First candidate with positive unchanged liquidity, unchanged NFT fee accounting, and no manager updates during the fixed week. Stop after this bounded list if none qualifies.",
+  "excludeOn": ["missing position", "different pair or fee tier", "zero liquidity", "changed liquidity or accounting", "position update events"],
+  "notExclusionCriteria": ["fee income", "profit or loss", "range activity", "position value"],
+  "dataFailure": "Stop with an incomplete capture; do not skip a candidate because its historical data is unavailable."
+}

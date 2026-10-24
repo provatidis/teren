@@ -1,0 +1,225 @@
+{
+  "version": 1,
+  "kind": "week-position-selection",
+  "checkedAt": "2026-10-24T23:19:07.622Z",
+  "stateProvider": "https://eth.drpc.org",
+  "eventProvider": "https://rpc.mevblocker.io",
+  "finalizedBlock": {
+    "number": "26265689",
+    "hash": "0xe95ac255c48d64ced3bc6ff20e6fd004aa37657f81c6b3de003c9c6aacb142de",
+    "timestamp": 1792883159
+  },
+  "candidates": [
+    "1375047",
+    "1382030"
+  ],
+  "selectionRule": "First positive-liquidity, unchanged WETH/USDC 0.3% position in ascending candidate order; dates fixed before fee outcomes.",
+  "boundaries": [
+    {
+      "requestedAt": "2026-10-12T00:00:00.000Z",
+      "block": {
+        "number": "26172658",
+        "hash": "0x635b5ac0fe8943907d22ecdd9fcfba781e0431d9b30de2e560c4da1c64bb80b2",
+        "timestamp": 1791763211
+      },
+      "previousBlock": {
+        "number": "26172657",
+        "hash": "0xd99c2c0eb8d9150b314d61c075fed14c9bb9f593e254c2073610166c5f11d04c",
+        "timestamp": 1791763199
+      }
+    },
+    {
+      "requestedAt": "2026-10-13T00:00:00.000Z",
+      "block": {
+        "number": "26179842",
+        "hash": "0x9ec0f4aff9fc8057d655a7c8d003801b4c2e01c22d349e2d209f11a594f0da65",
+        "timestamp": 1791849611
+      },
+      "previousBlock": {
+        "number": "26179841",
+        "hash": "0x40c731f68bcd8152ad12433f4be57783e731fcf1546575ab51aa894054244ac3",
+        "timestamp": 1791849599
+      }
+    },
+    {
+      "requestedAt": "2026-10-14T00:00:00.000Z",
+      "block": {
+        "number": "26187015",
+        "hash": "0x00bb049f2a33c7857a303e63b08f19fd67656043e86b31b6db13dfaf61f2269a",
+        "timestamp": 1791936011
+      },
+      "previousBlock": {
+        "number": "26187014",
+        "hash": "0x99fe2938a147746a168db2cc63e0312548c8e5efa2adb694d33657af2163a03a",
+        "timestamp": 1791935999
+      }
+    },
+    {
+      "requestedAt": "2026-10-15T00:00:00.000Z",
+      "block": {
+        "number": "26194189",
+        "hash": "0x7528cf0bd5e7351df79c2d95d15d91a0c80ecb9587aa046d9d0fbdad1edd2d56",
+        "timestamp": 1792022411
+      },
+      "previousBlock": {
+        "number": "26194188",
+        "hash": "0xf12bcb7db5631cc69f0aaa392df0855f2a2ff3c18a9b9bcbb3a25981cac9daed",
+        "timestamp": 1792022399
+      }
+    },
+    {
+      "requestedAt": "2026-10-16T00:00:00.000Z",
+      "block": {
+        "number": "26201365",
+        "hash": "0x65ff5ac54984381c0a60d9c1c5ad193781a76a5189cdac017a828831b419372c",
+        "timestamp": 1792108811
+      },
+      "previousBlock": {
+        "number": "26201364",
+        "hash": "0x16dc5a38a46ab5728fbb9d9892195c1d875ddc8f9036778b33eb432e484b3418",
+        "timestamp": 1792108799
+      }
+    },
+    {
+      "requestedAt": "2026-10-17T00:00:00.000Z",
+      "block": {
+        "number": "26208547",
+        "hash": "0x283c8321870f3c8d5f10aa02b094047a9e215e73e2862bf2ccff1935cb6c26b2",
+        "timestamp": 1792195211
+      },
+      "previousBlock": {
+        "number": "26208546",
+        "hash": "0xafdb259407c86380ce097b467bf8f526ecd466d4b341880cf4fcfeb464765d39",
+        "timestamp": 1792195199
+      }
+    },
+    {
+      "requestedAt": "2026-10-18T00:00:00.000Z",
+      "block": {
+        "number": "26215722",
+        "hash": "0xa371ae9aadfeb1b17aeef140cd3d3d5c19f408bd1f95f6094155bb270c16e231",
+        "timestamp": 1792281611
+      },
+      "previousBlock": {
+        "number": "26215721",
+        "hash": "0x6322a3b8f60cf9348ae62d3b1f3cf2c31c9ba8bc86b97119e2a8a776336569e0",
+        "timestamp": 1792281599
+      }
+    },
+    {
+      "requestedAt": "2026-10-19T00:00:00.000Z",
+      "block": {
+        "number": "26222896",
+        "hash": "0x13ade5825f8d2d53d3b8fac0bd8618634e2237c52e1a0d817438555403781462",
+        "timestamp": 1792368011
+      },
+      "previousBlock": {
+        "number": "26222895",
+        "hash": "0x3963feb050e7486f66e2c09595f12dc42206a78b51b2c287caaa1a3e99ceb59c",
+        "timestamp": 1792367999
+      }
+    }
+  ],
+  "checks": [
+    {
+      "tokenId": "1375047",
+      "eligible": false,
+      "eventQueries": [],
+      "endpointLiquidity": [
+        "350853357174328",
+        "350853357174328"
+      ],
+      "endpointAccountingMatches": false,
+      "reason": "Position liquidity or accounting changed, or liquidity is zero at an endpoint.",
+      "endpoints": [
+        {
+          "block": {
+            "number": "26172658",
+            "hash": "0x635b5ac0fe8943907d22ecdd9fcfba781e0431d9b30de2e560c4da1c64bb80b2",
+            "timestamp": 1791763211
+          },
+          "token0": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "token1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "fee": 3000,
+          "tickLower": 197400,
+          "tickUpper": 203880,
+          "liquidity": "350853357174328",
+          "feeGrowthInside0LastX128": "2772075867700490478768169541108008",
+          "feeGrowthInside1LastX128": "1350599617323957497086206987811402466257886",
+          "tokensOwed0": "0",
+          "tokensOwed1": "0"
+        },
+        {
+          "block": {
+            "number": "26222896",
+            "hash": "0x13ade5825f8d2d53d3b8fac0bd8618634e2237c52e1a0d817438555403781462",
+            "timestamp": 1792368011
+          },
+          "token0": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "token1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "fee": 3000,
+          "tickLower": 197400,
+          "tickUpper": 203880,
+          "liquidity": "350853357174328",
+          "feeGrowthInside0LastX128": "2776204509297492783054028773952804",
+          "feeGrowthInside1LastX128": "1352608433412335549467846392733254755875328",
+          "tokensOwed0": "0",
+          "tokensOwed1": "0"
+        }
+      ],
+      "changedFields": [
+        "feeGrowthInside0LastX128",
+        "feeGrowthInside1LastX128"
+      ]
+    },
+    {
+      "tokenId": "1382030",
+      "eligible": false,
+      "eventQueries": [],
+      "endpointLiquidity": [
+        "0",
+        "0"
+      ],
+      "endpointAccountingMatches": true,
+      "reason": "Position liquidity or accounting changed, or liquidity is zero at an endpoint.",
+      "endpoints": [
+        {
+          "block": {
+            "number": "26172658",
+            "hash": "0x635b5ac0fe8943907d22ecdd9fcfba781e0431d9b30de2e560c4da1c64bb80b2",
+            "timestamp": 1791763211
+          },
+          "token0": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "token1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "fee": 3000,
+          "tickLower": 198000,
+          "tickUpper": 198120,
+          "liquidity": "0",
+          "feeGrowthInside0LastX128": "92953395799951667951605359865338",
+          "feeGrowthInside1LastX128": "37106990000703181692944081427497040723578",
+          "tokensOwed0": "0",
+          "tokensOwed1": "0"
+        },
+        {
+          "block": {
+            "number": "26222896",
+            "hash": "0x13ade5825f8d2d53d3b8fac0bd8618634e2237c52e1a0d817438555403781462",
+            "timestamp": 1792368011
+          },
+          "token0": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "token1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "fee": 3000,
+          "tickLower": 198000,
+          "tickUpper": 198120,
+          "liquidity": "0",
+          "feeGrowthInside0LastX128": "92953395799951667951605359865338",
+          "feeGrowthInside1LastX128": "37106990000703181692944081427497040723578",
+          "tokensOwed0": "0",
+          "tokensOwed1": "0"
+        }
+      ],
+      "changedFields": []
+    }
+  ],
+  "selectedTokenId": null
+}

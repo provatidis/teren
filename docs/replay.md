@@ -71,7 +71,7 @@ First extend one unchanged position to a week in the existing 0.3% pool, as spec
 
 ## Proposed next case: one position over one week
 
-**Status: specification only. No position, block window or new earnings have been captured or verified for this proposal.** This takes priority over the two-range 0.05% comparison above. Extend a familiar mechanism before adding a pool and a second strategy.
+**Status: candidate qualification in progress. No new earnings record has been published.** The original two-candidate stage stopped after both failed the eligibility rules. The period remains 12–19 October 2026. A bounded fallback list is declared below before its fee outcomes are inspected.
 
 ### Learning question
 
@@ -83,6 +83,12 @@ First extend one unchanged position to a week in the existing 0.3% pool, as spec
 - First check the two existing NFT IDs, in ascending numeric order, for positive liquidity and unchanged position accounting across the entire window. If neither qualifies, stop and document why. Broader candidate discovery needs a declared, reproducible candidate list and ordering before fee outcomes are examined.
 - Record exclusions for position changes, missing history or inconsistent evidence. Low fees, losses against holding, inactivity and disappointing returns are not exclusion criteria. Do not move the dates to improve the result. Technical unavailability is an incomplete capture, not evidence of zero earnings.
 - Select daily checkpoints in advance. Additional samples may explain a counter change, but never claim that sampled prices locate every range crossing. A later multi-case library should include contrasting conditions under the same selection rules; one week is still not a representative yield.
+
+### Initial exclusions and bounded fallback
+
+The initial read on 24 October 2026 found unchanged positive liquidity but different endpoint fee accounting for #1375047, and zero liquidity at both endpoints for #1382030. Neither can represent an unchanged, positive-liquidity position over this week. The original stage stops here; it does not publish a partial record or move the dates.
+
+Before further discovery, [the machine-readable selection plan](../scripts/replay-week-plan.json) declares NFT IDs **1375000–1375499 in ascending order**, skipping the already excluded original candidate. This 500-ID interval begins at the smaller original candidate rounded down to the nearest 1,000. Select the first eligible WETH/USDC 0.3% position using the same positive-liquidity, unchanged-accounting and complete-event rules. Position size, range activity and earnings do not affect selection. A provider failure stops discovery as incomplete rather than excluding that candidate. If the bounded list contains no eligible position, stop and report that result.
 
 ### Evidence and engineering gate
 
