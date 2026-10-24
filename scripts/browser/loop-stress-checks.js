@@ -105,7 +105,7 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
       const id = 'stress-' + current;
       await key(id, 'Home');
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      const size = await evaluate(`({scene:document.getElementById('${id}').getBoundingClientRect().bottom-document.querySelector('.stress-figure').getBoundingClientRect().top,available:innerHeight-document.querySelector('.topbar').getBoundingClientRect().height})`);
+      const size = await evaluate(`({scene:document.getElementById('${id}').getBoundingClientRect().bottom-document.querySelector('.stress-figure').getBoundingClientRect().top,available:innerHeight-Math.max(0,document.querySelector('.topbar').getBoundingClientRect().bottom)})`);
       assert.ok(size.scene <= size.available, `Loop ${current} at ${width}px needs ${size.scene}px; available ${size.available}px.`);
       await evaluate(`document.getElementById('${id}').scrollIntoView({block:'center'})`);
       await settle(evaluate);

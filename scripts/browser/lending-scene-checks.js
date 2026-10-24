@@ -102,7 +102,7 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
       for (let i = 0; i < count; i++) {
         await evaluate(`document.querySelector('.scene-jump [data-stage="${i}"]').click()`);
         assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-        const size = await evaluate("({scene:document.getElementById('loan-scene-next').getBoundingClientRect().bottom-document.querySelector('.loan-scene-figure').getBoundingClientRect().top,available:innerHeight-document.querySelector('.topbar').getBoundingClientRect().height})");
+        const size = await evaluate("({scene:document.getElementById('loan-scene-next').getBoundingClientRect().bottom-document.querySelector('.loan-scene-figure').getBoundingClientRect().top,available:innerHeight-Math.max(0,document.querySelector('.topbar').getBoundingClientRect().bottom)})");
         assert.ok(size.scene <= size.available, `${id}, stage ${i}, ${width}px: scene and primary action need ${size.scene}px; available ${size.available}px.`);
       }
       await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });

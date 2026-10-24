@@ -13,10 +13,11 @@ export async function checkEntry({ navigate, evaluate, text, fill, click, nextEv
   assert.equal(await evaluate("document.getElementById('home-continue').hidden"), true);
   assert.equal(await evaluate("performance.getEntriesByType('resource').filter(r=>new URL(r.name).pathname.endsWith('.css')).length"), 1, 'Home loads one bundled stylesheet.');
   assert.equal(await evaluate("performance.getEntriesByType('resource').some(r=>['/models/','/examples/'].some(part=>new URL(r.name).pathname.includes(part)))"), false, 'Home loads no financial models or historical records.');
-  for (const [width, height] of [[1440, 1000], [390, 844], [320, 740]]) {
+  for (const [width, height] of [[1366, 768], [390, 844], [320, 740]]) {
     await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: width < 750 });
     await navigate(base); await settle(evaluate);
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+    if (width >= 750) assert.ok(await evaluate("[...document.querySelectorAll('.home-topic .primary')].every(a=>a.getBoundingClientRect().bottom<innerHeight)"), 'Both lesson entry buttons are visible on the first laptop screen.');
     if (width < 750) assert.ok(await evaluate("[...document.querySelectorAll('.home-topic-jumps a')].every(a=>{const r=a.getBoundingClientRect();return r.height>=44&&r.bottom<innerHeight})"), 'Both topics are discoverable on the first phone screen.');
   }
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });

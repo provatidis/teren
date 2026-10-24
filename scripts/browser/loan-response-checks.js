@@ -86,7 +86,7 @@ export async function checkLoanResponseLesson({ evaluate, click, fill, text, nav
     for (const budget of [0, 1000, 4950, 5000, 6000]) {
       await fill('response-budget', String(budget));
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      const size = await evaluate("({scene:document.getElementById('response-budget').getBoundingClientRect().bottom-document.querySelector('.response-figure').getBoundingClientRect().top,available:innerHeight-document.querySelector('.topbar').getBoundingClientRect().height})");
+      const size = await evaluate("({scene:document.getElementById('response-budget').getBoundingClientRect().bottom-document.querySelector('.response-figure').getBoundingClientRect().top,available:innerHeight-Math.max(0,document.querySelector('.topbar').getBoundingClientRect().bottom)})");
       assert.ok(size.scene <= size.available, `Response at ${width}px needs ${size.scene}px; available ${size.available}px.`);
     }
     await key('Home');
