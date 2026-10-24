@@ -1,3 +1,4 @@
+import { initSavedExperiments } from './ui/saved-experiments.js';
 import { initPageAccess } from './ui/page-access.js';
 import { initLending } from './ui/lending.js';
 import { initLendingLearning } from './ui/lending-learning.js';
@@ -7,8 +8,8 @@ import { loopLessonFromHash, readLoopHash } from './lib/loop-links.js';
 import { focusInitialLesson } from './lib/learning-elements.js';
 
 initPageAccess();
-initLending();
-initBorrowingLoops();
+const loanLab = initLending();
+const loopLab = initBorrowingLoops();
 const learning = initLendingLearning();
 
 function route(scroll = false) {
@@ -21,6 +22,7 @@ function route(scroll = false) {
   document.getElementById('lending-loops').hidden = !!lesson || !loops;
   document.getElementById('lending-learn').hidden = !lesson;
   document.getElementById('lending-tools').hidden = !!lesson;
+  document.getElementById('saved-experiments').hidden = !!lesson;
   document.getElementById('lending-tool-loan').setAttribute('aria-current', loops ? 'false' : 'page');
   document.getElementById('lending-tool-loops').setAttribute('aria-current', loops ? 'page' : 'false');
   document.getElementById('lending-nav-experiment').href = loops ? '#loops' : '#experiment';
@@ -62,3 +64,5 @@ document.addEventListener('click', event => {
 });
 route();
 if (lendingLessonFromHash(location.hash) || loopLessonFromHash(location.hash)) focusInitialLesson('lend-title');
+
+initSavedExperiments({ labs: { 'collateral-loan-v1': loanLab, 'borrowing-loop-v1': loopLab }, onOpen: () => route(true) });

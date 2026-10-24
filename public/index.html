@@ -5,8 +5,8 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://ethereum-rpc.publicnode.com https://eth.drpc.org; base-uri 'none'; object-src 'none'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101c27">
-  <meta name="description" content="Learn and experiment with DeFi liquidity and lending. Test price ranges, fees, collateral and debt, and inspect recorded liquidity evidence.">
-  <title>Teren · Learn DeFi by experimenting</title>
+  <meta name="description" content="Test DeFi liquidity, lending and borrowing-loop scenarios. Compare assumptions, save experiments, inspect recorded evidence, or learn step by step.">
+  <title>Teren · Explore DeFi liquidity and lending</title>
   <meta name="application-name" content="Teren">
   <meta name="apple-mobile-web-app-title" content="Teren">
   <meta name="color-scheme" content="dark">
@@ -17,8 +17,8 @@
   <link rel="manifest" href="site.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Teren">
-  <meta property="og:title" content="Teren · Learn DeFi by experimenting">
-  <meta property="og:description" content="Learn and experiment with DeFi liquidity and lending. Test price ranges, fees, collateral and debt, and inspect recorded liquidity evidence.">
+  <meta property="og:title" content="Teren · Explore DeFi liquidity and lending">
+  <meta property="og:description" content="Test DeFi liquidity, lending and borrowing-loop scenarios. Compare assumptions, save experiments, inspect recorded evidence, or learn step by step.">
   <meta property="og:url" content="https://teren.sh/">
   <meta property="og:image" content="https://teren.sh/assets/social-preview.png">
   <meta property="og:image:type" content="image/png">
@@ -26,8 +26,8 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Teren · Learn DeFi by experimenting">
-  <meta name="twitter:description" content="Learn and experiment with DeFi liquidity and lending. Test price ranges, fees, collateral and debt, and inspect recorded liquidity evidence.">
+  <meta name="twitter:title" content="Teren · Explore DeFi liquidity and lending">
+  <meta name="twitter:description" content="Test DeFi liquidity, lending and borrowing-loop scenarios. Compare assumptions, save experiments, inspect recorded evidence, or learn step by step.">
   <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
   <meta name="twitter:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
   <link rel="stylesheet" href="home.css">
@@ -41,38 +41,41 @@
   </header>
   <main id="main-content" tabindex="-1">
     <section class="home-intro" aria-labelledby="home-title">
-      <p class="eyebrow">A PLACE TO UNDERSTAND DEFI</p>
+      <p class="eyebrow">EXPLORE HOW DEFI WORKS</p>
       <h1 id="home-title">Look closely.</h1>
-      <p class="home-description">Explore how liquidity and borrowing work.<br>Change an assumption and watch what happens.</p>
+      <p class="home-description">Bring a setup to test, or a mechanism to understand.<br>Explore liquidity, lending and borrowing loops.</p>
       <nav class="home-topic-jumps" aria-label="Jump to a topic"><a href="#home-liquidity-title">Liquidity ↓</a><a href="#home-lending-title">Lending ↓</a></nav>
+      <div class="home-return-links">
+      <a id="home-experiment" class="home-continue" hidden><span>Continue experimenting</span><strong id="home-experiment-title"></strong><span aria-hidden="true">→</span></a>
       <a id="home-continue" class="home-continue" hidden><span>Continue learning</span><strong id="home-continue-title"></strong><span aria-hidden="true">→</span></a>
+      </div>
     </section>
     <section class="home-topics" aria-label="Choose a topic">
       <article class="home-topic" aria-labelledby="home-liquidity-title">
         <div class="home-topic-heading"><p class="eyebrow">POOLS, PRICES &amp; FEES</p><h2 id="home-liquidity-title">Liquidity</h2></div>
-        <p class="home-question">What happens to my tokens when prices move?</p>
+        <p class="home-question">How do price ranges and fees change the outcome?</p>
+        <div class="home-topic-actions"><a class="button secondary home-lab-link" href="liquidity.html#experiment">Open the liquidity lab <span aria-hidden="true">→</span></a><a class="button secondary home-learn-link" href="learn.html#lesson=swap-impact" aria-label="Learn liquidity step by step">Learn step by step <span aria-hidden="true">→</span></a></div>
         <div class="home-visual" aria-label="A swap sends ETH into a pool and USDC back to the trader">
           <span class="home-party">Trader</span>
           <div class="home-transfer"><span class="home-eth">ETH <span aria-hidden="true">→</span></span><span class="home-usdc"><span aria-hidden="true">←</span> USDC</span></div>
           <span class="home-party home-pool">Pool</span>
         </div>
         <p class="home-topic-copy">Swaps, price ranges, fees and comparisons with holding.</p>
-        <div class="home-topic-actions"><a class="button primary" href="learn.html#lesson=swap-impact" aria-label="Learn liquidity step by step">Learn step by step <span aria-hidden="true">→</span></a><a class="home-lab-link" href="liquidity.html#experiment">Open the liquidity lab <span aria-hidden="true">→</span></a></div>
         <a class="home-detail-link" href="liquidity.html#inspect">Inspect liquidity records →</a>
       </article>
       <article class="home-topic" aria-labelledby="home-lending-title">
         <div class="home-topic-heading"><p class="eyebrow">COLLATERAL, DEBT &amp; RISK</p><h2 id="home-lending-title">Lending</h2></div>
-        <p class="home-question">How do debt, interest and liquidation change my position?</p>
+        <p class="home-question">How do price and interest change a borrowing setup?</p>
+        <div class="home-topic-actions"><a class="button secondary home-lab-link" href="lending.html#experiment">Open the lending lab <span aria-hidden="true">→</span></a><a class="button secondary home-learn-link" href="lending.html#lesson=supply" aria-label="Learn lending step by step">Learn step by step <span aria-hidden="true">→</span></a></div>
         <div class="home-visual home-loan-visual" aria-label="Borrowing gives you USDC in your wallet and creates an equal USDC debt">
           <span class="home-party">Borrow</span>
           <div class="home-loan-branches"><span>+ USDC in wallet</span><span>+ USDC debt</span></div>
         </div>
         <p class="home-topic-copy">Supply assets, borrow against collateral and explore borrowing loops.</p>
-        <div class="home-topic-actions"><a class="button primary" href="lending.html#lesson=supply" aria-label="Learn lending step by step">Learn step by step <span aria-hidden="true">→</span></a><a class="home-lab-link" href="lending.html#experiment">Open the lending lab <span aria-hidden="true">→</span></a></div>
         <a class="home-detail-link" href="lending.html#loops">Go to borrowing loops →</a>
       </article>
     </section>
-    <p class="home-reassurance">Start with a lesson or bring a question of your own. Every topic is open from the beginning.</p>
+    <p class="home-reassurance">Every tool and lesson is open from the beginning. <a href="liquidity.html#saved-experiments">Your saved experiments →</a></p>
     <p class="home-methods">No wallet connection. Experiments use assumptions you can change; recorded liquidity cases are labelled separately. <a href="methods.html">How the results are made →</a></p>
     <noscript><p class="notice">You can browse these pages without JavaScript. Interactive lessons and experiments need JavaScript enabled.</p></noscript>
     <footer class="site-footer">

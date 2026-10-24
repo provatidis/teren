@@ -94,7 +94,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
   await fill('loop-future', '1500');
   await evaluate("{ const field=document.getElementById('loop-reference-rounds');field.value='3';field.dispatchEvent(new Event('change',{bubbles:true})); }");
   assert.equal(await text('loop-reference-difference'), 'Matches the reference');
-  assert.match(await text('loop-round-comparison-takeaway'), /same round count/);
+  assert.match(await text('loop-round-comparison-takeaway'), /same construction choices/);
   await evaluate("{ const field=document.getElementById('loop-reference-rounds');field.value='0';field.dispatchEvent(new Event('change',{bubbles:true})); }");
   await fill('loop-days', '365');
   assert.equal(await text('loop-reference-label'), 'Supply only');

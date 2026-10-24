@@ -1,5 +1,13 @@
 # Release history
 
+## 1.33.0 · 2026-10-25
+
+- Give Home equally prominent lab and lesson entries, with independent Continue experimenting and Continue learning routes. Restore edited model assumptions locally; keep saved source snapshots in named experiments.
+- Extend the existing experiment library to single loans and borrowing loops, including liquidation illustration inputs and loop reference choices. Add named duplication, model-aware saved comparisons and cross-topic reopening while retaining export/import, recovery and existing liquidity records.
+- Compare loop round counts and borrowing fractions under shared capital, prices, time, rates, collateral rules and swap costs. Add the reference to the price chart and separate build/unwind cost details; preserve legacy links and drafts.
+- Apply Follow the money to the user’s own complete construction and unwind ledgers. Show swap costs, blocked previews and unpaid debt without adding imagined execution steps. Keep lessons and their completion rules unchanged.
+- Check persistence, comparison boundaries, exact action balances, invalid reference recovery, return visits and desktop/mobile workflows. Financial models and recorded historical evidence are unchanged.
+
 ## 1.32.0 — 2026-10-25
 
 - Put prediction questions and answer choices in view across all twenty lessons. A clear “Not sure — show me” route keeps results accessible; choosing an answer offers “See what happens”. Visual lessons show the question’s outcome in the diagram, with the expectation and finding beside the choices. Keep each interactive diagram beside its controls on phones.

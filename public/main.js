@@ -31,7 +31,7 @@ initExamples({
   positionSnapshots, snapshotNavigation: snapshots,
   restoreScenario: () => { fullRangeLab.restoreLocation(); rangeLab.restoreLocation(); navigation.restoreLocation(); },
 });
-initSavedExperiments({ fullRangeLab, rangeLab });
+initSavedExperiments({ labs: { 'cp50-v1': fullRangeLab, 'cl-range-v1': rangeLab } });
 initPositionPeriod({ rangeLab });
 
 workspaces.restoreLocation();

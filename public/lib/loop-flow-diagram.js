@@ -10,20 +10,20 @@ const node = (tag, copy, className) => {
 
 // The arrows describe an action; the cards show its completed ledger balances.
 // A debt card is an obligation, never the source of borrowed tokens.
-export function createLoopFlowDiagram() {
+export function createLoopFlowDiagram(id = 'loop-flow') {
   const element = node('dl', undefined, 'loop-flow-balances');
   const values = {}, cards = {}, routes = {};
   const walletCue = node('span', undefined, 'loop-flow-wallet-cue');
-  walletCue.id = 'loop-flow-wallet-cue';
+  walletCue.id = id + '-wallet-cue';
   for (const [key, label] of [['wallet', 'Your wallet'], ['supplied', 'ETH backing the loan'], ['debt', 'Debt']]) {
     const card = node('div'), term = node('dt', label), value = node('dd');
     card.dataset.pocket = key;
-    value.id = 'loop-flow-' + key;
-    if (key === 'wallet') term.append(' ', walletCue);
+    value.id = id + '-' + key;
+    if (key === 'wallet') { value.className = 'loop-flow-wallet'; term.append(' ', walletCue); }
     else {
       term.append(' ', node('small', key === 'supplied' ? 'Collateral' : 'USDC owed'));
       const route = node('span', undefined, 'loop-flow-route');
-      route.id = 'loop-flow-route-' + key;
+      route.id = id + '-route-' + key;
       route.setAttribute('aria-hidden', 'true');
       const label = node('span'), arrow = node('span', undefined, 'loop-flow-arrow');
       const dot = node('span', undefined, 'loop-flow-traveller');
@@ -51,7 +51,7 @@ export function createLoopFlowDiagram() {
       values.supplied.textContent = loopTokens(p.collateralTokens);
       values.debt.textContent = formatTokenQuantity(p.debt, 2) + ' USDC';
       const cues = {
-        start: 'No tokens in this example’s wallet',
+        start: p.cash || p.walletETH ? 'Starting wallet balances' : 'No tokens in the wallet',
         borrow: 'Borrowed USDC arrives →',
         buy: 'Swap USDC → ETH',
         supply: 'ETH leaves your wallet',

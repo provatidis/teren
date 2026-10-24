@@ -1,3 +1,4 @@
+import { checkExperiencedExperiments } from './browser/experienced-experiment-checks.js';
 import { checkFeeContext } from './browser/fee-context-checks.js';
 import { checkPredictions } from './browser/prediction-checks.js';
 import { checkVisualLessonPilots } from './browser/visual-lesson-checks.js';
@@ -607,6 +608,7 @@ try {
   await checkComparisonLessons({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   await checkPredictions({ evaluate, click, text, navigate, reload, base, call });
+  await checkExperiencedExperiments({ evaluate, click, fill, text, navigate, reload, base, call });
   assert.deepEqual(errors, [], 'No uncaught browser errors');
   console.log('PASS: mobile layout and interaction; no uncaught browser errors');
 } finally {

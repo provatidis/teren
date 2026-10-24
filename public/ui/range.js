@@ -1,3 +1,4 @@
+import { saveExperimentLocation } from '../data/experiment-location.js';
 import { createFeeContext } from '../lib/fee-context.js';
 import { labFeedback } from '../lib/lab-feedback.js';
 import { MODEL, DEFAULT_RANGE, LIMITS, calculateRange, comparisonRanges, explorerDomain, rangePreset, futurePricePreset, matchHoldingFees } from '../models/cl-range-v1.js';
@@ -321,5 +322,8 @@ export function initRangeLab({ navigation }) {
     if (setupMedia.matches) $('cl-setup-details').open = false;
     $('cl-save-status').textContent = 'Opened “' + entry.name + '” as a working copy. Save again to keep a variation.';
   }
+  for (const event of ['input', 'change', 'click']) $('range-lab').addEventListener(event, () => {
+    if (current) saveExperimentLocation(MODEL, rangeHash(current));
+  });
   return { setStartingPrice: setRangeStartingPrice, setScenario, getExperimentDraft, restoreExperimentDraft, setExperiment, restoreLocation: loadShared };
 }

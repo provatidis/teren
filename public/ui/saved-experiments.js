@@ -1,12 +1,12 @@
 import { EXPERIMENTS_KEY, MAX_LIBRARY_BYTES, emptyLibrary, readLibrary, writeLibrary, libraryJSON, parseLibrary, createExperiment, addExperiment, editExperiment, removeExperiment, mergeLibraries } from '../data/saved-experiments.js';
-import { experimentView, defaultExperimentName, comparisonContext, startingAssets } from '../lib/saved-experiments.js';
-import { usd, signedUSD, percent } from '../lib/format.js';
-import { STATE_COPY } from '../lib/range-presentation.js';
+import { experimentView, defaultExperimentName, comparisonContext, experimentFamily, experimentSummary, experimentFacts } from '../lib/saved-experiments.js';
+import { usd } from '../lib/format.js';
+import { saveExperimentLocation } from '../data/experiment-location.js';
 import { downloadBlob } from '../lib/download.js';
 
-export function initSavedExperiments({ fullRangeLab, rangeLab }) {
+export function initSavedExperiments({ labs, onOpen = () => {} }) {
   const $ = id => document.getElementById(id);
-  const labs = { 'cp50-v1': fullRangeLab, 'cl-range-v1': rangeLab };
+  const saveButtons = { 'cp50-v1': 'scenario', 'cl-range-v1': 'cl', 'collateral-loan-v1': 'loan', 'borrowing-loop-v1': 'loop' };
   let saved = readLibrary(), library = saved.library, temporary = saved.status === 'unavailable';
   let recovery = ['invalid','incompatible'].includes(saved.status), removed = null, editor = null, returnFocus = null;
   const selected = new Set();
@@ -22,7 +22,7 @@ export function initSavedExperiments({ fullRangeLab, rangeLab }) {
     const row = element('div', className); row.append(element('dt', '', label), '\n', element('dd', '', value)); list.append(row);
   }
   function sourceLine(entry) {
-    if (!entry.origin) return element('p', 'experiment-source', 'Manual assumptions · ' + entry.model);
+    if (!entry.origin) return element('p', 'experiment-source', 'Hypothetical · ' + experimentView(entry).modelName);
     const source = entry.origin.snapshot;
     const line = element('p', 'experiment-source', entry.origin.kind === 'position' ? 'Position #' + source.tokenId + ' · ' : 'Pool starting price · ');
     const link = element('a', '', 'Ethereum block ' + source.block.number + ' ↗');
@@ -38,8 +38,11 @@ export function initSavedExperiments({ fullRangeLab, rangeLab }) {
   }
   function openExperiment(entry) {
     const view = experimentView(entry);
+    if (!labs[entry.model]) { location.href = view.page + '#saved=' + entry.id; return; }
     labs[entry.model].setExperiment(entry);
     history.replaceState(null, '', location.pathname + location.search + view.hash);
+    saveExperimentLocation(entry.model, view.hash);
+    onOpen(entry);
   }
   function commit(change) {
     if (recovery) throw new Error('Download or discard the unreadable saved copy before changing this library.');
@@ -57,12 +60,11 @@ export function initSavedExperiments({ fullRangeLab, rangeLab }) {
     const view = experimentView(draft);
     $('experiment-dialog-title').textContent = mode === 'edit' ? 'Edit name and notes' : 'Save experiment';
     $('experiment-save-confirm').textContent = mode === 'edit' ? 'Save changes' : 'Save experiment';
-    $('experiment-dialog-context').textContent = view.modelName + ' · ' + usd(view.result.investment) + ' · ETH ' + usd(view.result.initialPrice) + ' → ' + usd(view.result.futurePrice)
-      + ' · ' + usd(view.result.fees) + ' assumed LP cash fees'
-      + (draft.model === 'cl-range-v1' ? ' · Range ' + usd(view.result.lowerPrice) + ' – ' + usd(view.result.upperPrice) + ' · ' + usd(view.result.fullRangeFees) + ' assumed 50/50 reference fees' : '')
+    $('experiment-dialog-context').textContent = view.modelName + ' · ' + experimentSummary(draft)
+      + (view.family === 'liquidity' ? ' · ' + usd(view.result.fees) + ' assumed LP cash fees' : ' · hypothetical, before liquidation')
       + (mode === 'edit' ? '. The saved assumptions stay the same.' : '. This saves a new copy of the current assumptions.');
-    $('experiment-name').value = mode === 'edit' ? draft.name : defaultExperimentName(draft);
-    $('experiment-notes').value = mode === 'edit' ? draft.notes : '';
+    $('experiment-name').value = mode === 'edit' ? draft.name : mode === 'duplicate' ? (draft.name.slice(0, 68) + ' · variation') : defaultExperimentName(draft);
+    $('experiment-notes').value = mode === 'new' ? '' : draft.notes;
     $('experiment-dialog-error').textContent = '';
     $('experiment-dialog').showModal(); $('experiment-name').focus(); $('experiment-name').select();
   }
@@ -70,17 +72,20 @@ export function initSavedExperiments({ fullRangeLab, rangeLab }) {
     const draft = labs[model].getExperimentDraft();
     if (draft) beginEditor('new', draft, trigger);
   }
-  $('scenario-save').addEventListener('click', event => saveFromLab('cp50-v1', event.currentTarget));
-  $('cl-save').addEventListener('click', event => saveFromLab('cl-range-v1', event.currentTarget));
+  for (const model of Object.keys(labs)) $(saveButtons[model] + '-save').addEventListener('click', event => saveFromLab(model, event.currentTarget));
   $('experiment-save-form').addEventListener('submit', event => {
     event.preventDefault(); if (!editor) return;
     try {
       const { mode, draft } = editor, name = $('experiment-name').value, notes = $('experiment-notes').value;
-      const entry = mode === 'new' ? createExperiment(draft, name, notes) : null;
-      const persisted = commit(base => mode === 'new' ? addExperiment(base, entry) : editExperiment(base, draft, name, notes));
-      const message = (mode === 'new' ? 'Saved “' : 'Updated “') + name.trim() + '”' + (persisted ? ' in this browser.' : ' for this tab only. Export the library to keep it.');
+      const entry = mode !== 'edit' ? createExperiment(draft, name, notes) : null;
+      const persisted = commit(base => mode !== 'edit' ? addExperiment(base, entry) : editExperiment(base, draft, name, notes));
+      const message = (mode !== 'edit' ? 'Saved “' : 'Updated “') + name.trim() + '”' + (persisted ? ' in this browser.' : ' for this tab only. Export the library to keep it.');
       status(message);
-      if (mode === 'new') $(draft.model === 'cp50-v1' ? 'scenario-save-status' : 'cl-save-status').textContent = message;
+      if (mode !== 'edit') {
+        const line = $(saveButtons[draft.model] + '-save-status');
+        if (line) line.textContent = message;
+        saveExperimentLocation(draft.model, experimentView(draft).hash);
+      }
       $('experiment-dialog').close();
     } catch (error) { $('experiment-dialog-error').textContent = error.message; }
   });
@@ -114,23 +119,32 @@ export function initSavedExperiments({ fullRangeLab, rangeLab }) {
     const matches = library.experiments.filter(entry => (model === 'all' || entry.model === model) && (entry.name + '\n' + entry.notes).toLocaleLowerCase().includes(query));
     $('experiments-no-match').hidden = !library.experiments.length || matches.length > 0;
     $('experiments-list').replaceChildren(...matches.map(entry => {
-      const { result, modelName } = experimentView(entry);
+      const { result, modelName, family } = experimentView(entry);
       const item = element('li', 'experiment-entry'); item.dataset.experimentId = entry.id;
       const header = element('div', 'experiment-entry-header'); header.append(element('p', 'experiment-model', modelName));
       const label = element('label', 'experiment-compare-toggle');
       const checkbox = element('input'); checkbox.type = 'checkbox'; checkbox.dataset.compareId = entry.id; checkbox.checked = selected.has(entry.id);
-      checkbox.setAttribute('aria-label', 'Compare ' + entry.name + ' · ' + modelName + ' · LP cash fees ' + usd(result.fees));
-      checkbox.addEventListener('change', () => { if (checkbox.checked && selected.size < 3) selected.add(entry.id); else selected.delete(entry.id); $('experiments-comparison').hidden = true; renderSelection(); });
+      checkbox.setAttribute('aria-label', 'Compare ' + entry.name + ' · ' + modelName + (family === 'liquidity' ? ' · LP cash fees ' + usd(result.fees) : ''));
+      checkbox.addEventListener('change', () => {
+        const other = library.experiments.find(item => selected.has(item.id));
+        if (checkbox.checked && other && experimentFamily(other.model) !== family) {
+          checkbox.checked = false; status('Compare experiments within one topic. Clear the selection to switch topics.', true); return;
+        }
+        if (checkbox.checked && selected.size < 3) selected.add(entry.id); else selected.delete(entry.id);
+        $('experiments-comparison').hidden = true; renderSelection();
+      });
       label.append(checkbox, ' Compare'); header.append(label);
-      item.append(header, element('h3', '', entry.name), element('p', 'experiment-assumptions', usd(result.investment) + ' · ETH ' + usd(result.initialPrice) + ' → ' + usd(result.futurePrice)));
+      item.append(header, element('h3', '', entry.name), element('p', 'experiment-assumptions', experimentSummary(entry)));
       if (entry.model === 'cl-range-v1') item.append(element('p', 'experiment-assumptions', 'Range ' + usd(result.lowerPrice) + ' – ' + usd(result.upperPrice)));
-      item.append(element('p', 'experiment-assumptions', 'Assumed LP cash fees: ' + usd(result.fees) + (entry.model === 'cl-range-v1' ? ' · 50/50 reference fees: ' + usd(result.fullRangeFees) : '')));
+      if (family === 'liquidity') item.append(element('p', 'experiment-assumptions', 'Assumed LP cash fees: ' + usd(result.fees) + (entry.model === 'cl-range-v1' ? ' · 50/50 reference fees: ' + usd(result.fullRangeFees) : '')));
       const numbers = element('dl', 'experiment-entry-numbers');
-      pair(numbers, 'LP + assumed fees', usd(result.lpValue)); pair(numbers, 'LP minus holding', signedUSD(result.difference), result.difference >= 0 ? 'gain' : 'loss'); item.append(numbers, sourceLine(entry));
+      const metrics = experimentFacts(entry);
+      for (const [label, value] of family === 'liquidity' ? [metrics[0], metrics[2]] : metrics) pair(numbers, label, value);
+      item.append(numbers, sourceLine(entry));
       if (entry.notes) { const notes = element('details', 'experiment-notes'); notes.append(element('summary', '', 'Notes'), element('p', '', entry.notes)); item.append(notes); }
       item.append(element('p', 'experiment-saved-date', 'Saved ' + new Date(entry.updatedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })));
       const actions = element('div', 'experiment-entry-actions');
-      actions.append(button('Open in lab', () => openExperiment(entry)), button('Edit name / notes', event => beginEditor('edit', entry, event.currentTarget), 'text-button'), button('Remove', () => remove(entry), 'text-button'));
+      actions.append(button('Open in lab', () => openExperiment(entry)), button('Duplicate as variation', event => beginEditor('duplicate', entry, event.currentTarget), 'text-button'), button('Edit name / notes', event => beginEditor('edit', entry, event.currentTarget), 'text-button'), button('Remove', () => remove(entry), 'text-button'));
       item.append(actions); return item;
     }));
     renderSelection();
@@ -139,26 +153,18 @@ export function initSavedExperiments({ fullRangeLab, rangeLab }) {
     const entries = library.experiments.filter(entry => selected.has(entry.id));
     if (entries.length < 2) { $('experiments-comparison').hidden = true; return; }
     $('experiments-comparison-context').textContent = comparisonContext(entries);
+    $('experiments-comparison-scope').textContent = experimentFamily(entries[0].model) === 'liquidity'
+      ? 'Each holding benchmark keeps that experiment’s own starting tokens. Fees are assumed USD cash; gas, incentives and trading paths are excluded. Values use USDC = $1.'
+      : 'Recalculated from saved assumptions, before liquidation. A saved loop reference is retained when reopened; these cards show each main setup. USDC = $1; rates are fixed and real execution is not simulated.';
     $('experiments-comparison-cards').replaceChildren(...entries.map(entry => {
-      const { result, initial, modelName } = experimentView(entry), card = element('article', 'experiment-comparison-card');
+      const { modelName } = experimentView(entry), card = element('article', 'experiment-comparison-card');
       card.append(element('p', 'experiment-model', modelName), element('h4', '', entry.name));
-      card.append(element('p', 'experiment-assumptions', usd(result.investment) + ' · ETH ' + usd(result.initialPrice) + ' → ' + usd(result.futurePrice)));
-      if (entry.model === 'cl-range-v1') card.append(element('p', 'experiment-assumptions', 'Range ' + usd(result.lowerPrice) + ' – ' + usd(result.upperPrice)));
-      card.append(element('p', 'experiment-assumptions', 'Assumed LP cash fees: ' + usd(result.fees)));
+      card.append(element('p', 'experiment-assumptions', experimentSummary(entry)));
       const outcomes = element('dl', 'experiment-comparison-outcomes');
-      pair(outcomes, 'LP + assumed cash fees', usd(result.lpValue)); pair(outcomes, 'Hold starting tokens', usd(result.holdValue));
-      pair(outcomes, 'LP minus holding', signedUSD(result.difference), result.difference >= 0 ? 'gain' : 'loss'); card.append(outcomes);
+      for (const [label, value] of experimentFacts(entry)) pair(outcomes, label, value);
+      card.append(outcomes);
       const inputs = element('dl', 'experiment-comparison-inputs');
-      pair(inputs, 'Starting investment', usd(result.investment)); pair(inputs, 'Starting ETH price', usd(result.initialPrice)); pair(inputs, 'Future ETH price', usd(result.futurePrice));
-      pair(inputs, 'Starting tokens', startingAssets(initial));
-      if (entry.model === 'cl-range-v1') pair(inputs, 'Price range', usd(result.lowerPrice) + ' – ' + usd(result.upperPrice));
-      pair(inputs, 'Assumed LP cash fees', usd(result.fees)); pair(inputs, 'LP before fees', usd(result.lpBeforeFees));
-      pair(inputs, 'IL before fees vs. holding', percent(result.impermanentLoss)); pair(inputs, 'Total fees needed to match holding', usd(result.breakEvenFees));
-      if (entry.model === 'cl-range-v1') {
-        pair(inputs, 'Endpoint range status', STATE_COPY[result.state].title);
-        pair(inputs, 'Separate 50/50 LP reference', usd(result.fullRange.lpValue));
-        pair(inputs, 'Assumed 50/50 reference fees', usd(result.fullRangeFees));
-      }
+      for (const [label, value] of experimentFacts(entry, true)) pair(inputs, label, value);
       const details = element('details', 'experiment-comparison-details');
       details.append(element('summary', '', 'Assumptions and notes'), inputs, sourceLine(entry));
       if (entry.notes) details.append(element('p', 'experiment-comparison-notes', entry.notes));
@@ -224,5 +230,14 @@ export function initSavedExperiments({ fullRangeLab, rangeLab }) {
   });
   for (const link of document.querySelectorAll('a[href="#saved-experiments"]')) link.addEventListener('click', openLibrary);
   window.addEventListener('hashchange', () => { if (location.hash === '#saved-experiments') openLibrary(); });
+  function openSavedLink() {
+    const match = /^#saved=([0-9a-f-]{36})$/i.exec(location.hash);
+    if (!match) return;
+    const entry = library.experiments.find(item => item.id === match[1].toLowerCase());
+    if (entry) openExperiment(entry);
+    else { openLibrary(); status('That saved experiment is not available in this browser. Import its library file to restore it.', true); }
+  }
+  window.addEventListener('hashchange', openSavedLink);
   render(); if (location.hash === '#saved-experiments') openLibrary();
+  openSavedLink();
 }

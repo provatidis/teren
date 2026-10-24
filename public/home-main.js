@@ -1,3 +1,4 @@
+import { readExperimentLocation } from './data/experiment-location.js';
 import { isLiquidityEntry } from './lib/entry-links.js';
 import { readLearningLocation } from './data/learning-location.js';
 import { initPageAccess } from './ui/page-access.js';
@@ -17,9 +18,17 @@ if (!openSharedLink()) {
     const saved = readLearningLocation();
     const link = document.getElementById('home-continue');
     link.hidden = !saved;
-    if (!saved) return;
-    link.href = saved.route;
-    document.getElementById('home-continue-title').textContent = saved.title;
+    if (saved) {
+      link.href = saved.route;
+      document.getElementById('home-continue-title').textContent = saved.title;
+    }
+    const experiment = readExperimentLocation();
+    const resume = document.getElementById('home-experiment');
+    resume.hidden = !experiment;
+    if (experiment) {
+      resume.href = experiment.route;
+      document.getElementById('home-experiment-title').textContent = experiment.title;
+    }
   }
   showContinue();
   window.addEventListener('pageshow', showContinue);

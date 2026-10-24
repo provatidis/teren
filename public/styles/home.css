@@ -29,10 +29,13 @@
 .home-loan-branches span { position: relative; padding-left: 18px; color: var(--accent); }
 .home-loan-branches span::before { content: ''; position: absolute; left: 0; top: 50%; width: 10px; border-top: 1px solid var(--border-strong); }
 .home-loan-branches span:last-child { color: var(--text); }
-.home-topic-actions { margin-top: auto; }
-.home-topic .primary { min-height: 48px; font-size: 15px; }
-.home-topic .primary span { font-size: 20px; }
-.home-lab-link { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 10px 4px; margin-top: 6px; font-size: 15px; color: var(--accent); }
+.home-topic-actions { display: grid; gap: 10px; margin: 0 0 18px; }
+.home-topic-actions .button { display: flex; align-items: center; justify-content: space-between; min-height: 48px; width: 100%; padding: 10px 14px; font-size: 15px; text-align: left; }
+.home-topic-actions .button span { font-size: 20px; }
+.home-return-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.home-return-links .home-continue { margin-top: 0; }
+.home-return-links:has(a:not([hidden])) { margin-bottom: 8px; }
+.home-reassurance a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .home-detail-link { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 14px; min-height: 48px; font-size: 14px; color: var(--muted); }
 .home-lab-link:hover,.home-detail-link:hover,.home-methods a:hover { text-decoration: underline; }
 .home-reassurance { margin: 28px 0 8px; font-size: 15px; }

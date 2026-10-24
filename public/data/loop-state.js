@@ -1,6 +1,6 @@
 import { LOOP_DEFAULTS, LOOP_LIMITS, validateLoop } from '../models/borrowing-loop-v1.js';
 import { parseLendingProgress } from './lending-state.js';
-import { validReferenceRounds } from '../models/loop-comparison.js';
+import { validReferenceRounds, validReferenceBorrowPercent } from '../models/loop-comparison.js';
 
 export const LOOP_DRAFT_KEY = 'teren-loop-draft-v1';
 export const LOOP_LEARNING_KEY = 'teren-loop-learning-v1';
@@ -16,14 +16,17 @@ export function readLoopDraft(getStorage = () => globalThis.sessionStorage) {
     return {
       input: Object.fromEntries([...Object.keys(LOOP_LIMITS), 'interestMode'].map(key => [key, saved.input[key]])),
       comparisonRounds: validReferenceRounds(saved.comparisonRounds) ? saved.comparisonRounds : null,
+      ...(validReferenceRounds(saved.comparisonRounds) && validReferenceBorrowPercent(saved.comparisonBorrowPercent, saved.input.maxLTV)
+        ? { comparisonBorrowPercent: saved.comparisonBorrowPercent } : {}),
       status: 'ready',
     };
   } catch { return { input: { ...LOOP_DEFAULTS }, comparisonRounds: null, status: 'unavailable' }; }
 }
 
-export function saveLoopDraft(input, getStorage = () => globalThis.sessionStorage, comparisonRounds = null) {
+export function saveLoopDraft(input, getStorage = () => globalThis.sessionStorage, comparisonRounds = null, comparisonBorrowPercent = null) {
   if (Object.keys(validateLoop(input)).length || (comparisonRounds !== null && !validReferenceRounds(comparisonRounds))) return false;
-  try { getStorage().setItem(LOOP_DRAFT_KEY, JSON.stringify({ version: 1, input, comparisonRounds })); return true; }
+  if (comparisonBorrowPercent !== null && (comparisonRounds === null || !validReferenceBorrowPercent(comparisonBorrowPercent, input.maxLTV))) return false;
+  try { getStorage().setItem(LOOP_DRAFT_KEY, JSON.stringify({ version: 1, input, comparisonRounds, ...(comparisonBorrowPercent === null ? {} : { comparisonBorrowPercent }) })); return true; }
   catch { return false; }
 }
 

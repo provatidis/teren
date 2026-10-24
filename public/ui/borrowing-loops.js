@@ -1,5 +1,8 @@
-import { LOOP_DEFAULTS, LOOP_LIMITS, calculateLoop, validateLoop, loopAtPrice } from '../models/borrowing-loop-v1.js';
-import { calculateLoopComparison } from '../models/loop-comparison.js';
+import { saveExperimentLocation } from '../data/experiment-location.js';
+import { validateExperimentDraft } from '../data/saved-experiments.js';
+import { renderLoopMoneyFlow } from '../lib/loop-money-flow.js';
+import { LOOP_MODEL, LOOP_DEFAULTS, LOOP_LIMITS, calculateLoop, validateLoop, loopAtPrice } from '../models/borrowing-loop-v1.js';
+import { calculateLoopComparison, validReferenceBorrowPercent } from '../models/loop-comparison.js';
 import { readLoopDraft, saveLoopDraft } from '../data/loop-state.js';
 import { loopHash, readLoopHash } from '../lib/loop-links.js';
 import { healthLabel, loanStatus } from '../lib/lending-presentation.js';
@@ -15,6 +18,7 @@ export function initBorrowingLoops() {
   const stored = readLoopDraft();
   let current = null, firstInvalid, revision = 0;
   let comparisonRounds = stored.comparisonRounds;
+  let comparisonBorrowPercent = stored.comparisonBorrowPercent ?? null;
 
   function node(tag, copy, className) {
     const element = document.createElement(tag);
@@ -80,6 +84,8 @@ export function initBorrowingLoops() {
     const input = setup.input;
     $('loop-current-label').textContent = loopRoundLabel(input.rounds);
     $('loop-reference-label').textContent = loopRoundLabel(reference.input.rounds);
+    $('loop-current-fraction').textContent = input.rounds ? fmt(input.borrowPercent) + '% per round' : 'No borrowing';
+    $('loop-reference-fraction').textContent = reference.input.rounds ? fmt(reference.input.borrowPercent) + '% per round' : 'No borrowing';
     $('loop-round-comparison-context').textContent = 'Both start with ' + loopTokens(input.collateral) +
       ' at ' + money(input.start) + '/ETH. Compare them at ' + money(input.future) + '/ETH' +
       (input.days === 0 ? ', with no time elapsed.' : ', after ' + formatTokenQuantity(input.days, 2) + (input.days === 1 ? ' day.' : ' days.'));
@@ -91,29 +97,40 @@ export function initBorrowingLoops() {
       ['Health factor', result => healthLabel(result.end.healthFactor)],
       ['Liquidation boundary', result => result.end.boundaryPrice === null ? 'No debt' : money(result.end.boundaryPrice) + '/ETH'],
       ['Loan status', result => loanStatus(result.end)],
+      ['Build swap losses', result => money(result.buildCosts)],
+      ['Unwind preview', result => ({ complete: 'Debt cleared', limited: 'Partial · debt remains', blocked: 'Blocked · no actions', 'no-debt': 'No debt to repay' })[result.unwind.status]],
+      ['Swap losses in unwind', result => result.unwind.status === 'blocked' ? 'Not run' : money(result.unwind.costs)],
+      ['Net assets after preview', result => money(result.unwind.remaining.netAssets)],
+      ['Debt after preview', result => money(result.unwind.remaining.debt)],
     ];
-    $('loop-compare-rows').replaceChildren(...rows.map(([label, value]) => {
+    const cells = rows.map(([label, value]) => {
       const row = node('tr'), heading = node('th', label);
       heading.scope = 'row';
       row.append(heading, node('td', value(setup)), node('td', value(reference)));
       return row;
-    }));
-    $('loop-round-comparison-takeaway').textContent = input.rounds === comparisonRounds
-      ? 'Both use the same round count, so their results match. Change either count to explore the difference.'
-      : 'More rounds buy more ETH with more debt. A price move acts on that larger ETH balance. Interest rates and swap costs affect the result too.';
+    });
+    $('loop-compare-rows').replaceChildren(...cells.slice(0, 6));
+    $('loop-compare-cost-rows').replaceChildren(...cells.slice(6));
+    $('loop-round-comparison-takeaway').textContent = input.rounds === comparisonRounds && input.borrowPercent === reference.input.borrowPercent
+      ? 'Both use the same construction choices, so their results match. Change a round count or borrowing fraction to explore the difference.'
+      : 'More rounds or a higher borrowing fraction can increase both ETH exposure and debt. Change the shared price, time or rates to test both alternatives together.';
     $('loop-compare-warning').hidden = ![setup, reference].some(result => ['eligible', 'boundary'].includes(result.end.status));
   }
-  function renderChart(result) {
+  function renderChart(result, reference = null) {
     const input = result.input, left = 94, right = 600, top = 28, bottom = 246;
     const minPrice = Math.max(0.01, Math.min(input.start * 0.5, input.future * 0.8));
     const maxPrice = Math.max(input.start * 1.5, input.future * 1.2);
     const low = loopAtPrice(result, minPrice).netAssets, high = loopAtPrice(result, maxPrice).netAssets;
-    const minValue = Math.min(0, low), maxValue = Math.max(1, high, input.collateral * maxPrice);
+    const refLow = reference ? loopAtPrice(reference, minPrice).netAssets : low;
+    const refHigh = reference ? loopAtPrice(reference, maxPrice).netAssets : high;
+    const minValue = Math.min(0, low, refLow), maxValue = Math.max(1, high, refHigh, input.collateral * maxPrice);
     const x = price => left + (price - minPrice) / (maxPrice - minPrice) * (right - left);
     const y = value => bottom - (value - minValue) / (maxValue - minValue) * (bottom - top);
     const path = (a, b) => 'M' + left + ' ' + y(a) + 'L' + right + ' ' + y(b);
     $('loop-chart-value').setAttribute('d', path(low, high));
     $('loop-chart-hold').setAttribute('d', path(input.collateral * minPrice, input.collateral * maxPrice));
+    $('loop-chart-reference').setAttribute('d', reference ? path(refLow, refHigh) : '');
+    $('loop-chart-reference-key').hidden = !reference;
     $('loop-chart-grid').setAttribute('d', 'M94 28H600M94 137H600M94 246H600');
     $('loop-chart-zero').setAttribute('d', 'M94 ' + y(0) + 'H600');
     $('loop-chart-point').setAttribute('cx', x(input.future));
@@ -121,6 +138,8 @@ export function initBorrowingLoops() {
     const boundary = result.end.boundaryPrice;
     const visibleBoundary = boundary !== null && boundary >= minPrice && boundary <= maxPrice;
     $('loop-chart-boundary').setAttribute('d', visibleBoundary ? 'M' + x(boundary) + ' ' + top + 'V' + bottom : '');
+    const refBoundary = reference?.end.boundaryPrice;
+    $('loop-chart-reference-boundary').setAttribute('d', refBoundary != null && refBoundary >= minPrice && refBoundary <= maxPrice ? 'M' + x(refBoundary) + ' ' + top + 'V' + bottom : '');
     $('loop-chart-limit').textContent = boundary === null ? 'No debt, so there is no loan liquidation boundary.'
       : (visibleBoundary ? 'Vertical dotted line: ' : 'Liquidation boundary outside this chart: ') + money(boundary) + '/ETH. Below this price, values still show balances before liquidation; actual liquidation would change them.';
     $('loop-chart-top').textContent = compactUSD(maxValue);
@@ -128,7 +147,8 @@ export function initBorrowingLoops() {
     $('loop-chart-left').textContent = compactUSD(minPrice) + '/ETH';
     $('loop-chart-right').textContent = compactUSD(maxPrice) + '/ETH';
     $('loop-chart-current').textContent = 'Dot: your selected price, ' + money(input.future) + '/ETH. Assets minus debt: ' + money(result.end.netAssets) + '.';
-    $('loop-price-chart').setAttribute('aria-label', 'Possible ETH prices at fixed accrued balances. At ' + money(input.future) + ' per ETH, setup net assets are ' + money(result.end.netAssets) + ', versus ' + money(result.holdingValue) + ' holding original ETH. Before liquidation and unwinding.');
+    if (reference) $('loop-chart-current').textContent += ' Reference: ' + money(reference.end.netAssets) + '; its liquidation boundary is ' + (refBoundary === null ? 'absent (no debt).' : money(refBoundary) + '/ETH.');
+    $('loop-price-chart').setAttribute('aria-label', 'Possible ETH prices at fixed accrued balances. At ' + money(input.future) + ' per ETH, setup net assets are ' + money(result.end.netAssets) + ', versus ' + money(result.holdingValue) + ' holding original ETH.' + (reference ? ' Reference net assets: ' + money(reference.end.netAssets) + '.' : '') + ' Before liquidation and unwinding.');
   }
   function renderUnwind(result) {
     const preview = result.unwind;
@@ -159,15 +179,24 @@ export function initBorrowingLoops() {
   }
   function render(save = false) {
     revision++;
+    $('loop-save-status').textContent = '';
     $('loop-share-url').hidden = true;
     $('loop-share-status').textContent = '';
     const input = read(), errors = validateLoop(input);
     const comparing = comparisonRounds !== null;
     $('loop-compare-toggle').setAttribute('aria-expanded', String(comparing));
-    $('loop-compare-toggle').textContent = comparing ? 'Stop comparing' : 'Compare round counts';
+    $('loop-compare-toggle').textContent = comparing ? 'Stop comparing' : 'Compare loop setups';
     $('loop-compare-options').hidden = !comparing;
     $('loop-round-comparison').hidden = !comparing;
     if (comparing) $('loop-reference-rounds').value = comparisonRounds;
+    $('loop-reference-shared').checked = comparisonBorrowPercent === null;
+    $('loop-reference-borrow-field').hidden = comparisonBorrowPercent === null;
+    const invalidReference = comparing && comparisonBorrowPercent !== null && !validReferenceBorrowPercent(comparisonBorrowPercent, input.maxLTV);
+    $('loop-reference-error').hidden = !invalidReference;
+    $('loop-reference-error').textContent = invalidReference ? 'Use a number from 1% to the shared maximum LTV (' + input.maxLTV + '%).' : '';
+    $('loop-reference-borrow').setAttribute('aria-invalid', String(invalidReference));
+    $('loop-round-comparison').hidden = !comparing || invalidReference;
+    $('loop-compare-show').disabled = invalidReference;
     $('loop-share').textContent = comparing ? 'Copy comparison link' : 'Copy loop link';
     if (errors.borrowPercent && Number.isFinite(input.borrowPercent) && Number.isFinite(input.maxLTV) && input.borrowPercent > input.maxLTV) {
       errors.borrowPercent = 'Use ' + formatTokenQuantity(input.maxLTV, 4) + '% or less. Edit maximum LTV in Original capital and assumptions to change that limit.';
@@ -180,7 +209,8 @@ export function initBorrowingLoops() {
     }
     $('loop-invalid').hidden = !firstInvalid;
     $('loop-results').hidden = !!firstInvalid;
-    $('loop-share').disabled = !!firstInvalid;
+    $('loop-share').disabled = !!firstInvalid || invalidReference;
+    $('loop-save').disabled = !!firstInvalid || invalidReference;
     const roundsValid = Number.isInteger(input.rounds) && !errors.rounds;
     $('loop-round-down').disabled = !roundsValid || input.rounds === 0;
     $('loop-round-up').disabled = !roundsValid || input.rounds === 5;
@@ -193,7 +223,7 @@ export function initBorrowingLoops() {
       if (errors.collateral || errors.start) $('loop-setup-caption').textContent = 'Check original capital inputs';
       return;
     }
-    const pair = comparing ? calculateLoopComparison(input, comparisonRounds) : null;
+    const pair = comparing && !invalidReference ? calculateLoopComparison(input, comparisonRounds, comparisonBorrowPercent ?? input.borrowPercent) : null;
     current = pair ? pair.current : calculateLoop(input);
     const result = current, end = result.end, comparison = loopComparison(end.netAssets, result.holdingValue);
     $('loop-quick-result').dataset.state = end.status;
@@ -233,11 +263,20 @@ export function initBorrowingLoops() {
     $('loop-rate-summary').textContent = fmt(input.supplyAPR) + '% supply · ' + fmt(input.borrowAPR) + '% borrow APR · ' + (input.interestMode === 'compound' ? 'continuous compounding' : 'simple interest') + ' · fixed rates';
     for (const button of document.querySelectorAll('[data-loop-rounds]')) button.setAttribute('aria-pressed', String(Number(button.dataset.loopRounds) === input.rounds));
     for (const button of document.querySelectorAll('[data-loop-price]')) button.setAttribute('aria-pressed', String(input.future === input.start * Number(button.dataset.loopPrice)));
-    renderComparison(pair); renderLedger(result); renderChart(result); renderUnwind(result);
-    if (save) $('loop-storage').textContent = saveLoopDraft(input, undefined, comparisonRounds)
-      ? 'Working loop kept in this tab, separately from your single loan. Copy a link to keep or share it.'
+    renderComparison(pair); renderLedger(result); renderChart(result, pair?.reference); renderUnwind(result);
+    refreshFlows();
+    const resumable = save && !invalidReference && saveExperimentLocation(LOOP_MODEL, loopHash(input, comparisonRounds, comparisonBorrowPercent));
+    if (save && !invalidReference) $('loop-storage').textContent = saveLoopDraft(input, undefined, comparisonRounds, comparisonBorrowPercent)
+      ? 'Working loop kept in this tab.' + (resumable ? ' Home can resume these inputs.' : '') + ' Save a named experiment to keep alternatives.'
       : 'Tab storage is unavailable. Copy a loop link to keep your setup.';
   }
+  function refreshFlow(kind) {
+    const disclosure = $('loop-' + kind + '-visual');
+    if (disclosure.open && current) renderLoopMoneyFlow($('loop-' + kind + '-flow'), current, kind, undefined,
+      { id: 'lab-' + kind, allRounds: true, allowIncomplete: true });
+  }
+  function refreshFlows() { for (const kind of ['build', 'unwind']) refreshFlow(kind); }
+  for (const kind of ['build', 'unwind']) $('loop-' + kind + '-visual').addEventListener('toggle', () => refreshFlow(kind));
   function focus(id) {
     const target = $(id);
     for (let parent = target.parentElement; parent; parent = parent.parentElement) if (parent.tagName === 'DETAILS') parent.open = true;
@@ -246,8 +285,13 @@ export function initBorrowingLoops() {
   function restore() {
     const shared = readLoopHash(location.hash);
     $('loop-route-note').hidden = shared.status !== 'invalid';
-    if (shared.status === 'ready') { comparisonRounds = shared.comparisonRounds; write(shared.input); render(true); }
+    if (shared.status === 'ready') {
+      comparisonRounds = shared.comparisonRounds; comparisonBorrowPercent = shared.comparisonBorrowPercent ?? null;
+      $('loop-reference-borrow').value = comparisonBorrowPercent ?? shared.input.borrowPercent;
+      write(shared.input); render(true);
+    }
   }
+  $('loop-reference-borrow').value = comparisonBorrowPercent ?? stored.input.borrowPercent;
   write(stored.input); render();
   $('loop-storage').textContent = stored.status === 'unavailable'
     ? 'The previous loop draft could not be read. Defaults are shown; copy a link to keep your setup.'
@@ -264,21 +308,31 @@ export function initBorrowingLoops() {
   for (const button of document.querySelectorAll('[data-loop-rounds]')) button.addEventListener('click', () => { $('loop-rounds').value = button.dataset.loopRounds; render(true); });
   for (const button of document.querySelectorAll('[data-loop-price]')) button.addEventListener('click', () => { $('loop-future').value = Number($('loop-start').value) * Number(button.dataset.loopPrice); render(true); });
   $('loop-fix-input').addEventListener('click', () => { if (firstInvalid) focus('loop-' + firstInvalid); });
-  const showResult = () => focus(firstInvalid ? 'loop-' + firstInvalid : comparisonRounds === null ? 'loop-outcome' : 'loop-round-comparison');
+  const showResult = () => focus(firstInvalid ? 'loop-' + firstInvalid : !$('loop-reference-error').hidden ? 'loop-reference-borrow' : comparisonRounds === null ? 'loop-outcome' : 'loop-round-comparison');
   $('loop-show-result').addEventListener('click', showResult);
   $('loop-compare-show').addEventListener('click', showResult);
   $('loop-compare-toggle').addEventListener('click', () => {
     comparisonRounds = comparisonRounds === null ? (Number($('loop-rounds').value) === 1 ? 3 : 1) : null;
+    comparisonBorrowPercent = null;
     render(true);
   });
   $('loop-reference-rounds').addEventListener('change', () => {
     comparisonRounds = Number($('loop-reference-rounds').value);
     render(true);
   });
-  $('loop-reset').addEventListener('click', () => { comparisonRounds = null; write(LOOP_DEFAULTS); render(true); $('loop-share-status').textContent = 'Default loop restored.'; });
+  $('loop-reference-shared').addEventListener('change', () => {
+    comparisonBorrowPercent = $('loop-reference-shared').checked ? null : Number($('loop-borrowPercent').value);
+    $('loop-reference-borrow').value = comparisonBorrowPercent ?? $('loop-borrowPercent').value;
+    render(true);
+  });
+  $('loop-reference-borrow').addEventListener('input', () => {
+    comparisonBorrowPercent = $('loop-reference-borrow').value.trim() === '' ? NaN : Number($('loop-reference-borrow').value);
+    render(true);
+  });
+  $('loop-reset').addEventListener('click', () => { comparisonRounds = null; comparisonBorrowPercent = null; write(LOOP_DEFAULTS); render(true); $('loop-share-status').textContent = 'Default loop restored.'; });
   $('loop-share').addEventListener('click', async () => {
     if (!current) return;
-    const url = new URL(location.href); url.hash = loopHash(current.input, comparisonRounds);
+    const url = new URL(location.href); url.hash = loopHash(current.input, comparisonRounds, comparisonBorrowPercent);
     const copiedRevision = revision;
     $('loop-share-url').value = url.href;
     try {
@@ -292,4 +346,19 @@ export function initBorrowingLoops() {
     }
   });
   window.addEventListener('hashchange', restore);
+  return {
+    getExperimentDraft() {
+      if (!current || $('loop-save').disabled) return null;
+      return validateExperimentDraft({ model: LOOP_MODEL, inputs: current.input,
+        comparison: comparisonRounds === null ? null : { rounds: comparisonRounds, borrowPercent: comparisonBorrowPercent } });
+    },
+    setExperiment(entry) {
+      const draft = validateExperimentDraft(entry);
+      comparisonRounds = draft.comparison?.rounds ?? null;
+      comparisonBorrowPercent = draft.comparison?.borrowPercent ?? null;
+      $('loop-reference-borrow').value = comparisonBorrowPercent ?? draft.inputs.borrowPercent;
+      write(draft.inputs); render(true);
+      $('loop-save-status').textContent = 'Opened “' + entry.name + '” as a working copy. Save again to keep a variation.';
+    },
+  };
 }
