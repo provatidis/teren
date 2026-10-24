@@ -124,7 +124,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
 
   await click('learn-variation');
   assert.equal(await text('learn-variation-label'), 'Variation 2 of 3');
-  assert.equal(await evaluate("document.getElementById('learn-run').disabled"), true);
+  assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false, 'The visual challenge permits explanation without a prediction.');
   assert.equal(await text('learn-progress-count'), '7 of 7 checked');
   await reload();
   assert.equal(await text('learn-variation-label'), 'Variation 2 of 3');
