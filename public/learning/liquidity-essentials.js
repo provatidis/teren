@@ -38,7 +38,7 @@ export const LESSONS = [
   },
   {
     id: 'loss-vs-profit', protocol: 'Uniswap v2-style', title: 'Dollar profit and impermanent loss', short: 'Loss versus profit', concept: 'Benchmarks', skill: 'Separate dollar profit from impermanent loss.',
-    intro: 'Dollar profit compares the LP with its original investment. Impermanent loss compares the position’s tokens before fees with holding the exact starting tokens. These answer different questions.',
+    intro: 'An LP can gain dollars and still fall behind holding. Change ETH’s price and compare both benchmarks.',
     prediction: 'Before fees, is the LP worth at least the original budget at your selected price?',
     predictions: [['gain', 'Yes — it gains dollars or breaks even'], ['loss', 'No — it loses dollars']],
     question: 'How many dollars is the LP behind holding before fees? Use two decimal places.',
@@ -50,7 +50,7 @@ export const LESSONS = [
   },
   {
     id: 'fee-break-even', protocol: 'Uniswap v2-style', title: 'Fees needed to match holding', short: 'Fees & break-even', concept: 'Fee income', skill: 'Distinguish a fee target from assumed and earned fees.',
-    intro: 'Fee income can compensate for the gap to holding. Enter the total fees accruing to your position after any protocol share. This lab treats them as separate USD cash added at the end; it does not forecast earnings.',
+    intro: 'How much would fees need to add for LP to match holding? Move the fee assumption and watch the gap close.',
     prediction: 'Do your assumed fees cover the gap to holding at this future price?',
     predictions: [['enough', 'They match or exceed the gap'], ['short', 'The LP still trails holding']],
     question: 'What TOTAL fee income would match holding, before costs? Use two decimal places.',
@@ -74,7 +74,7 @@ export const LESSONS = [
   },
   {
     id: 'final-challenge', protocol: 'Uniswap v2-style', title: 'Compare liquidity with holding', short: 'Final challenge', concept: 'Apply what you learned', skill: 'Compare an LP with holding and justify the conclusion.',
-    intro: 'You have one budget, one starting mix and an explicit fee assumption. Compare the final values, then explain the result. A high fee number alone is not enough to choose a strategy.',
+    intro: 'Use the same starting tokens to compare holding with LP. Change price or assumed fees, then explain which assumption drives the result.',
     prediction: 'With your selected price and fee assumption, which has the higher final dollar value?',
     predictions: [['hold', 'Holding the starting tokens'], ['lp', 'The LP, including fees — or a tie']],
     question: 'How much ADDITIONAL assumed fee income would the LP need to match holding? Enter 0 if it already matches or beats holding.',

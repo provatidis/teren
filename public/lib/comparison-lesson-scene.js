@@ -86,7 +86,6 @@ export function createComparisonScene(id, input, prediction) {
   }
   // A visible, optional question precedes exploration. Keep the figure beside
   // its active control on phones; changing modes preserves both assumptions.
-  element.append(prediction, '\n');
   if (priceControl && feeControl) {
     const modes = sceneNode('div', undefined, 'scene-shortcuts comparison-modes');
     modes.setAttribute('role', 'group'); modes.setAttribute('aria-label', 'Choose what to explore');
@@ -104,11 +103,11 @@ export function createComparisonScene(id, input, prediction) {
     feeControl.element.hidden = true;
     element.append(modes, '\n');
   }
-  element.append(figure, '\n');
+  element.append(figure, '\n', prediction, '\n');
   if (priceControl) element.append(priceControl.element, '\n');
   if (feeControl) element.append(feeControl.element, '\n');
   element.append(scope, '\n', basket, '\n', sceneNode('p', withFees
-    ? 'Fees here are hypothetical cash added to the LP. Matching holding is a target, not a forecast. Gas and other costs are excluded.'
+    ? 'Fees here are hypothetical cash added to the LP, after any protocol share. Matching holding is a target, not a forecast. Gas and other costs are excluded.'
     : 'Each price is a separate hypothetical outcome. Dollar profit and performance against holding answer different questions.', 'scene-essential-note'));
   for (const control of element.querySelectorAll('input[type=range]')) control.setAttribute('aria-describedby', scope.id);
   priceControl?.show(price); feeControl?.show(fees); draw();

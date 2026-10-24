@@ -92,7 +92,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     }
   }
   assert.equal(await evaluate("localStorage.getItem('defi-sandbox-v1')"), sandbox);
-  await navigate(base + 'learn.html#lesson=loss-vs-profit');
+  await navigate(base + 'learn.html#lesson=range-boundaries');
   assert.equal(await evaluate("document.getElementById('learn-prediction-field').closest('.scene-prediction')===null"), true);
   assert.ok(await evaluate("document.getElementById('learn-prediction-question').getBoundingClientRect().width") > 100, 'Other lessons retain their visible group legend.');
   console.log('PASS: swap/deposit actions, exact token transfers, constant ownership through a trade, optional predictions, restoration and isolated exploration');
