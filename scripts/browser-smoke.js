@@ -1,3 +1,4 @@
+import { checkFeeContext } from './browser/fee-context-checks.js';
 import { checkVisualLessonPilots } from './browser/visual-lesson-checks.js';
 import { checkFoundationLessons } from './browser/foundation-lesson-checks.js';
 import { checkLendingScenes } from './browser/lending-scene-checks.js';
@@ -597,6 +598,7 @@ try {
   await checkLoopStressLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkReviewPolish({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkComparisonLessons({ evaluate, click, fill, text, navigate, reload, base, call });
+  await checkFeeContext({ evaluate, click, fill, text, navigate, base, call });
   assert.deepEqual(errors, [], 'No uncaught browser errors');
   console.log('PASS: mobile layout and interaction; no uncaught browser errors');
 } finally {
