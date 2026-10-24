@@ -36,7 +36,7 @@ export function renderLoopMoneyFlow(container, result, lesson = 'build', predict
     for (const key of Object.keys(changes)) changes[key].textContent = stage.changes[key];
     diagram.show(stage, animate);
     if (isUnwind || options.allRounds) {
-      health.textContent = p.debt === 0 ? 'No debt left to back.' : 'Health factor: ' + healthLabel(p.healthFactor) + ' · Supplied ETH backs debt.';
+      health.textContent = p.debt === 0 ? 'No debt is owed.' : 'Health factor: ' + healthLabel(p.healthFactor) + ' · Supplied ETH backs debt.';
       costs.textContent = 'Swap losses during unwind so far: ' + loopMoney(stage.costs);
     }
     net.textContent = 'Assets minus debt: ' + loopMoney(p.netAssets);

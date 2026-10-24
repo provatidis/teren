@@ -51,7 +51,7 @@ export function createLoopFlowDiagram(id = 'loop-flow') {
       values.supplied.textContent = loopTokens(p.collateralTokens);
       values.debt.textContent = formatTokenQuantity(p.debt, 2) + ' USDC';
       const cues = {
-        start: p.cash || p.walletETH ? 'Starting wallet balances' : 'No tokens in this example’s wallet',
+        start: p.cash || p.walletETH ? 'Starting wallet balances' : 'No tokens in the wallet',
         borrow: 'Borrowed USDC arrives →',
         buy: 'Swap USDC → ETH',
         supply: 'ETH leaves your wallet',
