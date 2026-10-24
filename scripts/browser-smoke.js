@@ -115,6 +115,10 @@ async function navigate(url) {
     await call('Page.navigate', { url: destination });
     await loaded;
   }
+  // Lesson entry focuses its heading on the next animation frame. Let that
+  // initial focus and measured header offsets finish before interacting or
+  // positioning a touch target; otherwise they can undo the test's scroll.
+  await evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
 }
 
 try {
