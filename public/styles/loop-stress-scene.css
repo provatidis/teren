@@ -1,0 +1,24 @@
+.stress-figure .scene-figure-title { margin-bottom: 6px; }
+.stress-before { margin: 0; font-size: 13px; line-height: 1.6; color: var(--muted); }
+.stress-row { margin: 8px 0; }
+.stress-heading { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; font-size: 14px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.stress-track { position: relative; height: 12px; margin: 8px 0; background: var(--surface); border-radius: 3px; }
+.stress-fill { position: absolute; top: 0; height: 100%; background: #a9c7f5; border-radius: 3px; }
+[data-strategy=loop] .stress-fill { background: repeating-linear-gradient(135deg, #e5bd85 0 5px, #99815f 5px 7px); }
+.stress-zero { position: absolute; left: 50%; top: -3px; bottom: -3px; border-left: 2px dashed var(--text); }
+.stress-change, .stress-key, .stress-status, .stress-boundary { font-size: 13px; line-height: 1.6; margin: 4px 0; }
+.stress-change { color: var(--muted); font-variant-numeric: tabular-nums; }
+.stress-key { display: flex; justify-content: space-between; color: var(--muted); min-height: 1.6em; }
+.stress-loan { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+.stress-loan span { display: block; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.stress-loan strong { display: block; font-size: 16px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+.stress-status { min-height: 1.6em; }
+.stress-boundary { min-height: 1.6em; color: var(--muted); }
+.stress-figure[data-state=eligible] #stress-health, .stress-figure[data-state=eligible] .stress-status { color: var(--error); }
+.stress-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stress-modes button { min-height: 48px; font-size: 14px; }
+.stress-assumptions, .stress-interest { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 12px 0; }
+.stress-scene .scene-price-heading { min-height: 1.7em; }
+.stress-scene .scene-price-control { margin: 12px 0 0; }
+.stress-scene .scene-prediction { margin: 8px 0; }
+.stress-scene .scene-prediction > summary { padding: 10px 0; }

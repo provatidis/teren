@@ -78,7 +78,7 @@ export async function checkLoanConditionLesson({ evaluate, click, fill, text, na
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   assert.deepEqual(await working(), drafts);
   await navigate(base + 'lending.html#loop-lesson=stress');
-  assert.equal(await evaluate("document.getElementById('lend-prediction-field').closest('.scene-prediction')===null"), true);
+  assert.equal(await evaluate("document.getElementById('lend-prediction-field').closest('.scene-prediction')===null"), false);
   await navigate(base + 'lending.html#loop-lesson=build');
   assert.equal(await text('lend-flow-title'), 'Follow the money');
   assert.equal(await text('lend-flow-instruction'), 'Take one action, then look at what changed.');

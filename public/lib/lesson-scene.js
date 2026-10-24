@@ -57,13 +57,16 @@ export function createSceneExplorer({ id, min, max, step, start, target, format,
   const status = sceneNode('p', '', 'sr-only'); status.setAttribute('role', 'status');
   function show(value, announce = false) {
     slider.value = String(value);
-    const selected = Number(slider.value);
+    // Some browsers shorten repeating decimals even with step="any". Preserve
+    // an exact, legal named value for the model; native input uses its own value.
+    const legalValue = Number.isFinite(value) && value >= min && value <= max && (exactStep === 'any' || onStep(value));
+    const selected = legalValue ? value : Number(slider.value);
     output.textContent = format(selected);
     slider.setAttribute('aria-valuetext', valueText(selected));
     for (const item of buttons) item.button.setAttribute('aria-pressed', String(item.value === selected));
     scope.textContent = scopeText(selected);
     const description = onChange(selected);
-    if (announce) status.textContent = format(selected) + '. ' + description;
+    status.textContent = announce ? format(selected) + '. ' + description : '';
   }
   slider.addEventListener('input', () => show(Number(slider.value)));
   element.append(heading, '\n', slider, '\n', links, '\n', scope, '\n', status);

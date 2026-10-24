@@ -34,7 +34,7 @@ export const LOOP_LESSONS = [
     adds: 'Repeat the loop, then lower ETH’s price.',
     intro: 'Compare a loop with holding the original ETH. Both start with the same money. The loop owns more ETH and owes USDC.',
     setup: 'Start with the same 5 ETH. Build three rounds, each borrowing half the value just supplied. Ignore swap costs and interest here. Then lower ETH’s price from $2,000 to $1,500. The displayed balances are before any liquidation.',
-    question: 'Which setup loses more net value from this price fall?',
+    question: 'If ETH falls to $1,500, which loses more value?',
     predictions: [['loop', 'The borrowing loop.'], ['hold', 'Holding the original ETH.'], ['same', 'Both lose the same net value.']],
     takeaway: 'More ETH exposure amplifies a price move. The USDC debt does not shrink when ETH falls.',
     explanation: 'The loop holds more ETH than the original basket. Each ETH loses value in the same price fall, while the USDC debt stays unchanged. The comparison uses the same original capital, rather than comparing two differently funded positions.',
@@ -51,7 +51,7 @@ export const LOOP_LESSONS = [
     applications: [['falls', 'It falls as the debt grows.'], ['same', 'It stays the same because the ETH price did not move.'], ['rises', 'It rises because the original loop added collateral.']],
     applicationFeedback: 'Debt grows while the ETH amount, price and threshold stay fixed, so health factor falls.',
     hint: 'Check the amount of ETH exposed to the price, and the currency in which debt is owed.',
-    deeper: ['All rounds are built at one starting price before the selected interest period. The lab can compare fixed simple interest with continuous compounding at the same entered APRs. Neither reproduces changing protocol rates or Aave’s reserve-index accounting.', 'A final price cannot establish that a position survived earlier prices. Eligible endpoints retain pre-liquidation balances rather than inventing a liquidation path.'],
+    deeper: ['All rounds are built at one starting price before the selected interest period. The price example has zero interest. The separate Time example holds ETH at $2,000, with 0% supply APR and 10% borrow APR using continuous compounding for up to one year. These chosen rates illustrate the changed situation; they are not live rates. Opening the explanation restores the original $1,500 price question with no interest.', 'The lab can compare fixed simple interest with continuous compounding at the same entered APRs. Neither reproduces changing protocol rates or Aave’s reserve-index accounting.', 'A final price cannot establish that a position survived earlier prices. Eligible endpoints retain pre-liquidation balances rather than inventing a liquidation path. Holding means keeping the original ETH without supplying or borrowing; it earns no supply interest.'],
     sources: [borrowing, health],
   },
   {
