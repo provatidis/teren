@@ -1,0 +1,13 @@
+.fee-context { margin-top: 20px; border-top: 1px solid var(--border); font-size: 14px; line-height: 1.7; }
+.fee-context > summary, .fee-context-records > summary { cursor: pointer; padding: 12px 0; min-height: 44px; }
+.fee-context summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.fee-context-headline { display: block; color: var(--muted); font-weight: 400; }
+.fee-context-body p { margin: 12px 0; }
+.fee-context-target, .fee-context-daily, .fee-context-earned { font-weight: 600; }
+.fee-context-window { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; }
+.fee-context-window select { min-height: 44px; padding: 8px 12px; color: var(--text); background: var(--surface); border: 1px solid var(--border-strong); border-radius: 8px; }
+.fee-context-records { margin: 20px 0; padding: 0 14px; border: 1px solid var(--border); border-radius: 10px; }
+.fee-context-record { padding: 16px 0; border-top: 1px solid var(--border); }
+.fee-context-record-title { font-size: 15px; margin: 0; }
+.fee-context-provenance { color: var(--muted); font-size: 13px; }
+.fee-context a { display: inline-block; text-decoration: underline; text-underline-offset: 3px; padding: 10px 0; }

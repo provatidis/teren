@@ -1,3 +1,4 @@
+import { createFeeContext } from './fee-context.js';
 import { comparisonSceneState } from './comparison-scene-state.js';
 import { createSceneExplorer, sceneNode } from './lesson-scene.js';
 import { fmt, usd } from './format.js';
@@ -11,6 +12,7 @@ export function comparisonQuestion(id, input) {
 
 export function createComparisonScene(id, input, prediction) {
   const withFees = id !== 'loss-vs-profit';
+  const feeContext = withFees ? createFeeContext('comparison') : null;
   const withPrice = id !== 'fee-break-even';
   let price = id === 'loss-vs-profit' ? input.initialPrice : input.futurePrice;
   let fees = id === 'final-challenge' ? input.fees : 0;
@@ -40,6 +42,7 @@ export function createComparisonScene(id, input, prediction) {
 
   function draw() {
     const state = comparisonSceneState(input, price, fees), r = state.result;
+    feeContext?.update(r);
     title.textContent = 'Value at ' + usd(price) + ' per ETH';
     for (const [key, value] of [['start', input.investment], ['hold', r.holdValue], ['lp', r.lpValue]]) {
       const row = rows[key];
@@ -109,6 +112,7 @@ export function createComparisonScene(id, input, prediction) {
   element.append(verdict, '\n', scope, '\n', basket, '\n', sceneNode('p', withFees
     ? 'Fees here are hypothetical cash added to the LP, after any protocol share. Matching holding is a target, not a forecast. Gas and other costs are excluded.'
     : 'Each price is a separate hypothetical outcome. Dollar profit and performance against holding answer different questions.', 'scene-essential-note'));
+  if (feeContext) element.append(feeContext.element);
   for (const control of element.querySelectorAll('input[type=range]')) control.setAttribute('aria-describedby', scope.id);
   priceControl?.show(price); feeControl?.show(fees); draw();
   return { element, showQuestion() {

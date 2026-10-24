@@ -1,5 +1,11 @@
 # Release history
 
+## 1.30.0 — 2026-10-24
+
+- Add optional “Could fees cover this?” context to both liquidity labs and the fee-break-even/final-challenge lessons. Show the total fee hurdle as a percentage of starting capital, the gap after assumed fees, and the required daily average over a chosen 1/7/30/90-day window. This is a hurdle, not an earnings estimate.
+- Offer two lazily loaded historical examples with their original principal, newly earned fees, exact duration, ranges, active time and capture-check dates. Inspect links open the original evidence. Different positions and periods remain separate observations; nothing is annualized or rescaled to the hypothetical deposit.
+- Keep the time-window control outside scenario inputs, saved progress and shared links. Failed example loads can be retried without disabling calculations. Financial models and stored formats are unchanged.
+
 ## 1.29.0 — 2026-10-24
 
 - Make loss versus profit, break-even fees and the final challenge visual. Compare starting capital, the exact holding basket and LP principal on one fixed dollar scale; add hypothetical cash fees as a separate striped segment.

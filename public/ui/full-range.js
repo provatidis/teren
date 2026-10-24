@@ -1,3 +1,4 @@
+import { createFeeContext } from '../lib/fee-context.js';
 import { labFeedback } from '../lib/lab-feedback.js';
 import { MODEL, DEFAULT_SCENARIO, LIMITS, validateScenario, calculateScenario, comparisonScenarios } from '../models/cp50-v1.js';
 import { scenarioHash } from '../lib/scenario-links.js';
@@ -15,6 +16,8 @@ export function initFullRangeLab({ navigation }) {
   const $ = (id) => document.getElementById(id);
   const fields = { investment: 'scenario-investment', initialPrice: 'scenario-start', futurePrice: 'scenario-future', fees: 'scenario-fees' };
   const feedback = labFeedback({ prefix: 'scenario', fields, limits: LIMITS, optional: ['fees'] });
+  const feeContext = createFeeContext('scenario');
+  $('scenario-results').append(feeContext.element);
   let current = null;
   let startingSource = null;
   let cardURL = null;
@@ -127,6 +130,7 @@ export function initFullRangeLab({ navigation }) {
       $('scenario-verdict').className = `scenario-verdict ${result.difference >= 0 ? 'gain' : 'loss'}`;
       $('scenario-il').textContent = percent(result.impermanentLoss);
       $('scenario-break-even').textContent = usd(result.breakEvenFees);
+      feeContext.update(result);
       $('scenario-price-change').textContent = percent((result.ratio - 1) * 100);
       $('scenario-hold-eth').textContent = `${fmt(result.held.eth, 6)} ETH`;
       $('scenario-hold-usdc').textContent = `${fmt(result.held.usdc)} USDC`;

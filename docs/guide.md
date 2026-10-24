@@ -194,3 +194,9 @@ On mobile, use **Explore experiment tools** or **Explore inspect tools** to reve
 - **Inspect** labels real v2 pool snapshots separately from v3 positions. Both historical cases use real v3 positions.
 
 Uniswap v3 can also provide full-range liquidity. The lab labels identify the calculations Teren uses. The `v1` in `cp50-v1` or `cl-range-v1` identifies Teren’s model revision; it does not mean Uniswap v1.
+
+## Putting an assumed fee amount in context
+
+Both liquidity labs, Fees & break-even and the final challenge offer **Could fees cover this?** below the comparison. It expresses the total holding-match fee target as a percentage of starting capital. A chosen time window translates that target into a required average per day; extending the window does not predict more income. The remaining gap subtracts your assumed fees from the total target, while the daily hurdle uses the full target.
+
+A separate disclosure loads two recorded v3 positions with their actual capital, new fee income, duration, ranges and active time. Their fee tokens are valued at the final recorded price with USDC = $1. They are short observations with different dates and ranges, not representative yields or forecasts for either lab. Follow **Inspect this recorded case** for the accounting and providers. Opening context or changing its window does not alter the question, an experiment, or a shared link.

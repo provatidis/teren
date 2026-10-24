@@ -1,3 +1,4 @@
+import { createFeeContext } from '../lib/fee-context.js';
 import { labFeedback } from '../lib/lab-feedback.js';
 import { MODEL, DEFAULT_RANGE, LIMITS, calculateRange, comparisonRanges, explorerDomain, rangePreset, futurePricePreset, matchHoldingFees } from '../models/cl-range-v1.js';
 import { rangeHash } from '../lib/range-links.js';
@@ -18,6 +19,8 @@ export function initRangeLab({ navigation }) {
     lowerPrice: 'cl-lower', upperPrice: 'cl-upper', fees: 'cl-fees', fullRangeFees: 'cl-full-fees',
   };
   const feedback = labFeedback({ prefix: 'cl', fields, limits: LIMITS, optional: ['fees', 'fullRangeFees'], range: true });
+  const feeContext = createFeeContext('cl');
+  $('cl-results').append(feeContext.element);
   let current = null;
   let domain = null;
   let source = null;
@@ -187,6 +190,7 @@ export function initRangeLab({ navigation }) {
       updateAllocation('final', result.finalEthPercent);
       $('cl-il').textContent = percent(result.impermanentLoss);
       $('cl-break-even').textContent = usd(result.breakEvenFees);
+      feeContext.update(result);
       $('cl-full-hold').textContent = usd(result.fullRange.holdValue);
       $('cl-match-fees').disabled = result.breakEvenFees > LIMITS.fees.max;
       $('cl-match-fees').textContent = result.breakEvenFees > LIMITS.fees.max ? 'Above the supported fee input limit' : 'Use break-even fees';

@@ -36,6 +36,12 @@ References checked in this review: [Aave health factor and liquidations](https:/
 - Retained blind spot: a slider can make an arbitrary fee assumption feel attainable. The nearby explanation identifies the target as hypothetical; the app still has no evidence that a real position would earn it. An observed learner should be able to explain a profitable LP that trails holding, then say what extra evidence is needed to judge the fee target. Automated checks do not establish this understanding.
 - Next presentation gap: range composition and exits/returns, followed by the distinction between sampled historical prices and recorded accounting. These remain accessible in their current lessons; no mechanism expansion is part of this release.
 
+## Fee context · 1.30.0
+
+The fee-context panel makes the hurdle easier to interrogate: total fees relative to starting capital, a user-chosen time window, and the gap after the current assumption. The two existing captured cases give concrete observations with their denominators and durations. They do not establish the likelihood of earning the hurdle. No annualized rate, time-to-earn estimate, target-achievability badge or automatic application of historical fees is offered.
+
+The remaining evidence gap is a matched pool/range/period reference of useful duration, with explicit assumptions about liquidity competition and costs. Comparing the two short records as strategies would be misleading. An observed learner should be able to explain why a longer window lowers the required daily average without proving the target attainable, and why 100% time in range does not establish a fee yield. Tests establish calculation and interaction consistency, not that learners understand these distinctions. This release reuses files checked at capture; it does not freshly verify historical contract state.
+
 ## Questions for a mechanism release
 
 - What conclusion could a learner draw from the headline number that the model cannot support? Put the decisive assumption beside that result.
