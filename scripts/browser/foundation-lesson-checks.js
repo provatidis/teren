@@ -24,7 +24,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     await navigate(base + 'learn.html#lesson=' + id);
     await reset();
     assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false);
-    assert.equal(await evaluate("document.querySelector('.scene-prediction').open"), false);
+    assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), await text('learn-prediction-question'));
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
     const initial = await saved();
@@ -69,11 +69,11 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     await reload();
     assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
     assert.equal(await evaluate("document.getElementById('foundation-amount').value"), amount);
-    await evaluate("document.querySelector('.scene-prediction > summary').click()");
+    assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
     assert.equal(await evaluate("document.getElementById('learn-predictions').checkVisibility()"), true);
     await choose('learn-prediction', 'less');
     await click('learn-run');
-    assert.equal(await text('learn-prediction-feedback'), 'Your prediction matches the result.');
+    assert.match(await text('learn-prediction-feedback'), /^Your prediction matches\. In this setup:/);
     await evaluate("document.querySelector('.scene-question-settings > summary').click()");
     const control = id === 'swap-impact' ? 'amount' : 'depositEth';
     await fill('learn-input-' + control, '1');
@@ -94,7 +94,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
   }
   assert.equal(await evaluate("localStorage.getItem('defi-sandbox-v1')"), sandbox);
   await navigate(base + 'learn.html#lesson=range-boundaries');
-  assert.equal(await evaluate("document.getElementById('learn-prediction-field').closest('.scene-prediction')===null"), true);
+  assert.equal(await evaluate("document.getElementById('learn-prediction-field').closest('.scene-prediction')===null"), false);
   assert.ok(await evaluate("document.getElementById('learn-prediction-question').getBoundingClientRect().width") > 100, 'Other lessons retain their visible group legend.');
   console.log('PASS: swap/deposit actions, exact token transfers, constant ownership through a trade, optional predictions, restoration and isolated exploration');
 

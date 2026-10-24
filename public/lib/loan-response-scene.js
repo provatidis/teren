@@ -93,7 +93,7 @@ export function createLoanResponseScene(input, prediction) {
   });
   element.append(node('p', 'The loan has ' + fmt(input.collateral, 0) + ' ETH at ' + usd(input.future) + ' and ' +
     fmt(start.reference.debt, 0) + ' USDC debt. Starting health factor: ' + healthLabel(start.result.end.healthFactor) + '.', 'loan-scene-intro'),
-  '\n', figure.element, '\n', prediction, '\n', explorer.element, '\n', copy,
+  '\n', prediction, '\n', figure.element, '\n', explorer.element, '\n', copy,
   '\n', node('p', 'The extra budget is fresh USDC ($1 each), separate from the borrowed cash. Each column uses it once. ETH stays supplied in both. The price is fixed; execution is immediate, with no costs or liquidation.', 'fine-print'));
   explorer.show(0);
   return { element, showQuestion() { explorer.show(input.budget); } };

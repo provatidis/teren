@@ -17,6 +17,7 @@ export function createComparisonScene(id, input, prediction) {
   let price = id === 'loss-vs-profit' ? input.initialPrice : input.futurePrice;
   let fees = id === 'final-challenge' ? input.fees : 0;
   const element = sceneNode('div', undefined, 'lesson-scene comparison-scene');
+  element.append(prediction, '\n');
   const figure = sceneNode('figure', undefined, 'comparison-figure');
   const title = sceneNode('figcaption', '', 'scene-figure-title'); title.id = 'comparison-title';
   const rows = {};
@@ -106,7 +107,7 @@ export function createComparisonScene(id, input, prediction) {
     feeControl.element.hidden = true;
     element.append(modes, '\n');
   }
-  element.append(figure, '\n', prediction, '\n');
+  element.append(figure, '\n');
   if (priceControl) element.append(priceControl.element, '\n');
   if (feeControl) element.append(feeControl.element, '\n');
   element.append(verdict, '\n', scope, '\n', basket, '\n', sceneNode('p', withFees

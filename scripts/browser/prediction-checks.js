@@ -1,0 +1,60 @@
+import assert from 'node:assert/strict';
+import { LEARNING_ROUTES } from '../../public/lib/entry-links.js';
+
+export async function checkPredictions({ evaluate, click, text, navigate, reload, base, call }) {
+  const keys = ['degenerator-learning-liquidity-v1', 'passiko-range-learning-v1',
+    'passiko-applied-liquidity-v1', 'teren-lending-learning-v1', 'teren-loop-learning-v1'];
+  const saved = await evaluate(`Object.fromEntries(${JSON.stringify(keys)}.map(key => [key, localStorage.getItem(key)]))`);
+  const ready = () => evaluate(`new Promise((resolve, reject) => {
+    const end = Date.now() + 5000;
+    const check = () => {
+      const applied = document.getElementById('learn-applied');
+      if (!applied || applied.hidden || applied.getAttribute('aria-busy') === 'false') resolve();
+      else if (Date.now() > end) reject(new Error('Historical record did not finish loading'));
+      else setTimeout(check, 25);
+    }; check();
+  })`);
+  const nonvisual = {
+    'range-boundaries': ['path', 'eth'], 'fee-tiers': ['trades', 'no'],
+    'range-management': ['asset', 'automatic'], 'fees-over-time': ['growth', 'same'],
+    'between-samples': ['counters', 'not-proof'], 'period-vs-holding': ['basket', 'hold'],
+  };
+  try {
+    for (const width of [1440, 390]) {
+      await call('Emulation.setDeviceMetricsOverride', { width, height: 1000, deviceScaleFactor: 1, mobile: width < 750 });
+      await evaluate(`${JSON.stringify(keys)}.forEach(key => localStorage.removeItem(key))`);
+      for (const route of Object.keys(LEARNING_ROUTES)) {
+        const id = route.split('=')[1];
+        const prefix = route.startsWith('lending') ? 'lend' : route.includes('#manage=') ? 'manage' : route.includes('#applied=') ? 'applied' : 'learn';
+        const result = prefix === 'learn' ? 'learn-results' : prefix + '-observe';
+        const selector = `#${prefix}-prediction-field`;
+        await navigate(base + route); await ready();
+        assert.equal(await evaluate(`document.querySelector('${selector} input').checkVisibility()`), true, route + ': choices are visible immediately');
+        assert.equal(await evaluate(`document.querySelector('${selector} input:checked') === null`), true);
+        assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
+        assert.equal(await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').querySelector('button').textContent`), 'Not sure — show me →');
+        await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').querySelector('button').focus()`);
+        await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' });
+        await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+        assert.equal(await evaluate(`document.getElementById('${result}').hidden`), false, route + ': skip reveals the outcome');
+        assert.equal(await evaluate(`document.querySelector('${selector} input:checked') === null`), true, 'Skipping must not invent a prediction');
+        assert.doesNotMatch(await text(prefix + '-prediction-feedback'), /Your prediction matches|You expected:/);
+        assert.equal(await evaluate(`document.getElementById('${prefix}-continue').hidden`), true, 'Viewing alone does not complete a lesson');
+        if (nonvisual[id]) {
+          for (const [group, value] of [['reason', nonvisual[id][0]], ['application', nonvisual[id][1]]]) {
+            await evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);
+          }
+          await click(prefix + '-check');
+          assert.equal(await text(prefix + '-feedback-title'), 'Both answers are correct.');
+        }
+        await reload(); await ready();
+        assert.equal(await evaluate(`document.getElementById('${result}').hidden`), false, route + ': skipped outcomes restore');
+        assert.equal(await evaluate(`document.querySelector('${selector} input:checked') === null`), true);
+        if (nonvisual[id]) assert.equal(await text(prefix + '-feedback-title'), 'Both answers are correct.', 'Skipped completion restores');
+      }
+    }
+  } finally {
+    await evaluate(`Object.entries(${JSON.stringify(saved)}).forEach(([key, value]) => value === null ? localStorage.removeItem(key) : localStorage.setItem(key, value))`);
+  }
+  console.log('PASS: visible predictions in all 20 lessons at desktop/mobile sizes, keyboard skip, no fabricated guesses, conceptual completion and restored progress');
+}

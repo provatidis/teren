@@ -1,8 +1,9 @@
+import { createPredictionPrompt } from '../lib/lesson-scene.js';
 import { saveLearningLocation } from '../data/learning-location.js';
 import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js';
 import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js';
 import { appliedApplication, checkAppliedUnderstanding } from '../lib/applied-applications.js';
-import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
+import { newChoiceSeed, validChoiceSeed, predictionFeedback } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson } from '../lib/learning-elements.js';
 import { POOL_PITFALLS } from '../learning/pool-pitfalls.js';
 import { readAppliedProgress, saveAppliedProgress } from '../data/applied-progress.js';
@@ -18,6 +19,8 @@ import { feeUSD } from '../lib/position-fees.js';
 export function initAppliedLearning() {
   const $ = id => document.getElementById(id);
   const { progress } = readAppliedProgress(), loadRecord = createAppliedRecordLoader();
+  const predictionField = $('applied-prediction-field');
+  let predictionPrompt;
   let lesson, draft, period = null, question = null, application = null, revision = 0;
   const utc = timestamp => new Date(timestamp * 1000).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
   const states = { inside: 'In range · both tokens', above: 'Above range · all USDC', below: 'Below range · all WETH' };
@@ -118,13 +121,12 @@ export function initAppliedLearning() {
     drawChart(index);
   }
   function reveal() {
-    if (!period || !draft.prediction) return;
+    if (!period) return;
     draft.revealed = true;
-    const correct = draft.prediction === question.prediction;
     const finding = lesson.id === 'fees-over-time' ? 'Fees accrued during this period without being collected.'
       : lesson.id === 'between-samples' ? 'The position was active between the two outside-range samples in the question.'
       : 'At the final checkpoint, ' + (question.prediction === 'lp' ? 'the LP including period fees' : 'holding the starting tokens') + ' has the higher value before costs.';
-    $('applied-prediction-feedback').textContent = (correct ? 'Your prediction matches. ' : 'Compare this with your prediction: ') + finding;
+    $('applied-prediction-feedback').textContent = predictionFeedback(lesson.predictions, draft.prediction, question.prediction, finding);
     $('applied-observe').hidden = false; $('applied-assessment').hidden = false;
     $('applied-reveal').textContent = 'Revisit the recorded result ↓';
     renderCheckpoint(); persist();
@@ -162,7 +164,7 @@ export function initAppliedLearning() {
     draft = progress.drafts[id] || fresh();
     if (!validChoiceSeed(draft.choiceSeed)) draft.choiceSeed = newChoiceSeed();
     draft.application ||= '';
-    if (!lesson.predictions.some(([value]) => value === draft.prediction)) { draft.prediction = ''; draft.revealed = false; }
+    if (!lesson.predictions.some(([value]) => value === draft.prediction)) draft.prediction = '';
     if (!lesson.reasons.some(([value]) => value === draft.reason)) draft.reason = '';
     $('learn-page-title').textContent = APPLIED_CHAPTER;
     $('learn-page-subtitle').textContent = 'Apply Uniswap v3 liquidity mechanics to two verified historical cases. Predict, observe, explain and apply.';
@@ -185,6 +187,8 @@ export function initAppliedLearning() {
       $('applied-reveal').disabled = !period; $('applied-reveal').textContent = 'Reveal the recorded result →'; persist();
     });
     choices('applied-reasons', 'applied-reason', lesson.reasons, draft.reason, value => { draft.reason = value; clearFeedback(); persist(); });
+    predictionPrompt = createPredictionPrompt(predictionField, { selected: draft.prediction, disabled: true, onShow: () => $('applied-reveal').click() });
+    $('applied-prediction-home').replaceChildren(predictionPrompt);
     $('applied-reveal').disabled = true; $('applied-reveal').textContent = 'Loading the recorded case…';
     $('applied-source').textContent = 'Opening this exercise’s bundled historical case.';
     $('applied-load-status').textContent = 'Loading the bundled record. No live chain request.';
@@ -207,8 +211,9 @@ export function initAppliedLearning() {
         button.textContent = item.label + (item.index === question.index ? ' · Question' : '');
         button.addEventListener('click', () => { draft.checkpoint = item.index; renderCheckpoint(); persist(); }); return button;
       }));
-      $('applied-reveal').textContent = 'Reveal the recorded result →'; $('applied-reveal').disabled = !draft.prediction;
-      $('applied-load-status').textContent = 'Record validated. Choose a prediction, then open the result.';
+      $('applied-reveal').textContent = 'Reveal the recorded result →'; $('applied-reveal').disabled = false;
+      predictionPrompt.querySelector('button').disabled = false;
+      $('applied-load-status').textContent = 'Record validated. Make a prediction or open the result directly.';
       if (draft.revealed) { reveal(); if (checkAppliedUnderstanding(question, application, draft.reason, draft.application).passed) check(false); }
       persist();
     } catch (error) {
@@ -216,6 +221,7 @@ export function initAppliedLearning() {
       $('applied-load-status').textContent = error.message;
       $('applied-source').textContent = 'The bundled record is unavailable. Your saved answers are retained.';
       $('applied-reveal').textContent = 'Retry loading the record →'; $('applied-reveal').disabled = false;
+      predictionPrompt.querySelector('button').disabled = true;
     } finally { if (token === revision) $('learn-applied').setAttribute('aria-busy', 'false'); }
   }
   APPLIED_LESSONS.forEach((item, i) => {

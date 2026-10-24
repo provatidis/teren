@@ -139,12 +139,12 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       assert.equal(await evaluate("document.getElementById('lend-reveal').disabled"), false);
       assert.equal(await evaluate("document.getElementById('lend-observe').hidden"), true);
       assert.equal(await evaluate("document.getElementById('loop-flow-next').checkVisibility()"), true);
-      assert.equal(await evaluate("document.querySelector('.scene-prediction').open"), false);
+      assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
       assert.equal(await evaluate("document.querySelectorAll('#loop-flow-slider').length"), 0);
       await moveFlow('ArrowRight');
     }
     await choose('prediction', prediction); await click('lend-reveal');
-    assert.match(await text('lend-prediction-feedback'), /Compare this with your prediction/);
+    assert.match(await text('lend-prediction-feedback'), /^You expected:/);
     assert.equal(await evaluate("document.getElementById('lend-money-flow').hidden"), false);
     if (id !== 'stress') {
       assert.equal(await flowIndex(), '1');

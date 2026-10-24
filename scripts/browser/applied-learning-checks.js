@@ -13,7 +13,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     assert.equal(await evaluate("document.querySelector('[data-applied-id=" + id + "]').getAttribute('aria-current')"), 'step');
     assert.equal(await evaluate("document.querySelectorAll('[data-lesson-id][aria-current=step]').length"), 0);
     assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"), true);
-    assert.equal(await evaluate("document.getElementById('applied-reveal').disabled"), true);
+    assert.equal(await evaluate("document.getElementById('applied-reveal').disabled"), false);
     await choose('applied-prediction', prediction); await click('applied-reveal');
     assert.equal(await evaluate("document.getElementById('applied-observe').hidden"), false);
     assert.equal(await evaluate("document.getElementById('applied-assessment').hidden"), false);
@@ -80,7 +80,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
   await navigate(base + 'learn.html#applied=between-samples'); await ready();
   await click('applied-restart'); await ready();
   assert.equal(await evaluate("document.getElementById('applied-observe').hidden"), true);
-  assert.equal(await evaluate("document.getElementById('applied-reveal').disabled"), true);
+  assert.equal(await evaluate("document.getElementById('applied-reveal').disabled"), false);
   const saved = await evaluate("localStorage.getItem('passiko-applied-liquidity-v1')");
   await evaluate("Storage.prototype.setItem=function(){throw new DOMException('Full','QuotaExceededError')}");
   await choose('applied-prediction', 'possible'); await click('applied-reveal');

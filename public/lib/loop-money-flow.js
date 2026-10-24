@@ -41,5 +41,6 @@ export function renderLoopMoneyFlow(container, result, lesson = 'build', predict
     net.textContent = 'Assets minus debt: ' + loopMoney(p.netAssets);
   } });
   container.dataset.flow = lesson;
-  container.replaceChildren(intro, '\n', diagram.element, '\n', ...(prediction ? [prediction, '\n'] : []), player.element, '\n', copy, '\n', health, '\n', net, '\n', limit, '\n', details);
+  container.replaceChildren(intro, '\n', ...(prediction ? [prediction, '\n'] : []), diagram.element, '\n', player.element, '\n', copy, '\n', health, '\n', net, '\n', limit, '\n', details);
+  return { showQuestion() { player.show(stages.length - 1, false, false); } };
 }

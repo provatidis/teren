@@ -6,19 +6,31 @@ export function sceneNode(tag, copy, className) {
   return element;
 }
 
-export function optionalPrediction(fieldset) {
-  const details = sceneNode('details', undefined, 'scene-prediction');
-  const summary = sceneNode('summary');
-  summary.append(
-    sceneNode('span', fieldset.querySelector('legend').textContent, 'scene-prediction-question'), ' ',
-    sceneNode('span', 'Choose an answer · optional', 'scene-prediction-invite'),
+export function createPredictionPrompt(fieldset, { selected, onShow, disabled = false, feedback }) {
+  const element = sceneNode('div', undefined, 'scene-prediction');
+  fieldset.querySelector('legend').classList.add('scene-prediction-question');
+  const show = sceneNode('button', undefined, 'button secondary scene-prediction-show');
+  show.type = 'button'; show.disabled = disabled;
+  const label = hasPrediction => { show.textContent = hasPrediction ? 'See what happens →' : 'Not sure — show me →'; };
+  label(Boolean(selected));
+  element.addEventListener('change', () => label(Boolean(fieldset.querySelector('input:checked'))));
+  show.addEventListener('click', onShow);
+  element.append(
+    sceneNode('p', 'Make a prediction', 'scene-prediction-invite'), '\n', fieldset, '\n',
+    sceneNode('p', 'A guess is enough. Your prediction isn’t scored.', 'fine-print'), '\n', show,
   );
-  details.append(
-    summary, '\n',
-    fieldset, '\n',
-    sceneNode('p', 'A guess gives you something to compare. You can also explore without answering.', 'fine-print'),
-  );
-  return details;
+  if (feedback) { feedback.textContent = ''; element.append('\n', feedback); }
+  return element;
+}
+
+// Keep the diagram and its controls together when a learner requests an outcome.
+export function focusSceneOutcome(container) {
+  const feedback = container.querySelector('.learn-prediction-feedback');
+  const target = feedback?.textContent ? feedback : container.querySelector('figure, table, .loop-flow-balances');
+  target.tabIndex = -1;
+  target.classList.add('scene-outcome-focus');
+  target.focus({ preventScroll: true });
+  target.scrollIntoView({ block: 'start', behavior: 'instant' });
 }
 
 // Exploration is ephemeral: it never edits a lesson's question, answers or draft.
