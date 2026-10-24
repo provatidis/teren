@@ -67,4 +67,41 @@ The manually triggered **Recheck recorded chain evidence** workflow runs `npm ru
 
 ## Next validation cases
 
-Compare two existing ranges over the same period in the ETH/USDC 0.05% pool, retaining each position's starting basket and verification evidence. Arbitrary hypothetical bounds need historical tick/swap reconstruction and an explicit assumption about the effect of adding liquidity. Hourly pool price and global fee growth alone do not establish their fee allocation.
+First extend one unchanged position to a week in the existing 0.3% pool, as specified below. A later comparison can follow two existing ranges over the same period in the ETH/USDC 0.05% pool, retaining each position's starting basket and verification evidence. Arbitrary hypothetical bounds need historical tick/swap reconstruction and an explicit assumption about the effect of adding liquidity. Hourly pool price and global fee growth alone do not establish their fee allocation.
+
+## Proposed next case: one position over one week
+
+**Status: specification only. No position, block window or new earnings have been captured or verified for this proposal.** This takes priority over the two-range 0.05% comparison above. Extend a familiar mechanism before adding a pool and a second strategy.
+
+### Learning question
+
+**Does giving a position more time make its fee target easier to earn?** Show the difference between dividing a fixed target by more days and observing additional fee tokens. Follow one unchanged position through daily checkpoints; show both cumulative fees and the newly earned tokens in each interval. A quiet or inactive interval should remain visible. If the selected week contains no such contrast, report that limitation rather than silently choosing a more dramatic week.
+
+### Selection before looking at the returns
+
+- Start with Ethereum WETH/USDC in the existing Uniswap v3 0.3% pool. Target 12–19 October 2026, 00:00 UTC, using the first finalized block at or after each requested boundary. Record actual timestamps and elapsed seconds; do not assume exactly seven days from block counts.
+- First check the two existing NFT IDs, in ascending numeric order, for positive liquidity and unchanged position accounting across the entire window. If neither qualifies, stop and document why. Broader candidate discovery needs a declared, reproducible candidate list and ordering before fee outcomes are examined.
+- Record exclusions for position changes, missing history or inconsistent evidence. Low fees, losses against holding, inactivity and disappointing returns are not exclusion criteria. Do not move the dates to improve the result. Technical unavailability is an incomplete capture, not evidence of zero earnings.
+- Select daily checkpoints in advance. Additional samples may explain a counter change, but never claim that sampled prices locate every range crossing. A later multi-case library should include contrasting conditions under the same selection rules; one week is still not a representative yield.
+
+### Evidence and engineering gate
+
+The current format supports at most 10,000 blocks, 32 checkpoints and 20 event-query chunks. A week will require a new bounded composition layer; merely raising those limits would change an existing validation contract.
+
+Proposed approach: a versioned manifest joining existing validated segments of at most 10,000 blocks. Adjacent segments must share exactly the same boundary block hash and canonical snapshot/counter/collect evidence, with one NFT, pool, liquidity and position accounting throughout. Omit only duplicate boundary points in the combined view. Fail on gaps, overlap beyond the shared boundary, changed accounting, missing event coverage, conflicting evidence or partial captures. Keep the original two records and routes unchanged.
+
+Calculate week-to-date fees against the **first** checkpoint's inside fee growth. Do not sum separately floored segment credits: that loses rounding carries. Interval credits are differences of those cumulative totals. Compare each cumulative result with an independent simulated-collect difference from the same first checkpoint, preserving the existing one-base-unit tolerance. Range-time deltas must be valid both within each segment and across the joined period. Complete event queries and provider block-identity checks remain mandatory over the full window.
+
+Bound the new manifest to eight segments and 64 unique checkpoints initially, validate all segments before enabling results, and record capture/check dates and providers. The capture tool should resume verified immutable segments after temporary RPC failures and invalidate conflicting boundaries. Add adversarial fixtures for gaps, boundary conflicts, changed positions, rounding carry, missing chunks and failed independent checks before publishing a record. Reproduction must succeed from the documented read-only commands and raw files; arithmetic-only browser validation must keep its existing label.
+
+### Presentation and accounting
+
+- Begin with starting principal → recorded time → newly earned fees. Daily exploration uses actual timestamps, with no smooth animation implying unseen prices.
+- Keep the original holding basket; compare principal alone and principal plus new fee tokens against it. Show dollar change from starting capital separately from the holding difference.
+- Keep earned USDC and WETH visible. Value cumulative fees at the selected checkpoint price with USDC = $1. Do not sum daily dollar values priced at different times to construct the final fee total.
+- Show exact range-active seconds alongside fees, without treating active time as a fee rate. No annualized yield, future earnings projection or scaling the position to an arbitrary deposit.
+- Results remain before gas and incentives. Do not invent execution costs for an unchanged position or claim lifetime PnL. A hypothetical fee target may be shown alongside the record only with its benchmark and endpoint assumptions explicitly identified.
+
+### Observation before further expansion
+
+Give a learner a fixed target and let them change the hypothetical window from 7 to 30 days. Ask, without calculations: “What changed? What would you need to know before expecting those fees?” Then open the week record and ask whether another equal-length interval must earn the same amount. Finally, ask whether matching holding establishes a dollar profit. Record their explanation and navigation difficulties without coaching first; this is a small usability/understanding observation, not a graded exam or proof of general learning effectiveness.

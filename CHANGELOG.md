@@ -1,5 +1,12 @@
 # Release history
 
+## 1.30.1 — 2026-10-24
+
+- Make recorded fee context easier to scan with starting capital → recorded time → fees earned. Keep ranges, active time and percentage denominators visible; move period/capture details and accounting notes below the figures.
+- Shorten the hypothetical fee explanation and clarify that choosing more days lowers the required daily average without establishing earnings. Models, records, scenarios and progress formats are unchanged.
+- Harden the intermittent pilot touch test with mode-before-measurement setup, stable hit-target checks, trusted event diagnostics and repeated fresh-page drags. No failed-gesture retry or weaker endpoint assertion is introduced.
+- Specify a proposed week-long fixed-position case with predetermined selection, bounded segment composition, exact cumulative fee accounting and a no-calculation learner observation. No new historical case is published in this release.
+
 ## 1.30.0 — 2026-10-24
 
 - Add optional “Could fees cover this?” context to both liquidity labs and the fee-break-even/final-challenge lessons. Show the total fee hurdle as a percentage of starting capital, the gap after assumed fees, and the required daily average over a chosen 1/7/30/90-day window. This is a hurdle, not an earnings estimate.
