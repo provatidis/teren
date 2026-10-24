@@ -1,5 +1,13 @@
 # Release history
 
+## 1.28.0 — 2026-10-24
+
+- Make the middle borrowing-loop lesson visual. Compare holding the original 5 ETH with a three-round loop from the same starting capital; show value after debt and gains/losses on one fixed scale.
+- Separate the original zero-interest price question from a labelled time example at the unchanged ETH price, with 0% supply APR and 10% borrow APR using continuous compounding. Keep debt, health factor, the liquidation price and pre-liquidation scope visible.
+- Complete visual exploration across all seven lending/loop lessons. Predictions are optional; conceptual checks, prior answers and completion remain compatible. Explanation and reload restore the original $1,500 question, and the Experiment handoff retains that exact setup.
+- Preserve exact named slider values when a browser shortens repeating decimals, and clear earlier announcements when a different frame is shown. The liquidation-boundary shortcut uses the full model value.
+- Add gain/loss, boundary, interest and restoration checks, plus mobile keyboard/touch and reduced-motion coverage. The financial models and recorded evidence are unchanged.
+
 ## 1.27.0 — 2026-10-24
 
 - Make the repayment lesson visual: compare repaying USDC debt with buying and supplying more ETH, using one outside-budget slider and two columns on the same dollar scale. Keep the original loan visible through reference marks.

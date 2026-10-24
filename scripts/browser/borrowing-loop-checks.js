@@ -133,7 +133,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await navigate(base + 'lending.html#loop-lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#lending-learn input[type=number]').length"), 0);
     assert.equal(await text('lend-number'), 'LOOPING ' + (index + 1) + ' OF 3');
-    assert.equal(await evaluate("document.getElementById('lend-visual').hidden"), id === 'stress');
+    assert.equal(await evaluate("document.getElementById('lend-visual').hidden"), false);
     if (id !== 'stress') {
       // Optional prediction and explanation must not reset the explored frame.
       assert.equal(await evaluate("document.getElementById('lend-reveal').disabled"), false);
@@ -145,7 +145,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     }
     await choose('prediction', prediction); await click('lend-reveal');
     assert.match(await text('lend-prediction-feedback'), /Compare this with your prediction/);
-    assert.equal(await evaluate("document.getElementById('lend-money-flow').hidden"), id === 'stress');
+    assert.equal(await evaluate("document.getElementById('lend-money-flow').hidden"), false);
     if (id !== 'stress') {
       assert.equal(await flowIndex(), '1');
       await moveFlow('Home');

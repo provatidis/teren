@@ -12,6 +12,7 @@ import { renderLoopMoneyFlow } from '../lib/loop-money-flow.js';
 import { createLendingScene } from '../lib/lending-lesson-scenes.js';
 import { createLoanConditionScene } from '../lib/loan-condition-scene.js';
 import { createLoanResponseScene } from '../lib/loan-response-scene.js';
+import { createLoopStressScene } from '../lib/loop-stress-scene.js';
 import { optionalPrediction } from '../lib/lesson-scene.js';
 import { newChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js';
@@ -28,9 +29,10 @@ export function initLendingLearning() {
       route: '#loop-lesson=', label: 'LOOPING', experiment: '#loops' },
   };
   let chapter = 'essentials', course = courses.essentials, progress = course.progress;
-  let lesson, draft, example, foundationScene;
+  let lesson, draft, example, lessonScene;
   const foundationLesson = () => chapter === 'essentials' && ['supply', 'borrow', 'conditions', 'respond'].includes(lesson?.id);
-  const visualLesson = () => foundationLesson() || chapter === 'loops' && ['build', 'unwind'].includes(lesson?.id);
+  const stressLesson = () => chapter === 'loops' && lesson?.id === 'stress';
+  const visualLesson = () => foundationLesson() || chapter === 'loops' && ['build', 'stress', 'unwind'].includes(lesson?.id);
   const revealLabel = () => visualLesson() ? 'Explain this example →' : 'Reveal the result →';
   const fresh = () => ({ prediction: '', reason: '', application: '', revealed: false, seed: newChoiceSeed() });
   function navigation() {
@@ -109,25 +111,29 @@ export function initLendingLearning() {
     const showFlow = visualLesson();
     const conditions = chapter === 'essentials' && lesson.id === 'conditions';
     const responses = chapter === 'essentials' && lesson.id === 'respond';
-    $('lend-flow-title').textContent = conditions ? 'Watch the health factor' : responses ? 'Where does the extra money go?' : 'Follow the money';
-    $('lend-flow-instruction').textContent = conditions ? 'Change one condition and compare what backs the debt.'
+    const stress = stressLesson();
+    $('lend-flow-title').textContent = stress ? 'Same start, different exposure'
+      : conditions ? 'Watch the health factor' : responses ? 'Where does the extra money go?' : 'Follow the money';
+    $('lend-flow-instruction').textContent = stress ? 'Compare holding with looping. Change one condition at a time.'
+      : conditions ? 'Change one condition and compare what backs the debt.'
       : responses ? 'Compare two choices using the same extra budget.' : 'Take one action, then look at what changed.';
     $('lend-adds').hidden = showFlow;
     $('lend-visual').hidden = !showFlow;
     $('lend-money-flow').hidden = !showFlow;
     $('lend-setup').hidden = showFlow;
     $('lend-predict-card').hidden = showFlow;
-    $('lend-explanation').hidden = showFlow && !foundationLesson();
+    $('lend-explanation').hidden = showFlow && !foundationLesson() && !stress;
     $('lend-observe-label').textContent = showFlow ? 'CONNECT THE IDEA' : '02 · OBSERVE';
     $('lend-observe-title').textContent = showFlow ? 'What to take away' : 'Read the result';
     $('lend-check-label').textContent = showFlow ? 'CHECK YOUR UNDERSTANDING' : '03 · CHECK YOUR UNDERSTANDING';
-    foundationScene = null;
-    if (foundationLesson()) {
-      foundationScene = conditions
-        ? createLoanConditionScene(example.input, optionalPrediction(predictionField))
-        : responses ? createLoanResponseScene(example.input, optionalPrediction(predictionField))
-          : createLendingScene(example.result, lesson.id, optionalPrediction(predictionField));
-      $('lend-money-flow').replaceChildren(foundationScene.element);
+    lessonScene = null;
+    if (foundationLesson() || stress) {
+      const prediction = optionalPrediction(predictionField);
+      if (stress) lessonScene = createLoopStressScene(example.input, prediction);
+      else if (conditions) lessonScene = createLoanConditionScene(example.input, prediction);
+      else if (responses) lessonScene = createLoanResponseScene(example.input, prediction);
+      else lessonScene = createLendingScene(example.result, lesson.id, prediction);
+      $('lend-money-flow').replaceChildren(lessonScene.element);
       $('lend-money-flow').removeAttribute('data-flow');
       $('lend-visual').append(revealButton);
     } else if (showFlow) {
@@ -168,7 +174,7 @@ export function initLendingLearning() {
     $('lend-observe').hidden = true; $('lend-assessment').hidden = true; clearFeedback();
     $('lend-reveal').disabled = !draft.prediction && !visualLesson(); $('lend-reveal').textContent = revealLabel();
     if (draft.revealed) {
-      foundationScene?.showQuestion();
+      lessonScene?.showQuestion();
       reveal();
       if (course.check(id, draft.reason, draft.application).passed) check(false);
     }
@@ -190,7 +196,7 @@ export function initLendingLearning() {
   }
   buildNavigation();
   $('lend-reveal').addEventListener('click', () => {
-    foundationScene?.showQuestion();
+    lessonScene?.showQuestion();
     reveal(); $('lend-observe-title').focus({ preventScroll: true });
     $('lend-observe').scrollIntoView({ block: 'start', behavior: 'instant' });
   });
