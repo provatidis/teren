@@ -31,13 +31,20 @@ export function createFeeContext(prefix) {
   const daily = node('p', '', 'fee-context-daily'); daily.id = prefix + '-fee-daily'; daily.setAttribute('aria-live', 'polite');
   const assumption = node('p'); assumption.id = prefix + '-fee-assumption';
   body.append(target, window, daily, assumption,
-    node('p', 'Changing the time window changes the required pace, not the fee estimate. This comparison has no trading history and excludes gas and other costs.'));
+    node('p', 'More time lowers the daily hurdle. Actual fees still depend on swaps and competing liquidity.', 'fee-context-takeaway'));
   const records = node('details', undefined, 'fee-context-records');
   records.append(node('summary', 'What did two recorded positions earn?'));
   const content = node('div');
   const status = node('p', 'Open to load the recorded examples.'); status.setAttribute('role', 'status');
   const retry = node('button', 'Try loading again', 'button secondary'); retry.type = 'button'; retry.hidden = true;
-  records.append(node('p', 'These are two short observations, not typical returns. Both are Ethereum Uniswap v3 WETH/USDC 0.3% positions, with different ranges and dates. They do not estimate fees for your setup.'), status, content, retry);
+  const method = node('details', undefined, 'fee-context-method');
+  method.append(node('summary', 'How to read these records'),
+    node('p', 'These are new fee tokens earned during each period. Earlier owed tokens are excluded; fees have not been compounded or reduced by gas costs.'),
+    node('p', 'Accounting was checked at capture. The browser checks the files; it does not re-read the chain. Open Inspect for the providers, checkpoints and verification evidence.'));
+  method.hidden = true;
+  records.append(node('p', 'Ethereum · Uniswap v3 · WETH/USDC 0.3%', 'fee-context-provenance'),
+    node('p', 'Two short observations with different ranges and dates. These are not typical returns or forecasts for this setup.'),
+    node('p', 'Fee tokens valued at the final recorded price · USDC = $1.', 'fee-context-provenance'), status, content, retry, method);
   let loading = false, loaded = false;
   async function showRecords() {
     if (loading || loaded) return;
@@ -47,17 +54,28 @@ export function createFeeContext(prefix) {
       const cards = periods.map((period, index) => {
         const r = recordedFeeContext(period), record = REPLAY_CASES[index];
         const card = node('article', undefined, 'fee-context-record');
-        card.append(node('strong', record.title, 'fee-context-record-title'),
-          node('p', usd(r.fees) + ' in new fees on ' + usd(r.capital) + ' starting principal.', 'fee-context-earned'),
-          node('p', fmt(r.percent, 4) + '% of starting capital over ' + periodDuration(r.duration) + '.'),
-          node('p', 'ETH range: ' + usd(r.range.lowerPrice) + '–' + usd(r.range.upperPrice) + '. Active for ' + fmt(r.activePercent, 1) + '% of the period.'),
-          node('p', date(r.start) + ' → ' + date(r.end) + ' UTC.', 'fee-context-provenance'),
-          node('p', 'Accounting checked at capture · ' + r.capturedAt.slice(0, 10) + '.', 'fee-context-provenance'));
+        const flow = node('dl', undefined, 'fee-record-flow');
+        for (const [label, value, detail] of [
+          ['Starting capital', usd(r.capital), 'Position principal'],
+          ['Recorded time', periodDuration(r.duration), fmt(r.activePercent, 1) + '% in range'],
+          ['New fees earned', usd(r.fees), fmt(r.percent, 4) + '% of starting capital'],
+        ]) {
+          const step = node('div');
+          step.append(node('dt', label), node('dd', value), node('dd', detail, 'fee-record-detail'));
+          flow.append(step);
+        }
+        const evidence = node('details', undefined, 'fee-context-method');
+        evidence.append(node('summary', 'Period and capture details'),
+          node('p', date(r.start) + ' → ' + date(r.end) + ' UTC.'),
+          node('p', 'Accounting checked at capture · ' + r.capturedAt.slice(0, 10) + '.'));
+        card.append(node('strong', record.title, 'fee-context-record-title'), flow,
+          node('p', 'ETH range: ' + usd(r.range.lowerPrice) + '–' + usd(r.range.upperPrice) + '.'), evidence);
         const link = node('a', 'Inspect this recorded case →'); link.href = './' + record.hash;
         card.append(link); return card;
       });
       content.replaceChildren(...cards);
-      status.textContent = 'New fee tokens are valued at the final recorded price, with USDC = $1. Earlier owed tokens are excluded. The browser checks the files; it does not re-read the chain.';
+      status.textContent = '';
+      method.hidden = false;
       loaded = true;
     } catch {
       status.textContent = 'The recorded examples could not load. Your hypothetical comparison still works.';
@@ -66,7 +84,7 @@ export function createFeeContext(prefix) {
   }
   records.addEventListener('toggle', () => { if (records.open) showRecords(); });
   retry.addEventListener('click', showRecords);
-  const next = node('p', 'To judge a fee assumption, look at swaps and competing liquidity in the same pool, range and period. Time in range gives the position a chance to earn; it does not tell you how much.');
+  const next = node('p', 'For a useful comparison, match the pool, range and period. Time in range alone does not establish fee income.');
   const source = node('a', 'How Uniswap allocates fees →');
   source.href = 'https://developers.uniswap.org/docs/liquidity/overview';
   body.append(records, next, source); element.append(summary, body);
@@ -77,11 +95,14 @@ export function createFeeContext(prefix) {
     headline.textContent = fmt(r.percent, r.percent > 0 && r.percent < .01 ? 4 : 2) + '% of starting capital needed';
     target.textContent = r.total === 0
       ? 'At these endpoint prices, the model needs no fees to match holding before costs.'
-      : usd(r.total) + ' in total cash fees would match holding at your chosen final price.';
+      : usd(r.total) + ' in total cash fees would match holding at your chosen final price, before gas and other costs.';
     daily.textContent = r.total === 0 ? 'No fee hurdle at this endpoint. Costs can still put the LP behind holding.'
       : 'Over ' + r.days + (r.days === 1 ? ' day' : ' days') + ', that requires an average of ' + usd(r.daily) + ' per day. Required, not predicted.';
-    assumption.textContent = 'You have assumed ' + usd(r.assumed) + ' in total fees. '
-      + (r.remaining > 0 ? (r.remaining < .01 ? 'Less than $0.01 more' : 'Another ' + usd(r.remaining)) + ' would be needed to match holding.' : r.total === 0 ? 'The model already matches holding before fees and costs.' : 'That covers the model’s fee target, but entering it does not establish that it could be earned.');
+    const gap = r.remaining < .01 ? 'Less than $0.01' : usd(r.remaining);
+    assumption.textContent = 'Assumed fees: ' + usd(r.assumed) + '. '
+      + (r.remaining > 0 ? 'Gap still to cover: ' + gap + '.'
+        : r.total === 0 ? 'No fee hurdle at this endpoint.'
+          : 'Covers the model’s fee target; earning it is still untested.');
   }
   select.addEventListener('change', () => update(current));
   return { element, update };

@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
-
-const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
+import { dragRangeToMax } from './touch-range.js';
 
 export async function checkVisualLessonPilots({ evaluate, click, fill, text, navigate, reload, base, call }) {
   const choose = (group, value) => evaluate(`document.querySelector('input[name="${group}"][value="${value}"]').click()`);
@@ -97,30 +96,15 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
 
   for (const width of [390, 320]) {
     await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
-    for (const [path, id, figure] of [['#lesson=token-balances', 'token-scene-price', '.scene-token-figure'], ['#manage=range-width', 'range-scene-price', '.scene-range-figure']]) {
-      await navigate(base + 'learn.html' + path);
-      assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      assert.ok(await evaluate(`document.getElementById('${id}').getBoundingClientRect().bottom-document.querySelector('${figure}').getBoundingClientRect().top <= innerHeight-document.querySelector('.topbar').getBoundingClientRect().height`), 'The scene and slider must fit together on a phone.');
-      await fill(id, await evaluate(`document.getElementById('${id}').min`));
-      await evaluate(`document.getElementById('${id}').scrollIntoView({block:'center'})`);
-      await settle(evaluate);
-      const box = await evaluate(`(()=>{const r=document.getElementById('${id}').getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height}})()`);
-      assert.ok(box.height >= 44);
-      const point = fraction => ({ x: box.left + 26 + (box.width - 52) * fraction, y: box.top + box.height / 2, id: 0 });
-      await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
-      try {
-        await call('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(0)] });
-        for (const fraction of [.25, .5, .75, 1]) {
-          await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(fraction)] });
-          await settle(evaluate);
-          assert.ok(Math.abs(await evaluate(`document.getElementById('${id}').getBoundingClientRect().top`) - box.top) < 1, 'The price control must not move during a drag.');
-        }
-        await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-        await settle(evaluate);
-      } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
-      assert.equal(await evaluate(`document.getElementById('${id}').value`), await evaluate(`document.getElementById('${id}').max`));
-      assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+    for (let repetition = 0; repetition < 3; repetition++) {
+      for (const [path, id, figure] of [['#lesson=token-balances', 'token-scene-price', '.scene-token-figure'], ['#manage=range-width', 'range-scene-price', '.scene-range-figure']]) {
+        await navigate(base + 'learn.html' + path);
+        assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+        assert.ok(await evaluate(`document.getElementById('${id}').getBoundingClientRect().bottom-document.querySelector('${figure}').getBoundingClientRect().top <= innerHeight-document.querySelector('.topbar').getBoundingClientRect().height`), 'The scene and slider must fit together on a phone.');
+        await dragRangeToMax({ evaluate, call, fill }, id);
+        assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+      }
     }
   }
-  console.log('PASS: both liquidity scenes fit with their controls and support stable native touch dragging at 390px/320px');
+  console.log('PASS: repeated fresh-page touch drags: both liquidity scenes fit with their controls and support stable native touch dragging at 390px/320px');
 }
