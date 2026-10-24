@@ -1,3 +1,4 @@
+import { saveExperimentLocation } from '../data/experiment-location.js';
 import { createFeeContext } from '../lib/fee-context.js';
 import { labFeedback } from '../lib/lab-feedback.js';
 import { MODEL, DEFAULT_SCENARIO, LIMITS, validateScenario, calculateScenario, comparisonScenarios } from '../models/cp50-v1.js';
@@ -266,5 +267,8 @@ export function initFullRangeLab({ navigation }) {
     selectLab('full', { updateURL: false, scroll: true, immediate: true });
     $('scenario-save-status').textContent = 'Opened “' + entry.name + '” as a working copy. Save again to keep a variation.';
   }
+  for (const event of ['input', 'change', 'click']) $('lp-lab').addEventListener(event, () => {
+    if (current) saveExperimentLocation(MODEL, scenarioHash(current));
+  });
   return { setStartingPrice, getExperimentDraft, restoreExperimentDraft, setExperiment, restoreLocation: loadShared };
 }

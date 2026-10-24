@@ -56,7 +56,7 @@
       <div id="lending-route-note" class="notice" role="status" hidden>
         <p>That lending lesson link could not be opened. <a href="#lesson=supply">Open the first lesson →</a></p>
       </div>
-      <nav id="lending-tools" class="lending-tools" aria-label="Lending experiments"><a id="lending-tool-loan" href="#experiment" aria-current="page">Single loan</a><a id="lending-tool-loops" href="#loops">Borrowing loops</a></nav>
+      <nav id="lending-tools" class="lending-tools" aria-label="Lending experiments"><a id="lending-tool-loan" href="#experiment" aria-current="page">Single loan</a><a id="lending-tool-loops" href="#loops">Borrowing loops</a><a href="#saved-experiments">Saved experiments</a></nav>
       <section id="lending-experiment" aria-label="Lending experiment">
         <p class="loan-model-label">Illustrative ETH/USDC inputs · USDC = $1</p>
         <div id="loan-route-note" class="notice" role="status" hidden>
@@ -278,6 +278,9 @@
               <p class="fine-print">These examples assume the response happens immediately, before liquidation, with no gas or swap costs. In practice, a liquidator may act before your transaction goes through.</p>
             </section>
             <section class="card loan-sharing" aria-label="Keep this lending experiment">
+              <button id="loan-save" class="button secondary" type="button">Save experiment +</button>
+              <a href="#saved-experiments" class="loop-learn-link">Saved experiments →</a>
+              <p id="loan-save-status" class="fine-print" role="status"></p>
               <button id="loan-share" class="button secondary" type="button">Copy experiment link</button>
               <button id="loan-reset" class="text-button" type="button">Reset loan</button>
               <label class="sr-only" for="loan-share-url">Experiment link</label>
@@ -336,7 +339,7 @@
                 <p id="loop-borrowPercent-error" class="field-error" hidden>
                 </p>
               </div>
-              <button id="loop-compare-toggle" class="text-button loop-compare-toggle" type="button" aria-expanded="false" aria-controls="loop-compare-options">Compare round counts</button>
+              <button id="loop-compare-toggle" class="text-button loop-compare-toggle" type="button" aria-expanded="false" aria-controls="loop-compare-options">Compare loop setups</button>
               <div id="loop-compare-options" hidden>
                 <div class="scenario-field">
                   <label for="loop-reference-rounds">Reference setup</label>
@@ -349,7 +352,9 @@
                     <option value="5">5 rounds</option>
                   </select>
                 </div>
-                <p id="loop-compare-help" class="fine-print">Only round count differs. Capital, prices, time, rates and costs stay the same for both.</p>
+                <label class="loan-checkbox"><input id="loop-reference-shared" type="checkbox" checked> Same borrowing fraction</label>
+                <div id="loop-reference-borrow-field" class="scenario-field" hidden><label for="loop-reference-borrow">Reference borrowing fraction <span>% per round</span></label><input id="loop-reference-borrow" type="number" min="1" max="95" step="any" value="50" aria-describedby="loop-reference-error"><p id="loop-reference-error" class="field-error" role="status" hidden></p></div>
+                <p id="loop-compare-help" class="fine-print">Vary rounds or the fraction borrowed per round. Original ETH, prices, time, rates, collateral rules and swap costs stay shared.</p>
                 <button id="loop-compare-show" class="text-button" type="button">See the comparison ↓</button>
               </div>
               <details class="loop-examples">
@@ -463,18 +468,21 @@
             <div id="loop-results">
               <section id="loop-round-comparison" class="card loop-card" aria-labelledby="loop-round-comparison-title" tabindex="-1" hidden>
                 <p class="eyebrow">SAME CONDITIONS</p>
-                <h2 id="loop-round-comparison-title">What changes with more rounds?</h2>
+                <h2 id="loop-round-comparison-title">Compare your loop choices</h2>
                 <p id="loop-round-comparison-context" class="body-copy"></p>
                 <p class="fine-print">Your setup’s assets minus debt · before liquidation</p>
                 <p id="loop-reference-difference" class="loop-comparison"></p>
                 <table class="loop-compare-table">
-                  <caption class="sr-only">Round counts compared at the same price and time, before liquidation or unwinding</caption>
-                  <thead><tr><th scope="col">Measure</th><th scope="col">Your setup<span id="loop-current-label"></span></th><th scope="col">Reference<span id="loop-reference-label"></span></th></tr></thead>
+                  <caption class="sr-only">Loop choices compared at shared prices, time and rates</caption>
+                  <thead><tr><th scope="col">Measure</th><th scope="col">Your setup<span id="loop-current-label"></span><small id="loop-current-fraction"></small></th><th scope="col">Reference<span id="loop-reference-label"></span><small id="loop-reference-fraction"></small></th></tr></thead>
                   <tbody id="loop-compare-rows"></tbody>
                 </table>
+                <details class="loop-disclosure"><summary>Compare build and unwind costs</summary>
+                  <table class="loop-compare-table"><caption class="sr-only">Build costs and fixed-price unwind previews</caption><thead><tr><th scope="col">Measure</th><th scope="col">Your setup</th><th scope="col">Reference</th></tr></thead><tbody id="loop-compare-cost-rows"></tbody></table>
+                </details>
                 <p id="loop-round-comparison-takeaway" class="body-copy"></p>
                 <p id="loop-compare-warning" class="loan-attention" hidden>At least one setup is at or below its liquidation boundary. These are balances before liquidation, not an amount you could withdraw. A liquidation would change them.</p>
-                <p class="fine-print">Before liquidation or unwinding. The endpoints do not show whether liquidation happened earlier. Supply only earns the assumed supply interest; holding keeps ETH in a wallet.</p>
+                <p class="fine-print">Headline balances are before liquidation. Unwind rows show the separate fixed-price preview; a blocked preview leaves balances unchanged. These endpoints cannot establish survival of earlier prices. Supply only earns assumed interest; holding keeps ETH in a wallet.</p>
               </section>
               <section id="loop-outcome" class="card loop-card" aria-labelledby="loop-outcome-title" tabindex="-1">
                 <p class="eyebrow">SAME ORIGINAL CAPITAL</p>
@@ -530,6 +538,7 @@
                 <h2 id="loop-ledger-title">Follow each round</h2>
                 <p id="loop-ledger-context" class="body-copy"></p>
                 <p id="loop-ledger-help" class="fine-print">Open a round to follow cash into wallet ETH, then collateral. Only supplied ETH backs the loan.</p>
+                <details id="loop-build-visual" class="loop-disclosure"><summary>Follow the money in your setup</summary><div id="loop-build-flow" class="loop-money-flow"></div></details>
                 <div id="loop-ledger">
                 </div>
               </section>
@@ -540,6 +549,7 @@
                     <path id="loop-chart-grid" class="chart-grid"/>
                     <path id="loop-chart-zero" class="chart-zero"/>
                     <path id="loop-chart-boundary" class="loop-chart-boundary"/>
+                    <path id="loop-chart-reference" class="loop-reference-line"/><path id="loop-chart-reference-boundary" class="loop-reference-boundary"/>
                     <path id="loop-chart-hold" class="loop-hold-line"/>
                     <path id="loop-chart-value" class="loop-value-line"/>
                     <circle id="loop-chart-point" r="5" class="loop-chart-point"/>
@@ -552,7 +562,7 @@
                     <text id="loop-chart-right" x="600" y="282" text-anchor="end" class="chart-label">
                     </text>
                   </svg>
-                  <div class="loop-chart-legend">
+                  <div class="loop-chart-legend"><span id="loop-chart-reference-key" hidden><i class="loop-line-key reference" aria-hidden="true"></i> Reference setup</span>
                     <span>
                       <i class="loop-line-key">
                       </i>Your setup · assets minus debt</span>
@@ -595,6 +605,7 @@
                   </div>
                 </div>
                 <p id="loop-unwind-cost-note" class="fine-print"></p>
+                <details id="loop-unwind-visual" class="loop-disclosure"><summary>Follow your unwind visually</summary><div id="loop-unwind-flow" class="loop-money-flow"></div></details>
                 <details id="loop-unwind-details" class="loop-disclosure">
                   <summary id="loop-unwind-caption">See the assumed steps</summary>
                   <ol id="loop-unwind-steps" class="loop-unwind-steps">
@@ -604,6 +615,9 @@
               </section>
             </div>
             <section class="card loan-sharing" aria-label="Keep this borrowing-loop experiment">
+              <button id="loop-save" class="button secondary" type="button">Save experiment +</button>
+              <a href="#saved-experiments" class="loop-learn-link">Saved experiments →</a>
+              <p id="loop-save-status" class="fine-print" role="status"></p>
               <button id="loop-share" class="button secondary" type="button">Copy loop link</button>
               <button id="loop-reset" class="button secondary" type="button">Reset loop</button>
               <label for="loop-share-url" class="sr-only">Loop experiment link</label>
@@ -625,6 +639,21 @@
           </p>
         </details>
       </section>
+          <details id="saved-experiments" class="saved-experiments card">
+      <summary><strong>Saved experiments</strong> <span id="experiments-count">0 saved</span></summary>
+      <p class="body-copy">Save your setup and notes. Reopen it to try a variation, or compare two or three saved experiments.</p>
+      <p id="experiments-storage" class="fine-print">Stored in this browser. Export a backup to keep it elsewhere.</p>
+      <div class="experiment-library-tools"><button id="experiments-export" class="button secondary" type="button" disabled>Export experiments</button><label class="button secondary file-button" for="experiments-file">Import experiments<input id="experiments-file" type="file" accept=".json,application/json" aria-label="Import experiments"></label></div>
+      <div id="experiments-recovery" class="experiment-recovery" hidden><p id="experiments-recovery-copy" class="fine-print"></p><button id="experiments-export-recovery" class="button secondary" type="button">Download saved copy</button><button id="experiments-discard" class="text-button" type="button">Discard unreadable saved copy</button></div>
+      <p id="experiments-status" class="fine-print" role="status"></p>
+      <div id="experiments-undo-row" class="experiment-undo" hidden><span id="experiments-undo-copy"></span> <button id="experiments-undo" class="text-button" type="button">Undo remove</button></div>
+      <div id="experiments-empty" class="experiment-empty"><h3>No saved experiments yet</h3><p class="body-copy">Set up a liquidity, lending or loop experiment and choose “Save experiment”.</p><div class="experiment-empty-links"><a href="liquidity.html#lp-lab">Open full-range lab →</a><a href="liquidity.html#range-lab">Open range lab →</a></div></div>
+      <div id="experiments-controls" class="experiment-library-controls" hidden><div><label for="experiments-search">Find an experiment</label><input id="experiments-search" type="search" placeholder="Search names or notes" maxlength="100"></div><div><label for="experiments-model">Model</label><select id="experiments-model"><option value="all">All models</option><option value="cp50-v1">V2-style full range</option><option value="cl-range-v1">V3-style price range</option><option value="collateral-loan-v1">Single loan</option><option value="borrowing-loop-v1">Borrowing loop</option></select></div></div>
+      <p id="experiments-no-match" class="fine-print" hidden>No experiments match this search.</p>
+      <ul id="experiments-list" class="experiment-library-list" aria-label="Saved experiments"></ul>
+      <div id="experiments-comparison-controls" class="experiment-comparison-controls" hidden><p id="experiments-selection">Select two or three experiments to compare.</p><button id="experiments-compare" class="button secondary" type="button" disabled>Compare selected</button><button id="experiments-clear-selection" class="text-button" type="button" hidden>Clear selection</button></div>
+      <section id="experiments-comparison" class="experiment-comparison" aria-labelledby="experiments-comparison-title" tabindex="-1" hidden><div class="experiment-comparison-heading"><h3 id="experiments-comparison-title">Compare saved experiments</h3><button id="experiments-close-comparison" class="text-button" type="button">Close comparison</button></div><p id="experiments-comparison-context" class="experiment-comparison-context"></p><p id="experiments-comparison-scope" class="fine-print">Each holding benchmark keeps that experiment’s own starting tokens. Fees are assumed USD cash; gas, incentives and trading paths are excluded. Values use USDC = $1.</p><div id="experiments-comparison-cards" class="experiment-comparison-cards"></div></section>
+    </details>
       <section id="lending-learn" hidden aria-label="Lending lessons">
         <div class="learn-meta"><span id="lend-meta-label">Four steps · Open any lesson</span><span id="lend-storage" role="status">Progress saves in this browser.</span>
         </div>
@@ -730,5 +759,6 @@
         </nav>
       </footer>
     </main>
+  <dialog id="experiment-dialog" class="experiment-dialog" aria-labelledby="experiment-dialog-title" aria-describedby="experiment-dialog-context"><form id="experiment-save-form"><h2 id="experiment-dialog-title">Save experiment</h2><p id="experiment-dialog-context" class="fine-print"></p><div class="scenario-field"><label for="experiment-name">Name</label><input id="experiment-name" type="text" maxlength="80" required autocomplete="off" aria-describedby="experiment-dialog-error"></div><div class="scenario-field"><label for="experiment-notes">Notes <span>Optional · 1,000 characters</span></label><textarea id="experiment-notes" maxlength="1000" rows="4" placeholder="What are you testing with this setup?" aria-describedby="experiment-dialog-error"></textarea></div><p id="experiment-dialog-error" class="form-error" role="status"></p><p class="fine-print">Saved in this browser. Export your library for a portable backup.</p><div class="experiment-dialog-actions"><button id="experiment-save-confirm" class="button primary" type="submit">Save experiment</button><button id="experiment-save-cancel" class="button secondary" type="button">Cancel</button></div></form></dialog>
   </body>
 </html>

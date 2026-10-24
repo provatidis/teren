@@ -1,4 +1,6 @@
-import { LOAN_DEFAULTS, LOAN_LIMITS, calculateLoan, validateLoan } from '../models/collateral-loan-v1.js';
+import { saveExperimentLocation } from '../data/experiment-location.js';
+import { validateExperimentDraft } from '../data/saved-experiments.js';
+import { LOAN_MODEL, LOAN_DEFAULTS, LOAN_LIMITS, calculateLoan, validateLoan } from '../models/collateral-loan-v1.js';
 import { readLoanDraft, saveLoanDraft, readLiquidationDraft, saveLiquidationDraft } from '../data/lending-state.js';
 import { LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation, singleLiquidation, interestReference, healthPriceCurve } from '../models/loan-explanations.js';
 import { loanHash, readLoanHash } from '../lib/lending-links.js';
@@ -51,7 +53,7 @@ export function initLending() {
       $('liquidation-' + key).setAttribute('aria-invalid', String(!!errors[key]));
     }
     const invalid = Object.keys(errors).length > 0;
-    if (invalid) { current = null; $('loan-share').disabled = true; }
+    if (invalid) { current = null; $('loan-share').disabled = true; $('loan-save').disabled = true; }
     if (save && !invalid) saveLiquidationDraft(assumptions);
     const eligible = result.end.status === 'eligible';
     if (eligible && !wasEligible) $('loan-liquidation').open = true;
@@ -93,6 +95,7 @@ export function initLending() {
   }
   function render(save = false) {
     revision++;
+    $('loan-save-status').textContent = '';
     const input = readInputs();
     const errors = validateLoan(input);
     for (const key of keys) {
@@ -109,6 +112,7 @@ export function initLending() {
     $('loan-outcomes').hidden = invalidLoan;
     $('loan-response-results').hidden = invalid;
     $('loan-share').disabled = invalid;
+    $('loan-save').disabled = invalid;
     $('loan-share-url').hidden = true;
     $('loan-share-status').textContent = '';
     const invalidSetup = ['collateral', 'start', 'borrow', 'supplyAPR', 'borrowAPR', 'maxLTV', 'threshold'].some(key => errors[key]);
@@ -177,8 +181,9 @@ export function initLending() {
     $('loan-repay-note').textContent = usd(responses.repay.spent) + ' repaid · ' + usd(responses.repay.unused) + ' budget left';
     $('loan-add-note').textContent = formatTokenQuantity(result.input.budget / input.future, 6) + ' ETH added at this price';
     renderExplanations({ ...input, budget: result.input.budget }, result, save);
+    const resumable = save && current && saveExperimentLocation(LOAN_MODEL, loanHash(current.input, readLiquidation()));
     if (save && !invalid) $('loan-storage').textContent = saveLoanDraft(input)
-      ? 'Working setup kept in this tab. Copy a link to keep or share it.'
+      ? 'Working setup kept in this tab.' + (resumable ? ' Home can resume these inputs.' : '') + ' Save a named experiment to keep alternatives.'
       : 'Tab storage is unavailable. Copy an experiment link to keep this setup.';
   }
   function restoreLocation() {
@@ -250,5 +255,15 @@ export function initLending() {
     }
   });
   window.addEventListener('hashchange', restoreLocation);
-  return { restoreLocation };
+  return {
+    restoreLocation,
+    getExperimentDraft() {
+      return current ? validateExperimentDraft({ model: LOAN_MODEL, inputs: current.input, liquidation: readLiquidation() }) : null;
+    },
+    setExperiment(entry) {
+      const draft = validateExperimentDraft(entry);
+      writeInputs(draft.inputs); writeLiquidation(draft.liquidation); render(true);
+      $('loan-save-status').textContent = 'Opened “' + entry.name + '” as a working copy. Save again to keep a variation.';
+    },
+  };
 }

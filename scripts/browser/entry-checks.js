@@ -17,7 +17,7 @@ export async function checkEntry({ navigate, evaluate, text, fill, click, nextEv
     await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: width < 750 });
     await navigate(base); await settle(evaluate);
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-    if (width >= 750) assert.ok(await evaluate("[...document.querySelectorAll('.home-topic .primary')].every(a=>a.getBoundingClientRect().bottom<innerHeight)"), 'Both lesson entry buttons are visible on the first laptop screen.');
+    if (width >= 750) assert.ok(await evaluate("[...document.querySelectorAll('.home-topic-actions .button')].every(a=>a.getBoundingClientRect().bottom<innerHeight)"), 'Both lab and lesson entry buttons are visible on the first laptop screen.');
     if (width < 750) assert.ok(await evaluate("[...document.querySelectorAll('.home-topic-jumps a')].every(a=>{const r=a.getBoundingClientRect();return r.height>=44&&r.bottom<innerHeight})"), 'Both topics are discoverable on the first phone screen.');
   }
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });

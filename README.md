@@ -2,11 +2,11 @@
 
 *Look closely.*
 
-A place to understand DeFi through short lessons and experiments you can change. Teren currently covers **liquidity** and **lending**: how token balances change, what fees mean, how debt grows and what makes liquidation possible.
+A place to test DeFi assumptions and understand the mechanisms behind them, through experiments, recorded evidence and short lessons. Teren currently covers **liquidity** and **lending**: how token balances change, what fees mean, how debt grows and what makes liquidation possible.
 
 [Open Teren](https://teren.sh/) · [Liquidity lessons](https://teren.sh/learn.html) · [Lending lessons](https://teren.sh/lending.html#learn) · [About](https://teren.sh/about.html)
 
-Home offers Liquidity and Lending, with a lesson path and a direct lab for each. Return to an opened lesson through Continue learning, or open the setup you want to test. Lessons use predictions, explanations and changed situations to check understanding; required answers involve no calculations. Links open Experiment in a separate tab so you can explore the idea without replacing your working draft.
+Home gives direct labs and guided lessons equal prominence. Continue experimenting restores your last edited assumptions; Continue learning returns to your last opened lesson. Save named liquidity, loan and loop experiments with notes, duplicate them as variations, or compare saved alternatives. Lessons use predictions, explanations and changed situations to check understanding; required answers involve no calculations. Links open Experiment in a separate tab so you can explore the idea without replacing your working draft.
 
 Visual lessons let you follow swaps, pool ownership, supplying, borrowing and loops one action at a time, or use sliders to explore token balances, price ranges, a loan’s health factor, equal-budget responses to debt, and holding versus looping as prices or interest change. Prediction questions and choices stay visible, with a “Not sure — show me” route. Predictions are ungraded; completion checks explanation and application.
 
@@ -14,7 +14,7 @@ Visual lessons let you follow swaps, pool ownership, supplying, borrowing and lo
 
 **[Liquidity](https://teren.sh/liquidity.html#experiment)** compares full-range and concentrated-liquidity positions with holding their starting tokens. Change prices, bounds and assumed cash fees, save comparisons, or try virtual swaps and deposits. Learn has six foundation lessons and a final challenge, followed by three range-choice exercises and three exercises using recorded historical cases.
 
-**[Lending](https://teren.sh/lending.html#experiment)** explores supplying ETH and borrowing USDC. The single-loan lab compares repayment with adding collateral and illustrates liquidation costs. The **[borrowing-loop lab](https://teren.sh/lending.html#loops)** follows borrowed USDC into more ETH, compares price exposure with holding and previews unwinding. Compare two round counts under identical conditions, or step through the money movements while building and unwinding a loop. Four foundation lessons lead to three loop lessons; every lesson is directly accessible. The single-loan model uses fixed simple interest, while loops offer simple interest or continuous compounding. Rates and collateral rules are editable teaching assumptions informed by Aave v3 concepts.
+**[Lending](https://teren.sh/lending.html#experiment)** explores supplying ETH and borrowing USDC. The single-loan lab compares repayment with adding collateral and illustrates liquidation costs. The **[borrowing-loop lab](https://teren.sh/lending.html#loops)** follows borrowed USDC into more ETH, compares price exposure with holding and previews unwinding. Compare round counts and borrowing fractions under shared market conditions. Follow the money through your own construction and unwind preview, including costs and any remaining debt. Four foundation lessons lead to three loop lessons; every lesson is directly accessible. The single-loan model uses fixed simple interest, while loops offer simple interest or continuous compounding. Rates and collateral rules are editable teaching assumptions informed by Aave v3 concepts.
 
 ## Models and recorded evidence
 

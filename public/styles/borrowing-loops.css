@@ -46,7 +46,7 @@
 .loop-flow-balances dt > small { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; font-weight: 400; }
 .loop-flow-balances dd { margin: 12px 0 0; font-size: 19px; line-height: 1.5; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .loop-flow-balances [data-pocket=debt] dd { color: #e5bd85; }
-.loop-flow-balances #loop-flow-wallet { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.loop-flow-balances .loop-flow-wallet { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .loop-flow-wallet-cue { display: block; min-height: 3em; margin-top: 4px; color: var(--muted); font-weight: 400; font-size: 14px; line-height: 1.5; }
 .loop-flow-token { display: flex; align-items: baseline; gap: 8px; font-size: 17px; }
 .loop-flow-token::before { content: ''; flex: 0 0 10px; width: 10px; height: 10px; border: 2px solid var(--text); }
@@ -153,3 +153,14 @@
   .loop-flow-balances > div { padding: 12px 10px; }
   .loop-flow-balances dd, .loop-flow-token { font-size: 15px; }
 }
+
+.loop-disclosure > .loop-money-flow { padding-top: 14px; }
+.loop-disclosure .loop-flow-balances { margin: 18px 0; }
+.loop-disclosure .scene-actions .primary { width: auto; }
+.loop-disclosure .scene-player { margin-bottom: 18px; }
+#loop-reference-borrow-field { margin-top: 12px; }
+
+.loop-reference-line { fill: none; stroke: #a9c7f5; stroke-width: 3; stroke-dasharray: 4 4; }
+.loop-reference-boundary { fill: none; stroke: #a9c7f5; stroke-width: 2; stroke-dasharray: 2 6; }
+.loop-line-key.reference { border-color: #a9c7f5; border-top-style: dotted; }
+.loop-compare-table thead small { display: block; font-size: 13px; font-weight: 400; }

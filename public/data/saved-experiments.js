@@ -1,6 +1,10 @@
 // Keep legacy storage and format identifiers so existing work survives rebranding.
 import { MODEL as FULL_MODEL, validateScenario } from '../models/cp50-v1.js';
 import { MODEL as RANGE_MODEL, validateRange } from '../models/cl-range-v1.js';
+import { LOAN_MODEL, LOAN_LIMITS, validateLoan } from '../models/collateral-loan-v1.js';
+import { LOOP_MODEL, LOOP_LIMITS, validateLoop } from '../models/borrowing-loop-v1.js';
+import { LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation } from '../models/loan-explanations.js';
+import { validReferenceRounds, validReferenceBorrowPercent } from '../models/loop-comparison.js';
 import { validateSnapshot, snapshotView } from './snapshot.js';
 import { validatePositionSnapshot, positionScenario } from './position-snapshot.js';
 
@@ -22,6 +26,25 @@ export function experimentNotes(value) {
 }
 export function validateExperimentDraft(input) {
   const model = input?.model;
+  if (model === LOAN_MODEL || model === LOOP_MODEL) {
+    if (input.origin != null) throw new Error('Lending experiments use hypothetical inputs, without a recorded source.');
+    const errors = model === LOAN_MODEL ? validateLoan(input.inputs) : validateLoop(input.inputs);
+    if (Object.keys(errors).length) throw new Error(Object.values(errors)[0]);
+    const keys = model === LOAN_MODEL ? [...Object.keys(LOAN_LIMITS), 'collateralEnabled'] : [...Object.keys(LOOP_LIMITS), 'interestMode'];
+    const draft = { model, inputs: Object.fromEntries(keys.map(key => [key, input.inputs[key]])), origin: null };
+    if (model === LOAN_MODEL) {
+      const liquidation = input.liquidation ?? LIQUIDATION_DEFAULTS;
+      if (Object.keys(validateLiquidation(liquidation)).length) throw new Error('Use valid liquidation assumptions.');
+      draft.liquidation = Object.fromEntries(Object.keys(LIQUIDATION_LIMITS).map(key => [key, liquidation[key]]));
+    } else if (input.comparison != null) {
+      const { rounds, borrowPercent } = input.comparison;
+      if (!validReferenceRounds(rounds) || (borrowPercent !== null && !validReferenceBorrowPercent(borrowPercent, draft.inputs.maxLTV))) {
+        throw new Error('Use a valid loop reference setup.');
+      }
+      draft.comparison = { rounds, borrowPercent };
+    }
+    return draft;
+  }
   if (![FULL_MODEL, RANGE_MODEL].includes(model)) throw new ExperimentVersionError();
   const inputs = model === FULL_MODEL ? validateScenario(input.inputs) : validateRange(input.inputs);
   let origin = null;

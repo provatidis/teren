@@ -1,7 +1,9 @@
 # Review questions and open blind spots
 
-## Current priorities · 1.32.0
+## Current priorities · 1.33.0
 
+- Observe an experienced user reopening a loop, changing a construction choice, testing shared adverse conditions and saving a variation. This release improves that workflow; repeat usage has not yet been measured.
+- Named lending/loop saves and custom visual previews still use fixed assumptions. Neither a saved comparison nor a successful hypothetical unwind establishes protocol execution or survival of an intervening price path.
 - Visible prediction choices now invite an expectation in all twenty lessons, with a deliberate skip. This restores teaching emphasis; its effect on understanding remains unmeasured. Evaluate the next review against expectation → observation → explanation → application.
 - The entry/navigation release adds Home, topic-scoped modes, local lesson resume, simpler progress orientation, stable slider value space and bundled production CSS.
 - Observe an unfamiliar learner finding a topic, explaining one visual change and applying it to another setup. Positive feedback from experienced friends is useful; it does not yet measure novice understanding.
