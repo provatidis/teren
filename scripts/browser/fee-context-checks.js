@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-export async function checkFeeContext({ evaluate, click, fill, text, navigate, base, call }) {
+export async function checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent }) {
   const open = prefix => evaluate(`document.querySelector('#${prefix}-fee-context > summary').click()`);
   const records = prefix => evaluate(`document.querySelector('#${prefix}-fee-context .fee-context-records > summary').click()`);
   const window = (prefix, days) => evaluate(`{const select=document.getElementById('${prefix}-fee-window');select.value='${days}';select.dispatchEvent(new Event('change',{bubbles:true}));}`);
@@ -60,10 +60,12 @@ export async function checkFeeContext({ evaluate, click, fill, text, navigate, b
     await wait("document.querySelectorAll('#comparison-fee-context .fee-context-record').length===2");
     assert.equal(await text('comparison-scope'), scope);
     assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), before);
-    assert.equal(await evaluate("new URL(document.querySelector('#comparison-fee-context .fee-context-record a').href).pathname"), new URL(base).pathname);
+    assert.equal(await evaluate("new URL(document.querySelector('#comparison-fee-context .fee-context-record a').href).pathname"), new URL(base + 'liquidity.html').pathname);
     assert.match(await evaluate("document.querySelector('#comparison-fee-context .fee-context-record a').hash"), /^#historical-case$/);
   }
+  const loaded = nextEvent('Page.loadEventFired');
   await evaluate("document.querySelector('#comparison-fee-context .fee-context-record a').click()");
+  await loaded;
   await wait("document.getElementById('period-result')&&!document.getElementById('period-result').hidden");
   assert.equal(await text('period-fees'), '$2.36');
   console.log('PASS: range and fee lessons share context without mutating questions or progress; lesson evidence links open Inspect');

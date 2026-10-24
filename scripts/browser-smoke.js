@@ -600,7 +600,7 @@ try {
   await checkLoopStressLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkReviewPolish({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkComparisonLessons({ evaluate, click, fill, text, navigate, reload, base, call });
-  await checkFeeContext({ evaluate, click, fill, text, navigate, base, call });
+  await checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   assert.deepEqual(errors, [], 'No uncaught browser errors');
   console.log('PASS: mobile layout and interaction; no uncaught browser errors');
 } finally {

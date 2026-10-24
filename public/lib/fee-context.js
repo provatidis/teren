@@ -70,7 +70,7 @@ export function createFeeContext(prefix) {
           node('p', 'Accounting checked at capture · ' + r.capturedAt.slice(0, 10) + '.'));
         card.append(node('strong', record.title, 'fee-context-record-title'), flow,
           node('p', 'ETH range: ' + usd(r.range.lowerPrice) + '–' + usd(r.range.upperPrice) + '.'), evidence);
-        const link = node('a', 'Inspect this recorded case →'); link.href = './' + record.hash;
+        const link = node('a', 'Inspect this recorded case →'); link.href = 'liquidity.html' + record.hash;
         card.append(link); return card;
       });
       content.replaceChildren(...cards);
