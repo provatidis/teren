@@ -16,6 +16,9 @@
 .scene-prediction-show { min-height: 44px; font-size: 14px; line-height: 1.5; }
 .scene-prediction .learn-prediction-feedback { margin: 14px 0 0; }
 .scene-prediction .learn-prediction-feedback:empty { display: none; }
+@media (min-width: 1000px) {
+  .scene-prediction .learn-choices { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+}
 .scene-question-settings .learn-controls { margin-top: 20px; }
 .scene-price-control { margin: 18px 0; }
 .scene-price-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 12px; font-size: 14px; line-height: 1.7; }
