@@ -77,7 +77,7 @@ export async function checkLoanConditionLesson({ evaluate, click, fill, text, na
   await choose('reason', 'interest'); await choose('application', 'lower'); await click('lend-check');
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   assert.deepEqual(await working(), drafts);
-  await navigate(base + 'lending.html#lesson=respond');
+  await navigate(base + 'lending.html#loop-lesson=stress');
   assert.equal(await evaluate("document.getElementById('lend-prediction-field').closest('.scene-prediction')===null"), true);
   await navigate(base + 'lending.html#loop-lesson=build');
   assert.equal(await text('lend-flow-title'), 'Follow the money');
