@@ -2,6 +2,7 @@ const supplySource = { title: 'Aave: supplying tokens', url: 'https://aave.com/h
 const receiptSource = { title: 'Aave v3: supplied balances and receipt tokens', url: 'https://aave.com/docs/aave-v3/smart-contracts/tokenization' };
 const collateralSource = { title: 'Aave: collateral and borrowing limits', url: 'https://aave.com/help/supplying/toggle-collateral-status' };
 const loanSource = { title: 'Aave: borrowing, interest and liquidations', url: 'https://aave.com/faq' };
+const healthSource = { title: 'Aave: health factor and liquidations', url: 'https://aave.com/help/borrowing/liquidations' };
 
 export const LENDING_LESSONS = [
   {
@@ -63,12 +64,12 @@ export const LENDING_LESSONS = [
   {
     id: 'conditions', short: 'Prices, interest and time', title: 'A loan can change even when prices stay the same',
     adds: 'Let time pass, then change ETH’s price.',
-    intro: 'Health factor compares the value backing a loan with the debt owed, using the liquidation threshold. Below 1, liquidation is possible. Interest can change the health factor even when prices stay the same.',
+    intro: 'Watch debt grow while ETH’s price stays still. Then change the price with time held fixed. Health factor compares the collateral value counted by the liquidation rule with the debt owed.',
     setup: 'Start with 5 ETH at $2,000 and a 5,000 USDC debt. Keep ETH’s price unchanged for one year. Assume 0% supply APR and 10% simple borrow APR. The liquidation threshold stays at 80%.',
-    question: 'What happens to the health factor during that year?',
+    question: 'After one year, what happens to the health factor?',
     predictions: [['higher', 'It rises.'], ['same', 'It stays the same.'], ['lower', 'It falls.']],
     takeaway: 'Watch both collateral and debt. Unchanged prices do not mean an unchanged loan.',
-    explanation: 'The collateral stays worth $10,000, while the debt grows from 5,000 to 5,500 USDC. The health factor falls but stays above the liquidation boundary in this example. Interest can have a different effect when the supply and borrow rates differ from those used here.',
+    explanation: 'Here, interest adds to debt while the counted backing stays unchanged. Health factor falls. A later price fall reduces the backing without reducing the debt. Below 1, liquidation is possible; the diagram shows balances before any liquidation.',
     pitfall: 'This example uses simple interest. Real debt can compound, and rates or collateral rules can change. A long period at a high rate makes the difference much larger.',
     reasoning: 'What makes the health factor fall in this example?',
     reasons: [['interest', 'Debt grows while the collateral amount and price stay unchanged.'], ['cash', 'The borrowed USDC in the wallet disappears as time passes.'], ['threshold', 'Waiting reduces the configured liquidation threshold.']],
@@ -84,9 +85,9 @@ export const LENDING_LESSONS = [
     hint: 'Compare the value backing the loan with the amount owed.',
     deeper: [
       'This model holds USDC at $1 and treats the chosen ETH price as the valuation price for the loan. In Aave, configured oracles provide the prices used in collateral accounting.',
-      'Supply interest adds ETH; borrow interest adds USDC debt. Their dollar effects depend on both rates and the chosen ETH price. A higher borrow APR alone does not tell you the whole portfolio’s net interest result.',
+      'Supply interest adds ETH; borrow interest adds USDC debt. Different rates can give time a different effect on health factor. Their dollar effects also depend on ETH’s price; a higher borrow APR alone does not tell you the whole portfolio’s net interest result.',
       'Each result uses one selected price after the chosen time has passed. It does not show earlier prices. A loan that finishes above the liquidation boundary may have crossed it earlier.',
-    ], sources: [loanSource, supplySource],
+    ], sources: [healthSource, loanSource, supplySource],
   },
   {
     id: 'respond', short: 'Repay or add collateral', title: 'Two ways to change the loan',
