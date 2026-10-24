@@ -6,7 +6,7 @@ import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnd
 import { managementLessonFromHash } from '../lib/management-links.js';
 import { readManagementProgress, saveManagementProgress } from '../data/management-progress.js';
 import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
-import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback } from '../lib/learning-elements.js';
+import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback, focusInitialLesson } from '../lib/learning-elements.js';
 import { rangeHash } from '../lib/range-links.js';
 
 export function initManagementLearning() {
@@ -134,4 +134,5 @@ export function initManagementLearning() {
     if(link&&link.hash===location.hash&&managementLessonFromHash(link.hash)){event.preventDefault();focus('manage-title');}
   });
   window.addEventListener('hashchange',()=>activate(true));activate();
+  if(managementLessonFromHash(location.hash))focusInitialLesson('manage-title');
 }

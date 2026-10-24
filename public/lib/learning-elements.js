@@ -11,6 +11,19 @@ export function focusLearningFeedback(prefix) {
   feedback.scrollIntoView({ block: 'start', behavior: 'instant' });
 }
 
+// A newly opened lesson link should land on that lesson. Reload and browser
+// history keep their reading position instead of being pulled back to its top.
+export function focusInitialLesson(id) {
+  if (performance.getEntriesByType('navigation')[0]?.type !== 'navigate') return;
+  const hash = location.hash;
+  requestAnimationFrame(() => {
+    const heading = document.getElementById(id);
+    if (location.hash !== hash || !heading || heading.closest('[hidden]')) return;
+    heading.focus({ preventScroll: true });
+    heading.scrollIntoView({ block: 'start', behavior: 'instant' });
+  });
+}
+
 export function learningChoices(container, {name,values,selected,seed,group,onChange,shuffle=true}) {
   const ordered=shuffle?orderedLearningChoices(values,seed,group):values;
   container.replaceChildren(...ordered.map(([value,copy])=>{

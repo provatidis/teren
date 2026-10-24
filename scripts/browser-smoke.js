@@ -4,6 +4,7 @@ import { checkLendingScenes } from './browser/lending-scene-checks.js';
 import { checkLoanConditionLesson } from './browser/loan-condition-checks.js';
 import { checkLoanResponseLesson } from './browser/loan-response-checks.js';
 import { checkLoopStressLesson } from './browser/loop-stress-checks.js';
+import { checkReviewPolish } from './browser/review-polish-checks.js';
 import { checkBorrowingLoops } from './browser/borrowing-loop-checks.js';
 import { checkProjectInformation, checkMobileTools } from './browser/clarity-checks.js';
 import { checkLending } from './browser/lending-checks.js';
@@ -593,6 +594,7 @@ try {
   await checkLoanConditionLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkLoanResponseLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkLoopStressLesson({ evaluate, click, fill, text, navigate, reload, base, call });
+  await checkReviewPolish({ evaluate, click, fill, text, navigate, reload, base, call });
   assert.deepEqual(errors, [], 'No uncaught browser errors');
   console.log('PASS: mobile layout and interaction; no uncaught browser errors');
 } finally {

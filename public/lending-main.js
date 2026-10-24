@@ -4,6 +4,7 @@ import { initLendingLearning } from './ui/lending-learning.js';
 import { initBorrowingLoops } from './ui/borrowing-loops.js';
 import { lendingLessonFromHash } from './lib/lending-links.js';
 import { loopLessonFromHash, readLoopHash } from './lib/loop-links.js';
+import { focusInitialLesson } from './lib/learning-elements.js';
 
 initPageAccess();
 initLending();
@@ -60,3 +61,4 @@ document.addEventListener('click', event => {
   }
 });
 route();
+if (lendingLessonFromHash(location.hash) || loopLessonFromHash(location.hash)) focusInitialLesson('lend-title');

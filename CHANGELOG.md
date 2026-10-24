@@ -1,5 +1,13 @@
 # Release history
 
+## 1.28.1 — 2026-10-24
+
+- Open direct lesson links at their heading across liquidity, practical ranges, historical exercises and both lending chapters. Preserve the overview for generic Learn links and the reading position on reload or browser history.
+- Make selecting the current liquidity lesson return to it without rebuilding its scene or changing saved answers. Compact the mobile chapter links and align the essentials counter with its seven exercises, including the final challenge.
+- Label the loop comparison's bars as gain or loss from the start and its totals as value after debt, before liquidation. Keep the existing calculations and shared scale.
+- Enlarge historical evidence disclosures for touch and keyboard use, and give an empty position import an accurate first-use label.
+- Record a whole-app review of usability, teaching, evidence, accessibility, performance and engineering, including unresolved learning and execution limits. Add navigation, reading-position and disclosure checks.
+
 ## 1.28.0 — 2026-10-24
 
 - Make the middle borrowing-loop lesson visual. Compare holding the original 5 ETH with a three-round loop from the same starting capital; show value after debt and gains/losses on one fixed scale.

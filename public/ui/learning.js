@@ -9,7 +9,7 @@ import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, checkLesson } from '../mo
 import { checkLessonUnderstanding } from '../models/lesson-application.js';
 import { lessonApplicationCopy } from '../lib/lesson-application-copy.js';
 import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
-import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback } from '../lib/learning-elements.js';
+import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson } from '../lib/learning-elements.js';
 import { POOL_PITFALLS } from '../learning/pool-pitfalls.js';
 import { managementLessonFromHash } from '../lib/management-links.js';
 import { readProgress, saveProgress } from '../data/learning-progress.js';
@@ -264,7 +264,7 @@ export function initLearning() {
     if (!draft.prediction && !visualLesson()) draft.ran = false;
     $('learn-level').textContent = lesson.protocol + ' · Stage ' + stageForLesson(lesson.id).level + ' · ' + stageForLesson(lesson.id).title;
     $('learn-lesson-title').textContent = lesson.title; document.title = lesson.short + ' · Teren Learn';
-    $('learn-lesson-number').textContent = index === 6 ? 'FINAL CHALLENGE' : 'LESSON ' + (index + 1) + ' OF 6';
+    $('learn-lesson-number').textContent = index === 6 ? 'FINAL CHALLENGE · 7 OF 7' : 'LESSON ' + (index + 1) + ' OF 7';
     $('learn-concept').textContent = lesson.concept; $('learn-skill').textContent = lesson.skill;
     $('learn-intro').textContent = lesson.intro; $('learn-prediction-question').textContent = lesson.prediction;
     $('learn-question').textContent = lesson.question; $('learn-reason-question').textContent = lesson.reasoning;
@@ -380,6 +380,16 @@ export function initLearning() {
   $('learn-topics').addEventListener('click', () => { courseDetails.open = true; const summary = courseDetails.querySelector('summary'); summary.focus({ preventScroll: true }); courseDetails.scrollIntoView({ block: 'start', behavior: 'instant' }); });
   $('learn-resume').addEventListener('click', () => { if (appliedLessonFromHash(location.hash) || managementLessonFromHash(location.hash)) return; $('learn-lesson-title').focus({ preventScroll: true }); $('learn-lesson-title').scrollIntoView({ block: 'start', behavior: 'instant' }); });
   window.addEventListener('hashchange', () => { if (!loadLesson()) return; $('learn-lesson-title').focus({ preventScroll: true }); $('learn-lesson-title').scrollIntoView({ block: 'start', behavior: 'instant' }); });
+  document.addEventListener('click', event => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = event.target.closest('a[href^="#lesson="]');
+    if (link && link.hash === location.hash && link.hash === '#lesson=' + lesson?.id) {
+      event.preventDefault();
+      if (matchMedia('(max-width: 750px)').matches) courseDetails.open = false;
+      $('learn-lesson-title').focus({ preventScroll: true });
+      $('learn-lesson-title').scrollIntoView({ block: 'start', behavior: 'instant' });
+    }
+  });
   window.addEventListener('pagehide', () => { if (cardURL) URL.revokeObjectURL(cardURL); });
-  loadLesson();
+  if (loadLesson() && location.hash && $('learn-route-note').hidden) focusInitialLesson('learn-lesson-title');
 }

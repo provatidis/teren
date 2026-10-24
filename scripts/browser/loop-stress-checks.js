@@ -19,6 +19,7 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   const handoff = await evaluate("document.getElementById('lend-explore').href");
   assert.match(handoff, /future=1500&days=0&supplyAPR=0&borrowAPR=0/);
   assert.equal(await text('lend-flow-title'), 'Same start, different exposure');
+  assert.equal(await evaluate("document.querySelector('.stress-figure figcaption').textContent"), 'Gain or loss from the start');
   assert.equal(await evaluate("document.getElementById('lend-reveal').disabled"), false);
   assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), await text('lend-question'));
   assert.equal(await evaluate("document.querySelector('.scene-prediction').open"), false);
@@ -43,7 +44,7 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   await fill('stress-price', String(boundary - .01));
   assert.equal(await text('stress-health'), '< 1.00');
   assert.equal(await text('stress-status'), 'Eligible for liquidation.');
-  assert.match(await evaluate("document.querySelector('.stress-figure').textContent"), /Before any liquidation/);
+  assert.match(await evaluate("document.querySelector('.stress-figure').textContent"), /before any liquidation/);
   await fill('stress-price', String(boundary + .01));
   assert.equal(await text('stress-health'), '> 1.00');
   await key('stress-price', 'Home');
