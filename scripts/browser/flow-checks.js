@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
 
 export async function checkExperimentFlow({ evaluate, click, fill, text, navigate, base, call }) {
-  await navigate(base + '#experiment');
+  await navigate(base + 'liquidity.html#experiment');
   await click('nav-inspect');
   assert.deepEqual(await evaluate("[...document.querySelectorAll('.workspace-links a')].filter(a=>!a.hidden).map(a=>a.textContent)"), ['V2 pool snapshot', 'V3 position', 'Historical cases', 'Back to experiments']);
   await click('nav-experiment');
@@ -20,7 +20,7 @@ export async function checkExperimentFlow({ evaluate, click, fill, text, navigat
   for (const [width, height] of [[390, 844], [320, 740]]) {
     await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: true });
     for (const [fragment, prefix, field, value] of [['lp-lab', 'scenario', 'scenario-future', '4500'], ['range-lab', 'cl', 'cl-future', '2400']]) {
-      await navigate(base + '#' + fragment);
+      await navigate(base + 'liquidity.html#' + fragment);
       if (prefix === 'cl') await evaluate("document.getElementById('cl-setup-details').open=true");
       // Align the input below its scroll margin so the summary is in its sticky state.
       await evaluate(`document.getElementById('${field}').focus();document.getElementById('${field}').scrollIntoView({block:'start'})`);
@@ -54,10 +54,10 @@ export async function checkExperimentFlow({ evaluate, click, fill, text, navigat
       assert.ok(await evaluate(`document.activeElement.matches('#${body} .selected-scenario button')`));
       assert.equal(await evaluate('document.documentElement.scrollWidth > innerWidth'), false);
     }
-    await navigate(base + '#experiment'); await click('example-start'); await settle(evaluate);
+    await navigate(base + 'liquidity.html#experiment'); await click('example-start'); await settle(evaluate);
     assert.ok(await evaluate("document.getElementById('scenario-investment').getBoundingClientRect().bottom<=innerHeight"), 'The beginner route reveals the first input in one step.');
   }
-  await navigate(base + '#historical-case');
+  await navigate(base + 'liquidity.html#historical-case');
   assert.equal(await evaluate("document.getElementById('nav-inspect').getAttribute('aria-current')"), 'page');
   assert.equal(await text('workspace-eyebrow'), 'UNISWAP V3 · CHECKED AT CAPTURE');
   const progress = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");

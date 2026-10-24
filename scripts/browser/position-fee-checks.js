@@ -29,7 +29,7 @@ export async function checkPositionFees({ evaluate, click, text, navigate, base,
   assert.equal(await evaluate("Array.from(document.querySelectorAll('.position-fee-sources a')).every(a=>a.target==='_blank'&&a.rel.includes('noopener')&&a.href.startsWith('https:'))"), true);
   const exportedPath = await downloadFile('position-export');
   assert.deepEqual(JSON.parse(await readFile(exportedPath,'utf8')), recorded);
-  await navigate(base+'#position-lab');
+  await navigate(base + 'liquidity.html#position-lab');
   assert.match(await text('position-status'), /Restored/);
   assert.equal(await text('position-accrued-value'), '$5.67');
   assert.equal(await evaluate("document.getElementById('position-fees').open"), false, 'Restoring a save does not force advanced detail open.');

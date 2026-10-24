@@ -93,7 +93,7 @@ export async function checkLoanConditionLesson({ evaluate, click, fill, text, na
       const id = 'condition-' + current;
       await key(id, 'Home');
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      const size = await evaluate(`({scene:document.getElementById('${id}').getBoundingClientRect().bottom-document.querySelector('.condition-figure').getBoundingClientRect().top,available:innerHeight-document.querySelector('.topbar').getBoundingClientRect().height})`);
+      const size = await evaluate(`({scene:document.getElementById('${id}').getBoundingClientRect().bottom-document.querySelector('.condition-figure').getBoundingClientRect().top,available:innerHeight-Math.max(0,document.querySelector('.topbar').getBoundingClientRect().bottom)})`);
       assert.ok(size.scene <= size.available, `${current} at ${width}px needs ${size.scene}px for chart and slider; available ${size.available}px.`);
       await evaluate(`document.getElementById('${id}').scrollIntoView({block:'center'})`);
       await settle(evaluate);

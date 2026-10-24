@@ -1,3 +1,4 @@
+import { dragRangeToMax } from './touch-range.js';
 import assert from 'node:assert/strict';
 
 const progressKey = 'degenerator-learning-liquidity-v1';
@@ -61,7 +62,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
     const checked = await saved();
     const link = await evaluate("document.getElementById('learn-explore').href");
-    assert.equal(link, base + '#swap-sandbox', 'Foundations retain their independent sandbox handoff.');
+    assert.equal(link, base + 'liquidity.html#swap-sandbox', 'Foundations retain their independent sandbox handoff.');
     await fill('foundation-amount', '1');
     assert.equal(await saved(), checked);
     assert.equal(await evaluate("document.getElementById('learn-explore').href"), link);
@@ -107,23 +108,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
       const sceneHeight = await evaluate("document.getElementById('foundation-next').getBoundingClientRect().bottom-document.querySelector('.foundation-pool').getBoundingClientRect().top");
       const available = await evaluate("innerHeight-document.querySelector('.topbar').getBoundingClientRect().height");
       assert.ok(sceneHeight <= available, `${id} at ${width}px: pool state and primary action need ${sceneHeight}px; available ${available}px.`);
-      await fill('foundation-amount', '1');
-      await evaluate("document.getElementById('foundation-amount').scrollIntoView({block:'center'})");
-      await settle(evaluate);
-      const box = await evaluate("(()=>{const r=document.getElementById('foundation-amount').getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height}})()");
-      assert.ok(box.height >= 44);
-      const point = fraction => ({ x: box.left + 26 + (box.width - 52) * fraction, y: box.top + box.height / 2, id: 0 });
-      await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
-      try {
-        await call('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(0)] });
-        for (const fraction of [.25, .5, .75, 1]) {
-          await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(fraction)] });
-          await settle(evaluate);
-          assert.ok(Math.abs(await evaluate("document.getElementById('foundation-amount').getBoundingClientRect().top") - box.top) < 1, 'The amount slider must stay still during a drag.');
-        }
-        await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-      } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
-      assert.equal(await evaluate("document.getElementById('foundation-amount').value"), '50');
+      await dragRangeToMax({ evaluate, call, fill }, 'foundation-amount');
       await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
       try {
         await click('foundation-replay');

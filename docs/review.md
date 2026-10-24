@@ -1,5 +1,14 @@
 # Review questions and open blind spots
 
+## Current priorities · 1.31.0
+
+- The entry/navigation release adds Home, topic-scoped modes, local lesson resume, simpler progress orientation, stable slider value space and bundled production CSS.
+- Observe an unfamiliar learner finding a topic, explaining one visual change and applying it to another setup. Positive feedback from experienced friends is useful; it does not yet measure novice understanding.
+- Check actual Android Chrome and an assistive-technology workflow. Desktop/narrow browser checks do not establish either.
+- Measure loading on the deployed site before claiming a time saving. One stylesheet request and a smaller Home dependency graph are engineering facts, not a field performance estimate.
+- Next teaching candidates: an explicit LP-minus-holding chart, a carefully bounded arbitrage explainer, and the pre-specified longer historical case. No new model or capture is part of this release.
+
+
 [Project decisions](../DECISIONS.md) · [Models](models.md) · [Learning evidence](learning.md)
 
 Review this list before expanding a mechanism. Discuss newly found omissions with the owner, including an omission that is deliberately retained. Passing arithmetic and browser tests does not establish that people learn the intended idea.

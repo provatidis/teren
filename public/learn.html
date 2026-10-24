@@ -34,26 +34,26 @@
 <body class="learning-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="topbar">
-    <a class="brand" href="./#experiment" aria-label="Teren home"><img class="brand-logo" src="assets/teren-logo.svg" width="145" height="40" alt=""></a>
-    <nav class="site-nav" aria-label="Teren"><div class="product-nav"><a href="./#experiment">Experiment</a><a href="learn.html" aria-current="page">Learn</a><a href="./#inspect">Inspect</a></div></nav>
+    <a class="brand" href="./" aria-label="Teren home"><img class="brand-logo" src="assets/teren-logo.svg" width="145" height="40" alt=""></a>
+    <nav class="topic-nav" aria-label="DeFi topic"><span class="topic-current" aria-current="true">Liquidity</span><a href="lending.html#learn">Lending</a></nav>
+    <nav class="site-nav" aria-label="Liquidity modes"><div class="product-nav"><a href="learn.html" aria-current="page">Learn</a><a href="liquidity.html#experiment">Experiment</a><a href="liquidity.html#inspect">Inspect</a></div></nav>
   </header>
   <main id="main-content" tabindex="-1">
-    <nav class="topic-switch" aria-label="DeFi topic"><span class="topic-label">Topic</span><span class="topic-current" aria-current="true">Liquidity</span><a href="lending.html#learn">Lending</a></nav>
-    <noscript><div class="notice"><p>JavaScript is needed for the interactive lessons and progress. Enable it to predict, run and check your experiments. <a href="./">Open Experiment →</a></p></div></noscript>
+    <noscript><div class="notice"><p>JavaScript is needed for the interactive lessons and progress. Enable it to predict, run and check your experiments. <a href="liquidity.html#experiment">Open Experiment →</a></p></div></noscript>
     <section class="intro learn-intro">
       <div><p class="eyebrow">LEARN BY DOING</p><h1 id="learn-page-title">Liquidity essentials</h1><p id="learn-page-subtitle" class="subtitle">Explore Uniswap v2-style full-range pools and Uniswap v3-style price ranges with interactive examples.</p></div>
       <button type="button" id="learn-resume" class="button secondary">Start lesson 1 ↓</button>
     </section>
     <nav class="learn-entry-links" aria-label="Learning entry points"><a href="#lesson=swap-impact">Foundations</a><a href="#manage=range-width">Range choices</a><a href="#applied=fees-over-time">Recorded cases</a></nav>
-    <div class="learn-meta"><span>13 liquidity exercises</span> <span>Open any topic</span> <span id="learn-storage" role="status">Progress saves in this browser.</span></div>
+    <div class="learn-meta"><span>Open any lesson · no calculations required</span> <span id="learn-storage" role="status">Progress saves in this browser.</span></div>
     <div id="learn-route-note" class="notice" role="status" hidden><p>That lesson link could not be opened. Your last lesson is shown below; choose any topic from the chapter.</p></div>
     <div id="learn-workspace" class="learn-workspace">
       <aside class="learn-sidebar">
         <details id="learn-course" class="card learn-course" open>
-          <summary><span>All topics</span><span class="learn-course-current"><span id="learn-current-chapter">Essentials</span><strong id="learn-current-progress">0 of 7 checked</strong></span><span class="learn-course-chevron">⌄</span></summary>
+          <summary><span>All lessons</span><span class="learn-course-current"><span id="learn-current-chapter">Essentials</span><strong id="learn-current-progress">0 of 7 checked</strong></span><span class="learn-course-chevron">⌄</span></summary>
           <div class="applied-course-heading learn-essentials-heading"><h2>Liquidity essentials</h2><span id="learn-progress-count">0 of 7 checked</span></div>
           <progress id="learn-progress" max="7" value="0" aria-label="0 of 7 exercises checked"></progress>
-          <p id="learn-course-status" class="fine-print">Six lessons and a final challenge. Open any topic.</p>
+          <p id="learn-course-status" class="fine-print">Swaps and ownership, then comparisons and price ranges.</p>
           <nav aria-label="Liquidity essentials lessons"><ol id="learn-lesson-list"></ol></nav>
           <section class="applied-course" aria-labelledby="manage-course-title"><div class="applied-course-heading"><h2 id="manage-course-title">Choosing and managing a range</h2><span id="manage-progress-count">0 of 3 checked</span></div><p class="fine-print">Next: range width, fee rates, then exits and costs. Open any exercise.</p><nav aria-label="Practical range exercises"><ol id="manage-lesson-list"></ol></nav></section>
           <section class="applied-course" aria-labelledby="applied-course-title">
@@ -61,13 +61,13 @@
             <p class="fine-print">Next: apply the mechanics to verified history. Open any exercise.</p>
             <nav aria-label="Applied liquidity exercises"><ol id="applied-lesson-list"></ol></nav>
           </section>
-          <a class="learn-sidebar-link" href="./">Have your own question? Open Experiment ↗</a>
+          <a class="learn-sidebar-link" href="liquidity.html#experiment">Have your own question? Open Experiment ↗</a>
         </details>
         <p class="learn-independence">These exercises have their own inputs. Your experiments and virtual balances stay separate.</p>
       </aside>
       <article id="learn-essential" class="learn-lesson" aria-labelledby="learn-lesson-title">
-        <div class="learn-lesson-heading"><p id="learn-lesson-number" class="eyebrow">LESSON 1 OF 7</p><span id="learn-concept" class="small-badge">Swaps</span><button type="button" id="learn-topics" class="learn-text-button">All topics ↑</button></div>
-        <p id="learn-level" class="learn-level">Uniswap v2-style · Stage 1 · Foundations</p>
+        <div class="learn-lesson-heading"><p id="learn-lesson-number" class="eyebrow">LESSON 1 OF 7</p><span id="learn-concept" class="small-badge">Swaps</span><button type="button" id="learn-topics" class="learn-text-button">All lessons ↑</button></div>
+        <p id="learn-level" class="learn-level">Uniswap v2-style · Foundations</p>
         <h2 id="learn-lesson-title" tabindex="-1">Trade size and execution price</h2>
         <p id="learn-skill" class="learn-skill"></p>
         <p id="learn-intro" class="learn-reading">A larger swap moves further along the pool’s curve. Predict what happens, then try it.</p>
@@ -89,7 +89,7 @@
           <p id="learn-takeaway" class="learn-takeaway"></p>
           <p id="learn-explanation" class="learn-reading"></p>
           <aside id="learn-pitfall" class="learn-pitfall" aria-label="Common pitfall"></aside>
-          <a id="learn-explore" class="learn-explore" href="./" target="_blank" rel="noopener noreferrer">Explore in Experiment ↗</a>
+          <a id="learn-explore" class="learn-explore" href="liquidity.html#experiment" target="_blank" rel="noopener noreferrer">Explore in Experiment ↗</a>
           <p id="learn-explore-note" class="fine-print"></p>
           <details id="learn-deeper" class="learn-deeper">
             <summary><span><strong>Go deeper</strong> <span class="learn-deeper-subtitle">Mechanics, calculations &amp; primary sources</span></span> <span class="learn-deeper-optional">Optional</span> <span class="learn-deeper-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" focusable="false"><path d="M6 1v10M1 6h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
@@ -98,7 +98,7 @@
               <div id="learn-deeper-body"></div>
               <section class="learn-worked" aria-labelledby="learn-worked-title"><p class="eyebrow">FOLLOW YOUR CURRENT INPUTS</p><h4 id="learn-worked-title">A worked example</h4><p class="learn-worked-note">These steps use your selected setup. Displayed numbers are rounded.</p><ol id="learn-worked-steps"></ol></section>
               <aside class="learn-misconception"><p class="eyebrow">COMMON MISCONCEPTION</p><h4 id="learn-misconception-title"></h4><p id="learn-misconception-copy"></p></aside>
-              <p id="learn-fee-case" hidden><a href="./#example=position-fees" target="_blank" rel="noopener noreferrer">Applied case: principal, fees and tokens owed ↗</a><br><a href="./#historical-case" target="_blank" rel="noopener noreferrer">Follow fees through a recorded period ↗</a><br><a href="#applied=fees-over-time">Applied chapter: fees, time and range exits →</a></p>
+              <p id="learn-fee-case" hidden><a href="liquidity.html#example=position-fees" target="_blank" rel="noopener noreferrer">Applied case: principal, fees and tokens owed ↗</a><br><a href="liquidity.html#historical-case" target="_blank" rel="noopener noreferrer">Follow fees through a recorded period ↗</a><br><a href="#applied=fees-over-time">Applied chapter: fees, time and range exits →</a></p>
               <details id="learn-math" class="learn-math"><summary>Show the math</summary><p id="learn-math-intro"></p><pre><code id="learn-math-formula"></code></pre><p id="learn-math-note" class="learn-math-note"></p></details>
               <details id="learn-calculation" class="learn-math learn-calculation"><summary>Try a calculation · optional</summary><p>Practice using the numbers. This does not affect lesson completion.</p><label id="learn-question" for="learn-answer" class="learn-answer-label"></label><input id="learn-answer" class="learn-answer" type="number" step="any" inputmode="decimal" autocomplete="off" aria-describedby="learn-question learn-calculation-feedback"><p id="learn-calculation-hint"></p><button id="learn-calculation-check" type="button" class="button secondary">Check calculation</button><p id="learn-calculation-feedback" role="status"></p></details>
               <section class="learn-reading-sources" aria-labelledby="learn-sources-title"><h4 id="learn-sources-title">Read the original sources</h4><p>Primary references. Links open in a new tab.</p><ul id="learn-sources"></ul></section>
@@ -128,7 +128,7 @@
         </section>
       </article>
       <article id="learn-management" class="learn-lesson management-lesson" aria-labelledby="manage-title" hidden>
-        <div class="learn-lesson-heading"><p id="manage-number" class="eyebrow">RANGE CHOICES 1 OF 3</p><span class="small-badge">Hypothetical situation</span><button id="manage-topics" type="button" class="learn-text-button">All topics ↑</button></div>
+        <div class="learn-lesson-heading"><p id="manage-number" class="eyebrow">RANGE CHOICES 1 OF 3</p><span class="small-badge">Hypothetical situation</span><button id="manage-topics" type="button" class="learn-text-button">All lessons ↑</button></div>
         <p id="manage-adds" class="learn-level"></p><h2 id="manage-title" tabindex="-1"></h2><p id="manage-intro" class="learn-reading"></p>
         <section class="card learn-experiment" aria-labelledby="manage-predict-title">
           <div class="card-heading"><div><p id="manage-predict-label" class="eyebrow">01 · PREDICT</p><h3 id="manage-predict-title">Before opening the example</h3></div><button id="manage-variation" class="learn-text-button" type="button">Try another situation ↻</button></div>
@@ -157,7 +157,7 @@
         </section>
       </article>
       <article id="learn-applied" class="learn-lesson applied-lesson" aria-labelledby="applied-title" hidden>
-        <div class="learn-lesson-heading"><p id="applied-number" class="eyebrow">APPLIED 1 OF 3</p><span class="small-badge">Checked historical record</span><button id="applied-topics" type="button" class="learn-text-button">All topics ↑</button></div>
+        <div class="learn-lesson-heading"><p id="applied-number" class="eyebrow">APPLIED 1 OF 3</p><span class="small-badge">Checked historical record</span><button id="applied-topics" type="button" class="learn-text-button">All lessons ↑</button></div>
         <p id="applied-adds" class="learn-level"></p>
         <h2 id="applied-title" tabindex="-1">Observe fees accumulating</h2>
         <p id="applied-intro" class="learn-reading"></p>
@@ -185,7 +185,7 @@
           <p id="applied-takeaway" class="learn-takeaway"></p>
           <p id="applied-explanation" class="learn-reading"></p>
           <aside id="applied-pitfall" class="learn-pitfall" aria-label="Common pitfall"></aside>
-          <div class="applied-handoffs"><a id="applied-explore" class="learn-explore" href="./" target="_blank" rel="noopener noreferrer">Explore this setup in Experiment ↗</a><a id="applied-inspect" href="./#historical-case" target="_blank" rel="noopener noreferrer">Inspect the full recorded case ↗</a></div>
+          <div class="applied-handoffs"><a id="applied-explore" class="learn-explore" href="liquidity.html#experiment" target="_blank" rel="noopener noreferrer">Explore this setup in Experiment ↗</a><a id="applied-inspect" href="liquidity.html#historical-case" target="_blank" rel="noopener noreferrer">Inspect the full recorded case ↗</a></div>
           <p class="fine-print">Experiment starts a new hypothetical experiment from the selected checkpoint’s principal and range, with zero assumed future fees. Earlier collectable tokens and recorded period earnings are excluded. Inspect opens the historical evidence.</p>
           <details id="applied-deeper" class="applied-deeper"><summary>Go deeper: accounting and evidence</summary><div>
             <details id="applied-calculation" class="learn-math learn-calculation"><summary>Try a calculation · optional</summary><p>Practice using the numbers. This does not affect lesson completion.</p><label id="applied-question" for="applied-answer" class="learn-answer-label"></label><input id="applied-answer" class="learn-answer" type="number" step="any" inputmode="decimal" autocomplete="off" aria-describedby="applied-question applied-calculation-feedback"><p id="applied-calculation-hint"></p><button id="applied-calculation-check" type="button" class="button secondary">Check calculation</button><p id="applied-calculation-feedback" role="status"></p></details>

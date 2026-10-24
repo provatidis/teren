@@ -103,12 +103,12 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
   await click('topic-liquidity'); await loaded;
   assert.ok(await evaluate("location.pathname.endsWith('/learn.html')"));
   loaded = nextEvent('Page.loadEventFired');
-  await evaluate("document.querySelector('.topic-switch a[href=\"lending.html#learn\"]').click()");
+  await evaluate("document.querySelector('.topic-nav a[href=\"lending.html#learn\"]').click()");
   await loaded;
   assert.equal(await text('lend-number'), 'LENDING 3 OF 4', 'Switching learning topics preserves the lending lesson.');
-  await navigate(base + '#range-lab'); await fill('cl-future', '2350');
+  await navigate(base + 'liquidity.html#range-lab'); await fill('cl-future', '2350');
   loaded = nextEvent('Page.loadEventFired');
-  await evaluate("document.querySelector('.topic-switch a[href^=\"lending.html\"]').click()");
+  await evaluate("document.querySelector('.topic-nav a[href^=\"lending.html\"]').click()");
   await loaded;
   loaded = nextEvent('Page.loadEventFired');
   await click('topic-liquidity');

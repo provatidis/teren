@@ -16,8 +16,9 @@
 .scene-prediction .learn-fieldset { margin: 12px 0; }
 .scene-question-settings .learn-controls { margin-top: 20px; }
 .scene-price-control { margin: 18px 0; }
-.scene-price-heading { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; font-size: 14px; line-height: 1.7; }
-.scene-price-heading output { font-weight: 600; font-variant-numeric: tabular-nums; }
+.scene-price-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 12px; font-size: 14px; line-height: 1.7; }
+.scene-price-heading > label { min-width: 0; }
+.scene-price-heading output { font-weight: 600; font-variant-numeric: tabular-nums; flex: none; white-space: nowrap; text-align: right; }
 .scene-price-control input[type=range] { display: block; appearance: none; -webkit-appearance: none; width: 100%; height: 48px; padding: 0 12px; margin: 4px 0 8px; border: 0; background: transparent; }
 .scene-price-control input[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--border-strong); }
 .scene-price-control input[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--border-strong); }

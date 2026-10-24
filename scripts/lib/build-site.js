@@ -3,7 +3,7 @@ import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve, relative, posix } from 'node:path';
 
 const moduleImports = /((?:import|export)\s+[^;]*?\sfrom\s*['"])([^'"]+)(['"])/g;
-const cssImports = /(@import\s+url\(["'])([^"']+)(["']\)\s*;?)/g;
+const cssImports = /(@import\s+url\(["'])([^"']+)(["']\)\s*;)/g;
 const digest = text => createHash('sha256').update(text).digest('hex').slice(0, 16);
 
 async function filesIn(root, prefix = '') {
@@ -48,6 +48,15 @@ export async function buildSite({ sourceRoot, outputRoot, version }) {
     const path = posix.relative(posix.dirname(owner), target);
     return path.startsWith('.') ? path : './' + path;
   };
+  function rebaseCSS(source, from, to) {
+    return source.replace(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)/g, (match, double, single, plain) => {
+      const specifier = double ?? single ?? plain;
+      if (/^(?:[a-z]+:|\/|#)/i.test(specifier)) return match;
+      const target = targetFor(from, specifier);
+      const suffix = specifier.slice(specifier.split(/[?#]/)[0].length);
+      return 'url("' + relativeAsset(to, target) + suffix + '")';
+    });
+  }
   async function asset(name, ancestry = []) {
     if (ancestry.includes(name)) throw new Error('Circular build dependency: ' + [...ancestry, name].join(' → '));
     if (assets.has(name)) return assets.get(name);
@@ -59,8 +68,17 @@ export async function buildSite({ sourceRoot, outputRoot, version }) {
         const target = targetFor(name, match[2]);
         imports.push(target);
         const built = await asset(target, [...ancestry, name]);
+        if (name.endsWith('.css')) {
+          if (!target.endsWith('.css')) throw new Error('CSS imports must reference CSS: ' + name);
+          return '/* ' + target + ' */\n' + rebaseCSS(built.source, target, name);
+        }
         return match[1] + relativeAsset(name, built.name, match[2].startsWith('/')) + match[3];
       });
+      // Fail safely if an unsupported import form would leave a network chain
+      // or silently change media/layer semantics. Sources use plain local imports.
+      if (name.endsWith('.css') && /@import\b/.test(source.replace(/\/\*[\s\S]*?\*\//g, ''))) {
+        throw new Error('Unsupported CSS import: ' + name);
+      }
       dependencies.set(name, imports);
       const extension = posix.extname(name);
       const outputName = name.slice(0, -extension.length) + '.' + digest(source) + extension;

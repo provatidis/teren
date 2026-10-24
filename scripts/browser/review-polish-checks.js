@@ -49,7 +49,7 @@ export async function checkReviewPolish({ evaluate, click, fill, text, navigate,
   assert.ok(await evaluate('scrollY') <= 1, 'Invalid routes keep their explanation visible.');
   console.log('PASS: direct lesson focus across five chapters, repeat-link keyboard navigation, preserved exploration, reload position and compact mobile overview');
 
-  await navigate(base + '#historical-case');
+  await navigate(base + 'liquidity.html#historical-case');
   await evaluate(`new Promise((resolve,reject)=>{const end=Date.now()+10000;const poll=()=>{if(!document.getElementById('period-result').hidden)resolve();else if(Date.now()>end)reject(new Error('Record did not load'));else setTimeout(poll,20)};poll()})`);
   const disclosure = await evaluate("Array.from(document.querySelectorAll('.period-details>summary')).map(el=>({height:el.getBoundingClientRect().height,outline:getComputedStyle(el).outlineStyle}))");
   assert.equal(disclosure.length, 2); assert.ok(disclosure.every(el => el.height >= 44));

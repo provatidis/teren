@@ -196,3 +196,6 @@
 .management-lesson .learn-metrics{margin:24px 0}.management-lesson .learn-metric-note{font-size:13px}.management-lesson .learn-metric .label{font-size:14px}
 .management-lesson :is(button,summary),#manage-title,#manage-observe-title{scroll-margin-top:24px}
 @media(min-width:751px){#manage-topics{display:none}}@media(max-width:750px){#manage-title{font-size:28px}.management-lesson .learn-lesson-heading{flex-wrap:wrap}.management-lesson .card-heading{align-items:flex-start;flex-wrap:wrap}}
+
+/* The closed catalogue shows current progress; the expanded list shows chapter counts. */
+.learn-course[open] .learn-course-current{display:none}

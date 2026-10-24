@@ -29,10 +29,32 @@ test('build hashes every dependency, preserves module directories and preloads t
   assert.ok(html.includes('rel="modulepreload" href="./' + manifest.assets['lib/value.js'] + '"'));
   assert.ok(entry.includes('./' + manifest.assets['lib/value.js']));
   const css = await readFile(join(options.outputRoot, manifest.assets['styles.css']), 'utf8');
-  assert.ok(css.includes('./' + manifest.assets['styles/base.css']));
+  assert.ok(css.includes('body { color: red; }'));
+  assert.doesNotMatch(css, /@import/);
   assert.ok((await readFile(join(options.outputRoot, '404.html'), 'utf8')).includes('href="/' + manifest.assets['styles.css'] + '"'));
   assert.equal(await readFile(join(options.outputRoot, 'CNAME'), 'utf8'), 'teren.sh\n');
   assert.equal(await readFile(join(options.outputRoot, 'main.js'), 'utf8'), await readFile(join(options.sourceRoot, 'main.js'), 'utf8'), 'Canonical aliases support previously cached page entries.');
+}));
+
+test('CSS bundles preserve cascade order, rebase nested URLs and propagate hashes', async () => fixture(async options => {
+  await mkdir(join(options.sourceRoot, 'assets'));
+  await mkdir(join(options.sourceRoot, 'styles/nested'));
+  await writeFile(join(options.sourceRoot, 'assets/mark.svg'), '<svg/>');
+  await writeFile(join(options.sourceRoot, 'styles/nested/detail.css'), '.detail{background:url("../../assets/mark.svg#shape")}');
+  await writeFile(join(options.sourceRoot, 'styles/base.css'), '@import url("./nested/detail.css");\nbody{color:red}');
+  await writeFile(join(options.sourceRoot, 'styles.css'), '@import url("./styles/base.css");\nbody{color:blue}');
+  const first = await buildSite(options);
+  const css = await readFile(join(options.outputRoot, first.assets['styles.css']), 'utf8');
+  assert.doesNotMatch(css, /@import/);
+  assert.match(css, /url\("\.\/assets\/mark.svg#shape"\)/);
+  assert.ok(css.indexOf('color:red') < css.indexOf('color:blue'));
+  await writeFile(join(options.sourceRoot, 'styles/nested/detail.css'), '.detail{color:green}');
+  const second = await buildSite(options);
+  assert.notEqual(first.assets['styles.css'], second.assets['styles.css']);
+  assert.notEqual(first.assets['styles/base.css'], second.assets['styles/base.css']);
+  await writeFile(join(options.sourceRoot, 'styles.css'), '@import url("./styles/base.css") print;');
+  await assert.rejects(buildSite(options), /Unsupported CSS import/);
+  assert.ok((await readFile(join(options.outputRoot, 'index.html'), 'utf8')).includes(second.assets['styles.css']));
 }));
 
 test('build is deterministic and a dependency change invalidates its parents', async () => fixture(async options => {

@@ -1,3 +1,4 @@
+import { saveLearningLocation } from '../data/learning-location.js';
 import { optionalPrediction } from '../lib/lesson-scene.js';
 import { createRangeWidthScene } from '../lib/liquidity-lesson-scenes.js';
 import { usd } from '../lib/format.js';
@@ -42,7 +43,7 @@ export function initManagementLearning() {
     $('manage-metrics').replaceChildren(...presentation.metrics.map(items=>learningMetric(...items)));
     $('manage-explanation').textContent=lesson.explanation;$('manage-takeaway').textContent=lesson.takeaway;$('manage-pitfall').textContent=lesson.pitfall;
     $('manage-handoffs').replaceChildren(...presentation.links.map(({label,scenario})=>{
-      const link=document.createElement('a');const home=new URL('./',location.href);home.hash=rangeHash(scenario);
+      const link=document.createElement('a');const home=new URL('liquidity.html',location.href);home.hash=rangeHash(scenario);
       link.href=home.href;link.textContent=label;link.target='_blank';link.rel='noopener noreferrer';return link;
     }));
     $('manage-explore-note').textContent=presentation.note;
@@ -64,6 +65,7 @@ export function initManagementLearning() {
   }
   function activate(scroll=false) {
     const id=managementLessonFromHash(location.hash);$('learn-management').hidden=!id;navigation();if(!id)return;
+    saveLearningLocation('learn.html#manage=' + id);
     lesson=MANAGEMENT_LESSONS.find(item=>item.id===id);draft=progress.drafts[id]||fresh();
     if(!validChoiceSeed(draft.choiceSeed))draft.choiceSeed=newChoiceSeed();
     outcome=managementCase(id,draft.variant);presentation=managementPresentation(outcome);application=managementApplication(outcome);

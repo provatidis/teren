@@ -12,7 +12,7 @@ const waitForRecord = evaluate => evaluate(`new Promise((resolve, reject) => {
 })`);
 
 export async function checkPolish({ evaluate, navigate, call, base }) {
-  await navigate(base + '#range-lab');
+  await navigate(base + 'liquidity.html#range-lab');
   const primaryValues = await evaluate("['cl-value','cl-hold-value'].map(id=>document.getElementById(id).textContent)");
   assert.equal(await evaluate("getComputedStyle(document.getElementById('cl-chart-full')).display"), 'none');
   for (const open of [true, false]) {
@@ -27,7 +27,7 @@ export async function checkPolish({ evaluate, navigate, call, base }) {
     ['lp-lab', 'scenario-comparisons', 'scenario-future', '1000'],
     ['range-lab', 'cl-comparisons', 'cl-future', '1440'],
   ]) {
-    await navigate(base + '#' + fragment);
+    await navigate(base + 'liquidity.html#' + fragment);
     await evaluate(`document.getElementById('${fragment === 'lp-lab' ? 'scenario-reset' : 'cl-reset'}').click()`);
     if (fragment === 'range-lab') await evaluate("document.querySelector('#cl-comparison-card > summary').click()");
     await settle(evaluate);
@@ -45,7 +45,7 @@ export async function checkPolish({ evaluate, navigate, call, base }) {
   for (const [width, height] of [[390, 844], [320, 740]]) {
     await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: true });
     for (const [fragment, chart] of [['lp-lab', 'scenario-chart'], ['range-lab', 'cl-chart'], ['swap-sandbox', 'curve'], ['historical-case=range-return', 'period-chart']]) {
-      await navigate(base + '#' + fragment);
+      await navigate(base + 'liquidity.html#' + fragment);
       if (chart === 'period-chart') await waitForRecord(evaluate);
       await settle(evaluate);
       const sizes = await evaluate(`(() => {

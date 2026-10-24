@@ -11,7 +11,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await text('learn-progress-count'), '0 of 7 checked');
   assert.equal(await evaluate("document.querySelector('.product-nav a[aria-current=page]').textContent"), 'Learn');
   assert.equal(await evaluate("document.querySelectorAll('[data-lesson-id]').length"), 7);
-  assert.equal(await text('learn-level'), 'Uniswap v3-style · Stage 3 · Ranges');
+  assert.equal(await text('learn-level'), 'Uniswap v3-style · Ranges');
   assert.equal(await evaluate("document.querySelector('.learn-sidebar').getBoundingClientRect().height <= innerHeight - 48"), true);
   assert.equal(await evaluate("(()=>{const sidebar=document.querySelector('.learn-sidebar').getBoundingClientRect(),active=document.querySelector('[data-lesson-id=range-boundaries]').getBoundingClientRect();return active.top>=sidebar.top&&active.bottom<=sidebar.bottom;})()"), true);
   assert.equal(await evaluate("document.querySelectorAll('.learn-path-group').length"), 4);
@@ -46,7 +46,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     const hasFeeCase = ['fee-break-even','range-boundaries','final-challenge'].includes(id);
     assert.equal(await evaluate("document.getElementById('learn-fee-case').hidden"), !hasFeeCase);
     if (hasFeeCase) {
-      assert.equal(await evaluate("document.querySelector('#learn-fee-case a').href"), base+'#example=position-fees');
+      assert.equal(await evaluate("document.querySelector('#learn-fee-case a').href"), base + 'liquidity.html#example=position-fees');
       assert.equal(await evaluate("document.querySelector('#learn-fee-case a').target"), '_blank');
       assert.equal(await evaluate("document.querySelector('#learn-fee-case a').rel.includes('noopener')"), true);
     }
@@ -145,7 +145,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await text('scenario-hold-value'), '$7,500.00');
   assert.equal(await text('scenario-lp-value'), '$7,171.07');
   assert.equal(await evaluate("localStorage.getItem('defi-sandbox-v1')"), sandbox);
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: optional deeper reading, current-input walkthroughs, math disclosures, source links, all learning assessments, feedback, progress restoration, deep links, state isolation, card/download, stale-result invalidation and full storage');
 }
 
@@ -176,7 +176,7 @@ export async function checkMobileLearning({ evaluate, click, fill, text, navigat
     assert.ok(await evaluate("(()=>{const r=document.getElementById('learn-next').getBoundingClientRect();return r.top>=document.querySelector('.topbar').getBoundingClientRect().bottom&&r.bottom<=innerHeight})()"), 'The next exercise is visible with its feedback.');
 
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'),true);
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   assert.equal(await evaluate("getComputedStyle(document.querySelector('.product-nav')).display"), 'flex');
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'),true);
   console.log('PASS: mobile lesson navigation, exercise, feedback, mode navigation and layout');

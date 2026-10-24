@@ -58,7 +58,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
   await navigate(base+'learn.html#manage=fee-tiers&applied=fees-over-time');
   assert.equal(await evaluate("document.getElementById('learn-management').hidden&&document.getElementById('learn-applied').hidden&&!document.getElementById('learn-essential').hidden"),true);
   assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"),false);
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: practical range chapter, three situations per topic, conceptual-only completion, incorrect prediction, corrective feedback, versioned routes, source links, model handoffs, stable restoration and independent/full storage');
 }
 export async function checkMobileManagementLearning({evaluate,click,text,navigate,base,call}) {
@@ -86,6 +86,6 @@ assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),
     await evaluate("document.querySelector('.learn-entry-links a[href=\"#lesson=swap-impact\"]').click()");
     assert.equal(await evaluate("document.getElementById('learn-management').hidden&&!document.getElementById('learn-essential').hidden"),true);
   }
-  await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await navigate(base);
+  await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});await navigate(base + 'liquidity.html');
   console.log('PASS: practical range entry, assessment, chapter switching, resume, sticky headings and no overflow at 390px/320px');
 }

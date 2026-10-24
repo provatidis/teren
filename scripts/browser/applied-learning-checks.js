@@ -42,7 +42,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     assert.equal(params.get('scenario'), 'cl-range-v1'); assert.equal(params.get('fees'), '0'); assert.equal(params.get('fullfees'), '0');
     assert.equal(params.get('future'), params.get('start'));
     assert.equal(await evaluate("document.getElementById('applied-explore').target"), '_blank');
-    assert.equal(await evaluate("document.getElementById('applied-inspect').href"), base + (record === 'in-range' ? '#historical-case' : '#historical-case=range-return'));
+    assert.equal(await evaluate("document.getElementById('applied-inspect').href"), base + 'liquidity.html' + (record === 'in-range' ? '#historical-case' : '#historical-case=range-return'));
     await evaluate("document.querySelector('#applied-deeper summary').click()");
     assert.match(await text('applied-evidence'), /Block hash|block/);
     assert.equal(await evaluate("Array.from(document.querySelectorAll('#applied-deeper a')).every(a=>a.target==='_blank'&&a.rel.includes('noopener')&&a.href.startsWith('https:'))"), true);
@@ -111,7 +111,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     await evaluate("new Promise(resolve=>setTimeout(resolve,100))");
     assert.equal(await evaluate('location.hash'), '#applied=between-samples'); assert.match(await text('applied-source'), /#1375047/);
   } finally { await call('Fetch.disable'); }
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: applied historical lessons, fixed assessments, checkpoint exploration, exact record outcomes, zero-fee Playground handoffs, independent progress, record retry and selection races');
 }
 
@@ -141,6 +141,6 @@ export async function checkMobileAppliedLearning({ evaluate, click, fill, text, 
     assert.equal(await text('learn-lesson-title'), 'Trade size and execution price');
   }
   await call('Emulation.setDeviceMetricsOverride', {width:390,height:844,deviceScaleFactor:1,mobile:true});
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: applied chapter navigation, assessment, disclosures and overflow at 390px/320px');
 }

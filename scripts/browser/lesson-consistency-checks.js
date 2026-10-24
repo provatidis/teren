@@ -52,7 +52,7 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   await choose('applied-application','hold'); await choose('applied-reason','income'); await click('applied-check');
   assert.match(await text('applied-feedback-copy'),/Fees can be smaller/);
   assert.equal(await text('applied-feedback-title'),'Review your answers.');
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: lesson direction, unchanged-price reasoning, misconception feedback, optional calculation isolation, historical question scope and versioned teaching compatibility');
 }
 
@@ -67,6 +67,6 @@ export async function checkMobileLessonConsistency({ evaluate, click, fill, text
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
   }
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: mobile lesson explanations and corrective feedback at 390px/320px');
 }

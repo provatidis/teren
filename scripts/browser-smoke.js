@@ -26,6 +26,7 @@ import { checkPositions, checkMobilePositions } from './browser/position-checks.
 import { checkSavedExperiments, checkMobileSavedExperiments } from './browser/saved-experiment-checks.js';
 // Optional real-browser smoke test, using Chromium's DevTools protocol and Node built-ins.
 import assert from 'node:assert/strict';
+import { checkEntry } from './browser/entry-checks.js';
 import { spawn } from 'node:child_process';
 import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -160,8 +161,9 @@ try {
   await call('Page.enable');
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
+  await checkEntry({ navigate, evaluate, text, fill, click, nextEvent, call, base });
   const initialLoad = nextEvent('Page.loadEventFired');
-  await call('Page.navigate', { url: base });
+  await call('Page.navigate', { url: base + 'liquidity.html' });
   await initialLoad;
   await evaluate(`new Promise((resolve, reject) => { const deadline = Date.now() + 10000; const check = () => { if (document.getElementById('swap-output')?.textContent === '1,974.32') resolve(true); else if (Date.now() > deadline) reject(new Error('App did not initialize')); else setTimeout(check, 50); }; check(); })`);
   const initialHash = await evaluate('location.hash');
@@ -172,7 +174,7 @@ try {
   assert.equal(await evaluate('document.activeElement.id'), 'main-content');
   assert.equal(await evaluate('location.hash'), initialHash, 'Skipping preserves shared scenario fragments.');
   assert.equal(await text('portfolio'), '$40,000.00');
-  assert.equal(await evaluate("document.querySelector('.brand').href"), base + '#experiment', 'Home link opens the experiment workspace inside the project path');
+  assert.equal(await evaluate("document.querySelector('.brand').href"), base, 'Home link returns to topic selection inside the project path');
   assert.equal(await text('scenario-hold-value'), '$7,500.00');
   assert.equal(await text('scenario-lp-value'), '$7,171.07');
   assert.equal(await text('scenario-break-even'), '$428.93');
@@ -309,11 +311,11 @@ try {
   await click('scenario-share');
   assert.equal(await evaluate("document.getElementById('scenario-share-wrap').hidden"), false);
   assert.match(await text('scenario-share-status'), /Copy the link/);
-  await navigate(base + '#scenario=cp50-v99&investment=5000&start=2000&future=4000&fees=100');
+  await navigate(base + 'liquidity.html#scenario=cp50-v99&investment=5000&start=2000&future=4000&fees=100');
   assert.match(await text('scenario-link-status'), /unsupported/);
   assert.equal(await text('scenario-hold-value'), '$7,500.00');
   assert.equal(await text('eth-reserve'), '101.0000');
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: shared links restore assumptions without overwriting saved balances; clipboard fallback and invalid links');
 
   await fill('scenario-future', '3000');
@@ -421,10 +423,10 @@ try {
   await evaluate("Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw new Error('denied'); } } });");
   await click('cl-share');
   assert.match(await text('cl-share-status'), /Copy the link/);
-  await navigate(base + '#scenario=cl-range-v1&investment=5000&start=2000&future=2100&lower=1800&upper=2200&fees=0');
+  await navigate(base + 'liquidity.html#scenario=cl-range-v1&investment=5000&start=2000&future=2100&lower=1800&upper=2200&fees=0');
   assert.match(await text('cl-link-status'), /missing/);
   assert.equal(await evaluate("document.getElementById('cl-future').value"), '2100');
-  await navigate(base);
+  await navigate(base + 'liquidity.html');
   console.log('PASS: range reference math, exact edges, slider stability, independent fees, validation, keyboard tabs, preserved setups, CSV/PNG downloads, snapshot seeding and shared range restoration');
   await checkPositions({ base, call, evaluate, click, fill, text, reload, navigate, downloadFile, profile });
   await checkExamples({ evaluate, click, fill, text, navigate, base });
@@ -563,13 +565,13 @@ try {
   await checkMobileAppliedLearning({ evaluate, click, fill, text, navigate, base, call });
   await checkMobileSavedExperiments({ evaluate, click, fill, text, navigate, base, call });
   await call('Emulation.setDeviceMetricsOverride', { width: 320, height: 740, deviceScaleFactor: 1, mobile: true });
-  await navigate(base+'#example=position-fees');
+  await navigate(base + 'liquidity.html#example=position-fees');
   await evaluate("new Promise((resolve,reject)=>{const until=Date.now()+10000;const check=()=>{if(document.getElementById('position-fees').open&&document.getElementById('position-lab').getAttribute('aria-busy')==='false')resolve();else if(Date.now()>until)reject(new Error('Narrow fee example did not open'));else setTimeout(check,20)};check()})");
   assert.equal(await text('position-collectable-value'), '$5.67');
   await evaluate("document.querySelector('#position-fee-math > summary').click()");
   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
   console.log('PASS: 320px navigation, pool statistics and expanded fee calculation without page overflow');
-  await navigate(base+'#saved-experiments');
+  await navigate(base + 'liquidity.html#saved-experiments');
   await evaluate("document.querySelectorAll('[data-compare-id]').forEach(input=>input.click())");await click('experiments-compare');
   assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
   await evaluate("document.querySelector('#experiments-list button').click()");await click('scenario-save');
@@ -577,7 +579,7 @@ try {
   assert.equal(await evaluate("(()=>{const rect=document.getElementById('experiment-dialog').getBoundingClientRect();return rect.left>=0&&rect.right<=innerWidth;})()"),true);
   await click('experiment-save-cancel');
   console.log('PASS: 320px saved comparison and modal bounds without page overflow');
-  await navigate(base+'#historical-case');
+  await navigate(base + 'liquidity.html#historical-case');
   await evaluate("new Promise((resolve,reject)=>{const until=Date.now()+10000;const check=()=>{if(!document.getElementById('period-result').hidden)resolve();else if(Date.now()>until)reject(new Error(document.getElementById('period-status').textContent));else setTimeout(check,20)};check()})");
   assert.equal(await text('period-fees'),'$2.36');assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
   await fill('period-checkpoint','0');assert.equal(await text('period-lp'),await text('period-hold'));
@@ -598,7 +600,7 @@ try {
   await checkLoopStressLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkReviewPolish({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkComparisonLessons({ evaluate, click, fill, text, navigate, reload, base, call });
-  await checkFeeContext({ evaluate, click, fill, text, navigate, base, call });
+  await checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   assert.deepEqual(errors, [], 'No uncaught browser errors');
   console.log('PASS: mobile layout and interaction; no uncaught browser errors');
 } finally {

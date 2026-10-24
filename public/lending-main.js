@@ -31,7 +31,7 @@ function route(scroll = false) {
     ? loops ? 'Build a loop, change conditions, then explore unwinding. No calculations required.' : 'Supply, borrow, change conditions and compare responses. Open any lesson; no calculations required.'
     : loops ? 'Follow borrowed money into more ETH. Test price, interest and unwinding.' : 'Supply ETH, borrow USDC, then change price or time.';
   document.getElementById('lending-evidence').textContent = lesson ? 'LEARN BY DOING · LENDING' : 'AAVE V3-STYLE · HYPOTHETICAL';
-  document.getElementById('topic-liquidity').href = lesson ? 'learn.html' : './#experiment';
+  document.getElementById('topic-liquidity').href = lesson ? 'learn.html' : 'liquidity.html#experiment';
   document.getElementById('lending-start').hidden = !!lesson;
   document.getElementById('lending-start').href = loops ? '#loop-lesson=build' : '#learn';
   document.getElementById('lending-start').setAttribute('aria-label', loops ? 'Learn about borrowing loops' : 'Learn about lending');

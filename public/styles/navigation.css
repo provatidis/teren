@@ -1,0 +1,45 @@
+/* Topic first; modes belong to that topic. One shared header across the tools. */
+.topbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 24px;
+  align-items: center;
+}
+.brand { min-height: 44px; width: max-content; }
+.topic-nav { display: flex; align-items: center; gap: 6px; }
+.topic-nav a, .topic-nav .topic-current {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.topic-nav [aria-current] { color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+.topic-nav a:hover { color: var(--accent); background: var(--surface); }
+.product-nav a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; }
+@media (max-width: 750px) {
+  .topbar {
+    height: auto;
+    min-height: 0;
+    grid-template-columns: auto 1fr;
+    gap: 8px 12px;
+    padding: 12px 20px;
+    top: -64px;
+  }
+  .topbar .brand-logo { width: 105px; height: 29px; }
+  .topic-nav { justify-content: flex-end; gap: 2px; }
+  .topic-nav a, .topic-nav .topic-current { padding: 8px 10px; font-size: 13px; }
+  .topbar .site-nav { grid-column: 1 / -1; }
+  .topbar .product-nav { width: 100%; gap: 4px; }
+  .topbar .product-nav a { flex: 1; font-size: 14px; padding: 8px; }
+  .topbar:not(:has(.site-nav)) { top: 0; }
+  .topbar:has(.brand:focus-visible, .topic-nav a:focus-visible) { top: 0; }
+}
+@media (max-width: 360px) {
+  .topbar { padding-inline: 12px; gap: 8px; }
+  .topbar .brand-logo { width: 96px; height: 27px; }
+  .topic-nav a, .topic-nav .topic-current { padding-inline: 8px; }
+}

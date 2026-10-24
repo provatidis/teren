@@ -53,7 +53,7 @@ export async function checkPositions({ base, call, evaluate, click, fill, text, 
   assert.equal(await evaluate("document.getElementById('cl-origin').hidden"),false);
   await fill('cl-lower','3900');
   assert.equal(await evaluate("document.getElementById('cl-origin').hidden"),true,'Editing imported bounds clears provenance.');
-  await navigate(base+'#position-lab');
+  await navigate(base + 'liquidity.html#position-lab');
   assert.equal(await evaluate("document.getElementById('source-position-tab').getAttribute('aria-selected')"),'true');
   assert.match(await text('position-evidence'),/not been rechecked/);
   assert.equal(await text('position-principal'),'$24.92');
