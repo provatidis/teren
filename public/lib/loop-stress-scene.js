@@ -116,7 +116,7 @@ export function createLoopStressScene(input, prediction) {
   element.append(node('p', 'Start with ' + fmt(input.collateral, 0) + ' ETH at ' + usd(input.start) +
     ': ' + usd(initial.result.ownCapital) + ' in either choice. The loop repeats three rounds of borrowing ' +
     fmt(input.borrowPercent, 0) + '% of the value just supplied, buying ETH and supplying it.', 'loan-scene-intro'),
-  '\n', assumptions, '\n', figure.element, '\n', prediction, '\n', modes,
+  '\n', assumptions, '\n', prediction, '\n', figure.element, '\n', modes,
   '\n', price.element, '\n', time.element, '\n', interest, '\n', copy,
   '\n', node('p', 'Balances are before any liquidation. Each selection is a separate endpoint, not a price history. USDC = $1; the liquidation threshold stays at ' + fmt(input.threshold, 0) + '%. Holding has no debt or loan liquidation boundary.', 'fine-print'));
   select('price');

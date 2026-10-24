@@ -14,7 +14,7 @@ import { createLendingScene } from '../lib/lending-lesson-scenes.js';
 import { createLoanConditionScene } from '../lib/loan-condition-scene.js';
 import { createLoanResponseScene } from '../lib/loan-response-scene.js';
 import { createLoopStressScene } from '../lib/loop-stress-scene.js';
-import { createPredictionPrompt } from '../lib/lesson-scene.js';
+import { focusSceneOutcome, createPredictionPrompt } from '../lib/lesson-scene.js';
 import { newChoiceSeed, predictionFeedback } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js';
 
@@ -199,7 +199,8 @@ export function initLendingLearning() {
     lessonScene?.showQuestion();
     if (sceneFirst) loopScene?.showQuestion();
     reveal();
-    const title = $(sceneFirst && visualLesson() ? 'lend-flow-title' : 'lend-observe-title');
+    if (sceneFirst && visualLesson()) { focusSceneOutcome($('lend-money-flow')); return; }
+    const title = $('lend-observe-title');
     title.tabIndex = -1; title.focus({ preventScroll: true });
     title.scrollIntoView({ block: 'start', behavior: 'instant' });
   }

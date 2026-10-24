@@ -48,7 +48,7 @@ export function createTokenBalanceScene(input, prediction) {
       return state.exchange;
     },
   });
-  element.append(figure, '\n', prediction, '\n', explorer.element, '\n', exchange, '\n',
+  element.append(prediction, '\n', figure, '\n', explorer.element, '\n', exchange, '\n',
     node('p', 'Each price is compared with the same starting position. Swaps change the balances; this model leaves out fees.', 'fine-print'));
   explorer.show(input.initialPrice);
   return { element, show: explorer.show, showQuestion: () => explorer.show(target) };
@@ -115,7 +115,7 @@ export function createRangeWidthScene(outcome, prediction) {
       return frames.map((frame, i) => (i === 0 ? 'Narrow: ' : 'Wider: ') + frame.status + ', ' + frame.tokens).join('. ');
     },
   });
-  element.append(figure, '\n', prediction, '\n', explorer.element, '\n', consequence, '\n',
+  element.append(prediction, '\n', figure, '\n', explorer.element, '\n', consequence, '\n',
     node('p', 'Inside a range means eligible to earn from swaps. It does not tell us how much was earned.', 'scene-essential-note'));
   explorer.show(narrow.initialPrice);
   return { element, show: explorer.show };

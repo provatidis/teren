@@ -1,5 +1,5 @@
 import { saveLearningLocation } from '../data/learning-location.js';
-import { createPredictionPrompt } from '../lib/lesson-scene.js';
+import { focusSceneOutcome, createPredictionPrompt } from '../lib/lesson-scene.js';
 import { createRangeWidthScene } from '../lib/liquidity-lesson-scenes.js';
 import { usd } from '../lib/format.js';
 import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js';
@@ -88,7 +88,7 @@ export function initManagementLearning() {
     $('manage-predict-label').textContent = visualLesson() ? 'EXPLORE THE MECHANISM' : '01 · PREDICT';
     $('manage-predict-title').textContent = visualLesson() ? 'Watch the same price cross both ranges' : 'Before opening the example';
     if (visualLesson()) {
-      $('manage-setup').textContent = 'Each starts with $5,000 at $2,000/ETH, using its own token mix. USDC = $1.';
+      $('manage-setup').textContent = 'Narrow: $1,900–$2,100. Wider: $1,500–$2,500. Each starts with $5,000 at $2,000/ETH, using its own token mix. USDC = $1.';
       $('manage-prediction-question').textContent = 'If ETH moves to ' + usd(outcome.price) + ', which position will be inside its range?';
       rangeScene = createRangeWidthScene(outcome, createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) }));
       $('manage-prediction-home').replaceChildren();
@@ -130,7 +130,8 @@ export function initManagementLearning() {
   function showResult(sceneFirst = false) {
     if (visualLesson()) rangeScene.show(outcome.price);
     reveal();
-    const id = sceneFirst && visualLesson() ? 'manage-predict-title' : 'manage-observe-title';
+    if (sceneFirst && visualLesson()) { focusSceneOutcome(rangeScene.element); return; }
+    const id = 'manage-observe-title';
     $(id).tabIndex = -1; focus(id);
   }
   $('manage-reveal').addEventListener('click', () => showResult());

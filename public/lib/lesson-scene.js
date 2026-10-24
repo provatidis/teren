@@ -23,6 +23,16 @@ export function createPredictionPrompt(fieldset, { selected, onShow, disabled = 
   return element;
 }
 
+// Keep the diagram and its controls together when a learner requests an outcome.
+export function focusSceneOutcome(container) {
+  const feedback = container.querySelector('.learn-prediction-feedback');
+  const target = feedback?.textContent ? feedback : container.querySelector('figure, table, .loop-flow-balances');
+  target.tabIndex = -1;
+  target.classList.add('scene-outcome-focus');
+  target.focus({ preventScroll: true });
+  target.scrollIntoView({ block: 'start', behavior: 'instant' });
+}
+
 // Exploration is ephemeral: it never edits a lesson's question, answers or draft.
 export function createPriceExplorer({ id, min, max, step, start, target, format, shortcuts, onChange }) {
   return createSceneExplorer({ id, min, max, step, start, target, format, shortcuts, onChange,

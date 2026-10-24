@@ -1,5 +1,6 @@
 /* Shared lesson patterns: a persistent scene, visible prediction, local controls. */
 .lesson-scene figure { margin: 0; }
+.scene-outcome-focus:focus { outline: none; }
 .scene-figure-title { margin: 0 0 20px; font-size: 16px; font-weight: 600; line-height: 1.5; }
 .scene-consequence { font-size: 16px; line-height: 1.7; margin: 20px 0; }
 .scene-key, .scene-question-scope { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 12px 0; }
@@ -13,6 +14,8 @@
 .scene-prediction .learn-choice { min-height: 44px; padding: 10px 12px; font-size: 14px; }
 .scene-prediction > .fine-print { margin: 12px 0; }
 .scene-prediction-show { min-height: 44px; font-size: 14px; line-height: 1.5; }
+.scene-prediction .learn-prediction-feedback { margin: 14px 0 0; }
+.scene-prediction .learn-prediction-feedback:empty { display: none; }
 .scene-question-settings .learn-controls { margin-top: 20px; }
 .scene-price-control { margin: 18px 0; }
 .scene-price-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 12px; font-size: 14px; line-height: 1.7; }

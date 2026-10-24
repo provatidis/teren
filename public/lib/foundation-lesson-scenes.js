@@ -153,7 +153,7 @@ export function createFoundationScene(id, input, variant, prediction) {
     figure.show({ pool, title: stage.label, transfer, fraction }, animate);
     copy.textContent = stage.copy;
   } });
-  element.append(figure.element, '\n', prediction, '\n', player.element, '\n', copy, '\n', explorer.element, '\n', outcome.element, '\n',
+  element.append(prediction, '\n', figure.element, '\n', player.element, '\n', copy, '\n', explorer.element, '\n', outcome.element, '\n',
     node('p', deposit ? 'Each amount starts with the same pool and shows one deposit, then one separate trade. The trade pays a 0.3% fee. Claims use proportional ownership before withdrawal rounding.'
       : 'Each amount starts with the same pool and shows one ETH-to-USDC swap, including the 0.3% fee.', 'fine-print'));
   explorer.show(target);

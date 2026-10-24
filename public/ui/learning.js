@@ -1,5 +1,5 @@
 import { saveLearningLocation } from '../data/learning-location.js';
-import { createPredictionPrompt, sceneNode } from '../lib/lesson-scene.js';
+import { focusSceneOutcome, createPredictionPrompt, sceneNode } from '../lib/lesson-scene.js';
 import { createTokenBalanceScene } from '../lib/liquidity-lesson-scenes.js';
 import { createFoundationScene } from '../lib/foundation-lesson-scenes.js';
 import { createComparisonScene, comparisonQuestion } from '../lib/comparison-lesson-scene.js';
@@ -125,7 +125,8 @@ export function initLearning() {
     $('learn-setup').textContent = lesson.id === 'swap-impact' || lesson.id === 'pool-share'
       ? 'Starting pool: ' + fmt(s.reserveEth, 0) + ' ETH + ' + fmt(s.reserveEth * s.initialPrice, 0) + ' USDC · ' + usd(s.initialPrice) + '/ETH'
       : 'Starting budget: ' + usd(s.investment) + ' · ETH starts at ' + usd(s.initialPrice) + ' · USDC = $1';
-    if (lesson.id === 'pool-share') $('learn-setup').textContent += ' · Matching USDC: ' + fmt(s.depositEth * s.initialPrice, 0);
+    if (lesson.id === 'pool-share') $('learn-setup').textContent += ' · Your deposit: ' + fmt(s.depositEth, 0) + ' ETH + ' + fmt(s.depositEth * s.initialPrice, 0) + ' USDC';
+    if (lesson.id === 'swap-impact') $('learn-setup').textContent += ' · Your swap: ' + fmt(s.amount, 0) + ' ETH';
     if (lesson.id === 'range-boundaries') $('learn-setup').textContent += ' · Range: ' + usd(s.initialPrice * (1 - s.width)) + '–' + usd(s.initialPrice * (1 + s.width));
     $('learn-variation-label').textContent = 'Variation ' + (draft.variant + 1) + ' of ' + VARIANTS;
     const model = lesson.protocol + (lesson.id === 'range-boundaries' ? ' · Price range' : ['swap-impact', 'pool-share'].includes(lesson.id) ? ' · Virtual pool' : ' · Full-range 50/50');
@@ -284,7 +285,7 @@ export function initLearning() {
     choices('learn-predictions', 'learn-prediction', lesson.predictions, draft.prediction);
     choices('learn-reasons', 'learn-reason', lesson.reasons, draft.reason);
     $('learn-scene').hidden = !visualLesson();
-    $('learn-setup').hidden = foundationLesson();
+    $('learn-setup').hidden = false;
     $('learn-metrics').hidden = visualLesson(); $('learn-visual').hidden = visualLesson();
     $('learn-experiment-title').textContent = {
       'swap-impact': 'Follow the swap', 'pool-share': 'Watch your pool share', 'token-balances': 'Watch the token mix',
@@ -332,7 +333,8 @@ export function initLearning() {
     draft.prediction = selection('learn-prediction');
     if (visualLesson()) lessonScene.showQuestion();
     draft.ran = true; renderResults(); persist();
-    const title = $(sceneFirst && visualLesson() ? 'learn-experiment-title' : 'learn-results-title');
+    if (sceneFirst && visualLesson()) { focusSceneOutcome(lessonScene.element); return; }
+    const title = $('learn-results-title');
     title.tabIndex = -1; title.focus({ preventScroll: true });
     title.scrollIntoView({ block: 'start', behavior: 'instant' });
   }
