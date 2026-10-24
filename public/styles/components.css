@@ -19,3 +19,5 @@
 
 .skip-link { position: fixed; top: 16px; left: 16px; z-index: 100; padding: 12px 18px; border-radius: 8px; background: var(--accent); color: var(--bg); font-weight: 600; transform: translateY(-200%); }
 .skip-link:focus { transform: translateY(0); }
+/* Navigation focuses headings as reading destinations, not interactive controls. */
+:is(h1, h2, h3)[tabindex="-1"]:focus { outline: none; }
