@@ -51,7 +51,7 @@ export async function checkMobileInspect({ evaluate, call, click, fill, navigate
         const learned=nextEvent('Page.loadEventFired');
         await evaluate("document.querySelector('.product-nav a[href=\"learn.html\"]').click()"); await learned;
         const returned=nextEvent('Page.loadEventFired');
-        await tap('.product-nav a[href="./#inspect"]'); await returned;
+        await tap('.product-nav a[href="liquidity.html#inspect"]'); await returned;
         await inspectSelected();
         assert.equal(await evaluate(`document.getElementById('${field}').value`),value);
         await tap('#nav-experiment'); await settle(evaluate);
