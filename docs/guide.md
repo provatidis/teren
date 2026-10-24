@@ -2,7 +2,7 @@
 
 ## Start from Home
 
-Home introduces Liquidity and Borrowing & leverage. Choose **Learn step by step** or open the lab directly; every lesson and advanced tool stays accessible. Phones have a shortcut to each topic above the cards. The Teren logo returns Home, and **Continue learning** reopens the most recently visited lesson in this browser after it has been opened in this release. It is a navigation bookmark, not a completion mark.
+Home introduces Liquidity and Lending. Choose **Learn step by step** or open the lab directly; every lesson and advanced tool stays accessible. Phones have a shortcut to each topic above the cards. The Teren logo returns Home, and **Continue learning** reopens the most recently visited lesson in this browser after it has been opened in this release. It is a navigation bookmark, not a completion mark.
 
 Inside a topic, the mode links stay within it: Liquidity has Learn, Experiment and Inspect; Lending has Learn and Experiment. Switch topics in the header. Valid liquidity drafts survive a same-tab visit to Home, Learn or Lending. An explicit shared scenario takes precedence when reopening the lab.
 
