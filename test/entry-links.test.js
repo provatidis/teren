@@ -7,6 +7,8 @@ import { MANAGEMENT_IDS } from '../public/models/range-decisions.js';
 import { APPLIED_IDS } from '../public/lib/applied-lessons.js';
 import { LENDING_LESSON_IDS } from '../public/data/lending-state.js';
 import { LOOP_LESSON_IDS } from '../public/data/loop-state.js';
+import { LENDING_LESSONS } from '../public/learning/lending-essentials.js';
+import { LOOP_LESSONS } from '../public/learning/borrowing-loops.js';
 
 test('home recognises existing liquidity links while retaining home anchors', () => {
   for (const hash of ['#experiment', '#inspect', '#range-lab', '#swap-sandbox', '#saved-experiments',
@@ -24,6 +26,8 @@ test('resume routes cover all current lessons without importing their models on 
     ...LOOP_LESSON_IDS.map(id => 'lending.html#loop-lesson=' + id),
   ];
   assert.deepEqual(Object.keys(LEARNING_ROUTES).sort(), routes.sort());
+  for (const lesson of LENDING_LESSONS) assert.equal(LEARNING_ROUTES['lending.html#lesson=' + lesson.id], lesson.short);
+  for (const lesson of LOOP_LESSONS) assert.equal(LEARNING_ROUTES['lending.html#loop-lesson=' + lesson.id], lesson.short);
 });
 
 test('resume bookmark allows only known local routes and tolerates blocked storage', () => {

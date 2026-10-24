@@ -33,6 +33,7 @@ export async function checkEntry({ navigate, evaluate, text, fill, click, nextEv
   await click('cl-reset'); await click('lab-full-tab'); await click('scenario-reset');
   for (const route of ['learn.html#lesson=pool-share', 'learn.html#manage=fee-tiers', 'learn.html#applied=fees-over-time', 'lending.html#lesson=conditions', 'lending.html#loop-lesson=unwind']) {
     await navigate(base + route);
+    if (route.includes('#applied=')) await wait(evaluate, "document.getElementById('learn-applied').getAttribute('aria-busy')==='false' && document.getElementById('applied-source').textContent.startsWith('Position #')");
     const progress = await evaluate("Object.keys(localStorage).filter(k=>/learning|progress|liquidity/.test(k)).sort().map(k=>[k,localStorage.getItem(k)])");
     await navigate(base);
     assert.equal(await evaluate("document.getElementById('home-continue').getAttribute('href')"), route);
