@@ -8,8 +8,8 @@
 .loan-scene-collateral { display: block; color: var(--muted); font-size: 13px; font-weight: 400; }
 .loan-scene-collateral[data-enabled=true] { color: var(--accent); }
 .loan-scene-token { display: block; white-space: nowrap; }
-.loan-scene-token::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border: 2px solid #a9c7f5; transform: rotate(45deg); }
-.loan-scene-usdc::before { border-color: #e5bd85; border-radius: 50%; transform: none; }
+.loan-scene-token::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border: 2px solid var(--allocation-eth); transform: rotate(45deg); }
+.loan-scene-usdc::before { border-color: var(--allocation-stripe); background: var(--allocation-usdc-background); border-radius: 50%; transform: none; }
 .loan-scene-balances [data-pocket=debt] { border-style: dashed; }
 .loan-scene-balances [data-pocket=debt] dd { color: #e5bd85; }
 .loan-scene-balances [data-changed=true] { border-color: var(--accent); box-shadow: inset 3px 0 var(--accent); }

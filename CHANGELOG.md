@@ -1,5 +1,10 @@
 # Release history
 
+## 1.31.2 · 2026-10-24
+
+- Align ETH and USDC identity in liquidity and lending lessons with Home and the labs: gold ETH, striped blue USDC, with diamond/circle markers and token labels retained.
+- Share the USDC background treatment between lab swatches and lesson markers/bars. Keep debt, warning, holding, strategy and range-comparison colours scoped to their existing meanings.
+
 ## 1.31.1 · 2026-10-24
 
 - Give Home a descriptive browser/search title and align each content page’s title and description across search and social previews. Liquidity metadata now describes liquidity experiments and records.
