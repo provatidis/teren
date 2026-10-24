@@ -10,6 +10,7 @@ import { lendingMetrics } from '../lib/lending-presentation.js';
 import { loopLessonMetrics } from '../lib/loop-presentation.js';
 import { renderLoopMoneyFlow } from '../lib/loop-money-flow.js';
 import { createLendingScene } from '../lib/lending-lesson-scenes.js';
+import { createLoanConditionScene } from '../lib/loan-condition-scene.js';
 import { optionalPrediction } from '../lib/lesson-scene.js';
 import { newChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js';
@@ -27,7 +28,7 @@ export function initLendingLearning() {
   };
   let chapter = 'essentials', course = courses.essentials, progress = course.progress;
   let lesson, draft, example, foundationScene;
-  const foundationLesson = () => chapter === 'essentials' && ['supply', 'borrow'].includes(lesson?.id);
+  const foundationLesson = () => chapter === 'essentials' && ['supply', 'borrow', 'conditions'].includes(lesson?.id);
   const visualLesson = () => foundationLesson() || chapter === 'loops' && ['build', 'unwind'].includes(lesson?.id);
   const revealLabel = () => visualLesson() ? 'Explain this example →' : 'Reveal the result →';
   const fresh = () => ({ prediction: '', reason: '', application: '', revealed: false, seed: newChoiceSeed() });
@@ -105,6 +106,9 @@ export function initLendingLearning() {
     $('lend-adds').textContent = lesson.adds;
     for (const key of ['intro', 'setup', 'question', 'takeaway', 'explanation', 'pitfall', 'reasoning']) $('lend-' + key).textContent = lesson[key];
     const showFlow = visualLesson();
+    const conditions = chapter === 'essentials' && lesson.id === 'conditions';
+    $('lend-flow-title').textContent = conditions ? 'Watch the health factor' : 'Follow the money';
+    $('lend-flow-instruction').textContent = conditions ? 'Change one condition and compare what backs the debt.' : 'Take one action, then look at what changed.';
     $('lend-adds').hidden = showFlow;
     $('lend-visual').hidden = !showFlow;
     $('lend-money-flow').hidden = !showFlow;
@@ -116,7 +120,9 @@ export function initLendingLearning() {
     $('lend-check-label').textContent = showFlow ? 'CHECK YOUR UNDERSTANDING' : '03 · CHECK YOUR UNDERSTANDING';
     foundationScene = null;
     if (foundationLesson()) {
-      foundationScene = createLendingScene(example.result, lesson.id, optionalPrediction(predictionField));
+      foundationScene = conditions
+        ? createLoanConditionScene(example.input, optionalPrediction(predictionField))
+        : createLendingScene(example.result, lesson.id, optionalPrediction(predictionField));
       $('lend-money-flow').replaceChildren(foundationScene.element);
       $('lend-money-flow').removeAttribute('data-flow');
       $('lend-visual').append(revealButton);

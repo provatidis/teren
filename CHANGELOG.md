@@ -1,5 +1,12 @@
 # Release history
 
+## 1.26.0 — 2026-10-24
+
+- Make the prices/interest/time lesson visual. Explore a year of debt interest at a fixed ETH price, then change the price while keeping the accrued token balances fixed. Two bars on one dollar scale compare counted collateral backing with debt; equal bars mean health factor 1.
+- Keep comparison markers, the original ETH quantity, added interest and liquidation status visible. Show the exact boundary and distinguish nearby values that would otherwise round to 1.00. Balances below the boundary are explicitly before liquidation; moving the slider never invents a price history or liquidation event.
+- Make the prediction optional while preserving explanation/application checks, prior completion and the exact one-year Experiment handoff. Opening the explanation or restoring a revealed lesson returns to that assessed setup. Mode changes and sliders stay separate from working drafts.
+- Add reference and boundary tests, keyboard/touch checks, stable mobile slider checks and reduced-motion coverage. The underlying financial model and recorded evidence are unchanged.
+
 ## 1.25.0 — 2026-10-24
 
 - Extend **Follow the money** to the first two lending lessons. Follow ETH from the wallet into a supplied claim, let interest accrue with collateral off, then enable collateral without taking a loan. In the borrowing lesson, USDC and matching debt appear together while assets minus debt stay unchanged.
