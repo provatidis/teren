@@ -14,3 +14,8 @@
 .response-scene .scene-prediction { margin: 12px 0; }
 .response-scene .scene-price-control { margin-top: 12px; }
 .response-scene .scene-price-heading { min-height: 1.7em; }
+@media (max-width: 750px) {
+  /* The lesson heading already introduces the comparison. Keep its table
+     caption available to screen readers without repeating it above the columns. */
+  .response-table caption { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
