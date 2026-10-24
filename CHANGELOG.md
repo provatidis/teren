@@ -4,6 +4,7 @@
 
 - Align ETH and USDC identity in liquidity and lending lessons with Home and the labs: gold ETH, striped blue USDC, with diamond/circle markers and token labels retained.
 - Share the USDC background treatment between lab swatches and lesson markers/bars. Keep debt, warning, holding, strategy and range-comparison colours scoped to their existing meanings.
+- Wait for initial lesson focus and header measurements before browser-test interactions, preserving the existing feedback-visibility and native-touch assertions.
 
 ## 1.31.1 · 2026-10-24
 
