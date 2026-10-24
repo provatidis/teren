@@ -1,5 +1,11 @@
 # Release history
 
+## 1.31.1 · 2026-10-24
+
+- Give Home a descriptive browser/search title and align each content page’s title and description across search and social previews. Liquidity metadata now describes liquidity experiments and records.
+- Use Lending consistently on Home and in topic navigation, with plain-language copy covering supplying, borrowing and loops. Match arrows to existing same-tab, in-page and new-tab behavior.
+- Publish a six-page canonical sitemap and a robots file that allows crawling and references it. Serve XML with the appropriate content type in local previews.
+
 ## 1.31.0 · 2026-10-24
 
 - Added a permanent Home with Liquidity and Borrowing & leverage entry points, direct labs, mobile topic shortcuts and a local Continue-learning bookmark. Home loads no financial models or recorded datasets.

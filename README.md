@@ -6,7 +6,7 @@ A place to understand DeFi through short lessons and experiments you can change.
 
 [Open Teren](https://teren.sh/) · [Liquidity lessons](https://teren.sh/learn.html) · [Lending lessons](https://teren.sh/lending.html#learn) · [About](https://teren.sh/about.html)
 
-Home offers Liquidity and Borrowing & leverage, with a lesson path and a direct lab for each. Return to an opened lesson through Continue learning, or open the setup you want to test. Lessons use predictions, explanations and changed situations to check understanding; required answers involve no calculations. Links open Experiment in a separate tab so you can explore the idea without replacing your working draft.
+Home offers Liquidity and Lending, with a lesson path and a direct lab for each. Return to an opened lesson through Continue learning, or open the setup you want to test. Lessons use predictions, explanations and changed situations to check understanding; required answers involve no calculations. Links open Experiment in a separate tab so you can explore the idea without replacing your working draft.
 
 Visual lessons let you follow swaps, pool ownership, supplying, borrowing and loops one action at a time, or use sliders to explore token balances, price ranges, a loan’s health factor, equal-budget responses to debt, and holding versus looping as prices or interest change. The prediction question stays visible, and answering it is optional.
 

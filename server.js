@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), process.env.SITE_DIR || 'public');
 const types = {
   '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml',
-  '.json': 'application/json', '.webmanifest': 'application/manifest+json',
+  '.xml': 'application/xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json',
   '.png': 'image/png', '.ico': 'image/x-icon', '.txt': 'text/plain',
 };
 const headers = {
@@ -29,7 +29,7 @@ const server = http.createServer(async (request, response) => {
     }
     const body = await readFile(file);
     const type = types[extname(file)] || 'application/octet-stream';
-    const charset = type.startsWith('text/') || ['image/svg+xml', 'application/json', 'application/manifest+json'].includes(type) ? '; charset=utf-8' : '';
+    const charset = type.startsWith('text/') || ['image/svg+xml', 'application/xml', 'application/json', 'application/manifest+json'].includes(type) ? '; charset=utf-8' : '';
     response.writeHead(200, { ...headers, 'Content-Type': type + charset });
     response.end(request.method === 'HEAD' ? undefined : body);
   } catch (error) {
