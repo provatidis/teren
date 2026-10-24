@@ -22,7 +22,7 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   assert.equal(await evaluate("document.querySelector('.stress-figure figcaption').textContent"), 'Gain or loss from the start');
   assert.equal(await evaluate("document.getElementById('lend-reveal').disabled"), false);
   assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), await text('lend-question'));
-  assert.equal(await evaluate("document.querySelector('.scene-prediction').open"), false);
+  assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
   assert.equal(await text('stress-holding-value'), '$10,000.00');
   assert.equal(await text('stress-loop-value'), '$10,000.00');
   await fill('stress-price', '1500');
@@ -81,9 +81,9 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   assert.equal(await mode(), 'price');
   assert.equal(await evaluate("document.getElementById('stress-price').value"), '1500');
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
-  await evaluate("document.querySelector('.scene-prediction > summary').click()");
+  assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
   await choose('prediction', 'hold'); await click('lend-reveal');
-  assert.match(await text('lend-prediction-feedback'), /^Compare this with your prediction/);
+  assert.match(await text('lend-prediction-feedback'), /^You expected:/);
   await choose('reason', 'exposure'); await choose('application', 'falls'); await click('lend-check'); await reload();
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked').value"), 'hold');

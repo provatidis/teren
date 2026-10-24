@@ -10,11 +10,11 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
     assert.equal(await evaluate("document.getElementById('learn-essential').hidden&&document.getElementById('learn-applied').hidden&&!document.getElementById('learn-management').hidden"),true);
     assert.equal(await evaluate("document.querySelectorAll('[data-lesson-id][aria-current=step],[data-applied-id][aria-current=step]').length"),0);
     assert.equal(await evaluate("document.querySelector('[data-management-id="+id+"]').getAttribute('aria-current')"),'step');
-    assert.equal(await evaluate("document.getElementById('manage-reveal').disabled"),id!=='range-width');
+    assert.equal(await evaluate("document.getElementById('manage-reveal').disabled"),false);
     assert.equal(await evaluate("document.querySelectorAll('#learn-management input[type=number]').length"),0);
     await choose('manage-prediction',prediction);await click('manage-reveal');
     assert.equal(await evaluate("document.getElementById('manage-observe').hidden"),false);
-    assert.match(await text('manage-prediction-feedback'),/differs from your prediction/);
+    assert.match(await text('manage-prediction-feedback'),/^You expected:/);
     assert.equal(await evaluate("document.getElementById('manage-observe-title').getBoundingClientRect().top>=document.querySelector('.topbar').getBoundingClientRect().bottom"),true);
     if(id==='range-width')assert.match(await text('manage-metrics'),/Narrow range Inactive.*Wider range Active/s);
     if(id==='fee-tiers')assert.match(await text('manage-metrics'),/Unknown/);
@@ -40,7 +40,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
     assert.equal(await evaluate("document.getElementById('manage-title').getBoundingClientRect().top>=document.querySelector('.topbar').getBoundingClientRect().bottom"),true);
     for(let variant=1;variant<3;variant++) {
       await click('manage-variation');assert.equal(await text('manage-variation-label'),'Situation '+(variant+1)+' of 3');
-      assert.equal(await evaluate("document.getElementById('manage-reveal').disabled"),id!=='range-width');assert.equal(await evaluate("document.getElementById('manage-observe').hidden"),true);
+      assert.equal(await evaluate("document.getElementById('manage-reveal').disabled"),false);assert.equal(await evaluate("document.getElementById('manage-observe').hidden"),true);
       await choose('manage-prediction',id==='range-width'?(variant===2?'both':'wide'):id==='fee-tiers'?'unknown':variant===1?'same':'rises');await click('manage-reveal');
       const changedAnswer=id==='range-width'?(variant===1?'narrow':'wide'):id==='fee-tiers'?(variant===1?'a':'b'):variant===1?'removed':'automatic';
       await choose('manage-reason',reason);await choose('manage-application',changedAnswer);await click('manage-check');assert.equal(await text('manage-feedback-title'),'Both answers are correct.');

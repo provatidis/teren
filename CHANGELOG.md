@@ -1,5 +1,12 @@
 # Release history
 
+## 1.32.0 — 2026-10-25
+
+- Put prediction questions and answer choices in view across all twenty lessons. A clear “Not sure — show me” route keeps results accessible; choosing an answer offers “See what happens”. Visual lessons show the question’s outcome in the diagram, with the expectation and finding beside the choices.
+- Make prediction optional consistently in the six older range and recorded lessons too. Skipping never invents an answer or marks a lesson complete; explanation and changed-situation checks still determine completion. Saved answers, earlier completion, exploratory controls and exact Experiment handoffs remain compatible.
+- Keep recorded outcomes behind successful record validation and preserve loading, retry and navigation isolation. Check desktop/mobile prediction access, keyboard activation, mistaken predictions, skipped completion and restoration across chapters.
+- Record the teaching sequence as a durable product choice: form an expectation, observe the mechanism, explain the result and apply it elsewhere. Usability and accounting checks do not establish improved learning.
+
 ## 1.31.3 · 2026-10-25
 
 - Remove browser-default outlines around non-interactive heading destinations when opening or navigating lessons. Keep heading focus and scroll placement, with visible focus indicators on controls and feedback cards.

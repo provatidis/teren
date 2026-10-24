@@ -21,7 +21,7 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
     await click('lend-retry');
     assert.equal(await stage(), '0');
     assert.equal(await evaluate("document.getElementById('lend-reveal').disabled"), false);
-    assert.equal(await evaluate("document.querySelector('.scene-prediction').open"), false);
+    assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), await text('lend-question'));
     const initial = await saved();
     await enter('loan-scene-next');
@@ -76,7 +76,7 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
     assert.equal(await stage(), questionStage);
     assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
     assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
-    await evaluate("document.querySelector('.scene-prediction > summary').click()");
+    assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
     assert.equal(await evaluate("document.getElementById('lend-prediction-field').checkVisibility()"), true);
     await choose('prediction', id === 'supply' ? 'earn' : 'same');
     assert.equal(await stage(), questionStage, 'Choosing a prediction must not reset the explored scene.');

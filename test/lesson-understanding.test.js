@@ -11,7 +11,16 @@ import { LESSONS } from '../public/learning/liquidity-essentials.js';
 import { APPLIED_LESSONS } from '../public/learning/applied-liquidity.js';
 import { parseProgress } from '../public/data/learning-progress.js';
 import { parseAppliedProgress } from '../public/data/applied-progress.js';
-import { newChoiceSeed, validChoiceSeed, orderedLearningChoices } from '../public/lib/learning-choices.js';
+import { newChoiceSeed, validChoiceSeed, orderedLearningChoices, predictionFeedback } from '../public/lib/learning-choices.js';
+
+test('prediction feedback distinguishes a guess from a skipped observation', () => {
+  const choices = [['more', 'More ETH'], ['less', 'Less ETH.']];
+  assert.equal(predictionFeedback(choices, '', 'less'), 'In this setup: Less ETH.');
+  assert.equal(predictionFeedback(choices, 'unknown', 'less'), 'In this setup: Less ETH.');
+  assert.equal(predictionFeedback(choices, 'more', 'less'), 'You expected: More ETH. In this setup: Less ETH.');
+  assert.equal(predictionFeedback(choices, 'less', 'less'), 'Your prediction matches. In this setup: Less ETH.');
+  assert.equal(predictionFeedback(choices, '', 'less', 'The record shows fewer tokens.'), 'The record shows fewer tokens.');
+});
 
 const [baseline, returning] = await Promise.all(['uniswap-v3-position-period.json','uniswap-v3-position-range-return.json'].map(async file => validatePositionPeriod(JSON.parse(await readFile(new URL('../public/examples/' + file, import.meta.url),'utf8')))));
 

@@ -16,3 +16,13 @@ export function orderedLearningChoices(values, seed, group) {
   }
   return result;
 }
+
+// Predictions invite comparison; only the explanation/application checks score progress.
+export function predictionFeedback(choices, selected, actual, finding) {
+  const sentence = text => /[.!?]$/.test(text) ? text : text + '.';
+  const expected = choices.find(([id]) => id === selected)?.[1];
+  const result = finding || 'In this setup: ' + sentence(choices.find(([id]) => id === actual)[1]);
+  if (!expected) return result;
+  if (selected === actual) return 'Your prediction matches. ' + result;
+  return 'You expected: ' + sentence(expected) + ' ' + result;
+}

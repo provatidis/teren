@@ -23,7 +23,7 @@ export async function checkLoanResponseLesson({ evaluate, click, fill, text, nav
   assert.equal(await text('lend-flow-title'), 'Where does the extra money go?');
   assert.equal(await evaluate("document.getElementById('lend-reveal').disabled"), false);
   assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), await text('lend-question'));
-  assert.equal(await evaluate("document.querySelector('.scene-prediction').open"), false);
+  assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
   assert.equal(await text('response-repay-health'), '1.20');
   assert.equal(await text('response-add-health'), '1.20');
   await shortcut('Question');
@@ -64,9 +64,9 @@ export async function checkLoanResponseLesson({ evaluate, click, fill, text, nav
   assert.equal(await evaluate("document.getElementById('response-budget').value"), '1000');
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
-  await evaluate("document.querySelector('.scene-prediction > summary').click()");
+  assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
   await choose('prediction', 'add'); await click('lend-reveal');
-  assert.match(await text('lend-prediction-feedback'), /^Compare this with your prediction/);
+  assert.match(await text('lend-prediction-feedback'), /^You expected:/);
   await choose('reason', 'debt'); await choose('application', 'none'); await click('lend-check');
   await reload();
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');

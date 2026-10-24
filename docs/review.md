@@ -1,7 +1,8 @@
 # Review questions and open blind spots
 
-## Current priorities · 1.31.0
+## Current priorities · 1.32.0
 
+- Visible prediction choices now invite an expectation in all twenty lessons, with a deliberate skip. This restores teaching emphasis; its effect on understanding remains unmeasured. Evaluate the next review against expectation → observation → explanation → application.
 - The entry/navigation release adds Home, topic-scoped modes, local lesson resume, simpler progress orientation, stable slider value space and bundled production CSS.
 - Observe an unfamiliar learner finding a topic, explaining one visual change and applying it to another setup. Positive feedback from experienced friends is useful; it does not yet measure novice understanding.
 - Check actual Android Chrome and an assistive-technology workflow. Desktop/narrow browser checks do not establish either.
