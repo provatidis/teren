@@ -1,0 +1,31 @@
+.loan-scene-intro { font-size: 14px; line-height: 1.7; margin: 0 0 18px; }
+.loan-scene-figure .scene-figure-title { margin: 0 0 8px; }
+.loan-scene-cue { font-size: 14px; line-height: 1.6; min-height: 3.2em; margin: 0 0 12px; }
+.loan-scene-balances { display: grid; gap: 8px; margin: 0; }
+.loan-scene-balances > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); min-height: 56px; }
+.loan-scene-balances dt { font-size: 14px; font-weight: 600; line-height: 1.6; }
+.loan-scene-balances dd { margin: 0; font-size: 17px; line-height: 1.5; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.loan-scene-collateral { display: block; color: var(--muted); font-size: 13px; font-weight: 400; }
+.loan-scene-collateral[data-enabled=true] { color: var(--accent); }
+.loan-scene-token { display: block; white-space: nowrap; }
+.loan-scene-token::before { content: ''; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border: 2px solid #a9c7f5; transform: rotate(45deg); }
+.loan-scene-usdc::before { border-color: #e5bd85; border-radius: 50%; transform: none; }
+.loan-scene-balances [data-pocket=debt] { border-style: dashed; }
+.loan-scene-balances [data-pocket=debt] dd { color: #e5bd85; }
+.loan-scene-balances [data-changed=true] { border-color: var(--accent); box-shadow: inset 3px 0 var(--accent); }
+.loan-scene-balances [data-pocket=debt][data-changed=true] { border-color: #e5bd85; box-shadow: inset 3px 0 #e5bd85; }
+.loan-scene-totals { margin: 12px 0 0; }
+.loan-scene-totals > div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 8px; }
+.loan-scene-totals dt { font-size: 13px; line-height: 1.6; }
+.loan-scene-totals dd { margin: 0; font-size: 15px; line-height: 1.6; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.loan-scene-totals > div:last-child { border-top: 1px solid var(--border); padding-top: 8px; }
+.loan-scene-totals [data-changed=true] dd { color: var(--accent); }
+.loan-scene-figure[data-motion=true] [data-changed=true] { animation: loan-balance-cue .5s ease-out; }
+@keyframes loan-balance-cue { from { background-color: var(--highlight); } to { background-color: var(--surface); } }
+@media (prefers-reduced-motion: reduce) {
+  .loan-scene-figure[data-motion=true] [data-changed=true] { animation: none; }
+}
+@media (max-width: 750px) {
+  .loan-scene-balances > div { padding: 8px 10px; }
+  .loan-scene-balances dd { font-size: 16px; }
+}

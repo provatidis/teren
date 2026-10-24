@@ -1,5 +1,6 @@
 import { checkVisualLessonPilots } from './browser/visual-lesson-checks.js';
 import { checkFoundationLessons } from './browser/foundation-lesson-checks.js';
+import { checkLendingScenes } from './browser/lending-scene-checks.js';
 import { checkBorrowingLoops } from './browser/borrowing-loop-checks.js';
 import { checkProjectInformation, checkMobileTools } from './browser/clarity-checks.js';
 import { checkLending } from './browser/lending-checks.js';
@@ -585,6 +586,7 @@ try {
   await checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call });
   await checkVisualLessonPilots({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkFoundationLessons({ evaluate, click, fill, text, navigate, reload, base, call });
+  await checkLendingScenes({ evaluate, click, text, navigate, reload, base, call });
   assert.deepEqual(errors, [], 'No uncaught browser errors');
   console.log('PASS: mobile layout and interaction; no uncaught browser errors');
 } finally {

@@ -1,5 +1,12 @@
 # Release history
 
+## 1.25.0 — 2026-10-24
+
+- Extend **Follow the money** to the first two lending lessons. Follow ETH from the wallet into a supplied claim, let interest accrue with collateral off, then enable collateral without taking a loan. In the borrowing lesson, USDC and matching debt appear together while assets minus debt stay unchanged.
+- Keep wallet funds, supplied ETH, remaining borrowing capacity and debt distinct. Reuse named actions, replay, Back and direct step selection, with brief cues and reduced-motion support. Predictions remain visible and optional; completion still checks explanation and application.
+- Keep exploration separate from the fixed lesson question and exact Experiment link. Opening an explanation or restoring a revealed lesson returns to its assessed balances. Preserve existing answers, completion and independent working drafts.
+- Add accounting checks for transfers, accrued interest, collateral enabling and borrowing capacity, plus browser checks for keyboard controls, restoration and narrow mobile layouts. No financial model, recorded evidence or storage version changes.
+
 ## 1.24.0 — 2026-10-24
 
 - Extend the visual lessons to swaps and providing liquidity. Follow ETH into the pool and USDC out, then compare small and large trades by their average execution price. Step through a matching deposit and a separate trader’s later swap, with the ownership percentage visible beside both token balances.
