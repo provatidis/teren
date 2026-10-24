@@ -1,0 +1,25 @@
+.comparison-figure .scene-figure-title { margin-bottom: 14px; }
+.comparison-row { margin: 12px 0; }
+.comparison-heading { display: flex; justify-content: space-between; gap: 8px 14px; flex-wrap: wrap; font-size: 14px; line-height: 1.6; }
+.comparison-heading strong { font-variant-numeric: tabular-nums; }
+.comparison-track { display: flex; height: 18px; margin-top: 6px; background: var(--surface); border-radius: 3px; }
+.comparison-principal, .comparison-fees { display: block; height: 100%; flex-shrink: 0; }
+[data-comparison=start] .comparison-principal { border: 2px dashed var(--muted); background: transparent; }
+[data-comparison=hold] .comparison-principal { background: #a9c7f5; }
+[data-comparison=lp] .comparison-principal { background: #e5bd85; }
+.comparison-fees { background: repeating-linear-gradient(135deg, #e5bd85 0 3px, #49381f 3px 6px); }
+.comparison-parts { font-size: 13px; line-height: 1.7; margin: 8px 0; min-height: 1.7em; }
+.comparison-verdict { border-left: 3px solid var(--accent); padding-left: 12px; margin-top: 16px; font-size: 14px; line-height: 1.7; }
+.comparison-verdict p { margin: 4px 0; min-height: 1.7em; }
+.comparison-modes { margin-bottom: 20px; }
+.comparison-scene .scene-price-control { margin: 14px 0; }
+.comparison-scene .scene-question-scope:empty { display: none; }
+.comparison-scene .scene-shortcuts { min-height: 44px; }
+@media (max-width: 750px) {
+  .comparison-heading { font-size: 13px; gap: 4px 8px; }
+  .comparison-row { margin: 10px 0; }
+  .comparison-verdict { margin-top: 12px; font-size: 13px; }
+  .comparison-figure .scene-figure-title { font-size: 14px; }
+  .comparison-parts, .comparison-verdict p { min-height: 3.4em; }
+  .comparison-scene .scene-price-heading:has(label[for=comparison-fees]) { display: grid; grid-template-columns: 1fr; gap: 0; }
+}
