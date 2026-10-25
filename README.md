@@ -18,6 +18,8 @@ Try [Follow the fees](https://teren.sh/liquidity.html#follow-fees) to see how hy
 
 **[Lending](https://teren.sh/lending.html#experiment)** explores supplying ETH and borrowing USDC. The single-loan lab compares repayment with adding collateral and illustrates liquidation costs. The **[borrowing-loop lab](https://teren.sh/lending.html#loops)** follows borrowed USDC into more ETH, compares price exposure with holding and previews unwinding. Compare round counts and borrowing fractions under shared market conditions. Follow the money through your own construction and unwind preview, including costs and any remaining debt. Four foundation lessons lead to three loop lessons; every lesson is directly accessible. The single-loan model uses fixed simple interest, while loops offer simple interest or continuous compounding. Rates and collateral rules are editable teaching assumptions informed by Aave v3 concepts.
 
+The **[correlated-asset loop lab](https://teren.sh/lending.html#lst-loops)** follows wstETH collateral against WETH debt. Build the balances, compare staking growth with borrowing costs, stress the market discount and oracle assumptions, then inspect a hypothetical atomic exit. The unlooped comparison keeps the same original wstETH. Save exact assumptions and compare named LST variations. This is a separate model from the ETH/USDC loop, with no live Aave or Morpho settings.
+
 ## Models and recorded evidence
 
 - **Hypothetical experiments:** prices, assumed cash fees and lending rates/rules are inputs. Follow the fees instead calculates token fees from chosen trading batches and competing liquidity. Outcomes describe those assumptions; they are not live quotes or forecasts.
@@ -54,7 +56,8 @@ Open http://127.0.0.1:3000/ after starting the development server. `npm run buil
 - [Custom domain and repository cutover](docs/domain-setup.md)
 - [Product decisions](DECISIONS.md)
 - [Review questions and open blind spots](docs/review.md)
-- [Next discussions: LST looping and roadmap choices](docs/roadmap.md)
+- [Correlated-asset looping model](docs/lst-loops.md)
+- [Next discussions and roadmap choices](docs/roadmap.md)
 - [Release history](CHANGELOG.md)
 
 MIT licensed. The adapted Uniswap tick arithmetic retains its [separate notice](public/licenses/uniswap-v3-sdk.txt).

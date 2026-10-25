@@ -1,19 +1,14 @@
 # Next discussion
 
-Updated for 1.38.0. These are discussion priorities, not commitments to build every item.
+Updated for 1.39.0. These are discussion priorities, not commitments to build every item.
 
 ## Correlated-asset looping and LSTs
 
-Bring this back first when discussing the next release. There is a direct user interest in testing liquid staking token (LST) loops, including wstETH/WETH. The product should remain useful for experienced DeFi users testing assumptions as well as people learning a mechanism for the first time.
+The first wstETH/WETH experiment shipped in 1.39.0: build the balances, separate staking and collateral lending growth from WETH borrow costs, stress sale/oracle prices, and inspect a hypothetical atomic exit. The existing ETH/USDC loop remains available.
 
-Start with a visual experiment that separates:
+Next, use this experiment to identify which assumptions experienced users actually want to compare. Test whether a person can distinguish a shared ETH-dollar move, a market discount and an oracle change, and whether they understand why a positive yield spread need not pay for the exit.
 
-- Staking income, lending income and the cost of borrowing. Avoid counting the underlying staking yield twice.
-- A change in borrowing rates, including the role of utilization, from a change in collateral value.
-- The collateral’s value relative to the debt asset from both assets’ prices in dollars. Distinguish a market discount, the redemption/exchange rate and the protocol oracle used for liquidation.
-- Building exposure, maintaining it and unwinding it, including assumed costs and unavailable exits.
-
-Keep the existing ETH/USDC loop: it teaches a different exposure. Step-by-step balances remain useful even when a flash loan packages a real strategy into one transaction. Aave e-mode and Morpho market parameters need separate treatment before either is presented as a supported deployment. A captured current rate must not be presented as a fixed future borrowing cost.
+Candidates for a later release are an explicit utilization-to-rate experiment and a separately validated protocol adapter. Aave e-mode and Morpho Blue require their own market identity, oracle behavior, limits and liquidation rules. A captured rate is a point-in-time observation, not a future borrowing cost. Do not treat wrapping, redemption and a liquid market sale as equivalent exits.
 
 ## Other decisions to revisit
 

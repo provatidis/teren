@@ -3,6 +3,7 @@ import { MODEL as FULL_MODEL, validateScenario } from '../models/cp50-v1.js';
 import { MODEL as RANGE_MODEL, validateRange } from '../models/cl-range-v1.js';
 import { LOAN_MODEL, LOAN_LIMITS, validateLoan } from '../models/collateral-loan-v1.js';
 import { LOOP_MODEL, LOOP_LIMITS, validateLoop } from '../models/borrowing-loop-v1.js';
+import { LST_MODEL, LST_KEYS, validateLST } from '../models/lst-loop-v1.js';
 import { LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation } from '../models/loan-explanations.js';
 import { validReferenceRounds, validReferenceBorrowPercent } from '../models/loop-comparison.js';
 import { validateSnapshot, snapshotView } from './snapshot.js';
@@ -26,6 +27,12 @@ export function experimentNotes(value) {
 }
 export function validateExperimentDraft(input) {
   const model = input?.model;
+  if (model === LST_MODEL) {
+    if (input.origin != null) throw new Error('LST loops use hypothetical assumptions, without a recorded source.');
+    const errors = validateLST(input.inputs);
+    if (Object.keys(errors).length) throw new Error(Object.values(errors)[0]);
+    return { model, inputs: Object.fromEntries(LST_KEYS.map(key => [key, input.inputs[key]])), origin: null };
+  }
   if (model === LOAN_MODEL || model === LOOP_MODEL) {
     if (input.origin != null) throw new Error('Lending experiments use hypothetical inputs, without a recorded source.');
     const errors = model === LOAN_MODEL ? validateLoan(input.inputs) : validateLoop(input.inputs);

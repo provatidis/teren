@@ -4,17 +4,24 @@ import { scenarioHash } from './scenario-links.js';
 import { rangeHash } from './range-links.js';
 import { calculateLoan } from '../models/collateral-loan-v1.js';
 import { calculateLoop } from '../models/borrowing-loop-v1.js';
+import { calculateLST } from '../models/lst-loop-v1.js';
+import { lstHash } from './lst-links.js';
+import { lstExperimentFacts, lstExperimentContext } from './lst-presentation.js';
 import { loanHash } from './lending-links.js';
 import { loopHash } from './loop-links.js';
 import { healthLabel, loanStatus } from './lending-presentation.js';
 import { fmt, usd, signedUSD, percent, formatTokenQuantity } from './format.js';
 import { STATE_COPY } from './range-presentation.js';
 
-const names = { 'cp50-v1': 'V2-style full range', 'cl-range-v1': 'V3-style price range', 'collateral-loan-v1': 'Single loan', 'borrowing-loop-v1': 'Borrowing loop' };
+const names = { 'cp50-v1': 'V2-style full range', 'cl-range-v1': 'V3-style price range', 'collateral-loan-v1': 'Single loan', 'borrowing-loop-v1': 'Borrowing loop', 'lst-loop-v1': 'Correlated-asset loop' };
 export const experimentModelName = model => names[model];
-export const experimentFamily = model => ['collateral-loan-v1', 'borrowing-loop-v1'].includes(model) ? 'lending' : 'liquidity';
+export const experimentFamily = model => model === 'lst-loop-v1' ? 'correlated' : ['collateral-loan-v1', 'borrowing-loop-v1'].includes(model) ? 'lending' : 'liquidity';
 export function experimentView(entry) {
   const family = experimentFamily(entry.model), modelName = experimentModelName(entry.model);
+  if (family === 'correlated') {
+    const result = calculateLST(entry.inputs);
+    return { result, family, modelName, hash: lstHash(entry.inputs), page: 'lending.html', net: result.end.net };
+  }
   if (family === 'lending') {
     const loop = entry.model === 'borrowing-loop-v1';
     const result = loop ? calculateLoop(entry.inputs) : calculateLoan(entry.inputs);
@@ -29,6 +36,7 @@ export function experimentView(entry) {
 }
 export function defaultExperimentName(draft) {
   const { result } = experimentView(draft);
+  if (draft.model === 'lst-loop-v1') return 'wstETH/WETH · ' + draft.inputs.rounds + ' rounds · ' + fmt(draft.inputs.discount) + '% discount';
   if (experimentFamily(draft.model) === 'lending') {
     return draft.model === 'borrowing-loop-v1'
       ? draft.inputs.rounds + ' rounds · borrow ' + fmt(draft.inputs.borrowPercent) + '% · ETH → ' + usd(draft.inputs.future)
@@ -51,6 +59,7 @@ export const startingAssets = initial => fmt(initial.eth, 6) + ' ETH + ' + fmt(i
 export function comparisonContext(entries) {
   if (entries.length < 2) return '';
   if (entries.some(entry => experimentFamily(entry.model) !== experimentFamily(entries[0].model))) return 'Select experiments from one topic to compare their outcomes.';
+  if (experimentFamily(entries[0].model) === 'correlated') return lstExperimentContext(entries);
   if (experimentFamily(entries[0].model) === 'lending') {
     const first = entries[0].inputs;
     const shared = keys => entries.every(entry => keys.every(key => entry.inputs[key] === first[key]));
@@ -74,6 +83,7 @@ export function comparisonContext(entries) {
 
 export function experimentSummary(entry) {
   const { result, family } = experimentView(entry);
+  if (family === 'correlated') return fmt(entry.inputs.collateral, 4) + ' wstETH · ' + entry.inputs.rounds + ' rounds · ' + fmt(entry.inputs.days, 1) + ' days · ' + fmt(entry.inputs.discount, 1) + '% market discount';
   if (family === 'lending') {
     const p = entry.inputs;
     return formatTokenQuantity(p.collateral, 4) + ' ETH · ETH ' + usd(p.start) + ' → ' + usd(p.future) + ' · ' + formatTokenQuantity(p.days, 2) + ' days';
@@ -83,6 +93,7 @@ export function experimentSummary(entry) {
 
 export function experimentFacts(entry, detailed = false) {
   const { result: r, family, initial, net } = experimentView(entry);
+  if (family === 'correlated') return lstExperimentFacts(r, detailed);
   if (family === 'lending') {
     const p = entry.inputs, loop = entry.model === 'borrowing-loop-v1';
     const rows = [

@@ -1,4 +1,5 @@
 import { checkFeeFlow } from './browser/fee-flow-checks.js';
+import { checkLSTLoops } from './browser/lst-loop-checks.js';
 import { checkWeekReplay, checkMobileWeekReplay } from './browser/week-replay-checks.js';
 import { checkMatchedComparison } from './browser/matched-comparison-checks.js';
 import { checkWidthComparison } from './browser/width-comparison-checks.js';
@@ -179,6 +180,11 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (process.env.BROWSER_CHECKS === 'lst') {
+    await checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call });
+    assert.deepEqual(errors, [], 'No uncaught browser errors');
+    return;
+  }
   if (process.env.BROWSER_CHECKS === 'fees') {
     await checkWidthComparison({ evaluate, click, fill, text, navigate, reload, base, call });
     await checkFeeFlow({ evaluate, click, fill, text, navigate, reload, base, call });
@@ -629,6 +635,7 @@ try {
   await checkLending({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   await checkLoanConsequences({ evaluate, click, fill, text, navigate, base, call });
   await checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call });
+  await checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkVisualLessonPilots({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkFoundationLessons({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkLendingScenes({ evaluate, click, text, navigate, reload, base, call });

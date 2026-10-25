@@ -8,6 +8,7 @@ const destinations = {
   'cl-width-v1': { page: 'liquidity.html', prefix: '#width=cl-width-v1&', title: 'Liquidity · compare widths' },
   'collateral-loan-v1': { page: 'lending.html', prefix: '#loan=collateral-loan-v1&', title: 'Lending · single loan' },
   'borrowing-loop-v1': { page: 'lending.html', prefix: '#loop=borrowing-loop-v1&', title: 'Lending · borrowing loops' },
+  'lst-loop-v1': { page: 'lending.html', prefix: '#lst=lst-loop-v1&', title: 'Lending · correlated-asset loops' },
 };
 
 function locationView(value) {

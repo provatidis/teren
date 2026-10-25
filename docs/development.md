@@ -242,3 +242,9 @@ Run the full unit/structure/build/browser checks for release. `BROWSER_CHECKS=fe
 
 
 `ui/fee-mechanics.js` owns only the isolated arbitrage steps. The scene uses the existing full-range calculation, stays separate from the fee ledger and opens directly at `#fee-mechanics`. The static JIT diagram labels its fictional liquidity units and shares. Both explanations are optional, and no LVR estimate or new lesson grading is introduced. Check the next-batch share readout, empty-liquidity alternatives, competitor boundaries, per-batch widths, legacy migration and scene isolation before extending the model.
+
+## Correlated-loop extension · 1.39.0
+
+`models/lst-loop-v1.js` owns construction, accrual, the rate-only boundary check, one liquidation event and an atomic exit ledger. `lib/lst-links.js` validates complete versioned fragments; `data/lst-state.js` keeps its independent local draft. `lib/lst-scene.js` renders intermediate balances without changing model inputs. `ui/lst-loops.js` owns controls and the three-stage view, composed from `lending-main.js`. Shared saved experiments support the model as its own comparison family. No chain adapter or protocol preset is implied.
+
+Tests independently check geometric construction, conservation, APY/APR accrual, price/oracle separation, earlier-boundary recovery, bad debt, exit obligations, strict links and storage. Browser coverage includes cross-topic reopening, invalid-input recovery, live result updates and native touch controls at 390px/320px. The lending tool strip scrolls horizontally without widening the page.

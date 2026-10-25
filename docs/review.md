@@ -1,8 +1,11 @@
 # Review questions and open blind spots
 
-## Current priorities · 1.38.0
+## Current priorities · 1.39.0
 
-- Revisit [correlated-asset/LST looping and deferred roadmap choices](roadmap.md) at the next next-steps discussion. This is a requested priority; do not silently replace it with wallet monitoring, broader chain coverage or arbitrary backtesting.
+- The correlated-loop experiment is hypothetical, with no live Aave or Morpho parameters. Review [the remaining roadmap](roadmap.md) before expanding it. A successful ledger does not establish executable swaps, flash loans, withdrawals or a survivable price path.
+- Ask a user to explain what happens to health factor when only ETH/USD changes, then when the market discount changes under each oracle assumption. Ask why unlooped wstETH already earns staking growth, and why flash-borrowed cash is not profit. These learning outcomes have not been observed.
+- The rate-only boundary check catches an earlier crossing followed by a recovery, but the market discount is an endpoint stress. Actual oracle delays/caps, intraperiod discount paths, slashing events, available liquidity, protocol-specific rates and liquidation rules remain outside the model. Build gas is excluded; the exit assumes flat gas can be paid up front.
+- Correlated-loop comparisons use WETH and the original wstETH benchmark. Named records with different assumptions must not become a ranked list of equivalent investments. Mobile emulation and native touch checks still need actual-device and assistive-technology follow-through.
 - Fee competition now has a visible, independent range. The new default is a chosen 100% width, not an estimate of real liquidity. One range for all competitors remains a major simplification. A single block's active liquidity would not describe competition across future prices or historical swaps.
 - Check whether a user can explain why the same competitor capital earns a larger share when concentrated, and why a fully inactive alternative cannot receive trading. Existing fee tokens must remain distinct from the next-batch preview. Legacy full-range batches retain their meaning.
 - The arbitrage and JIT illustrations add mechanism explanations without estimating losses or reconstructing swaps. Ask whether a user distinguishes the holding and rebalancing benchmarks and understands that JIT fee dilution alone does not determine total LP profit. Do not add IL and LVR as independent deductions.
