@@ -292,6 +292,7 @@
               <path d="M70 38H570 M70 88H570" class="width-track"/>
               <rect id="width-band-a" y="24" height="28" class="width-band width-band-a"/>
               <rect id="width-band-b" y="74" height="28" class="width-band width-band-b"/>
+              <g id="width-competitors" visibility="hidden"><text x="12" y="143" class="chart-label">Other</text><path d="M70 138H570" class="width-track"/><rect id="width-band-others" y="124" height="28" class="width-band width-band-others"/></g>
               <path id="width-start-marker" class="width-start-marker"/><path id="width-price-marker" class="width-price-marker"/>
               <text id="width-scale-low" x="70" y="138" class="chart-label"></text><text id="width-scale-high" x="570" y="138" text-anchor="end" class="chart-label"></text>
             </svg>
@@ -334,18 +335,33 @@
               <div class="scenario-field"><label for="fee-flow-volume">Trading volume · USD</label><input id="fee-flow-volume" type="number" min="0" max="1000000000" step="any" value="1000000" aria-describedby="fee-flow-volume-error"><p id="fee-flow-volume-error" class="field-error" hidden></p></div>
               <div class="scenario-field"><label for="fee-flow-competition">Other LPs’ starting capital · USD</label><input id="fee-flow-competition" type="number" min="1" max="1000000000000" step="any" value="1000000" aria-describedby="fee-flow-competition-error fee-flow-competition-help"><p id="fee-flow-competition-error" class="field-error" hidden></p></div>
             </div>
-            <p id="fee-flow-competition-help" class="fine-print">Other LPs spread that capital across all prices, valued at the shared starting ETH price. Each range is a separate alternative against those same LPs.</p>
+            <p id="fee-flow-competition-help" class="fine-print">Valued at the shared starting ETH price. Each range is a separate alternative against those same LPs.</p>
             <details class="fee-flow-rates"><summary>Trader fee and protocol share <span id="fee-flow-rate-summary"></span></summary><div class="fee-flow-settings">
               <div class="scenario-field"><label for="fee-flow-tier">Trader fee</label><select id="fee-flow-tier"><option value="100">0.01%</option><option value="500">0.05%</option><option value="3000" selected>0.30%</option><option value="10000">1.00%</option></select></div>
               <div class="scenario-field"><label for="fee-flow-protocol">Protocol share of fees</label><select id="fee-flow-protocol"><option value="0">None</option><option value="4">1/4</option><option value="5">1/5</option><option value="6" selected>1/6</option><option value="7">1/7</option><option value="8">1/8</option><option value="9">1/9</option><option value="10">1/10</option></select></div>
             </div><p class="fine-print">Chosen teaching assumptions, not the current settings of a live pool. Actual protocol shares can differ between the two input tokens.</p></details>
             </details>
             <div id="fee-flow-market"></div>
+            <div class="fee-flow-next">
+            <section class="fee-flow-competition" aria-labelledby="fee-flow-competition-title">
+              <h3 id="fee-flow-competition-title">The other LPs’ range</h3>
+              <p id="fee-flow-competitor-capital" class="body-copy"></p>
+              <label for="fee-flow-other-width">Other LPs’ range width <output id="fee-flow-width-value" for="fee-flow-other-width"></output></label>
+              <input id="fee-flow-other-width" type="range" min="1" max="400" step="any" value="100" aria-describedby="fee-flow-competitor-bounds fee-flow-concentration-help">
+              <div class="fee-flow-slider-ends" aria-hidden="true"><span>Tighter range</span><span>Wider range</span></div>
+              <label class="fee-flow-full-range"><input id="fee-flow-full-range" type="checkbox"> Spread their capital across all prices (full range)</label>
+              <div class="fee-flow-impact" aria-live="polite"><p>Your share of the next batch’s LP fees</p><div><span>A <strong id="fee-flow-impact-a"></strong></span><span>B <strong id="fee-flow-impact-b"></strong></span></div></div>
+              <p id="fee-flow-competitor-bounds" class="fine-print"></p>
+              <p id="fee-flow-concentration-help" class="fine-print">Changing this width keeps their starting capital the same.</p>
+              <button id="fee-flow-start" type="button" class="button secondary">Compare at the starting price</button>
+              <p class="fine-print">One illustrative range for all other LPs.</p>
+            </section>
+            <div class="fee-flow-preview">
             <p class="fine-print">Only added batches earn fees here. Moving the price adds no trading.</p>
             <p id="fee-flow-error" class="field-error" role="status"></p>
             <div id="fee-flow-quote">
               <p id="fee-flow-quote-price" class="fee-flow-quote-price"></p>
-              <div class="fee-flow-source" aria-label="Where this batch’s fees go">
+              <div id="fee-flow-source" class="fee-flow-source" aria-label="Where this batch’s fees go">
                 <div><span>Traders pay in fees</span><strong id="fee-flow-gross"></strong></div>
                 <span class="fee-flow-arrow" aria-hidden="true">→</span>
                 <div><span>To the protocol</span><strong id="fee-flow-cut"></strong></div>
@@ -355,6 +371,7 @@
               <div id="fee-flow-quotes" class="fee-flow-columns"></div>
               <p id="fee-flow-mechanism" class="body-copy"></p>
             </div>
+            </div></div>
             <div class="fee-flow-actions"><button id="fee-flow-add" type="button" class="button primary">Add this trading batch</button><button id="fee-flow-example" type="button" class="button secondary">Try two batches</button></div>
             <p id="fee-flow-status" role="status" class="fine-print"></p>
             <section id="fee-flow-totals" aria-labelledby="fee-flow-totals-title">
@@ -365,11 +382,48 @@
             </section>
             <details id="fee-flow-ledger" class="model-details"><summary>Inspect the batches <span id="fee-flow-ledger-count"></span></summary><ol id="fee-flow-batches"></ol></details>
             <div class="fee-flow-actions"><button id="fee-flow-undo" class="button secondary" type="button">Undo last batch</button><button id="fee-flow-clear" class="text-button" type="button">Clear batches</button></div>
-            <p class="fine-print">Changing widths or the shared starting setup recalculates every batch. Trading settings apply to the next batch. Keep up to eight batches; share the comparison to retain all of them.</p>
+            <p class="fine-print">Changing A/B widths or the shared starting setup recalculates every batch. Trading and competitor settings apply to the next batch. Keep up to eight batches; share the comparison to retain all of them.</p>
+            <details id="fee-mechanics" class="model-details fee-mechanics">
+              <summary>Go deeper: arbitrage and changing fee competition</summary>
+              <div>
+                <h3>Why do pools trade when the market moves?</h3>
+                <p>Follow one price change. This separate illustration does not add fees or trades to your experiment.</p>
+                <div class="fee-scene-steps" role="group" aria-label="Arbitrage illustration">
+                  <button type="button" data-fee-arbitrage-stage="0" aria-pressed="true" aria-controls="fee-arbitrage-scene">1 · Prices match</button>
+                  <button type="button" data-fee-arbitrage-stage="1" aria-pressed="false" aria-controls="fee-arbitrage-scene">2 · Market moves</button>
+                  <button type="button" data-fee-arbitrage-stage="2" aria-pressed="false" aria-controls="fee-arbitrage-scene">3 · Trade follows</button>
+                </div>
+                <figure id="fee-arbitrage-scene" class="fee-arbitrage-scene" data-stage="0">
+                  <div class="fee-scene-prices"><div><span>Market ETH price</span><strong id="fee-arbitrage-market">$2,000.00</strong></div><div><span>Pool ETH price</span><strong id="fee-arbitrage-pool">$2,000.00</strong></div></div>
+                  <div class="fee-scene-wallet"><span class="fee-scene-label">Tokens in the example pool</span><span><i class="allocation-swatch allocation-swatch-eth" aria-hidden="true"></i><strong id="fee-arbitrage-eth">10 ETH</strong></span><span><i class="allocation-swatch allocation-swatch-usdc" aria-hidden="true"></i><strong id="fee-arbitrage-usdc">20,000.00 USDC</strong></span></div>
+                  <div class="fee-scene-trade" aria-hidden="true"><span>ETH → trader</span><span>USDC → pool</span></div>
+                  <figcaption id="fee-arbitrage-caption" aria-live="polite"></figcaption>
+                </figure>
+                <p class="fine-print">A full-range, zero-fee illustration. Real arbitrage must cover fees and execution costs, so a price gap can remain. If the market price falls instead, the trade direction reverses.</p>
+                <p>Arbitrage helps bring pool prices toward market prices. For LPs, those trades can also give up value: the pool sells an asset while its price is catching up.</p>
+                <h4>Two different comparisons</h4>
+                <dl class="fee-benchmarks"><div><dt>Impermanent loss</dt><dd>Compare the LP’s principal with keeping its starting tokens.</dd></div><div><dt>Loss-versus-rebalancing (LVR)</dt><dd>Compare with a strategy that makes the same balance changes at external market prices, under its stated assumptions.</dd></div></dl>
+                <p>They answer different questions. Adding IL and LVR as two separate charges would mix the benchmarks. This illustration does not estimate LVR or change your results.</p>
+                <p class="fine-print"><a href="https://arxiv.org/html/2208.06046v6" target="_blank" rel="noopener noreferrer">Research: loss-versus-rebalancing ↗</a></p>
+                <h3>Competition can change for a single trade</h3>
+                <p>A provider can add liquidity just before a swap and remove it just after. This is called just-in-time liquidity, or JIT.</p>
+                <figure class="fee-jit-scene">
+                  <div class="fee-jit-stages">
+                    <div><strong>Before</strong><div class="fee-jit-bar" role="img" aria-label="Existing LPs supply all 100 units of active liquidity"><span class="fee-jit-existing"></span></div><p>Existing LPs<br>100% of active liquidity</p></div>
+                    <div><strong>During the trade</strong><div class="fee-jit-bar fee-jit-during" role="img" aria-label="Existing LPs keep their 100 units. Temporary LPs add 300 units. Existing LPs now supply 25 percent of active liquidity"><span class="fee-jit-existing"></span><span class="fee-jit-temporary"></span></div><p>Existing LPs<br>25% of active liquidity</p></div>
+                    <div><strong>After</strong><div class="fee-jit-bar" role="img" aria-label="Temporary liquidity leaves. Existing LPs again supply all 100 units"><span class="fee-jit-existing"></span></div><p>Existing LPs<br>100% of active liquidity</p></div>
+                  </div>
+                  <figcaption><span class="fee-jit-key">Solid: existing LPs · striped: temporary LPs.</span> An invented example: 100 liquidity units stay, 300 join for the trade, then leave. Bars show shares, not capital or pool size.</figcaption>
+                </figure>
+                <p>The existing LPs did not withdraw anything. Extra liquidity reduced their share of that trade’s fees. In a real swap it can also improve the trader’s execution, so fee dilution alone does not establish the effect on LP profit.</p>
+                <p class="fine-print">A snapshot before or after the trade can miss that competition. Neither this illustration nor the fee batches reconstruct real JIT activity. <a href="https://blog.uniswap.org/jit-liquidity" target="_blank" rel="noopener noreferrer">Uniswap’s JIT research ↗</a></p>
+              </div>
+            </details>
             <details class="model-details"><summary>How fees are allocated here</summary><div>
               <p>Half of each batch’s gross input value is ETH and half is USDC. The trader fee is taken from each input token. After the chosen protocol share, your active range receives its liquidity divided by the combined liquidity of your range and the other LPs. A and B are alternatives, not positions competing with each other.</p>
-              <p>Other LPs use continuous full-range liquidity; their entered capital is valued at the shared starting price. Trading volume, competitor capital, fee tier and protocol share are captured separately for each batch. Fees remain in tokens without compounding and are valued at the selected comparison price, with USDC = $1.</p>
-              <p>The price is held fixed while each batch is allocated. Price impact, routing, tick crossings and fees from moving between batch prices are omitted. Exact range edges require individual swap direction, so batches at an edge are not added. This is an allocation approximation, not a historical replay or executable pool simulation.</p>
+              <p>Real pools contain many overlapping ranges that change over time. This experiment groups other LPs into one chosen range; it does not show typical earnings.</p>
+              <p>Other LPs start 50/50 by value in one range centered on the starting price, or across the full range. Their entered capital is valued at that starting price. Their width, capital, trading volume, fee tier and protocol share are captured separately for each batch. Changing the shared starting price recenters every range; moving the comparison price does not. Fees remain in tokens without compounding and are valued at the selected comparison price, with USDC = $1.</p>
+              <p>The price is held fixed while each batch is allocated. Price impact, routing, tick crossings and fees from moving between batch prices are omitted. Exact range edges require individual swap direction, so batches at an edge are not added. A batch also cannot be added if either alternative has no active LPs. This is an allocation approximation, not a historical replay or executable pool simulation.</p>
               <p>Principal uses the existing continuous range model. Gas, incentives, rebalancing and contract rounding are excluded. The handoff to the range lab converts retained fee tokens into a fixed USD assumption at the selected price.</p>
               <p><a href="https://developers.uniswap.org/docs/get-started/concepts/fees" target="_blank" rel="noopener noreferrer">Uniswap fee sharing ↗</a> · <a href="https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol" target="_blank" rel="noopener noreferrer">Pool accounting ↗</a></p>
             </div></details>

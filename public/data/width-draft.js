@@ -1,5 +1,5 @@
 import { validateWidths } from '../models/range-width.js';
-import { validateFeeFlow } from '../models/range-fee-flow-v1.js';
+import { validateFeeFlow } from '../models/range-fee-flow-v2.js';
 
 export const WIDTH_DRAFT_KEY = 'teren-width-comparison-v1';
 export function readWidthDraft(getStorage = () => globalThis.localStorage) {
@@ -7,10 +7,10 @@ export function readWidthDraft(getStorage = () => globalThis.localStorage) {
     const text = getStorage().getItem(WIDTH_DRAFT_KEY);
     if (!text) return { inputs: null, status: 'empty' };
     const record = JSON.parse(text);
-    if (![1, 2].includes(record?.version)) return { inputs: null, status: 'invalid' };
+    if (![1, 2, 3].includes(record?.version)) return { inputs: null, status: 'invalid' };
     try {
       return { inputs: validateWidths(record.inputs), status: 'saved',
-        ...(record.version === 2 ? { flow: validateFeeFlow(record.flow) } : {}) };
+        ...(record.version >= 2 ? { flow: validateFeeFlow(record.flow) } : {}) };
     } catch { return { inputs: null, status: 'invalid' }; }
   } catch (error) {
     return { inputs: null, status: error instanceof SyntaxError || error?.message?.includes('must be between') ? 'invalid' : 'unavailable' };
@@ -18,7 +18,7 @@ export function readWidthDraft(getStorage = () => globalThis.localStorage) {
 }
 export function saveWidthDraft(input, getStorage = () => globalThis.localStorage, flow = null) {
   const inputs = validateWidths(input);
-  const record = flow ? { version: 2, inputs, flow: validateFeeFlow(flow) } : { version: 1, inputs };
+  const record = flow ? { version: 3, inputs, flow: validateFeeFlow(flow) } : { version: 1, inputs };
   try {
     getStorage().setItem(WIDTH_DRAFT_KEY, JSON.stringify(record));
     return true;

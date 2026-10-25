@@ -2,7 +2,7 @@ import { WIDTH_MODEL, validateWidths } from '../models/range-width.js';
 
 const keys = { investment: 'capital', initialPrice: 'start', futurePrice: 'price', widthA: 'a', widthB: 'b' };
 export function isWidthHash(hash) {
-  return ['#compare-widths', '#follow-fees'].includes(hash) || new URLSearchParams(hash.replace(/^#/, '')).has('width');
+  return ['#compare-widths', '#follow-fees', '#fee-mechanics'].includes(hash) || new URLSearchParams(hash.replace(/^#/, '')).has('width');
 }
 export function widthHash(input) {
   const scenario = validateWidths(input);

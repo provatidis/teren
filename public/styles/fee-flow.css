@@ -71,3 +71,30 @@
   .fee-flow-column strong, .fee-flow-column dd { font-size: 16px; }
   .fee-flow-source strong { font-size: 16px; }
 }
+
+.width-band-others { fill: var(--muted); fill-opacity: .3; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 2 4; }
+.fee-flow-competition { margin: 20px 0 24px; padding: 20px; border: 1px solid var(--border-strong); border-radius: 10px; }
+.fee-flow-next { display: grid; grid-template-columns: minmax(0,.85fr) minmax(0,1.15fr); align-items: start; gap: 24px; }
+.fee-flow-next > * { min-width: 0; }
+.fee-flow-preview { padding-top: 10px; }
+.fee-flow-impact { padding: 12px 0; border-block: 1px solid var(--border); margin: 12px 0; }
+.fee-flow-impact > p { margin: 0 0 8px; font-size: 14px; line-height: 1.6; }
+.fee-flow-impact > div { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fee-flow-impact strong { display: block; font-size: 21px; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.fee-flow-competition h3 { margin-top: 0; font-size: 19px; }
+.fee-flow-competition > label:first-of-type { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 15px; line-height: 1.6; }
+#fee-flow-width-value { font-variant-numeric: tabular-nums; color: var(--text); }
+#fee-flow-other-width { width: 100%; min-height: 44px; accent-color: var(--accent); cursor: pointer; margin: 4px 0 0; }
+#fee-flow-other-width:disabled { opacity: .45; cursor: default; }
+.fee-flow-slider-ends { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); }
+.fee-flow-full-range { display: flex; align-items: center; gap: 12px; min-height: 48px; margin: 12px 0 0; font-size: 14px; line-height: 1.6; cursor: pointer; }
+.fee-flow-full-range input { width: 20px; height: 20px; flex: none; accent-color: var(--accent); }
+#fee-flow-competitor-bounds { min-height: 3.4em; }
+@media(max-width:1050px) {
+  .fee-flow-next { grid-template-columns: 1fr; gap: 0; }
+}
+@media(max-width:750px) {
+  .fee-flow-competition { padding: 14px; }
+  .fee-flow-competition h3 { font-size: 18px; }
+  #fee-flow-start { width: 100%; }
+}
