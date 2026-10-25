@@ -35,3 +35,5 @@ Technical references: [models](docs/models.md), [data](docs/data.md), [developme
 
 - Review experienced users’ tasks alongside beginner comprehension. Home gives experimentation and guided learning equal standing. Keep repeatable personal work—saved assumptions, variations, comparisons and return visits—available without lessons. Shared-condition comparisons must expose exactly which choices differ; saved scenarios with different conditions must say so.
 - Controlled width experiments hold capital, starting price, initial token basket and endpoint price equal. Use reciprocal bounds to preserve a 50/50 starting basket. Their principal results and fee hurdles are hypothetical; never transplant recorded NFT fees onto these altered ranges.
+
+- Hypothetical fee allocation captures explicit trading batches and retains fee tokens separately. Preserve per-batch assumptions, exclude previews from totals, and distinguish token accrual from later USD revaluation. A fixed-price fee split is not a swap engine, historical replay or earnings forecast; do not silently replace that scope with a stronger claim.

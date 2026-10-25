@@ -1,5 +1,7 @@
 import { calculateWidthComparison, DEFAULT_WIDTHS, WIDTH_LIMITS, WIDTH_MODEL, widthPriceDomain } from '../models/range-width.js';
-import { isWidthHash, widthHash, widthsFromHash } from '../lib/width-links.js';
+import { isWidthHash } from '../lib/width-links.js';
+import { widthFlowHash, widthFlowFromHash } from '../lib/width-flow-links.js';
+import { FEE_FLOW_MODEL, DEFAULT_FEE_FLOW } from '../models/range-fee-flow-v1.js';
 import { readWidthDraft, saveWidthDraft } from '../data/width-draft.js';
 import { saveExperimentLocation } from '../data/experiment-location.js';
 import { assetAmounts, rangePriceLabels, STATE_COPY } from '../lib/range-presentation.js';
@@ -12,7 +14,7 @@ const node = (tag, text, className) => {
   return element;
 };
 
-export function initWidthComparison({ rangeLab }) {
+export function initWidthComparison({ rangeLab, feeFlow }) {
   const $ = id => document.getElementById(id);
   const fields = { investment: 'width-capital', initialPrice: 'width-start', futurePrice: 'width-price', widthA: 'width-a', widthB: 'width-b' };
   const saved = readWidthDraft();
@@ -105,6 +107,7 @@ export function initWidthComparison({ rangeLab }) {
       $('width-error').textContent = ''; $('width-results').hidden = false;
       $('width-share').disabled = false;
       $('width-setup-label').textContent = usd(current.investment) + ' each · ETH ' + usd(current.initialPrice);
+      $('width-inputs-overview').textContent = 'A ' + fmt(current.widthA, 2) + '% · B ' + fmt(current.widthB, 2) + '% · ' + usd(current.investment) + ' each';
       $('width-starting-tokens').textContent = 'Both start with ' + assetAmounts(current.initial) + '.';
       $('width-current').textContent = 'ETH ' + usd(current.futurePrice) + ' · ' + percent((current.futurePrice / current.initialPrice - 1) * 100) + ' from the start';
       const slider = $('width-price-slider');
@@ -141,19 +144,23 @@ export function initWidthComparison({ rangeLab }) {
             + (gap < .005 ? 'Their fee targets are less than half a cent apart at this price.'
               : 'It needs ' + usd(gap) + ' more fees to match holding at this price.');
       renderBands(); renderGapChart();
-      if (persist) {
-        const savedOK = saveWidthDraft(current);
+      feeFlow.update(current);
+      $('width-share').disabled = !feeFlow.isValid();
+      $('width-fee-invalid').textContent = feeFlow.isValid() ? '' : 'Check the Follow the fees inputs before saving or sharing this comparison.';
+      if (persist && feeFlow.isValid()) {
+        const flow = feeFlow.getState();
+        const savedOK = saveWidthDraft(current, undefined, flow);
         saved.inputs = input; saved.status = savedOK ? 'saved' : 'unavailable';
         $('width-save-status').textContent = savedOK ? 'Comparison kept in this browser. Share the link to reopen it elsewhere.' : 'This browser could not save the comparison. Use the share link to keep it.';
         $('width-notice').textContent = '';
         if (isWidthHash(location.hash)) {
-          const hash = widthHash(current);
+          const hash = widthFlowHash(current, flow);
           history.replaceState(null, '', location.pathname + location.search + hash);
-          saveExperimentLocation(WIDTH_MODEL, hash);
+          saveExperimentLocation(flow ? FEE_FLOW_MODEL : WIDTH_MODEL, hash);
         }
       }
     } catch (error) {
-      current = null; $('width-error').textContent = error.message;
+      current = null; $('width-inputs').open = true; feeFlow.update(null); $('width-error').textContent = error.message;
       $('width-results').hidden = true; $('width-share').disabled = true;
       $('width-starting-tokens').textContent = 'Correct the highlighted inputs to compare the positions.';
       if (['width-capital', 'width-start'].some(id => $(id).getAttribute('aria-invalid') === 'true')) $('width-setup').open = true;
@@ -170,10 +177,10 @@ export function initWidthComparison({ rangeLab }) {
     if (button) { $('width-price').value = button.dataset.price; render({ persist: true, updateDomain: false }); }
   });
   $('width-chart-details').addEventListener('toggle', renderGapChart);
-  $('width-reset').addEventListener('click', () => { fill(DEFAULT_WIDTHS); render({ persist: true }); });
+  $('width-reset').addEventListener('click', () => { feeFlow.restore(null); fill(DEFAULT_WIDTHS); render({ persist: true }); });
   $('width-share').addEventListener('click', async () => {
-    if (!current) return;
-    const url = new URL(location.pathname, location.origin); url.hash = widthHash(current);
+    if (!current || !feeFlow.isValid()) return;
+    const url = new URL(location.pathname, location.origin); url.hash = widthFlowHash(current, feeFlow.getState());
     $('width-share-url').value = url.href; $('width-share-result').hidden = false;
     try { await navigator.clipboard.writeText(url.href); $('width-share-status').textContent = 'Comparison link copied.'; }
     catch { $('width-share-status').textContent = 'Copy this link to keep both widths and the shared assumptions.'; $('width-share-url').focus(); $('width-share-url').select(); }
@@ -181,15 +188,19 @@ export function initWidthComparison({ rangeLab }) {
   function restore() {
     if (!isWidthHash(location.hash)) return;
     try {
-      const shared = widthsFromHash(location.hash);
+      const parsed = widthFlowFromHash(location.hash), shared = parsed.inputs;
+      if (shared) feeFlow.restore(parsed.flow);
+      else if (location.hash === '#follow-fees') feeFlow.restore({ ...(feeFlow.getState() || DEFAULT_FEE_FLOW), enabled: true });
       fill(shared || current || saved.inputs || DEFAULT_WIDTHS); render();
       $('width-notice').textContent = shared ? 'Shared hypothetical comparison loaded.'
         : saved.status === 'invalid' ? 'The previous local comparison could not be read. Showing the default setup; editing it will replace that local copy.'
           : saved.status === 'unavailable' ? 'Local storage is unavailable. You can still explore and share a link.' : '';
     } catch (error) {
-      fill(DEFAULT_WIDTHS); render(); $('width-notice').textContent = error.message + ' Showing the default setup.';
+      feeFlow.restore(null); fill(DEFAULT_WIDTHS); render(); $('width-notice').textContent = error.message + ' Showing the default setup.';
     }
   }
+  feeFlow.restore(saved.flow || null);
   makeCards(); fill(saved.inputs || DEFAULT_WIDTHS); render();
   window.addEventListener('hashchange', restore); restore();
+  return { saveFees: () => render({ persist: true, updateDomain: false }) };
 }

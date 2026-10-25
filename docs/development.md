@@ -230,3 +230,12 @@ The existing version-1 experiment library accepts the tagged `collateral-loan-v1
 `#compare-widths` opens a focused Experiment workspace. `ui/width-comparison.js` owns controls, range bands, current inventories, the optional before-fee gap chart and exact handoffs through the injected range-lab interface. The 0–1000 native slider maps to a fixed price domain during a drag; exact numeric inputs and boundary buttons retain their unrounded values. It does not fetch recorded data or alter learning progress. Existing named-experiment schemas remain unchanged; either result can be opened and saved through the range lab.
 
 Reference/invariant tests cover centering, shared baskets, equal/reversed widths, scaling, boundaries and fee targets. Browser checks cover links, Home resume, reload/Back, recovery, keyboard and native touch at 390px/320px, chart text and isolated handoffs. Run the focused browser checks with `BROWSER_CHECKS=width npm run test:browser`; the full suite includes them.
+
+
+## Fee-flow experiment
+
+`models/range-fee-flow-v1.js` allocates and accumulates hypothetical token fees on top of the existing width/principal model. `ui/range-fee-flow.js` receives the range-lab handoff and a change callback through `main.js`; it does not import another UI controller. The width controller supplies the common inputs and coordinates validation, sharing and persistence. Switching views moves the same bands/price control only on the mode transition; price input does not rebuild or move its slider.
+
+`lib/width-flow-links.js` keeps the old `cl-width-v1` links unchanged and adds bounded `cl-width-fees-v1` links with validated compact tuples. The existing width draft key reads version 1 and version 2; version 2 stores widths and the complete fee state together on valid edits. Invalid edits preserve the last valid draft and disable sharing. A standalone `#follow-fees` route opens the fee view. Home’s lightweight location metadata recognizes the new model. Named experiment libraries and historical schemas are unchanged.
+
+Run the full unit/structure/build/browser checks for release. `BROWSER_CHECKS=fees npm run test:browser` focuses on both original width behavior and the fee flow, including native touch at 390px and 320px, sharing, restoration, handoffs, invalid inputs, ledger limits and retained fees outside a range. No network request is introduced by the experiment.

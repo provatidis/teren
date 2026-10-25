@@ -5,7 +5,7 @@ export function isLiquidityEntry(hash) {
   const parameters = new URLSearchParams(hash.replace(/^#/, ''));
   return ['#experiment', '#inspect', '#lp-lab', '#range-lab', '#pool-lab',
     '#position-lab', '#swap-sandbox', '#example-library', '#saved-experiments',
-    '#historical-case', '#fee-comparison', '#compare-widths'].includes(hash)
+    '#historical-case', '#fee-comparison', '#compare-widths', '#follow-fees'].includes(hash)
     || ['scenario', 'example', 'historical-case', 'width'].some(key => parameters.has(key));
 }
 

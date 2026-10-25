@@ -1,6 +1,7 @@
 import { initLearnReturn } from './ui/learn-return.js';
 import { initPositionPeriod } from './ui/position-period.js';
 import { initMatchedComparison } from './ui/matched-comparison.js';
+import { initRangeFeeFlow } from './ui/range-fee-flow.js';
 import { initWidthComparison } from './ui/width-comparison.js';
 import { initWorkspaces } from './ui/workspaces.js';
 import { initPositionFees } from './ui/position-fees.js';
@@ -36,6 +37,8 @@ initExamples({
 initSavedExperiments({ labs: { 'cp50-v1': fullRangeLab, 'cl-range-v1': rangeLab } });
 initPositionPeriod({ rangeLab });
 initMatchedComparison({ rangeLab });
-initWidthComparison({ rangeLab });
+let widthComparison;
+const feeFlow = initRangeFeeFlow({ rangeLab, onChange: () => widthComparison.saveFees() });
+widthComparison = initWidthComparison({ rangeLab, feeFlow });
 
 workspaces.restoreLocation();

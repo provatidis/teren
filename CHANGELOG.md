@@ -1,5 +1,13 @@
 # Release history
 
+## 1.37.0 · 2026-10-25
+
+- Add Follow the fees within the controlled width experiment. Allocate a hypothetical trading batch between the protocol, the chosen active range and other LPs; each range is a separate alternative against the same competing liquidity.
+- Keep up to eight batches with their own prices, volumes, competitor capital, fee tiers and protocol shares. Retain ETH/USDC fee tokens after range exits, revalue them at the selected price, and separate fees, LP versus holding and dollar change. Previewed activity is excluded until added.
+- Keep the price control next to the fee split, with setup details available on demand, paired mobile results, a two-batch example, undo/clear and exact fee-value handoffs. Versioned links and migrated local drafts retain every assumption; original width-only links and records remain supported.
+- Label the fixed-price approximation explicitly. Half of each batch’s input notional is ETH and half USDC; the other LPs use continuous full-range liquidity. No price impact, inter-batch swap fees, historical earnings or executable trades are inferred. Exact-edge batches require a different model and cannot be added.
+- Add independent fee-allocation, conservation, revaluation, dilution, compatibility and desktop/mobile workflow checks. Historical evidence and lesson progress are unchanged.
+
 ## 1.36.0 · 2026-10-25
 
 - Add a controlled range-width experiment with equal capital, starting price, 50/50 token basket and comparison price. Reciprocal bounds preserve the common starting mix as either width changes; A and B can be equal or reverse order.
