@@ -37,3 +37,7 @@ Technical references: [models](docs/models.md), [data](docs/data.md), [developme
 - Controlled width experiments hold capital, starting price, initial token basket and endpoint price equal. Use reciprocal bounds to preserve a 50/50 starting basket. Their principal results and fee hurdles are hypothetical; never transplant recorded NFT fees onto these altered ranges.
 
 - Hypothetical fee allocation captures explicit trading batches and retains fee tokens separately. Preserve per-batch assumptions, exclude previews from totals, and distinguish token accrual from later USD revaluation. A fixed-price fee split is not a swap engine, historical replay or earnings forecast; do not silently replace that scope with a stronger claim.
+
+- Fee competition must expose where other LPs place capital, not just its dollar total. A chosen competitor range remains hypothetical; a current active-liquidity snapshot is not a historical path. Legacy full-range assumptions retain their original meaning.
+- Explain arbitrage and temporary liquidity with optional visual mechanisms. Holding and rebalancing are separate benchmarks; do not add IL and LVR as independent costs.
+- At the next roadmap discussion, revisit correlated-asset/LST looping first. Focus on staking income versus borrow cost, changing rates and relative asset prices before adding live protocol adapters. Keep the priorities and deferred scope in [the roadmap](docs/roadmap.md).

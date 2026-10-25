@@ -1,4 +1,4 @@
-import { calculateFeeFlow, DEFAULT_FEE_FLOW, MAX_FEE_BATCHES, validateFeeFlow } from '../models/range-fee-flow-v1.js';
+import { calculateFeeFlow, DEFAULT_FEE_FLOW, MAX_FEE_BATCHES, validateFeeFlow } from '../models/range-fee-flow-v2.js';
 import { compactUSD, fmt, formatTokenQuantity, signedUSD, usd } from '../lib/format.js';
 
 const node = (tag, text, className) => {
@@ -9,7 +9,7 @@ const node = (tag, text, className) => {
 };
 const shareText = share => fmt(share * 100, share > 0 && share < .0001 ? 4 : 2) + '%';
 
-export function initRangeFeeFlow({ rangeLab, onChange }) {
+export function initRangeFeeFlow({ rangeLab, onChange, onStartingPrice }) {
   const $ = id => document.getElementById(id);
   const fields = { volume: 'fee-flow-volume', competition: 'fee-flow-competition',
     feeTier: 'fee-flow-tier', protocolDivisor: 'fee-flow-protocol' };
@@ -17,8 +17,9 @@ export function initRangeFeeFlow({ rangeLab, onChange }) {
   let valid = true, shownMode = null;
   const quoteRefs = [], outcomeRefs = [];
   function nextInputs() {
-    return Object.fromEntries(Object.entries(fields).map(([key, id]) =>
-      [key, $(id).value.trim() ? Number($(id).value) : NaN]));
+    return { ...Object.fromEntries(Object.entries(fields).map(([key, id]) =>
+      [key, $(id).value.trim() ? Number($(id).value) : NaN])),
+      competitorWidth: $('fee-flow-full-range').checked ? null : Number($('fee-flow-other-width').value) };
   }
   function getState() {
     return touched ? validateFeeFlow({ ...state, ...nextInputs() }) : null;
@@ -26,6 +27,8 @@ export function initRangeFeeFlow({ rangeLab, onChange }) {
   function restore(input) {
     touched = Boolean(input); state = validateFeeFlow(input || DEFAULT_FEE_FLOW);
     for (const [key, id] of Object.entries(fields)) $(id).value = state[key];
+    $('fee-flow-full-range').checked = state.competitorWidth === null;
+    $('fee-flow-other-width').value = state.competitorWidth ?? DEFAULT_FEE_FLOW.competitorWidth;
     $('fee-flow-status').textContent = '';
   }
   function metric(list, label) {
@@ -78,7 +81,11 @@ export function initRangeFeeFlow({ rangeLab, onChange }) {
       item.append(node('strong', 'Batch ' + (index + 1) + ' · ETH ' + usd(batch.price)),
         node('p', usd(batch.volume) + ' trading · ' + usd(batch.competition) + ' other starting capital · '
           + fmt(batch.feeTier / 10000, 2) + '% trader fee · protocol '
-          + (batch.protocolDivisor ? '1/' + batch.protocolDivisor : 'none')));
+          + (batch.protocolDivisor ? '1/' + batch.protocolDivisor : 'none')),
+        node('p', batch.competitorWidth === null ? 'Other LPs: full range.'
+          : 'Other LPs: ' + fmt(batch.competitorWidth, 2) + '% width · '
+            + usd(batch.competitors.bounds.lowerPrice) + '–' + usd(batch.competitors.bounds.upperPrice)
+            + ' · ' + (batch.competitors.active ? 'active.' : 'outside their range.')));
       for (const range of batch.ranges) item.append(node('p', range.id.toUpperCase() + ': '
         + formatTokenQuantity(range.tokens.eth, 6) + ' ETH + '
         + formatTokenQuantity(range.tokens.usdc, 2, 2) + ' USDC · ' + shareText(range.share) + ' of LP fees'));
@@ -118,16 +125,29 @@ export function initRangeFeeFlow({ rangeLab, onChange }) {
       if (!comparison) throw new Error('Correct the shared starting setup to explore fees.');
       result = calculateFeeFlow(comparison, { ...state, ...next }); valid = true;
       state = { ...state, ...next };
-      $('fee-flow-assumptions-summary').textContent = 'Trading ' + compactUSD(next.volume) + ' · other full-range LPs ' + compactUSD(next.competition);
+      $('fee-flow-assumptions-summary').textContent = 'Trading ' + compactUSD(next.volume) + ' · other LPs ' + compactUSD(next.competition);
       const { quote, ranges } = result;
+      const fullRange = next.competitorWidth === null;
+      $('fee-flow-other-width').disabled = fullRange;
+      $('fee-flow-width-value').textContent = fullRange ? 'Full range' : fmt(next.competitorWidth, 2) + '% total width';
+      $('fee-flow-other-width').setAttribute('aria-valuetext', $('fee-flow-width-value').textContent);
+      $('fee-flow-competitor-capital').textContent = compactUSD(next.competition) + ' of starting capital';
+      $('fee-flow-competitor-capital').title = usd(next.competition);
+      $('fee-flow-competitor-bounds').textContent = fullRange
+        ? 'Other LPs are active at every price. Their full range extends beyond this chart.'
+        : 'Other LPs: ' + usd(quote.competitors.bounds.lowerPrice) + '–' + usd(quote.competitors.bounds.upperPrice)
+          + '. ' + (quote.competitors.edge ? 'Selected price is at their edge.'
+            : quote.competitors.active ? 'They are active at the selected price.' : 'They are outside their range at the selected price.');
       $('fee-flow-error').textContent = quote.atEdge
-        ? 'The selected price is on a range edge. Move slightly inside or outside before adding a batch.' : '';
+        ? 'The selected price is on a range edge. Move slightly inside or outside before adding a batch.'
+        : quote.unavailable ? 'At least one alternative has no active LPs. Widen a range or move the price before adding trading.' : '';
       $('fee-flow-rate-summary').textContent = fmt(next.feeTier / 10000, 2) + '% · protocol '
         + (next.protocolDivisor ? '1/' + next.protocolDivisor : 'none');
       $('fee-flow-quote').hidden = quote.atEdge;
+      $('fee-flow-source').hidden = quote.unavailable;
       $('fee-flow-totals').hidden = false;
-      $('fee-flow-add').disabled = quote.atEdge || next.volume === 0 || state.batches.length >= MAX_FEE_BATCHES;
-      $('fee-flow-example').disabled = quote.atEdge || next.volume === 0;
+      $('fee-flow-add').disabled = quote.atEdge || quote.unavailable || next.volume === 0 || state.batches.length >= MAX_FEE_BATCHES;
+      $('fee-flow-example').disabled = quote.atEdge || quote.unavailable || next.volume === 0;
       $('fee-flow-quote-price').textContent = 'Preview · new trading at ETH ' + usd(quote.price);
       for (const [id, amount] of [['fee-flow-gross', quote.traderFees], ['fee-flow-cut', quote.protocolFees], ['fee-flow-pot', quote.lpFees]]) {
         $(id).textContent = amount >= 1e4 ? compactUSD(amount) : usd(amount);
@@ -135,17 +155,24 @@ export function initRangeFeeFlow({ rangeLab, onChange }) {
         $(id).title = usd(amount);
       }
       quote.ranges.forEach((range, index) => {
+        $('fee-flow-impact-' + range.id).textContent = quote.atEdge ? 'At an edge'
+          : range.available ? shareText(range.share) : 'No active LPs';
         const refs = quoteRefs[index];
         refs.status.textContent = range.active ? 'Active at this price' : 'Outside this range';
-        refs.value.textContent = usd(range.value);
-        refs.share.textContent = 'Your range · ' + shareText(range.share) + ' of LP fees';
+        refs.value.textContent = range.available ? usd(range.value) : '—';
+        refs.share.textContent = range.available ? 'Your range · ' + shareText(range.share) + ' of LP fees' : 'No active LPs in this alternative';
         refs.portion.style.width = range.share * 100 + '%';
+        refs.split.hidden = !range.available;
         refs.split.setAttribute('aria-label', 'Your share ' + shareText(range.share)
           + '; other LPs ' + shareText(1 - range.share));
-        refs.others.textContent = 'Other LPs · ' + usd(range.others);
+        refs.others.textContent = range.available ? 'Other LPs · ' + usd(range.others) : 'No trading allocated here';
       });
       const active = quote.ranges.filter(range => range.active);
-      $('fee-flow-mechanism').textContent = active.length === 0
+      $('fee-flow-mechanism').textContent = quote.unavailable
+        ? 'Trading needs active liquidity. This setup cannot allocate the batch in both alternatives.'
+        : !quote.competitors.active
+          ? 'The other LPs are outside their range. Each active alternative takes all LP fees in this simplified setup.'
+        : active.length === 0
         ? 'Both ranges are outside. This batch’s LP fees go to the other active LPs.'
         : active.length === 1
           ? 'Only ' + active[0].id.toUpperCase() + ' is active here. The other range receives no new fees from this batch.'
@@ -173,10 +200,14 @@ export function initRangeFeeFlow({ rangeLab, onChange }) {
       $('fee-flow-quote').hidden = $('fee-flow-totals').hidden = true;
       $('fee-flow-add').disabled = $('fee-flow-example').disabled = true;
       $('fee-flow-batches').replaceChildren();
+      $('fee-flow-impact-a').textContent = $('fee-flow-impact-b').textContent = 'Check inputs';
     }
   }
   function change() { touched = true; $('fee-flow-status').textContent = ''; onChange(); }
   for (const id of Object.values(fields)) $(id).addEventListener(id.includes('tier') || id.includes('protocol') ? 'change' : 'input', change);
+  $('fee-flow-other-width').addEventListener('input', change);
+  $('fee-flow-full-range').addEventListener('change', change);
+  $('fee-flow-start').addEventListener('click', onStartingPrice);
   for (const [id, enabled] of [['width-balances-view', false], ['width-fees-view', true]]) {
     $(id).addEventListener('click', () => { state.enabled = enabled; change(); });
   }
@@ -200,5 +231,6 @@ export function initRangeFeeFlow({ rangeLab, onChange }) {
   $('fee-flow-clear').addEventListener('click', () => { state.batches = []; change(); });
   makeCards();
   return { restore, getState, isValid: () => valid,
+    getCompetitorWidth: () => state.enabled ? nextInputs().competitorWidth : undefined,
     update(input) { comparison = input; render(); } };
 }

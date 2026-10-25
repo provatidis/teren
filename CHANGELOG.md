@@ -1,5 +1,13 @@
 # Release history
 
+## 1.38.0 · 2026-10-25
+
+- Make competing LPs’ range visible alongside A and B. Change its width while keeping capital fixed, or use full-range competition. Show fee shares beside the slider, preserve each batch’s assumptions, and identify inactive competitors. New experiments use an explicit 100% competitor width; this is a teaching choice, not calibrated market data.
+- Reject trading batches at competitor boundaries or when an alternative has no active LPs. Keep accrued tokens and outcome totals independent from the next-batch preview.
+- Add a separate stepped arbitrage illustration and a before/during/after JIT diagram. Explain the different holding and rebalancing benchmarks without inventing an LVR estimate or adding another loss deduction. Link from the fee-tier lesson and Methods.
+- Version new fee links and drafts while preserving the full-range meaning of earlier records. Add independent concentration/conservation checks and desktop/mobile coverage for sliders, boundaries, compatibility and illustration isolation.
+- Keep correlated-asset/LST looping as the next roadmap discussion, alongside later evidence-sharing and historical-analysis decisions.
+
 ## 1.37.0 · 2026-10-25
 
 - Add Follow the fees within the controlled width experiment. Allocate a hypothetical trading batch between the protocol, the chosen active range and other LPs; each range is a separate alternative against the same competing liquidity.

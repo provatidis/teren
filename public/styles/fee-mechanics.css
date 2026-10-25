@@ -1,0 +1,42 @@
+.fee-mechanics { margin-top: 24px; }
+.fee-mechanics > div { padding-top: 8px; }
+.fee-mechanics p, .fee-mechanics dd, .fee-mechanics figcaption { font-size: 15px; line-height: 1.75; }
+.fee-mechanics h3 { margin-top: 28px; }
+.fee-mechanics h4 { font-size: 17px; }
+.fee-scene-steps { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 12px; }
+.fee-scene-steps button { flex: 1; min-height: 48px; min-width: 120px; padding: 10px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-size: 14px; cursor: pointer; }
+.fee-scene-steps button[aria-pressed=true] { background: var(--accent); color: var(--bg); }
+.fee-arbitrage-scene { margin: 0; border: 1px solid var(--border-strong); border-radius: 10px; padding: 20px; }
+.fee-scene-prices { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.fee-scene-prices > div { padding-bottom: 12px; border-bottom: 2px solid var(--border-strong); }
+.fee-scene-prices span { font-size: 14px; }
+.fee-scene-prices strong { display: block; font-size: 23px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.fee-arbitrage-scene[data-stage="1"] .fee-scene-prices > div:first-child { border-bottom-color: var(--accent); }
+.fee-scene-wallet { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 18px; }
+.fee-scene-wallet .fee-scene-label { flex-basis: 100%; font-size: 14px; color: var(--muted); }
+.fee-scene-wallet > span:not(.fee-scene-label) { display: flex; align-items: center; gap: 10px; font-size: 16px; font-variant-numeric: tabular-nums; }
+.fee-scene-trade { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 16px 0; font-size: 15px; visibility: hidden; }
+.fee-arbitrage-scene[data-stage="2"] .fee-scene-trade { visibility: visible; }
+.fee-arbitrage-scene figcaption { min-height: 5.3em; }
+.fee-benchmarks { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.fee-benchmarks > div { border-left: 3px solid var(--border-strong); padding-left: 14px; }
+.fee-benchmarks dt { font-weight: 600; font-size: 16px; }
+.fee-benchmarks dd { margin: 8px 0 0; }
+.fee-jit-scene { margin: 20px 0; }
+.fee-jit-stages { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+.fee-jit-stages strong { display: block; font-size: 15px; min-height: 2.8em; line-height: 1.4; }
+.fee-jit-stages p { font-size: 14px; }
+.fee-jit-bar { display: flex; height: 28px; border: 1px solid var(--border-strong); border-radius: 4px; overflow: hidden; }
+.fee-jit-existing { width: 100%; background: var(--accent); }
+.fee-jit-during .fee-jit-existing { width: 25%; }
+.fee-jit-temporary { width: 75%; background: repeating-linear-gradient(135deg,var(--muted) 0 3px,var(--surface) 3px 7px); }
+.fee-jit-key { display: block; margin-bottom: 6px; }
+@media(max-width:750px) {
+  .fee-arbitrage-scene { padding: 14px; }
+  .fee-scene-prices { gap: 10px; }
+  .fee-scene-prices strong { font-size: 20px; }
+  .fee-arbitrage-scene figcaption { min-height: 10.5em; }
+  .fee-benchmarks { grid-template-columns: 1fr; }
+  .fee-jit-stages { gap: 8px; }
+  .fee-jit-stages p { font-size: 13px; }
+}

@@ -1,6 +1,11 @@
 # Review questions and open blind spots
 
-## Current priorities · 1.37.0
+## Current priorities · 1.38.0
+
+- Revisit [correlated-asset/LST looping and deferred roadmap choices](roadmap.md) at the next next-steps discussion. This is a requested priority; do not silently replace it with wallet monitoring, broader chain coverage or arbitrary backtesting.
+- Fee competition now has a visible, independent range. The new default is a chosen 100% width, not an estimate of real liquidity. One range for all competitors remains a major simplification. A single block's active liquidity would not describe competition across future prices or historical swaps.
+- Check whether a user can explain why the same competitor capital earns a larger share when concentrated, and why a fully inactive alternative cannot receive trading. Existing fee tokens must remain distinct from the next-batch preview. Legacy full-range batches retain their meaning.
+- The arbitrage and JIT illustrations add mechanism explanations without estimating losses or reconstructing swaps. Ask whether a user distinguishes the holding and rebalancing benchmarks and understands that JIT fee dilution alone does not determine total LP profit. Do not add IL and LVR as independent deductions.
 
 - The fee-flow view makes the allocation mechanism explicit: input tokens pay fees, the protocol takes its assumed share, and active liquidity divides the remainder. A and B are alternatives, and accrued tokens survive exits. Tests check conservation and consistent assumptions; learning remains unmeasured.
 - The fixed-price batch is the central retained approximation. It cannot answer whether a real market produces the selected volume, how a large trade moves price, what happens between prices, or what editable historical ranges would have earned. Do not call it a replay, forecast or measured yield. Current protocol settings must not be inferred from the example defaults.
@@ -24,7 +29,7 @@
 - Observe an unfamiliar learner finding a topic, explaining one visual change and applying it to another setup. Positive feedback from experienced friends is useful; it does not yet measure novice understanding.
 - Check actual Android Chrome and an assistive-technology workflow. Desktop/narrow browser checks do not establish either.
 - Measure loading on the deployed site before claiming a time saving. One stylesheet request and a smaller Home dependency graph are engineering facts, not a field performance estimate.
-- Further candidates: predetermined consecutive periods with the same declared selection policy, an explicit LP-minus-holding chart, and a carefully bounded arbitrage explainer. One matched pair cannot establish a realistic expected fee rate.
+- Further candidates: predetermined consecutive periods with the same declared selection policy, an explicit LP-minus-holding chart, and more varied historical comparisons. One matched pair cannot establish a realistic expected fee rate.
 
 
 [Project decisions](../DECISIONS.md) · [Models](models.md) · [Learning evidence](learning.md)

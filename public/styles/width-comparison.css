@@ -17,11 +17,11 @@
 .width-price-field { max-width: 420px; }
 .width-price-controls { margin-top: 24px; }
 .width-price-controls > label { display: block; margin-bottom: 12px; }
-#width-price-slider { display: block; appearance: none; -webkit-appearance: none; width: 100%; height: 48px; padding: 0 12px; margin: 4px 0 8px; border: 0; background: transparent; }
-#width-price-slider::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--border-strong); }
-#width-price-slider::-moz-range-track { height: 6px; border-radius: 3px; background: var(--border-strong); }
-#width-price-slider::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 28px; height: 28px; margin-top: -11px; border: 3px solid var(--text); border-radius: 50%; background: var(--accent-ink); }
-#width-price-slider::-moz-range-thumb { width: 22px; height: 22px; border: 3px solid var(--text); border-radius: 50%; background: var(--accent-ink); }
+:is(#width-price-slider, #fee-flow-other-width) { display: block; appearance: none; -webkit-appearance: none; width: 100%; height: 48px; padding: 0 12px; margin: 4px 0 8px; border: 0; background: transparent; }
+:is(#width-price-slider, #fee-flow-other-width)::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--border-strong); }
+:is(#width-price-slider, #fee-flow-other-width)::-moz-range-track { height: 6px; border-radius: 3px; background: var(--border-strong); }
+:is(#width-price-slider, #fee-flow-other-width)::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 28px; height: 28px; margin-top: -11px; border: 3px solid var(--text); border-radius: 50%; background: var(--accent-ink); }
+:is(#width-price-slider, #fee-flow-other-width)::-moz-range-thumb { width: 22px; height: 22px; border: 3px solid var(--text); border-radius: 50%; background: var(--accent-ink); }
 .width-current { min-height: 1.6em; font-size: 19px; font-variant-numeric: tabular-nums; line-height: 1.6; }
 .width-shortcuts { display: flex; flex-wrap: wrap; gap: 8px; }
 .width-shortcuts button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text); background: var(--surface); font: inherit; font-size: 14px; cursor: pointer; }

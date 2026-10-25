@@ -1,7 +1,7 @@
-import { calculateWidthComparison, DEFAULT_WIDTHS, WIDTH_LIMITS, WIDTH_MODEL, widthPriceDomain } from '../models/range-width.js';
+import { calculateWidthComparison, centeredBounds, DEFAULT_WIDTHS, WIDTH_LIMITS, WIDTH_MODEL, widthPriceDomain } from '../models/range-width.js';
 import { isWidthHash } from '../lib/width-links.js';
 import { widthFlowHash, widthFlowFromHash } from '../lib/width-flow-links.js';
-import { FEE_FLOW_MODEL, DEFAULT_FEE_FLOW } from '../models/range-fee-flow-v1.js';
+import { FEE_FLOW_MODEL, DEFAULT_FEE_FLOW } from '../models/range-fee-flow-v2.js';
 import { readWidthDraft, saveWidthDraft } from '../data/width-draft.js';
 import { saveExperimentLocation } from '../data/experiment-location.js';
 import { assetAmounts, rangePriceLabels, STATE_COPY } from '../lib/range-presentation.js';
@@ -68,17 +68,31 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
   }
   function renderBands() {
     const x = price => 70 + (price - domain.low) / (domain.high - domain.low) * 500;
+    const otherWidth = feeFlow.getCompetitorWidth();
+    const showOthers = otherWidth !== undefined;
+    const bottom = showOthers ? 164 : 114;
+    $('width-bands').setAttribute('viewBox', '0 0 600 ' + (showOthers ? 200 : 150));
+    $('width-competitors').setAttribute('visibility', showOthers ? 'visible' : 'hidden');
+    if (showOthers) {
+      const bounds = otherWidth === null ? { lowerPrice: domain.low, upperPrice: domain.high }
+        : centeredBounds(current.initialPrice, otherWidth);
+      $('width-band-others').setAttribute('x', x(bounds.lowerPrice));
+      $('width-band-others').setAttribute('width', Math.max(1, x(bounds.upperPrice) - x(bounds.lowerPrice)));
+    }
     for (const range of current.ranges) {
       const band = $('width-band-' + range.id);
       band.setAttribute('x', x(range.lowerPrice));
       band.setAttribute('width', Math.max(1, x(range.upperPrice) - x(range.lowerPrice)));
     }
     for (const [id, price] of [['start', current.initialPrice], ['price', current.futurePrice]]) {
-      $('width-' + id + '-marker').setAttribute('d', 'M' + x(price) + ' 12V114');
+      $('width-' + id + '-marker').setAttribute('d', 'M' + x(price) + ' 12V' + bottom);
     }
+    for (const id of ['width-scale-low', 'width-scale-high']) $(id).setAttribute('y', bottom + 24);
     $('width-scale-low').textContent = compactUSD(domain.low); $('width-scale-high').textContent = compactUSD(domain.high);
     $('width-bands-title').textContent = 'At ETH ' + usd(current.futurePrice) + ': A is ' + STATE_COPY[current.ranges[0].state].title.toLowerCase()
-      + '; B is ' + STATE_COPY[current.ranges[1].state].title.toLowerCase() + '. Both ranges use the same price scale.';
+      + '; B is ' + STATE_COPY[current.ranges[1].state].title.toLowerCase()
+      + (showOthers ? '; other LPs use ' + (otherWidth === null ? 'the full range' : fmt(otherWidth, 2) + '% width') : '')
+      + '. All visible ranges use the same price scale.';
   }
   function renderGapChart() {
     if (!current || !$('width-chart-details').open) return;
@@ -103,7 +117,15 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
     $('width-share-result').hidden = true;
     try {
       current = calculateWidthComparison(input);
-      if (!domain || updateDomain) domain = widthPriceDomain(input);
+      if (!domain || updateDomain) {
+        domain = widthPriceDomain(input);
+        const otherWidth = feeFlow.getCompetitorWidth();
+        if (otherWidth != null) {
+          const bounds = centeredBounds(input.initialPrice, otherWidth);
+          domain.low = Math.min(domain.low, bounds.lowerPrice * .9);
+          domain.high = Math.max(domain.high, bounds.upperPrice * 1.1);
+        }
+      }
       $('width-error').textContent = ''; $('width-results').hidden = false;
       $('width-share').disabled = false;
       $('width-setup-label').textContent = usd(current.investment) + ' each · ETH ' + usd(current.initialPrice);
@@ -190,7 +212,7 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
     try {
       const parsed = widthFlowFromHash(location.hash), shared = parsed.inputs;
       if (shared) feeFlow.restore(parsed.flow);
-      else if (location.hash === '#follow-fees') feeFlow.restore({ ...(feeFlow.getState() || DEFAULT_FEE_FLOW), enabled: true });
+      else if (['#follow-fees', '#fee-mechanics'].includes(location.hash)) feeFlow.restore({ ...(feeFlow.getState() || DEFAULT_FEE_FLOW), enabled: true });
       fill(shared || current || saved.inputs || DEFAULT_WIDTHS); render();
       $('width-notice').textContent = shared ? 'Shared hypothetical comparison loaded.'
         : saved.status === 'invalid' ? 'The previous local comparison could not be read. Showing the default setup; editing it will replace that local copy.'
@@ -202,5 +224,12 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
   feeFlow.restore(saved.flow || null);
   makeCards(); fill(saved.inputs || DEFAULT_WIDTHS); render();
   window.addEventListener('hashchange', restore); restore();
-  return { saveFees: () => render({ persist: true, updateDomain: false }) };
+  return {
+    saveFees: () => render({ persist: true }),
+    atStartingPrice() {
+      if (!current) return;
+      $('width-price').value = current.initialPrice;
+      render({ persist: true });
+    },
+  };
 }

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { allocateFeeBatch, calculateFeeFlow, DEFAULT_FEE_FLOW, validateFeeFlow, MAX_FEE_BATCHES } from '../public/models/range-fee-flow-v1.js';
+import { allocateFeeBatch, calculateFeeFlow, DEFAULT_FEE_FLOW, FEE_FLOW_MODEL, validateFeeFlow, MAX_FEE_BATCHES } from '../public/models/range-fee-flow-v2.js';
 import { DEFAULT_WIDTHS, calculateWidthComparison } from '../public/models/range-width.js';
 import { widthFlowHash, widthFlowFromHash } from '../public/lib/width-flow-links.js';
 import { widthHash } from '../public/lib/width-links.js';
@@ -8,7 +8,7 @@ import { readWidthDraft, saveWidthDraft, WIDTH_DRAFT_KEY } from '../public/data/
 import { readExperimentLocation, saveExperimentLocation } from '../public/data/experiment-location.js';
 
 const close = (a, b) => assert.ok(Math.abs(a - b) <= 1e-10 * Math.max(1, Math.abs(a), Math.abs(b)), a + ' ≠ ' + b);
-const batch = (price = 2000, extra = {}) => ({ price, ...DEFAULT_FEE_FLOW, ...extra });
+const batch = (price = 2000, extra = {}) => ({ price, ...DEFAULT_FEE_FLOW, competitorWidth: null, ...extra });
 const flow = (batches = [], extra = {}) => ({ ...DEFAULT_FEE_FLOW, enabled: true, batches, ...extra });
 
 test('fee allocation agrees with an independent 1000–4000 range calculation', () => {
@@ -118,7 +118,7 @@ test('versioned links round-trip every batch and keep old width links compatible
   assert.deepEqual(widthFlowFromHash(widthHash(DEFAULT_WIDTHS)), { inputs: DEFAULT_WIDTHS, flow: null });
   const maximum = widthFlowHash(DEFAULT_WIDTHS, flow(Array(MAX_FEE_BATCHES).fill(batch(2345.123456789))));
   assert.ok(maximum.length < 2400);
-  for (const bad of [link + '&a=30', link + '&flow=[]', link + '&unknown=1', link.replace('flow=', 'data='), link.replace('cl-width-fees-v1', 'cl-width-fees-v9')]) {
+  for (const bad of [link + '&a=30', link + '&flow=[]', link + '&unknown=1', link.replace('flow=', 'data='), link.replace(FEE_FLOW_MODEL, 'cl-width-fees-v9')]) {
     assert.throws(() => widthFlowFromHash(bad));
   }
 });
@@ -127,12 +127,105 @@ test('drafts migrate on edit, preserve corrupt records, and Home resumes the com
   saveWidthDraft(DEFAULT_WIDTHS, getStorage);
   assert.equal(JSON.parse(values.get(WIDTH_DRAFT_KEY)).version, 1);
   const state = flow([batch()]); saveWidthDraft(DEFAULT_WIDTHS, getStorage, state);
-  assert.equal(JSON.parse(values.get(WIDTH_DRAFT_KEY)).version, 2);
+  assert.equal(JSON.parse(values.get(WIDTH_DRAFT_KEY)).version, 3);
   assert.deepEqual(readWidthDraft(getStorage).flow, validateFeeFlow(state));
   const hash = widthFlowHash(DEFAULT_WIDTHS, state);
-  saveExperimentLocation('cl-width-fees-v1', hash, getStorage);
+  saveExperimentLocation(FEE_FLOW_MODEL, hash, getStorage);
   assert.equal(readExperimentLocation(getStorage).route, 'liquidity.html' + hash);
   values.set(WIDTH_DRAFT_KEY, JSON.stringify({ version: 2, inputs: DEFAULT_WIDTHS, flow: { enabled: true } }));
   assert.equal(readWidthDraft(getStorage).status, 'invalid');
   assert.ok(values.get(WIDTH_DRAFT_KEY).includes('enabled'));
+});
+
+test('equal ranges divide fees by capital; concentrating the same competitor capital dilutes our share', () => {
+  const matched = allocateFeeBatch(DEFAULT_WIDTHS, batch(2000, { competitorWidth: 20 }));
+  close(matched.ranges[0].share, 5000 / 1005000);
+  const full = allocateFeeBatch(DEFAULT_WIDTHS, batch());
+  close(full.ranges[0].share, 0.09312433650459242);
+  let previous = full.ranges[0].share;
+  for (const competitorWidth of [400, 100, 20, 1]) {
+    const quote = allocateFeeBatch(DEFAULT_WIDTHS, batch(2000, { competitorWidth }));
+    assert.ok(quote.ranges[0].share < previous);
+    assert.equal(quote.competition, full.competition);
+    previous = quote.ranges[0].share;
+  }
+});
+
+test('concentrated competitors agree with independently funded liquidity and conserve both input tokens', () => {
+  const input = { ...DEFAULT_WIDTHS, investment: 4000, widthA: 150, widthB: 100 };
+  for (const protocolDivisor of [0, 4, 6, 10]) {
+    const quote = allocateFeeBatch(input, batch(2000, { competitorWidth: 150, competition: 50000, volume: 120000, protocolDivisor }));
+    const liquidity = 25000 / (Math.sqrt(2000) - Math.sqrt(1000));
+    close(quote.otherLiquidity, liquidity);
+    close(quote.ranges[0].share, 4000 / 54000);
+    for (const range of quote.ranges) {
+      close(range.value + range.others + quote.protocolFees, quote.traderFees);
+      close(range.tokens.eth + (range.others + quote.protocolFees) / 4000, quote.traderFees / 4000);
+      close(range.tokens.usdc + (range.others + quote.protocolFees) / 2, quote.traderFees / 2);
+    }
+  }
+});
+
+test('an inactive competitor earns nothing, but a pool with no active LPs cannot receive a batch', () => {
+  const bothActive = { ...DEFAULT_WIDTHS, widthA: 100, widthB: 200 };
+  const quote = allocateFeeBatch(bothActive, batch(2400, { competitorWidth: 20 }));
+  assert.equal(quote.competitors.active, false);
+  assert.equal(quote.otherLiquidity, 0);
+  assert.equal(quote.unavailable, false);
+  for (const range of quote.ranges) {
+    assert.equal(range.share, 1);
+    assert.equal(range.others, 0);
+  }
+  const missingA = allocateFeeBatch(DEFAULT_WIDTHS, batch(2400, { competitorWidth: 20 }));
+  assert.equal(missingA.unavailable, true);
+  assert.equal(missingA.ranges[0].available, false);
+  assert.equal(missingA.ranges[0].others, 0);
+  assert.throws(() => calculateFeeFlow(DEFAULT_WIDTHS, flow([batch(2400, { competitorWidth: 20 })])), /no active LPs/);
+  assert.throws(() => calculateFeeFlow(DEFAULT_WIDTHS, flow([batch(5000, { competitorWidth: 100 })])), /no active LPs/);
+});
+
+test('competitor boundaries are fixed around the starting price and reject exact-edge batches', () => {
+  const entries = [1900, 2000, 2100].map(price => allocateFeeBatch(DEFAULT_WIDTHS, batch(price, { competitorWidth: 70 })));
+  for (const entry of entries) assert.deepEqual(entry.competitors.bounds, entries[0].competitors.bounds);
+  for (const price of Object.values(entries[0].competitors.bounds)) {
+    assert.equal(allocateFeeBatch(DEFAULT_WIDTHS, batch(price, { competitorWidth: 70 })).atEdge, true);
+    assert.throws(() => calculateFeeFlow(DEFAULT_WIDTHS, flow([batch(price, { competitorWidth: 70 })])), /range edge/);
+  }
+});
+
+test('batches retain their own competitor width; a preview change does not rewrite accrued fees', () => {
+  const batches = [batch(2000, { competitorWidth: null }), batch(2000, { competitorWidth: 20 })];
+  const first = calculateFeeFlow(DEFAULT_WIDTHS, flow(batches, { competitorWidth: 100 }));
+  const preview = calculateFeeFlow(DEFAULT_WIDTHS, flow(batches, { competitorWidth: 20 }));
+  assert.deepEqual(first.ranges, preview.ranges);
+  assert.ok(first.batches[0].ranges[0].value > first.batches[1].ranges[0].value);
+  assert.equal(preview.quote.unavailable, true);
+});
+
+test('legacy fee links and drafts preserve full-range assumptions and the same fee quantities', () => {
+  const parameters = new URLSearchParams(widthHash(DEFAULT_WIDTHS).slice(1));
+  parameters.set('width', 'cl-width-fees-v1');
+  parameters.set('flow', JSON.stringify([true, 1000000, 1000000, 3000, 6, [[2000, 1000000, 1000000, 3000, 6]]]));
+  const parsed = widthFlowFromHash('#' + parameters);
+  assert.equal(parsed.flow.competitorWidth, null);
+  assert.equal(parsed.flow.batches[0].competitorWidth, null);
+  const reference = calculateFeeFlow(DEFAULT_WIDTHS, flow([batch()], { competitorWidth: null }));
+  assert.deepEqual(calculateFeeFlow(parsed.inputs, parsed.flow).ranges, reference.ranges);
+  const oldFlow = { ...parsed.flow, batches: parsed.flow.batches.map(({ competitorWidth, ...old }) => old) };
+  delete oldFlow.competitorWidth;
+  const getStorage = () => ({ getItem: () => JSON.stringify({ version: 2, inputs: DEFAULT_WIDTHS, flow: oldFlow }) });
+  assert.deepEqual(readWidthDraft(getStorage).flow, parsed.flow);
+  const upgraded = widthFlowFromHash(widthFlowHash(parsed.inputs, parsed.flow));
+  assert.deepEqual(upgraded, parsed);
+});
+
+test('new links retain independent competitor widths and reject malformed versioned tuples', () => {
+  const state = flow([batch(), batch(2000, { competitorWidth: 1.23456789 })], { competitorWidth: 50.123456789 });
+  const link = widthFlowHash(DEFAULT_WIDTHS, state);
+  assert.deepEqual(widthFlowFromHash(link).flow, validateFeeFlow(state));
+  for (const value of [0, 401, NaN, Infinity, '20']) assert.throws(() => validateFeeFlow(flow([], { competitorWidth: value })));
+  const parameters = new URLSearchParams(link.slice(1));
+  const values = JSON.parse(parameters.get('flow'));
+  values[5][0].pop(); parameters.set('flow', JSON.stringify(values));
+  assert.throws(() => widthFlowFromHash('#' + parameters), /not supported/);
 });

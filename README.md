@@ -10,7 +10,7 @@ Home gives direct labs and guided lessons equal prominence. Continue experimenti
 
 Visual lessons let you follow swaps, pool ownership, supplying, borrowing and loops one action at a time, or use sliders to explore token balances, price ranges, a loan’s health factor, equal-budget responses to debt, and holding versus looping as prices or interest change. Prediction questions and choices stay visible, with a “Not sure — show me” route. Predictions are ungraded; completion checks explanation and application.
 
-Try [Follow the fees](https://teren.sh/liquidity.html#follow-fees) to see how hypothetical trading batches divide fees between active ranges and other LPs, then keep those fee tokens through a range exit.
+Try [Follow the fees](https://teren.sh/liquidity.html#follow-fees) to see how hypothetical trading batches divide fees between active ranges and other LPs, then keep those fee tokens through a range exit. Tighten the other LPs’ range without adding capital and watch your share change. Optional illustrations explain arbitrage and temporary fee competition.
 
 ## Two topics
 
@@ -54,6 +54,7 @@ Open http://127.0.0.1:3000/ after starting the development server. `npm run buil
 - [Custom domain and repository cutover](docs/domain-setup.md)
 - [Product decisions](DECISIONS.md)
 - [Review questions and open blind spots](docs/review.md)
+- [Next discussions: LST looping and roadmap choices](docs/roadmap.md)
 - [Release history](CHANGELOG.md)
 
 MIT licensed. The adapted Uniswap tick arithmetic retains its [separate notice](public/licenses/uniswap-v3-sdk.txt).
