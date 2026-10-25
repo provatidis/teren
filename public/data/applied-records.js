@@ -1,5 +1,5 @@
 import { REPLAY_CASES } from './replay-cases.js';
-import { validatePositionPeriod } from './position-period.js';
+import { validateRecordedCase, recordedPeriod } from './position-history.js';
 
 export function createAppliedRecordLoader(fetchRecord = (...args) => fetch(...args)) {
   const requests = new Map();
@@ -12,7 +12,7 @@ export function createAppliedRecordLoader(fetchRecord = (...args) => fetch(...ar
         try { response = await fetchRecord(new URL('../examples/' + record.file, import.meta.url)); }
         catch { throw new Error('The recorded case could not be loaded. Check your connection, then try again.'); }
         if (!response.ok) throw new Error('The recorded case could not be loaded. Try again.');
-        return validatePositionPeriod(await response.json());
+        return recordedPeriod(validateRecordedCase(await response.json()));
       })();
       requests.set(caseId, request);
       request.catch(() => { if (requests.get(caseId) === request) requests.delete(caseId); });

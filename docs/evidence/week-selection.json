@@ -1,0 +1,1345 @@
+{
+  "version": 1,
+  "kind": "week-position-selection",
+  "checkedAt": "2026-10-24T23:19:07.622Z",
+  "stateProvider": "https://eth.drpc.org",
+  "eventProvider": "https://rpc.mevblocker.io",
+  "finalizedBlock": {
+    "number": "26265689",
+    "hash": "0xe95ac255c48d64ced3bc6ff20e6fd004aa37657f81c6b3de003c9c6aacb142de",
+    "timestamp": 1792883159
+  },
+  "candidates": [
+    "1375047",
+    "1382030"
+  ],
+  "selectionRule": "First positive-liquidity, unchanged WETH/USDC 0.3% position in ascending candidate order; dates fixed before fee outcomes.",
+  "boundaries": [
+    {
+      "requestedAt": "2026-10-12T00:00:00.000Z",
+      "block": {
+        "number": "26172658",
+        "hash": "0x635b5ac0fe8943907d22ecdd9fcfba781e0431d9b30de2e560c4da1c64bb80b2",
+        "timestamp": 1791763211
+      },
+      "previousBlock": {
+        "number": "26172657",
+        "hash": "0xd99c2c0eb8d9150b314d61c075fed14c9bb9f593e254c2073610166c5f11d04c",
+        "timestamp": 1791763199
+      }
+    },
+    {
+      "requestedAt": "2026-10-13T00:00:00.000Z",
+      "block": {
+        "number": "26179842",
+        "hash": "0x9ec0f4aff9fc8057d655a7c8d003801b4c2e01c22d349e2d209f11a594f0da65",
+        "timestamp": 1791849611
+      },
+      "previousBlock": {
+        "number": "26179841",
+        "hash": "0x40c731f68bcd8152ad12433f4be57783e731fcf1546575ab51aa894054244ac3",
+        "timestamp": 1791849599
+      }
+    },
+    {
+      "requestedAt": "2026-10-14T00:00:00.000Z",
+      "block": {
+        "number": "26187015",
+        "hash": "0x00bb049f2a33c7857a303e63b08f19fd67656043e86b31b6db13dfaf61f2269a",
+        "timestamp": 1791936011
+      },
+      "previousBlock": {
+        "number": "26187014",
+        "hash": "0x99fe2938a147746a168db2cc63e0312548c8e5efa2adb694d33657af2163a03a",
+        "timestamp": 1791935999
+      }
+    },
+    {
+      "requestedAt": "2026-10-15T00:00:00.000Z",
+      "block": {
+        "number": "26194189",
+        "hash": "0x7528cf0bd5e7351df79c2d95d15d91a0c80ecb9587aa046d9d0fbdad1edd2d56",
+        "timestamp": 1792022411
+      },
+      "previousBlock": {
+        "number": "26194188",
+        "hash": "0xf12bcb7db5631cc69f0aaa392df0855f2a2ff3c18a9b9bcbb3a25981cac9daed",
+        "timestamp": 1792022399
+      }
+    },
+    {
+      "requestedAt": "2026-10-16T00:00:00.000Z",
+      "block": {
+        "number": "26201365",
+        "hash": "0x65ff5ac54984381c0a60d9c1c5ad193781a76a5189cdac017a828831b419372c",
+        "timestamp": 1792108811
+      },
+      "previousBlock": {
+        "number": "26201364",
+        "hash": "0x16dc5a38a46ab5728fbb9d9892195c1d875ddc8f9036778b33eb432e484b3418",
+        "timestamp": 1792108799
+      }
+    },
+    {
+      "requestedAt": "2026-10-17T00:00:00.000Z",
+      "block": {
+        "number": "26208547",
+        "hash": "0x283c8321870f3c8d5f10aa02b094047a9e215e73e2862bf2ccff1935cb6c26b2",
+        "timestamp": 1792195211
+      },
+      "previousBlock": {
+        "number": "26208546",
+        "hash": "0xafdb259407c86380ce097b467bf8f526ecd466d4b341880cf4fcfeb464765d39",
+        "timestamp": 1792195199
+      }
+    },
+    {
+      "requestedAt": "2026-10-18T00:00:00.000Z",
+      "block": {
+        "number": "26215722",
+        "hash": "0xa371ae9aadfeb1b17aeef140cd3d3d5c19f408bd1f95f6094155bb270c16e231",
+        "timestamp": 1792281611
+      },
+      "previousBlock": {
+        "number": "26215721",
+        "hash": "0x6322a3b8f60cf9348ae62d3b1f3cf2c31c9ba8bc86b97119e2a8a776336569e0",
+        "timestamp": 1792281599
+      }
+    },
+    {
+      "requestedAt": "2026-10-19T00:00:00.000Z",
+      "block": {
+        "number": "26222896",
+        "hash": "0x13ade5825f8d2d53d3b8fac0bd8618634e2237c52e1a0d817438555403781462",
+        "timestamp": 1792368011
+      },
+      "previousBlock": {
+        "number": "26222895",
+        "hash": "0x3963feb050e7486f66e2c09595f12dc42206a78b51b2c287caaa1a3e99ceb59c",
+        "timestamp": 1792367999
+      }
+    }
+  ],
+  "checks": [
+    {
+      "tokenId": "1375047",
+      "eligible": false,
+      "eventQueries": [],
+      "endpointLiquidity": [
+        "350853357174328",
+        "350853357174328"
+      ],
+      "endpointAccountingMatches": false,
+      "reason": "Position liquidity or accounting changed, or liquidity is zero at an endpoint.",
+      "endpoints": [
+        {
+          "block": {
+            "number": "26172658",
+            "hash": "0x635b5ac0fe8943907d22ecdd9fcfba781e0431d9b30de2e560c4da1c64bb80b2",
+            "timestamp": 1791763211
+          },
+          "token0": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "token1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "fee": 3000,
+          "tickLower": 197400,
+          "tickUpper": 203880,
+          "liquidity": "350853357174328",
+          "feeGrowthInside0LastX128": "2772075867700490478768169541108008",
+          "feeGrowthInside1LastX128": "1350599617323957497086206987811402466257886",
+          "tokensOwed0": "0",
+          "tokensOwed1": "0"
+        },
+        {
+          "block": {
+            "number": "26222896",
+            "hash": "0x13ade5825f8d2d53d3b8fac0bd8618634e2237c52e1a0d817438555403781462",
+            "timestamp": 1792368011
+          },
+          "token0": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "token1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "fee": 3000,
+          "tickLower": 197400,
+          "tickUpper": 203880,
+          "liquidity": "350853357174328",
+          "feeGrowthInside0LastX128": "2776204509297492783054028773952804",
+          "feeGrowthInside1LastX128": "1352608433412335549467846392733254755875328",
+          "tokensOwed0": "0",
+          "tokensOwed1": "0"
+        }
+      ],
+      "changedFields": [
+        "feeGrowthInside0LastX128",
+        "feeGrowthInside1LastX128"
+      ]
+    },
+    {
+      "tokenId": "1382030",
+      "eligible": false,
+      "eventQueries": [],
+      "endpointLiquidity": [
+        "0",
+        "0"
+      ],
+      "endpointAccountingMatches": true,
+      "reason": "Position liquidity or accounting changed, or liquidity is zero at an endpoint.",
+      "endpoints": [
+        {
+          "block": {
+            "number": "26172658",
+            "hash": "0x635b5ac0fe8943907d22ecdd9fcfba781e0431d9b30de2e560c4da1c64bb80b2",
+            "timestamp": 1791763211
+          },
+          "token0": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "token1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "fee": 3000,
+          "tickLower": 198000,
+          "tickUpper": 198120,
+          "liquidity": "0",
+          "feeGrowthInside0LastX128": "92953395799951667951605359865338",
+          "feeGrowthInside1LastX128": "37106990000703181692944081427497040723578",
+          "tokensOwed0": "0",
+          "tokensOwed1": "0"
+        },
+        {
+          "block": {
+            "number": "26222896",
+            "hash": "0x13ade5825f8d2d53d3b8fac0bd8618634e2237c52e1a0d817438555403781462",
+            "timestamp": 1792368011
+          },
+          "token0": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "token1": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "fee": 3000,
+          "tickLower": 198000,
+          "tickUpper": 198120,
+          "liquidity": "0",
+          "feeGrowthInside0LastX128": "92953395799951667951605359865338",
+          "feeGrowthInside1LastX128": "37106990000703181692944081427497040723578",
+          "tokensOwed0": "0",
+          "tokensOwed1": "0"
+        }
+      ],
+      "changedFields": []
+    }
+  ],
+  "selectedTokenId": "1375090",
+  "fallbackStartedAt": "2026-10-24T23:23:28.467Z",
+  "plan": {
+    "version": 1,
+    "id": "weth-usdc-week-2026-10-12",
+    "startUTC": "2026-10-12T00:00:00.000Z",
+    "endUTC": "2026-10-19T00:00:00.000Z",
+    "initialCandidates": [
+      "1375047",
+      "1382030"
+    ],
+    "fallback": {
+      "firstTokenId": "1375000",
+      "lastTokenId": "1375499",
+      "order": "ascending",
+      "reason": "The two original candidates failed eligibility. Inspect a fixed 500-ID interval beginning at the lower original ID rounded down to the nearest 1,000."
+    },
+    "pool": "Ethereum Uniswap v3 WETH/USDC 0.3%",
+    "selection": "First candidate with positive unchanged liquidity, unchanged NFT fee accounting, and no manager updates during the fixed week. Stop after this bounded list if none qualifies.",
+    "excludeOn": [
+      "missing position",
+      "different pair or fee tier",
+      "zero liquidity",
+      "changed liquidity or accounting",
+      "position update events"
+    ],
+    "notExclusionCriteria": [
+      "fee income",
+      "profit or loss",
+      "range activity",
+      "position value"
+    ],
+    "dataFailure": "Stop with an incomplete capture; do not skip a candidate because its historical data is unavailable."
+  },
+  "planSHA256": "fc6d3b6076579c4249fa13e398d76c2aff14dbc4cfa8c4e84156c3582dd8cef5",
+  "declarationCommit": "2e293cc51a1de520bb81a20d4230980eed8ebc1e",
+  "fallbackChecks": [
+    {
+      "tokenId": "1375000",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375001",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375002",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375003",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375004",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375005",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375006",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375007",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375008",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375009",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375010",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375011",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375012",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375013",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375014",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375015",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375016",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375017",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375018",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375019",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375020",
+      "eligible": false,
+      "reason": "missing position at start"
+    },
+    {
+      "tokenId": "1375021",
+      "eligible": false,
+      "reason": "missing position at start"
+    },
+    {
+      "tokenId": "1375022",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375023",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375024",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375025",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375026",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375027",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375028",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375029",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375030",
+      "eligible": false,
+      "reason": "missing position at start"
+    },
+    {
+      "tokenId": "1375031",
+      "eligible": false,
+      "reason": "missing position at start"
+    },
+    {
+      "tokenId": "1375032",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375033",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375034",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375035",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375036",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375037",
+      "eligible": false,
+      "reason": "missing position at start"
+    },
+    {
+      "tokenId": "1375038",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375039",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375040",
+      "eligible": false,
+      "reason": "missing position at start"
+    },
+    {
+      "tokenId": "1375041",
+      "eligible": false,
+      "reason": "missing position at start"
+    },
+    {
+      "tokenId": "1375042",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375043",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375044",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375045",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375046",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375048",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375049",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375050",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375051",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375052",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375053",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375054",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375055",
+      "eligible": false,
+      "reason": "missing position at start"
+    },
+    {
+      "tokenId": "1375056",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375057",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375058",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375059",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375060",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375061",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375062",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375063",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375064",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375065",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375066",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375067",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375068",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375069",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375070",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375071",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375072",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375073",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375074",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375075",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375076",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375077",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375078",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375079",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375080",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375081",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375082",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375083",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375084",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375085",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375086",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375087",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375088",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375089",
+      "eligible": false,
+      "reason": "different pair or fee tier"
+    },
+    {
+      "tokenId": "1375090",
+      "eligible": true,
+      "startAccountingWords": [
+        "000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+        "0000000000000000000000000000000000000000000000000000000000000bb8",
+        "0000000000000000000000000000000000000000000000000000000000030264",
+        "0000000000000000000000000000000000000000000000000000000000030390",
+        "0000000000000000000000000000000000000000000000000000aee18cf3286d",
+        "000000000000000000000000000000000000095bff03c7a3b1ac86d2286fbbd0",
+        "000000000000000000000000000000d04b02c71e97d15dae0b6aa5899f788d45",
+        "0000000000000000000000000000000000000000000000000000000000000000",
+        "0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "startLiquidity": "192283755620461",
+      "endAccountingWords": [
+        "000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+        "0000000000000000000000000000000000000000000000000000000000000bb8",
+        "0000000000000000000000000000000000000000000000000000000000030264",
+        "0000000000000000000000000000000000000000000000000000000000030390",
+        "0000000000000000000000000000000000000000000000000000aee18cf3286d",
+        "000000000000000000000000000000000000095bff03c7a3b1ac86d2286fbbd0",
+        "000000000000000000000000000000d04b02c71e97d15dae0b6aa5899f788d45",
+        "0000000000000000000000000000000000000000000000000000000000000000",
+        "0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "eventQueries": [
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26172659",
+          "toBlock": "26173158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26173159",
+          "toBlock": "26173658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26173659",
+          "toBlock": "26174158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26174159",
+          "toBlock": "26174658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26174659",
+          "toBlock": "26175158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26175159",
+          "toBlock": "26175658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26175659",
+          "toBlock": "26176158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26176159",
+          "toBlock": "26176658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26176659",
+          "toBlock": "26177158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26177159",
+          "toBlock": "26177658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26177659",
+          "toBlock": "26178158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26178159",
+          "toBlock": "26178658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26178659",
+          "toBlock": "26179158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26179159",
+          "toBlock": "26179658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26179659",
+          "toBlock": "26180158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26180159",
+          "toBlock": "26180658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26180659",
+          "toBlock": "26181158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26181159",
+          "toBlock": "26181658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26181659",
+          "toBlock": "26182158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26182159",
+          "toBlock": "26182658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26182659",
+          "toBlock": "26183158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26183159",
+          "toBlock": "26183658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26183659",
+          "toBlock": "26184158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26184159",
+          "toBlock": "26184658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26184659",
+          "toBlock": "26185158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26185159",
+          "toBlock": "26185658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26185659",
+          "toBlock": "26186158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26186159",
+          "toBlock": "26186658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26186659",
+          "toBlock": "26187158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26187159",
+          "toBlock": "26187658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26187659",
+          "toBlock": "26188158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26188159",
+          "toBlock": "26188658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26188659",
+          "toBlock": "26189158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26189159",
+          "toBlock": "26189658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26189659",
+          "toBlock": "26190158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26190159",
+          "toBlock": "26190658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26190659",
+          "toBlock": "26191158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26191159",
+          "toBlock": "26191658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26191659",
+          "toBlock": "26192158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26192159",
+          "toBlock": "26192658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26192659",
+          "toBlock": "26193158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26193159",
+          "toBlock": "26193658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26193659",
+          "toBlock": "26194158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26194159",
+          "toBlock": "26194658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26194659",
+          "toBlock": "26195158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26195159",
+          "toBlock": "26195658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26195659",
+          "toBlock": "26196158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26196159",
+          "toBlock": "26196658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26196659",
+          "toBlock": "26197158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26197159",
+          "toBlock": "26197658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26197659",
+          "toBlock": "26198158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26198159",
+          "toBlock": "26198658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26198659",
+          "toBlock": "26199158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26199159",
+          "toBlock": "26199658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26199659",
+          "toBlock": "26200158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26200159",
+          "toBlock": "26200658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26200659",
+          "toBlock": "26201158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26201159",
+          "toBlock": "26201658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26201659",
+          "toBlock": "26202158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26202159",
+          "toBlock": "26202658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26202659",
+          "toBlock": "26203158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26203159",
+          "toBlock": "26203658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26203659",
+          "toBlock": "26204158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26204159",
+          "toBlock": "26204658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26204659",
+          "toBlock": "26205158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26205159",
+          "toBlock": "26205658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26205659",
+          "toBlock": "26206158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26206159",
+          "toBlock": "26206658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26206659",
+          "toBlock": "26207158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26207159",
+          "toBlock": "26207658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26207659",
+          "toBlock": "26208158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26208159",
+          "toBlock": "26208658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26208659",
+          "toBlock": "26209158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26209159",
+          "toBlock": "26209658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26209659",
+          "toBlock": "26210158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26210159",
+          "toBlock": "26210658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26210659",
+          "toBlock": "26211158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26211159",
+          "toBlock": "26211658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26211659",
+          "toBlock": "26212158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26212159",
+          "toBlock": "26212658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26212659",
+          "toBlock": "26213158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26213159",
+          "toBlock": "26213658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26213659",
+          "toBlock": "26214158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26214159",
+          "toBlock": "26214658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26214659",
+          "toBlock": "26215158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26215159",
+          "toBlock": "26215658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26215659",
+          "toBlock": "26216158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26216159",
+          "toBlock": "26216658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26216659",
+          "toBlock": "26217158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26217159",
+          "toBlock": "26217658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26217659",
+          "toBlock": "26218158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26218159",
+          "toBlock": "26218658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26218659",
+          "toBlock": "26219158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26219159",
+          "toBlock": "26219658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26219659",
+          "toBlock": "26220158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26220159",
+          "toBlock": "26220658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26220659",
+          "toBlock": "26221158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26221159",
+          "toBlock": "26221658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26221659",
+          "toBlock": "26222158",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26222159",
+          "toBlock": "26222658",
+          "matchingEvents": 0
+        },
+        {
+          "provider": "https://rpc.mevblocker.io",
+          "fromBlock": "26222659",
+          "toBlock": "26222896",
+          "matchingEvents": 0
+        }
+      ]
+    }
+  ],
+  "completedAt": "2026-10-24T23:24:35.049Z"
+}

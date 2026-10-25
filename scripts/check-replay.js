@@ -7,6 +7,7 @@ import { abiWords, encodeInt, encodeUint, encodeWord, uintFromWord, decodeAddres
 import { V3 } from '../public/data/config.js';
 import { feeGrowthInside, subtractGrowth, Q128 } from '../public/models/v3-fees.js';
 import { validatePositionPeriod } from '../public/data/position-period.js';
+import { readReplayEvents } from './lib/replay-events.js';
 
 // Development-only: read a bounded period for one unchanged NFT. No transactions.
 const endpoint = process.env.REPLAY_RPC || 'https://eth.drpc.org';
@@ -58,10 +59,8 @@ for(const point of [start,end])await confirmBlock(eventClient,'0x'+BigInt(point.
 for(let from=startNumber+1n;from<=endNumber;from+=500n){
   const to=from+499n>endNumber?endNumber:from+499n;
   const filter={address:V3.positionManager,fromBlock:'0x'+from.toString(16),toBlock:'0x'+to.toString(16),topics:[null,'0x'+encodeUint(id)]};
-  const response=await fetch(eventProvider,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getLogs',params:[filter]}),signal:AbortSignal.timeout(15000)});
-  assert.ok(response.ok,'The historical event query failed (HTTP '+response.status+').');const reply=await response.json();
-  assert.ok(reply.jsonrpc==='2.0'&&reply.id===1&&!reply.error&&Array.isArray(reply.result),'The provider returned an invalid event response.');
-  assert.equal(reply.result.length,0,'The NFT was updated during this period. Segment at its events.');
+  const logs=await readReplayEvents(eventProvider,filter,{onRetry:attempt=>console.log('Event provider busy; retrying read '+attempt+'…')});
+  assert.equal(logs.length,0,'The NFT was updated during this period. Segment at its events.');
   eventQueries.push({provider:eventProvider,fromBlock:from.toString(),toBlock:to.toString(),matchingEvents:0});
 }
 for(const point of [start,end]){await confirmBlock(client,'0x'+BigInt(point.snapshot.block.number).toString(16),point.snapshot.block);await confirmBlock(eventClient,'0x'+BigInt(point.snapshot.block.number).toString(16),point.snapshot.block);}

@@ -1,6 +1,6 @@
 # Historical cases: fixed positions
 
-[In-range baseline](https://teren.sh/#historical-case) · [Exit and return](https://teren.sh/#historical-case=range-return) · [Project overview](../README.md)
+[In-range baseline](https://teren.sh/liquidity.html#historical-case) · [Exit and return](https://teren.sh/liquidity.html#historical-case=range-return) · [One week](https://teren.sh/liquidity.html#historical-case=one-week) · [Project overview](../README.md)
 
 The recorded cases follow unchanged Ethereum Uniswap v3 WETH/USDC positions in the 0.3% pool. Each retains validated snapshots, cumulative range-time counters and independent read-only collection checks. They are fixed-position replays, not arbitrary-range backtests.
 
@@ -8,6 +8,7 @@ The recorded cases follow unchanged Ethereum Uniswap v3 WETH/USDC positions in t
 | --- | --- | --- | --- | --- | --- |
 | 01 · Stays in range | #1382030 | 26168526–26168941 | 9 | 4,992 seconds | 4,992 seconds · 100% |
 | 02 · Exit and return | #1375047 | 26080000–26090000 | 17 | 120,468 seconds | 50,256 seconds · 41.7% |
+| 03 · One week | #1375090 | 26172658–26222896 | 8 | 604,800 seconds | 0 seconds · 0% |
 
 ## In-range baseline
 
@@ -24,6 +25,16 @@ The starting principal is **4982691068 USDC base units** and **14920139441099507
 The first outside sample is block 26081250. Several following intervals add no active seconds and no fee tokens. Between blocks **26084375 and 26085000**, both sampled endpoints are outside, but cumulative counters record **2,724 active seconds** and new fee tokens. The first subsequent in-range sample is block **26086875**. The final checkpoint is outside again.
 
 These facts explain why an endpoint status or sampled price line cannot establish the whole path. **Outside sample** and **Return sample** identify recorded checkpoints, not exact crossing times. **Between samples** opens the interval with activity omitted by the price line. The position's lower USD price bound is far below these prices, so the chart focuses on the observed movement and explicitly identifies that bound as outside the plotted window.
+
+## One week without new fees
+
+Release 1.34.0 adds [position #1375090](../public/examples/uniswap-v3-position-week.json), from **12 October 2026, 00:00:11 UTC** to **19 October 2026, 00:00:11 UTC**. The eight daily checkpoints cover **604,800 seconds**. All seven intervals record **zero newly earned USDC, zero newly earned WETH and zero active seconds**. Independent collection differences also equal zero throughout.
+
+The starting and final principal are **0 USDC** and **55672026415822610 WETH base units** (about 0.055672 ETH). The fixed range is about **$2,643.90–$2,724.41 per ETH**, above every sampled price. Principal value falls from about **$140.75 to $133.80**, a **$6.96 loss**, while **LP minus holding is $0.00**. This separates matching holding from making a dollar profit. Values use the recorded pool ratio and USDC = $1.
+
+The record joins seven independently checked daily segments, retaining 105 complete event-query chunks. State reads came from dRPC and event queries from MEV Blocker. Each segment retains its capture date and evidence. The UI begins with starting capital → seven days → no new fees, then offers daily checkpoint shortcuts, interval fee tokens and active time. Dollar change is shown separately from the holding comparison in every case.
+
+This is one inactive week, not a typical yield or an estimate of how quickly another range might earn its fee target. The dates stayed fixed, and the first eligible position was retained regardless of its size or earnings. The selection procedure and exclusions are documented below.
 
 ## Learn from these records
 
@@ -51,57 +62,72 @@ The result describes this period's principal and earned fee tokens relative to h
 npm run check:replay
 node scripts/check-replay.js 1382030 26168526 26168941 public/examples/uniswap-v3-position-period.json
 
-# Longer case: the optional final argument chooses 17 checkpoints.
+# Exit and return: the optional final argument chooses 17 checkpoints.
 node scripts/check-replay.js 1375047 26080000 26090000 public/examples/uniswap-v3-position-range-return.json 17
+
+# Reproduce the week using the committed selection audit; output stays separate.
+# Re-running resumes fully validated cached segments after checking block identities.
+npm run check:week
+# Optional explicit selection, output and cache paths:
+node scripts/check-replay-week.js docs/evidence/week-selection.json week-replay.json .replay-week-cache
+
+# Independently repeat candidate qualification in the predeclared order.
+# This reads up to 500 candidates and stops on provider failure, never skips it.
+npm run qualify:week
 ```
 
 The development script makes read-only calls, paces provider requests and retries temporary limits. It supports 2–32 checkpoints over at most 10,000 blocks. It rejects changed positions, incomplete event queries, invalid counters, non-finalized endpoints and fee discrepancies, then validates the complete record before writing it. `REPLAY_RPC` and `REPLAY_LOG_RPC` select public HTTPS providers; current defaults are dRPC for state and MEV Blocker for events. Public archive availability and request limits vary. No wallet, transaction or scheduled collector is involved.
 
-The browser opens the bundled cases without RPC calls. Export includes all checkpoint snapshots, block hashes, raw counters, simulation results and event query coverage. File validation checks arithmetic and evidence consistency; it cannot independently authenticate a provider's chain history. Applying a checkpoint starts a new hypothetical principal-only range experiment with zero assumed future fees, rather than continuing the recorded history.
+The browser opens the bundled cases without RPC calls. Export includes all checkpoint snapshots, block hashes, raw counters, simulation results and event query coverage. The week export retains its versioned manifest and every complete segment, including both copies of shared boundaries; only the display deduplicates those points. File validation checks arithmetic and evidence consistency; it cannot independently authenticate a provider's chain history. Applying a checkpoint starts a new hypothetical principal-only range experiment with zero assumed future fees, rather than continuing the recorded history.
 
 Source references: [Uniswap range counters](https://github.com/Uniswap/v3-core/blob/main/contracts/interfaces/pool/IUniswapV3PoolDerivedState.sol), [fee-growth rules](https://github.com/Uniswap/v3-core/blob/main/contracts/libraries/Tick.sol), [NFT accounting events](https://github.com/Uniswap/v3-periphery/blob/main/contracts/interfaces/INonfungiblePositionManager.sol).
 
 ## Recheck the bundled evidence in CI
 
-The manually triggered **Recheck recorded chain evidence** workflow runs `npm run check:records`. It recaptures both windows, checks fresh contract/collection/event evidence, and compares every canonical checkpoint with the bundled record, excluding provider labels and capture timestamps. It uploads `record-verification.json` with the run time, providers and per-case matches or errors. The original files are not overwritten. Public archive availability can fail the run; it is separate from ordinary release CI. No new run is implied by a “checked at capture” label.
+The manually triggered **Recheck recorded chain evidence** workflow runs `npm run check:records`. It recaptures all three windows (using a fresh cache for the week), checks fresh contract/collection/event evidence, and compares every canonical checkpoint with the bundled record, excluding provider labels and capture timestamps. It uploads `record-verification.json` with the run time, providers and per-case matches or errors. The original files are not overwritten. Public archive availability can fail the run; it is separate from ordinary release CI. No new run is implied by a “checked at capture” label.
 
-## Next validation cases
+## Week selection and composition
 
-First extend one unchanged position to a week in the existing 0.3% pool, as specified below. A later comparison can follow two existing ranges over the same period in the ETH/USDC 0.05% pool, retaining each position's starting basket and verification evidence. Arbitrary hypothetical bounds need historical tick/swap reconstruction and an explicit assumption about the effect of adding liquidity. Hourly pool price and global fee growth alone do not establish their fee allocation.
-
-## Proposed next case: one position over one week
-
-**Status: specification only. No position, block window or new earnings have been captured or verified for this proposal.** This takes priority over the two-range 0.05% comparison above. Extend a familiar mechanism before adding a pool and a second strategy.
-
-### Learning question
-
-**Does giving a position more time make its fee target easier to earn?** Show the difference between dividing a fixed target by more days and observing additional fee tokens. Follow one unchanged position through daily checkpoints; show both cumulative fees and the newly earned tokens in each interval. A quiet or inactive interval should remain visible. If the selected week contains no such contrast, report that limitation rather than silently choosing a more dramatic week.
+The question declared before capture was: **Does giving a position more time make its fee target easier to earn?** The record distinguishes dividing a hypothetical target by more days from observing additional fee tokens. This selected week contains no earning interval, so it cannot show variable daily income. That limitation is retained rather than changing the dates or choosing a more dramatic outcome.
 
 ### Selection before looking at the returns
 
-- Start with Ethereum WETH/USDC in the existing Uniswap v3 0.3% pool. Target 12–19 October 2026, 00:00 UTC, using the first finalized block at or after each requested boundary. Record actual timestamps and elapsed seconds; do not assume exactly seven days from block counts.
-- First check the two existing NFT IDs, in ascending numeric order, for positive liquidity and unchanged position accounting across the entire window. If neither qualifies, stop and document why. Broader candidate discovery needs a declared, reproducible candidate list and ordering before fee outcomes are examined.
-- Record exclusions for position changes, missing history or inconsistent evidence. Low fees, losses against holding, inactivity and disappointing returns are not exclusion criteria. Do not move the dates to improve the result. Technical unavailability is an incomplete capture, not evidence of zero earnings.
-- Select daily checkpoints in advance. Additional samples may explain a counter change, but never claim that sampled prices locate every range crossing. A later multi-case library should include contrasting conditions under the same selection rules; one week is still not a representative yield.
+- Use Ethereum WETH/USDC in the existing Uniswap v3 0.3% pool. Target 12–19 October 2026, 00:00 UTC, choosing the first finalized block at or after each daily boundary. The audit retains each boundary's previous block to establish this choice. All eight chosen timestamps are 11 seconds after midnight; actual elapsed time is exactly 604,800 seconds.
+- First inspect the two existing NFT IDs in ascending order for positive liquidity and unchanged position accounting across the whole window. Neither qualified. Record exclusions before declaring broader discovery.
+- The bounded fallback order below chooses the first eligible position. Low fees, losses, size and inactivity are not exclusion criteria. Do not move dates to improve results. Provider failure means incomplete evidence, never zero earnings or permission to skip a candidate.
+- Retain daily samples as declared. Cumulative counters and complete continuity evidence establish accounting between them; sampled prices do not locate every range crossing.
 
-### Evidence and engineering gate
+### Initial exclusions and bounded fallback
 
-The current format supports at most 10,000 blocks, 32 checkpoints and 20 event-query chunks. A week will require a new bounded composition layer; merely raising those limits would change an existing validation contract.
+The [initial read](evidence/week-initial-selection.json) on 24 October 2026 found unchanged positive liquidity but different endpoint fee accounting for **#1375047**, and zero liquidity at both endpoints for **#1382030**. Neither could represent an unchanged, positive-liquidity position over this week. The initial stage stopped without moving the dates.
 
-Proposed approach: a versioned manifest joining existing validated segments of at most 10,000 blocks. Adjacent segments must share exactly the same boundary block hash and canonical snapshot/counter/collect evidence, with one NFT, pool, liquidity and position accounting throughout. Omit only duplicate boundary points in the combined view. Fail on gaps, overlap beyond the shared boundary, changed accounting, missing event coverage, conflicting evidence or partial captures. Keep the original two records and routes unchanged.
+Before further discovery, [the machine-readable selection plan](../scripts/replay-week-plan.json) declared NFT IDs **1375000–1375499 in ascending order**, skipping the already excluded original candidate. [Commit 2e293cc](https://github.com/provatidis/teren/commit/2e293cc51a1de520bb81a20d4230980eed8ebc1e) records that plan before the fallback reads. This 500-ID interval begins at the smaller original candidate rounded down to the nearest 1,000. Positive liquidity, the configured pair/fee, unchanged accounting and complete empty position-event coverage determine eligibility. A provider failure stops discovery as incomplete.
 
-Calculate week-to-date fees against the **first** checkpoint's inside fee growth. Do not sum separately floored segment credits: that loses rounding carries. Interval credits are differences of those cumulative totals. Compare each cumulative result with an independent simulated-collect difference from the same first checkpoint, preserving the existing one-base-unit tolerance. Range-time deltas must be valid both within each segment and across the joined period. Complete event queries and provider block-identity checks remain mandatory over the full window.
+The [completed qualification audit](evidence/week-selection.json) records the plan hash, daily boundary headers, exclusions and event coverage. The fallback inspected 90 IDs: 81 used another pair or fee tier, eight were missing at the start, and **#1375090 was the first eligible candidate**. It was retained before daily fee accounting was captured. The week has no minimum-balance, active-time or fee-income filter.
 
-Bound the new manifest to eight segments and 64 unique checkpoints initially, validate all segments before enabling results, and record capture/check dates and providers. The capture tool should resume verified immutable segments after temporary RPC failures and invalidate conflicting boundaries. Add adversarial fixtures for gaps, boundary conflicts, changed positions, rounding carry, missing chunks and failed independent checks before publishing a record. Reproduction must succeed from the documented read-only commands and raw files; arithmetic-only browser validation must keep its existing label.
+### Bounded composition and rounding
 
-### Presentation and accounting
+The original version-1 period format still permits at most 10,000 blocks, 32 checkpoints and 20 event-query chunks, each covering at most 500 blocks. A separate version-1 **fixed-position-history** manifest joins **2–8 segments with at most 64 unique checkpoints**. The week uses seven two-point segments. Every segment independently passes the original validation.
 
-- Begin with starting principal → recorded time → newly earned fees. Daily exploration uses actual timestamps, with no smooth animation implying unseen prices.
-- Keep the original holding basket; compare principal alone and principal plus new fee tokens against it. Show dollar change from starting capital separately from the holding difference.
-- Keep earned USDC and WETH visible. Value cumulative fees at the selected checkpoint price with USDC = $1. Do not sum daily dollar values priced at different times to construct the final fee total.
-- Show exact range-active seconds alongside fees, without treating active time as a fee rate. No annualized yield, future earnings projection or scaling the position to an arbitrary deposit.
-- Results remain before gas and incentives. Do not invent execution costs for an unchanged position or claim lifetime PnL. A hypothetical fee target may be shown alongside the record only with its benchmark and endpoint assumptions explicitly identified.
+Adjacent segments share exactly the same canonical checkpoint: block number/hash/time, snapshot accounting, range-time counters and collection amounts. Only provider labels and capture timestamps may differ. The combined view omits duplicate boundary points. Gaps, overlap beyond that boundary, changed accounting, missing event coverage, conflicting evidence and partial captures are rejected.
 
-### Observation before further expansion
+Week-to-date fees use the **first** checkpoint's inside fee growth. Summing separately floored segment credits would lose rounding carries. Interval credits are differences of those cumulative totals. Every cumulative result is checked against a simulated-collect difference from the same first checkpoint, within one base unit per token. Range-time increments and unchanged accounting are checked both locally and over the full sequence.
 
-Give a learner a fixed target and let them change the hypothetical window from 7 to 30 days. Ask, without calculations: “What changed? What would you need to know before expecting those fees?” Then open the week record and ask whether another equal-length interval must earn the same amount. Finally, ask whether matching holding establishes a dollar profit. Record their explanation and navigation difficulties without coaching first; this is a small usability/understanding observation, not a graded exam or proof of general learning effectiveness.
+The week capture command validates the committed selection audit and confirms daily headers against both providers. Cached segments are accepted only when their canonical endpoint headers and position ID match that audit and their complete evidence validates. Temporary event-query failures have bounded retries of the identical query; invalid evidence stops capture. The final output is written atomically only after every segment and the combined record validate and block identities are rechecked. Reusing a cache is a resume operation, not a fresh re-query of its contract state. The separate `check:records` workflow always uses an empty temporary cache.
+
+Tests cover boundary conflicts, gaps, reversed segments, changed accounting, missing chunks, rounding carries, global-versus-local collection discrepancies, cache identity and bounded retries. Browser checks cover daily access, export, selection changes, failed loads and principal-only Experiment handoffs. These checks establish implementation consistency; browser file validation cannot authenticate chain history independently.
+
+### Presentation and interpretation
+
+- Keep the original holding basket. Compare principal alone and principal plus new fee tokens against it, while showing dollar change from starting capital separately.
+- Keep earned USDC and WETH visible. Value cumulative fees at the selected checkpoint price with USDC = $1; do not sum daily dollar values priced at different times into a final fee total.
+- Show recorded active seconds beside fees without converting active time into a fee rate. Do not annualize, project future income or scale the record to an arbitrary deposit.
+- Exclude gas and incentives, and do not claim lifetime PnL. Applying a checkpoint starts a new hypothetical principal-only range experiment with zero assumed future fees.
+
+## Next validation cases
+
+A future comparison can follow two existing ranges over the same period, retaining each starting basket and verification evidence. It needs a new selection declaration before returns are inspected. The inactive week does not close the gap between a hypothetical fee target and a useful matched earning reference. Arbitrary hypothetical bounds need historical tick/swap reconstruction and an explicit assumption about the effect of adding liquidity. Hourly pool price and global fee growth alone do not establish fee allocation.
+
+## Observation before further expansion
+
+Give a learner a fixed target and let them change the hypothetical window from 7 to 30 days. Ask, without calculations: “What changed? What would you need to know before expecting those fees?” Then open the week record and ask what its seven daily intervals establish about income, and whether matching holding establishes a dollar profit. Record their explanation and navigation difficulties without coaching first. This observation has not yet happened; tests are not evidence of teaching effectiveness.

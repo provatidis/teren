@@ -1,15 +1,17 @@
 # Review questions and open blind spots
 
-## Current priorities · 1.33.0
+## Current priorities · 1.34.0
 
-- Observe an experienced user reopening a loop, changing a construction choice, testing shared adverse conditions and saving a variation. This release improves that workflow; repeat usage has not yet been measured.
+- The new week keeps the declared dates and first eligible position, including its zero fees and zero active seconds. Its seven daily segments pass collection and continuity checks. This is evidence of one inactive week, not a representative fee yield or a matched earning reference. Do not choose another window after seeing the outcome merely to make it more impressive.
+- Ask a learner what changed when seven days passed without fees, and why matching holding can accompany a dollar loss. This has not yet been observed; passing tests does not establish understanding.
+- Observe an experienced user reopening a loop, changing a construction choice, testing shared adverse conditions and saving a variation. Release 1.33.0 improves that workflow; repeat usage has not yet been measured.
 - Named lending/loop saves and custom visual previews still use fixed assumptions. Neither a saved comparison nor a successful hypothetical unwind establishes protocol execution or survival of an intervening price path.
 - Visible prediction choices now invite an expectation in all twenty lessons, with a deliberate skip. This restores teaching emphasis; its effect on understanding remains unmeasured. Evaluate the next review against expectation → observation → explanation → application.
 - The entry/navigation release adds Home, topic-scoped modes, local lesson resume, simpler progress orientation, stable slider value space and bundled production CSS.
 - Observe an unfamiliar learner finding a topic, explaining one visual change and applying it to another setup. Positive feedback from experienced friends is useful; it does not yet measure novice understanding.
 - Check actual Android Chrome and an assistive-technology workflow. Desktop/narrow browser checks do not establish either.
 - Measure loading on the deployed site before claiming a time saving. One stylesheet request and a smaller Home dependency graph are engineering facts, not a field performance estimate.
-- Next teaching candidates: an explicit LP-minus-holding chart, a carefully bounded arbitrage explainer, and the pre-specified longer historical case. No new model or capture is part of this release.
+- Further candidates: a matched-period comparison between existing ranges, an explicit LP-minus-holding chart, and a carefully bounded arbitrage explainer. A longer inactive record does not close the question of realistic fee income; the next capture needs new eligibility rules declared before its returns are inspected.
 
 
 [Project decisions](../DECISIONS.md) · [Models](models.md) · [Learning evidence](learning.md)
@@ -160,4 +162,4 @@ Carry both asset and debt exposure through every loop. Separate borrowed cash, r
 - The recorded examples now lead with a labeled capital → time → fees sequence. Original ranges, active time and the percentage denominator remain visible. Period/capture details and shared accounting notes are disclosed below. The layout does not scale, annualize or rank the records, and the arrows do not represent asset transfers.
 - The time control explicitly says that more time lowers the daily hurdle while actual fees depend on swaps and competing liquidity. The target, recorded figures, question, saved progress and handoff remain unchanged by duration exploration. An observed learner still needs to explain this distinction; the new presentation is not evidence of learning.
 - The intermittent native-touch fixture previously measured before enabling touch mode and only checked the end value. The pilot checks now establish touch mode first, wait for stable unobscured geometry and retain trusted pointer/input diagnostics. Repeated fresh-page drags keep the original endpoint/layout requirements. The old failure lacked event evidence, so its exact browser-level cause cannot be established retrospectively.
-- [The proposed week-long case](replay.md#proposed-next-case-one-position-over-one-week) sets a learning question, fixed selection rules, continuity/rounding checks and a learner observation before data collection. No longer record or new chain verification ships here. Representativeness, transaction costs, protocol execution and learning effectiveness remain open evidence gaps.
+- [The proposed week-long case](replay.md#week-selection-and-composition) sets a learning question, fixed selection rules, continuity/rounding checks and a learner observation before data collection. No longer record or new chain verification ships here. Representativeness, transaction costs, protocol execution and learning effectiveness remain open evidence gaps.

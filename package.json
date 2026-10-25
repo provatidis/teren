@@ -1,6 +1,6 @@
 {
   "name": "teren",
-  "version": "1.33.0",
+  "version": "1.34.0",
   "private": true,
   "type": "module",
   "description": "A DeFi playground for liquidity, lending and reproducible learning experiments",
@@ -14,6 +14,8 @@
     "check:position": "node scripts/check-position.js",
     "check:fees": "node scripts/check-position-fees.js",
     "check:replay": "node scripts/check-replay.js",
+    "check:week": "node scripts/check-replay-week.js",
+    "qualify:week": "node scripts/qualify-replay-week.js",
     "check:records": "node scripts/check-records.js"
   },
   "engines": {

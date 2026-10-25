@@ -33,7 +33,7 @@ export function createFeeContext(prefix) {
   body.append(target, window, daily, assumption,
     node('p', 'More time lowers the daily hurdle. Actual fees still depend on swaps and competing liquidity.', 'fee-context-takeaway'));
   const records = node('details', undefined, 'fee-context-records');
-  records.append(node('summary', 'What did two recorded positions earn?'));
+  records.append(node('summary', 'What did recorded positions earn?'));
   const content = node('div');
   const status = node('p', 'Open to load the recorded examples.'); status.setAttribute('role', 'status');
   const retry = node('button', 'Try loading again', 'button secondary'); retry.type = 'button'; retry.hidden = true;
@@ -43,7 +43,7 @@ export function createFeeContext(prefix) {
     node('p', 'Accounting was checked at capture. The browser checks the files; it does not re-read the chain. Open Inspect for the providers, checkpoints and verification evidence.'));
   method.hidden = true;
   records.append(node('p', 'Ethereum · Uniswap v3 · WETH/USDC 0.3%', 'fee-context-provenance'),
-    node('p', 'Two short observations with different ranges and dates. These are not typical returns or forecasts for this setup.'),
+    node('p', 'Separate observations with different ranges, dates and durations. These are not typical returns or forecasts for this setup.'),
     node('p', 'Fee tokens valued at the final recorded price · USDC = $1.', 'fee-context-provenance'), status, content, retry, method);
   let loading = false, loaded = false;
   async function showRecords() {

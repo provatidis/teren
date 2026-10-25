@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Re-read both historical cases and compare their evidence
+      - name: Re-read all historical cases and compare their evidence
         run: npm run check:records
       - name: Publish the verification report
         if: always()
