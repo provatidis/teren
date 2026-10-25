@@ -258,8 +258,13 @@
     <div id="width-workspace" class="app-workspace" hidden>
       <section id="compare-widths" class="card width-comparison" aria-labelledby="width-title">
         <h2 id="width-title">Two ranges, one starting basket</h2>
-        <p class="body-copy">Start with the same 50/50 basket by value. Move the price and watch each range exchange ETH and USDC.</p>
+        <p id="width-intro" class="body-copy">Start with the same 50/50 basket by value. Move the price and watch each range exchange ETH and USDC.</p>
+        <div class="width-view-switch" role="group" aria-label="Width comparison view">
+          <button id="width-balances-view" type="button" aria-pressed="true" aria-controls="width-principal-view">Token balances</button>
+          <button id="width-fees-view" type="button" aria-pressed="false" aria-controls="width-fee-view">Follow the fees</button>
+        </div>
         <p id="width-notice" class="fine-print" role="status"></p>
+        <details id="width-inputs" class="width-inputs" open><summary>Capital, ranges and exact price <span id="width-inputs-overview"></span></summary>
         <form id="width-form" novalidate>
           <details id="width-setup" class="model-details">
             <summary>Shared starting setup <span id="width-setup-label"></span></summary>
@@ -277,6 +282,8 @@
           <div class="scenario-field width-price-field"><label for="width-price">Compare at this ETH price · USD</label><input id="width-price" type="number" min="0.01" max="10000000" step="any" value="2400" aria-describedby="width-price-error"><p id="width-price-error" class="field-error" hidden></p></div>
           <p id="width-error" class="field-error" role="alert"></p>
         </form>
+        </details>
+        <p id="width-fee-invalid" class="field-error" role="status"></p>
         <div id="width-results">
           <figure class="width-bands-figure">
             <svg id="width-bands" viewBox="0 0 600 150" role="img" aria-labelledby="width-bands-title">
@@ -288,7 +295,7 @@
               <path id="width-start-marker" class="width-start-marker"/><path id="width-price-marker" class="width-price-marker"/>
               <text id="width-scale-low" x="70" y="138" class="chart-label"></text><text id="width-scale-high" x="570" y="138" text-anchor="end" class="chart-label"></text>
             </svg>
-            <figcaption class="fine-print">Same price scale · solid vertical line: selected price · dotted line: starting price.</figcaption>
+            <figcaption class="fine-print">Shared price scale · dotted line: start · solid line: selected price.</figcaption>
           </figure>
           <div class="width-price-controls">
             <label for="width-price-slider">Move the same price for both ranges</label>
@@ -298,6 +305,7 @@
               <button type="button" data-width-price="start">Starting price</button><button type="button" data-width-price="a-lower">A lower edge</button><button type="button" data-width-price="a-upper">A upper edge</button><button type="button" data-width-price="b-lower">B lower edge</button><button type="button" data-width-price="b-upper">B upper edge</button>
             </div></details>
           </div>
+          <div id="width-principal-view">
           <p id="width-holding" class="width-holding"></p>
           <div id="width-cards" class="width-cards"></div>
           <p id="width-takeaway" class="width-takeaway"></p>
@@ -318,6 +326,54 @@
               <p class="fine-print">Each point is a separate possible price outcome. This is not a price path or a record of earned fees.</p>
             </figure>
           </details>
+          </div>
+          <section id="width-fee-view" class="fee-flow" aria-labelledby="fee-flow-title" hidden>
+            <h3 id="fee-flow-title" class="sr-only">Hypothetical trading batch</h3>
+            <details id="fee-flow-assumptions" class="model-details"><summary>Next batch <span id="fee-flow-assumptions-summary"></span></summary>
+            <div class="fee-flow-settings">
+              <div class="scenario-field"><label for="fee-flow-volume">Trading volume · USD</label><input id="fee-flow-volume" type="number" min="0" max="1000000000" step="any" value="1000000" aria-describedby="fee-flow-volume-error"><p id="fee-flow-volume-error" class="field-error" hidden></p></div>
+              <div class="scenario-field"><label for="fee-flow-competition">Other LPs’ starting capital · USD</label><input id="fee-flow-competition" type="number" min="1" max="1000000000000" step="any" value="1000000" aria-describedby="fee-flow-competition-error fee-flow-competition-help"><p id="fee-flow-competition-error" class="field-error" hidden></p></div>
+            </div>
+            <p id="fee-flow-competition-help" class="fine-print">Other LPs spread that capital across all prices, valued at the shared starting ETH price. Each range is a separate alternative against those same LPs.</p>
+            <details class="fee-flow-rates"><summary>Trader fee and protocol share <span id="fee-flow-rate-summary"></span></summary><div class="fee-flow-settings">
+              <div class="scenario-field"><label for="fee-flow-tier">Trader fee</label><select id="fee-flow-tier"><option value="100">0.01%</option><option value="500">0.05%</option><option value="3000" selected>0.30%</option><option value="10000">1.00%</option></select></div>
+              <div class="scenario-field"><label for="fee-flow-protocol">Protocol share of fees</label><select id="fee-flow-protocol"><option value="0">None</option><option value="4">1/4</option><option value="5">1/5</option><option value="6" selected>1/6</option><option value="7">1/7</option><option value="8">1/8</option><option value="9">1/9</option><option value="10">1/10</option></select></div>
+            </div><p class="fine-print">Chosen teaching assumptions, not the current settings of a live pool. Actual protocol shares can differ between the two input tokens.</p></details>
+            </details>
+            <div id="fee-flow-market"></div>
+            <p class="fine-print">Only added batches earn fees here. Moving the price adds no trading.</p>
+            <p id="fee-flow-error" class="field-error" role="status"></p>
+            <div id="fee-flow-quote">
+              <p id="fee-flow-quote-price" class="fee-flow-quote-price"></p>
+              <div class="fee-flow-source" aria-label="Where this batch’s fees go">
+                <div><span>Traders pay in fees</span><strong id="fee-flow-gross"></strong></div>
+                <span class="fee-flow-arrow" aria-hidden="true">→</span>
+                <div><span>To the protocol</span><strong id="fee-flow-cut"></strong></div>
+                <div><span>Left for active LPs</span><strong id="fee-flow-pot"></strong></div>
+              </div>
+              <p class="fine-print">A and B are separate alternatives. Each shares the LP fees with the same other LPs.</p>
+              <div id="fee-flow-quotes" class="fee-flow-columns"></div>
+              <p id="fee-flow-mechanism" class="body-copy"></p>
+            </div>
+            <div class="fee-flow-actions"><button id="fee-flow-add" type="button" class="button primary">Add this trading batch</button><button id="fee-flow-example" type="button" class="button secondary">Try two batches</button></div>
+            <p id="fee-flow-status" role="status" class="fine-print"></p>
+            <section id="fee-flow-totals" aria-labelledby="fee-flow-totals-title">
+              <h3 id="fee-flow-totals-title">Fees kept from your batches</h3>
+              <p id="fee-flow-count" class="body-copy"></p>
+              <div id="fee-flow-outcomes" class="fee-flow-columns"></div>
+              <p class="fine-print">Moving the price changes the value of retained ETH fees. Leaving a range does not remove fee tokens already earned.</p>
+            </section>
+            <details id="fee-flow-ledger" class="model-details"><summary>Inspect the batches <span id="fee-flow-ledger-count"></span></summary><ol id="fee-flow-batches"></ol></details>
+            <div class="fee-flow-actions"><button id="fee-flow-undo" class="button secondary" type="button">Undo last batch</button><button id="fee-flow-clear" class="text-button" type="button">Clear batches</button></div>
+            <p class="fine-print">Changing widths or the shared starting setup recalculates every batch. Trading settings apply to the next batch. Keep up to eight batches; share the comparison to retain all of them.</p>
+            <details class="model-details"><summary>How fees are allocated here</summary><div>
+              <p>Half of each batch’s gross input value is ETH and half is USDC. The trader fee is taken from each input token. After the chosen protocol share, your active range receives its liquidity divided by the combined liquidity of your range and the other LPs. A and B are alternatives, not positions competing with each other.</p>
+              <p>Other LPs use continuous full-range liquidity; their entered capital is valued at the shared starting price. Trading volume, competitor capital, fee tier and protocol share are captured separately for each batch. Fees remain in tokens without compounding and are valued at the selected comparison price, with USDC = $1.</p>
+              <p>The price is held fixed while each batch is allocated. Price impact, routing, tick crossings and fees from moving between batch prices are omitted. Exact range edges require individual swap direction, so batches at an edge are not added. This is an allocation approximation, not a historical replay or executable pool simulation.</p>
+              <p>Principal uses the existing continuous range model. Gas, incentives, rebalancing and contract rounding are excluded. The handoff to the range lab converts retained fee tokens into a fixed USD assumption at the selected price.</p>
+              <p><a href="https://developers.uniswap.org/docs/get-started/concepts/fees" target="_blank" rel="noopener noreferrer">Uniswap fee sharing ↗</a> · <a href="https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol" target="_blank" rel="noopener noreferrer">Pool accounting ↗</a></p>
+            </div></details>
+          </section>
         </div>
         <div class="width-actions"><button id="width-share" type="button" class="button secondary">Share this comparison</button><button id="width-reset" type="button" class="text-button">Reset comparison</button></div>
         <div id="width-share-result" hidden><label for="width-share-url">Comparison link</label><input id="width-share-url" type="text" readonly><p id="width-share-status" class="fine-print" role="status"></p></div>

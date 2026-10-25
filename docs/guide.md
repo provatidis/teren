@@ -232,3 +232,14 @@ Open **Compare two ranges over the same week** from a liquidity lab’s **Could 
 Each range keeps its own starting principal basket. **Tokens, collections and evidence** shows current principal, actual withdrawals, earlier excluded claims and remaining collectable tokens. Withdrawals can include old claims, so they are not automatically new income. **Explore this range in Experiment** starts a principal-only hypothetical scenario with zero future fees. **Export both positions and their evidence** retains both complete records.
 
 The two positions share their pool and week, but differ in range placement and starting mix. This is an illustration, not typical earnings or a controlled test of width. Collected tokens are valued as if held to the selected checkpoint; gas and recipient trades are excluded.
+
+
+## Follow the fees
+
+Open [Compare widths → Follow the fees](https://teren.sh/liquidity.html#follow-fees). Start with the **Try two batches** example: the same trading amount first happens at the starting price, then at the selected price. Each is hypothetical, with its price held fixed while fees are split.
+
+The preview shows trader fees, the protocol share, and each alternative’s share among active LPs. **Add this trading batch** keeps its ETH and USDC fee tokens. Move the price outside a range: it receives no new fees there, but tokens from earlier batches remain. Their ETH value changes with price. **Next batch** lets you vary volume and competing capital; its settings are captured when you add it. Inspect the batches to see those assumptions.
+
+The totals separate fee-token value, principal plus fees, the holding comparison and dollar change. **Token balances** returns to the principal-only comparison. Share retains every batch and setting; Home can resume the experiment. Undo removes the last batch, clear removes all batches, and Reset comparison also resets the widths and starting setup. Opening either range with fees converts the retained tokens into a fixed USD fee assumption for a separate range-lab experiment.
+
+These results explain fee sharing under chosen conditions. They do not establish whether a real pool would see that volume or earn those fees. Use the recorded cases separately for historical observations.

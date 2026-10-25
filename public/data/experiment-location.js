@@ -3,6 +3,7 @@ export const EXPERIMENT_LOCATION_KEY = 'teren-experiment-location-v1';
 const destinations = {
   'cp50-v1': { page: 'liquidity.html', prefix: '#scenario=cp50-v1&', title: 'Liquidity · full range' },
   'cl-range-v1': { page: 'liquidity.html', prefix: '#scenario=cl-range-v1&', title: 'Liquidity · price range' },
+  'cl-width-fees-v1': { page: 'liquidity.html', prefix: '#width=cl-width-fees-v1&', title: 'Liquidity · follow the fees' },
   'cl-width-v1': { page: 'liquidity.html', prefix: '#width=cl-width-v1&', title: 'Liquidity · compare widths' },
   'collateral-loan-v1': { page: 'lending.html', prefix: '#loan=collateral-loan-v1&', title: 'Lending · single loan' },
   'borrowing-loop-v1': { page: 'lending.html', prefix: '#loop=borrowing-loop-v1&', title: 'Lending · borrowing loops' },

@@ -1,6 +1,12 @@
 # Review questions and open blind spots
 
-## Current priorities · 1.36.0
+## Current priorities · 1.37.0
+
+- The fee-flow view makes the allocation mechanism explicit: input tokens pay fees, the protocol takes its assumed share, and active liquidity divides the remainder. A and B are alternatives, and accrued tokens survive exits. Tests check conservation and consistent assumptions; learning remains unmeasured.
+- The fixed-price batch is the central retained approximation. It cannot answer whether a real market produces the selected volume, how a large trade moves price, what happens between prices, or what editable historical ranges would have earned. Do not call it a replay, forecast or measured yield. Current protocol settings must not be inferred from the example defaults.
+- Ask someone to add an in-range batch, move outside and explain why fee tokens remain while new fees stop. Then increase other LP capital and ask why the next batch pays less. Finally ask whether a higher fee total proves the range beats holding. None requires arithmetic. Watch whether the preview is mistaken for an added batch.
+- Follow through on actual-device/assistive-technology checks and learner observations before treating more polished controls as evidence of understanding.
+
 
 - The controlled width experiment now holds capital, the starting 50/50 basket and comparison price equal. It separates width’s effect on principal and the fee hurdle from the recorded pair’s different placements and starting mixes. This does not establish which width earns more fees or gives a better net outcome in a real pool.
 - A user may infer that the larger fee hurdle makes the narrower range worse overall. Check whether they can explain what additional swap, competition and cost evidence would be needed. Width is a total span, not an arithmetic ± percentage; verify that the displayed bounds make this understandable. These learner outcomes have not been observed.

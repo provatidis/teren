@@ -1,0 +1,106 @@
+import assert from 'node:assert/strict';
+import { calculateFeeFlow, DEFAULT_FEE_FLOW } from '../../public/models/range-fee-flow-v1.js';
+import { DEFAULT_WIDTHS, calculateWidthComparison } from '../../public/models/range-width.js';
+import { widthFlowHash, widthFlowFromHash } from '../../public/lib/width-flow-links.js';
+import { dragRangeToMax } from './touch-range.js';
+
+export async function checkFeeFlow({ evaluate, click, fill, text, navigate, reload, base, call }) {
+  const keys = ['teren-width-comparison-v1', 'teren-experiment-location-v1'];
+  await navigate(base + 'liquidity.html#compare-widths');
+  const saved = await evaluate(`${JSON.stringify(keys)}.map(key=>[key,localStorage.getItem(key)])`);
+  const value = id => evaluate(`document.getElementById('${id}').value`);
+  const state = () => evaluate("JSON.parse(localStorage.getItem('teren-width-comparison-v1'))");
+  const openAssumptions = () => evaluate("document.getElementById('fee-flow-assumptions').open=true");
+  try {
+    await click('width-reset');
+    await navigate(base + 'liquidity.html#follow-fees');
+    assert.equal(await evaluate("document.getElementById('width-fee-view').hidden"), false);
+    assert.equal(await evaluate("document.getElementById('width-principal-view').hidden"), true);
+    assert.match(await text('fee-flow-mechanism'), /Only B is active/);
+    assert.match(await text('fee-flow-count'), /No batches added/);
+    await click('fee-flow-example');
+    assert.equal(await evaluate('document.activeElement.id'), 'fee-flow-add');
+    assert.equal((await state()).flow.batches.length, 2);
+    const expectedState = (await state()).flow;
+    const result = calculateFeeFlow(DEFAULT_WIDTHS, expectedState);
+    assert.ok(result.ranges[0].netVsHolding < 0 && result.ranges[1].netVsHolding > 0);
+    const tokens = await evaluate("Array.from(document.querySelectorAll('#fee-flow-outcomes .width-token-key')).map(el=>el.textContent)");
+    await evaluate("document.getElementById('width-inputs').open=true");
+    await fill('width-price', '4000');
+    assert.match(await text('fee-flow-mechanism'), /Both ranges are outside/);
+    assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#fee-flow-outcomes .width-token-key')).map(el=>el.textContent)"), tokens);
+    await click('fee-flow-add');
+    assert.equal((await state()).flow.batches.length, 3);
+    assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#fee-flow-outcomes .width-token-key')).map(el=>el.textContent)"), tokens);
+    await click('fee-flow-undo');
+    await fill('width-price', '2400');
+    await openAssumptions();
+    await fill('fee-flow-volume', '0');
+    assert.equal(await evaluate("document.getElementById('fee-flow-add').disabled"), true);
+    await fill('fee-flow-volume', '123456.789');
+    await fill('fee-flow-competition', '987654.321');
+    const lastValid = await evaluate("localStorage.getItem('teren-width-comparison-v1')");
+    await fill('fee-flow-volume', '');
+    assert.equal(await evaluate("document.getElementById('width-share').disabled"), true);
+    assert.equal(await evaluate("localStorage.getItem('teren-width-comparison-v1')"), lastValid);
+    await fill('fee-flow-volume', '123456.789');
+    await click('width-share');
+    const shared = await value('width-share-url');
+    const parsed = widthFlowFromHash(new URL(shared).hash);
+    assert.equal(parsed.flow.volume, 123456.789); assert.equal(parsed.flow.batches.length, 2);
+    await reload();
+    assert.equal(await value('fee-flow-volume'), '123456.789');
+    assert.match(await text('fee-flow-count'), /2 of 8/);
+    await navigate(base);
+    assert.equal(await evaluate("document.getElementById('home-experiment').href"), shared);
+    await navigate(shared);
+    const calculated = calculateFeeFlow(parsed.inputs, parsed.flow);
+    await evaluate("document.querySelector('[data-fee-apply=\"a\"]').click()");
+    assert.equal(Number(await value('cl-fees')), calculated.ranges[0].feeValue);
+    assert.equal(Number(await value('cl-lower')), calculated.ranges[0].lowerPrice);
+    await navigate(shared);
+    await click('width-balances-view');
+    assert.equal(await evaluate("document.getElementById('width-principal-view').hidden"), false);
+    assert.match(await text('width-holding'), /exclude fees/);
+    await click('width-fees-view');
+    assert.match(await text('fee-flow-count'), /2 of 8/);
+    await evaluate("document.getElementById('width-inputs').open=true");
+    const edge = calculateWidthComparison(DEFAULT_WIDTHS).ranges[0].upperPrice;
+    await fill('width-price', String(edge));
+    assert.equal(await evaluate("document.getElementById('fee-flow-add').disabled"), true);
+    assert.match(await text('fee-flow-error'), /range edge/);
+    assert.match(await text('fee-flow-count'), /2 of 8/);
+    await fill('width-price', '2400');
+    for (let i = 0; i < 6; i++) await click('fee-flow-add');
+    assert.match(await text('fee-flow-count'), /8 of 8/);
+    assert.equal(await evaluate("document.getElementById('fee-flow-add').disabled"), true);
+    await click('fee-flow-clear');
+    assert.match(await text('fee-flow-count'), /No batches added/);
+    const malformed = shared.replace('flow=', 'bad=');
+    await navigate(malformed); assert.match(await text('width-notice'), /default setup/);
+    assert.equal(await evaluate("document.getElementById('width-fee-view').hidden"), true);
+    console.log('PASS: fee allocation, retained tokens, preview separation, bounded ledger, edge protection, exact sharing, Home resume and handoffs');
+
+    const mobileLink = widthFlowHash(DEFAULT_WIDTHS, { ...DEFAULT_FEE_FLOW, enabled: true });
+    for (const width of [390, 320]) {
+      await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
+      await navigate(base + 'liquidity.html' + mobileLink);
+      await dragRangeToMax({ evaluate, call, fill }, 'width-price-slider');
+      assert.match(await text('fee-flow-mechanism'), /Both ranges are outside/);
+      assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+      assert.ok(await evaluate("['fee-flow-add','width-fees-view','width-balances-view'].every(id=>document.getElementById(id).getBoundingClientRect().height>=44)"));
+      await click('fee-flow-example');
+      assert.equal(await evaluate('document.activeElement.id'), 'fee-flow-add');
+      const layout = await evaluate("Array.from(document.querySelectorAll('#fee-flow-outcomes article')).map(el=>({y:el.getBoundingClientRect().y,w:el.getBoundingClientRect().width}))");
+      assert.ok(Math.abs(layout[0].y - layout[1].y) < 1 && layout.every(card => card.w > 110));
+      await click('nav-inspect');
+      assert.equal(await evaluate("document.getElementById('width-workspace').hidden"), true);
+      await navigate(base + 'liquidity.html#compare-widths');
+      assert.equal(await evaluate("document.getElementById('width-fee-view').hidden"), false);
+    }
+    console.log('PASS: fee-flow at 390px/320px, stable native price dragging, paired outcomes, focus and navigation');
+  } finally {
+    await evaluate(`${JSON.stringify(saved)}.forEach(([key,value])=>value===null?localStorage.removeItem(key):localStorage.setItem(key,value))`);
+    await call('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+  }
+}

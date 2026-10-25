@@ -10,6 +10,8 @@ Home gives direct labs and guided lessons equal prominence. Continue experimenti
 
 Visual lessons let you follow swaps, pool ownership, supplying, borrowing and loops one action at a time, or use sliders to explore token balances, price ranges, a loan’s health factor, equal-budget responses to debt, and holding versus looping as prices or interest change. Prediction questions and choices stay visible, with a “Not sure — show me” route. Predictions are ungraded; completion checks explanation and application.
 
+Try [Follow the fees](https://teren.sh/liquidity.html#follow-fees) to see how hypothetical trading batches divide fees between active ranges and other LPs, then keep those fee tokens through a range exit.
+
 ## Two topics
 
 **[Liquidity](https://teren.sh/liquidity.html#experiment)** compares full-range and concentrated-liquidity positions with holding their starting tokens. Change prices, bounds and assumed cash fees, save comparisons, or try virtual swaps and deposits. Learn has six foundation lessons and a final challenge, followed by three range-choice exercises and three exercises using recorded historical cases.
@@ -18,7 +20,7 @@ Visual lessons let you follow swaps, pool ownership, supplying, borrowing and lo
 
 ## Models and recorded evidence
 
-- **Hypothetical experiments:** liquidity fee income, prices and lending rates/rules are inputs. Outcomes describe those assumptions; they are not live quotes or forecasts.
+- **Hypothetical experiments:** prices, assumed cash fees and lending rates/rules are inputs. Follow the fees instead calculates token fees from chosen trading batches and competing liquidity. Outcomes describe those assumptions; they are not live quotes or forecasts.
 - **[Controlled width comparison](https://teren.sh/liquidity.html#compare-widths):** keep capital and the starting 50/50 basket equal, then move one shared price. Compare token balances, principal and fee targets for two widths. Share the setup or open either range in the lab; fee earnings are not estimated.
 - **[Snapshots](https://teren.sh/liquidity.html#inspect):** Inspect reads Ethereum mainnet WETH/USDC Uniswap v2 pools and v3 NFT positions at a recorded block. It shows principal, fee accounting where available and exportable JSON. A snapshot does not establish lifetime profit.
 - **[Historical liquidity cases](https://teren.sh/liquidity.html#historical-case):** three unchanged v3 positions over about 83 minutes, 33 hours and one week, with earned fee tokens, time in range and a comparison with holding the exact starting principal tokens. Chain reads, event queries and independent collection simulations checked the records at capture. The browser validates the bundled arithmetic without re-querying Ethereum. These are fixed-position records, not an arbitrary-range backtester.
