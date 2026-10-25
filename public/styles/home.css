@@ -37,7 +37,7 @@
 .home-return-links:has(a:not([hidden])) { margin-bottom: 8px; }
 .home-reassurance a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .home-detail-link { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 14px; min-height: 48px; font-size: 14px; color: var(--muted); }
-.home-lab-link:hover,.home-detail-link:hover,.home-methods a:hover { text-decoration: underline; }
+.home-detail-link:hover,.home-methods a:hover { text-decoration: underline; }
 .home-reassurance { margin: 28px 0 8px; font-size: 15px; }
 .home-methods { max-width: 760px; margin: 0; color: var(--muted); font-size: 14px; }
 .home-methods a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }

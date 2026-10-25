@@ -1,5 +1,10 @@
 # Release history
 
+## 1.39.1 · 2026-10-25
+
+- Keep button labels free of underlines at rest, on hover and during keyboard focus. Remove the Home-only lab-link hover override so lab and lesson buttons share the same treatment.
+- Keep disabled secondary buttons from showing the hover feedback used by available actions. Preserve text-link underlines and keyboard focus outlines across the site.
+
 ## 1.39.0 · 2026-10-25
 
 - Add a separate wstETH/WETH correlated-loop experiment with directly accessible Build, Hold & stress, and Exit stages. Follow construction and atomic-exit balances without adding borrowed cash to wealth.
