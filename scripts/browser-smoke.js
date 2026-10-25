@@ -1,4 +1,5 @@
 import { checkWeekReplay, checkMobileWeekReplay } from './browser/week-replay-checks.js';
+import { checkMatchedComparison } from './browser/matched-comparison-checks.js';
 import { checkExperiencedExperiments } from './browser/experienced-experiment-checks.js';
 import { checkFeeContext } from './browser/fee-context-checks.js';
 import { checkPredictions } from './browser/prediction-checks.js';
@@ -66,7 +67,11 @@ function start(command, args, options, pattern) {
 function call(method, params = {}) {
   const id = ++sequence;
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => { pending.delete(id); reject(new Error(`DevTools timed out: ${method}`)); }, 15000);
+    const timer = setTimeout(() => {
+      pending.delete(id);
+      const context = method === 'Runtime.evaluate' ? '\n' + params.expression?.slice(0, 250) : '';
+      reject(new Error(`DevTools timed out: ${method}${context}`));
+    }, 15000);
     pending.set(id, { resolve, reject, timer });
     socket.send(JSON.stringify({ id, method, params }));
   });
@@ -121,6 +126,7 @@ async function navigate(url) {
   // Lesson entry focuses its heading on the next animation frame. Let that
   // initial focus and measured header offsets finish before interacting or
   // positioning a touch target; otherwise they can undo the test's scroll.
+  await call('Page.bringToFront');
   await evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
 }
 
@@ -146,7 +152,9 @@ try {
   for (const [path, type] of [['favicon.svg','image/svg+xml'], ['favicon.ico','image/x-icon'], ['assets/social-preview.png','image/png'], ['site.webmanifest','application/manifest+json']]) assert.ok((await fetch(base + path)).headers.get('content-type').startsWith(type));
   console.log('PASS: HTTP assets, identity images, manifest types and branded 404');
 
-  const devtools = await start(process.env.CHROMIUM_BIN || 'chromium', ['--headless', '--no-sandbox', '--disable-dev-shm-usage', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'pipe', 'pipe'] }, /DevTools listening on (ws:\/\/[^\s]+)/);
+  const devtools = await start(process.env.CHROMIUM_BIN || 'chromium', ['--headless', '--no-sandbox', '--disable-dev-shm-usage',
+    '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows',
+    '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'pipe', 'pipe'] }, /DevTools listening on (ws:\/\/[^\s]+)/);
   const endpoint = new URL(devtools);
   const pageResponse = await fetch(`http://${endpoint.host}/json/new?about:blank`, { method: 'PUT' });
   assert.equal(pageResponse.status, 200, 'Chromium created a test page');
@@ -168,6 +176,13 @@ try {
   await call('Page.enable');
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
+  async function runChecks() {
+  if (process.env.BROWSER_CHECKS === 'matched') {
+    await call('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: profile, eventsEnabled: true });
+    await checkMatchedComparison({ evaluate, click, fill, text, navigate, base, call, nextEvent, downloadFile });
+    assert.deepEqual(errors, [], 'No uncaught browser errors');
+    return;
+  }
   await checkEntry({ navigate, evaluate, text, fill, click, nextEvent, call, base });
   const initialLoad = nextEvent('Page.loadEventFired');
   await call('Page.navigate', { url: base + 'liquidity.html' });
@@ -612,8 +627,19 @@ try {
   await checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   await checkPredictions({ evaluate, click, text, navigate, reload, base, call });
   await checkExperiencedExperiments({ evaluate, click, fill, text, navigate, reload, base, call });
+  await checkMatchedComparison({ evaluate, click, fill, text, navigate, base, call, nextEvent, downloadFile });
   assert.deepEqual(errors, [], 'No uncaught browser errors');
   console.log('PASS: mobile layout and interaction; no uncaught browser errors');
+  }
+  await runChecks();
+} catch (error) {
+  if (socket?.readyState === WebSocket.OPEN) {
+    try {
+      const state = await call('Runtime.evaluate', { expression: 'JSON.stringify({url:location.href,visibility:document.visibilityState,ready:document.readyState,focus:document.activeElement?.id})', returnByValue: true });
+      console.error('Failure context:', state.result?.value, errors);
+    } catch { /* Preserve the original failure if the renderer is unavailable. */ }
+  }
+  throw error;
 } finally {
   socket?.close();
   for (const task of pending.values()) clearTimeout(task.timer);

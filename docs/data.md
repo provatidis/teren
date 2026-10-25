@@ -94,3 +94,7 @@ Captures attempt each configured public endpoint at most once. Only typed networ
 A manager revert with the specific Invalid token ID reason identifies a nonexistent or burned NFT at the captured block. Other reverts and identity/schema failures keep their own error path. Imported provider metadata remains descriptive, not proof of chain origin.
 
 The HTML entry points carry a restrictive Content Security Policy for GitHub Pages, including the two configured RPC origins. The local server also sends it as a header, with frame-ancestors protection (which cannot be enforced by a meta policy). Script/style assets remain local.
+
+## Histories with fee collections
+
+The original fixed-position records still reject all NFT accounting updates. A separate bounded `collected-position-history` schema supports fee withdrawals while liquidity and bounds remain unchanged. It retains daily and collection-block snapshots, full successful receipts, complete manager-event query coverage, simulated collect amounts and exact cash-flow summaries. Pool Collect payments are matched to the manager event by transaction/log order, recipient, owner and range; manager debits are not assumed to equal payments. Browser validation checks this evidence locally, while the development capture authenticates it through historical RPC reads. See [collection accounting](replay.md#collection-accounting).

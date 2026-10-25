@@ -2,7 +2,7 @@
 
 [In-range baseline](https://teren.sh/liquidity.html#historical-case) · [Exit and return](https://teren.sh/liquidity.html#historical-case=range-return) · [One week](https://teren.sh/liquidity.html#historical-case=one-week) · [Project overview](../README.md)
 
-The recorded cases follow unchanged Ethereum Uniswap v3 WETH/USDC positions in the 0.3% pool. Each retains validated snapshots, cumulative range-time counters and independent read-only collection checks. They are fixed-position replays, not arbitrary-range backtests.
+The recorded cases follow fixed-range Ethereum Uniswap v3 WETH/USDC positions in the 0.3% pool. The three original cases require unchanged NFT accounting; the separate matched comparison allows fee collections while liquidity stays fixed. Each retains validated snapshots, cumulative range-time counters and independent read-only collection checks. They are fixed-position replays, not arbitrary-range backtests.
 
 | Case | Position | Block window | Checkpoints | Elapsed time | Time in range |
 | --- | --- | --- | --- | --- | --- |
@@ -124,9 +124,66 @@ Tests cover boundary conflicts, gaps, reversed segments, changed accounting, mis
 - Show recorded active seconds beside fees without converting active time into a fee rate. Do not annualize, project future income or scale the record to an arbitrary deposit.
 - Exclude gas and incentives, and do not claim lifetime PnL. Applying a checkpoint starts a new hypothetical principal-only range experiment with zero assumed future fees.
 
-## Next validation cases
+## Matched week comparison
 
-A future comparison can follow two existing ranges over the same period, retaining each starting basket and verification evidence. It needs a new selection declaration before returns are inspected. The inactive week does not close the gap between a hypothetical fee target and a useful matched earning reference. Arbitrary hypothetical bounds need historical tick/swap reconstruction and an explicit assumption about the effect of adding liquidity. Hourly pool price and global fee growth alone do not establish fee allocation.
+Release 1.35.0 adds [Two ranges, the same week](https://teren.sh/liquidity.html#fee-comparison). The [selection plan](../scripts/replay-comparison-plan.json) was committed before inspecting this pair's earnings. It keeps 12–19 October 2026 and the same Ethereum WETH/USDC 0.3% pool. The price path was already known from the inactive case; this is not a prospective or random sample.
+
+The original local declaration object is retained [as text](evidence/comparison-declaration.txt): Git commit `f895ce670e43ad59320f8cc548791907545f15bc`, before the selection audit's `startedAt`. GitHub publication happened later through the connector in [fbf4581](https://github.com/provatidis/teren/commit/fbf45816dcf660e5594e588c8dc2d7adafedf949). Both declarations point to the same plan tree. The local timestamps document the workflow; they are not an external attestation. Tests check the preserved commit object's hash and order relative to the reads.
+
+The first eligible wider position was **#1375047**, with one fee collection. The first eligible narrower position was **#1377928**, with none, after **2,929** candidate decisions. Both records span exactly **604,800 seconds**. Values below use the final recorded price, USDC = $1, and exclude gas and incentives:
+
+| | Narrower #1377928 | Wider #1375047 |
+| --- | ---: | ---: |
+| Fixed ETH price range | $2,504.92–$3,016.95 | $1,399.74–$2,675.81 |
+| Starting principal | $21,495.36 | $5,008.33 |
+| Starting WETH share by value | 94.8% | 9.9% |
+| Time in range | 144,024 seconds (23.81%) | 604,800 seconds (100%) |
+| Net new fees | $39.47 (0.184% of starting capital) | $18.83 (0.376%) |
+| LP minus its own holding basket | −$10.65 | +$7.79 |
+| Dollar change from the start | −$1,017.92 | −$16.60 |
+
+Exact new tokens: narrower **18857244 USDC** and **8577209355539933 WETH** base units; wider **8917228 USDC** and **4125861114329493 WETH** base units. The wider position withdrew **4256899 USDC** and **2071220659861564 WETH** base units during the week; those withdrawals include earlier claims and are not the new-income total. Pool payments exactly matched manager debits in this receipt. The records retain integer summaries and all receipt logs.
+
+Inspect NFT IDs 1375000–1384999 in ascending order. Choose the first eligible position in each width bucket: up to 2,000 ticks, and more than 2,000 ticks. Both must have positive unchanged liquidity and be active at the start. Complete manager-event coverage excludes additions/removals, including zero-liquidity accounting updates; up to 32 fee collections are supported. Later inactivity, fees, profit, loss and balance size do not determine selection. Data failure stops the process rather than skipping a candidate. [The selection audit](evidence/comparison-selection.json) retains the declared order and exclusions.
+
+### Collection accounting
+
+The separate version-1 `collected-position-history` schema supports eight daily checkpoints plus collection-block checkpoints, at most 40 total points, 32 collections and 120 event-query chunks of at most 500 blocks. A `matched-position-comparison` contains two independently validated histories. Shared daily block identities, pool state, global fee growth, dates and starting eligibility must agree.
+
+For each token and every checkpoint:
+
+```
+net new fee tokens = actual pool payments since start
+                  + simulated collect at checkpoint
+                  - simulated collect at start
+
+new claim credits = manager collection debits since start
+                  + calculated collectable claim at checkpoint
+                  - calculated collectable claim at start
+```
+
+Starting claims can include earlier fees and principal removed before this period. Subtract all of them. No additions or principal removals are allowed inside the period. Keep collected tokens separate from unchanged liquidity.
+
+The manager emits the requested debit, which can exceed the actual pool payment because core accounting floors amounts. Check each manager event against the immediately preceding pool Collect event in the same successful transaction receipt: pool, manager owner, bounds, recipient, block identity, transaction and log order must agree. Actual payment cannot exceed the debit. Retain full receipt logs and all matching manager events; reject duplicate events, missing receipts or incomplete event-query coverage. Collection blocks are independently pinned through both providers.
+
+Calculated claim credits are checked against `floor(L × ΔfeeGrowthInside / 2^128)`. With `n` real collections, the signed difference must be within `[-n, +1]` base units per token: each collection can floor another interval, while the start simulation can introduce a carry. Apply the check both from the period start and between every adjacent checkpoint. An interval without collection events must retain identical NFT accounting. Actual receipt payments and endpoint simulation shortfalls determine the cash-flow result, including any signed dust loss. Do not clamp losses or sum separately floored daily growth estimates.
+
+This method follows the [Uniswap position manager's collect implementation](https://github.com/Uniswap/v3-periphery/blob/main/contracts/NonfungiblePositionManager.sol#L285) and [pool collection implementation](https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol). The browser validates recorded evidence and integer arithmetic; authentication of chain state still requires fresh RPC reads.
+
+### Reproduce the comparison
+
+```sh
+npm run qualify:comparison -- /tmp/teren-comparison-selection.json
+npm run check:comparison -- /tmp/teren-comparison-selection.json /tmp/teren-matched-week.json /tmp/teren-comparison-fresh-cache
+```
+
+The committed selection audit can replace the first argument to reproduce the chosen pair without repeating discovery. Use a new empty cache for fresh contract reads. A resumed capture accepts cached checkpoints only after checking their token ID, block identity and complete final accounting. Missing or invalid evidence never writes a final comparison. `REPLAY_RPC` and `REPLAY_LOG_RPC` choose public HTTPS providers; collection receipts use the event provider. The browser's read-only method allowlist is unchanged.
+
+### Presentation and remaining limits
+
+One shared day changes both positions. Plot new fees as a percentage of each position's actual starting capital, with dollar values alongside. Show fee income, LP minus its own holding basket, and change from starting dollar value separately. Daily active-time bars use cumulative counters, not sampled price classifications. Collected tokens are valued as if held to the selected checkpoint; recipient activity after collection is not reconstructed. Gas and incentives are excluded and USDC is valued at $1.
+
+These are differently placed ranges with different starting mixes, not a controlled experiment isolating width. Their results do not establish typical income or fees for an arbitrary deposit. Broader context needs predetermined consecutive periods, including quiet weeks and losses. Active management remains excluded. Arbitrary hypothetical bounds require historical tick/swap reconstruction and an explicit assumption about adding liquidity; hourly price and global fee growth alone cannot establish arbitrary-range allocation.
 
 ## Observation before further expansion
 

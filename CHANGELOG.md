@@ -1,5 +1,12 @@
 # Release history
 
+## 1.35.0 · 2026-10-25
+
+- Compare two real WETH/USDC 0.3% ranges over the same declared week. Require both to start active and select the first eligible NFT in each predeclared width group, retaining later exits, losses and collections. Preserve the earlier inactive case.
+- Account for fee collections without changing principal. Reconcile manager debits with actual pool payments in transaction receipts, subtract starting claims, retain rounding differences and check the ledger against fee growth and collection simulations. Keep complete event coverage and exports; original record formats remain unchanged.
+- Add a shared daily timeline, normalized fee chart, daily range-time bars and three separate outcomes: fees, LP versus holding, and dollar change. Each position retains its own starting mix and capital. Experiment handoffs start with principal and zero assumed future fees.
+- Link the comparison from fee context and historical cases. Add receipt, accounting, selection, navigation, export and mobile checks, with reproducible capture commands. The comparison is a historical illustration, not a forecast or a controlled test of width alone.
+
 ## 1.34.0 · 2026-10-25
 
 - Add a fixed-position week for Ethereum WETH/USDC 0.3% NFT #1375090: eight daily checkpoints over 604,800 seconds, with zero newly earned fees and zero recorded active seconds. Preserve the original fixed dates, publish candidate exclusions and a fallback list declared before its earnings were inspected, and retain the first eligible outcome.

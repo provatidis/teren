@@ -49,7 +49,7 @@ The period model lives in `public/models/fixed-position-period.js`; record valid
 - public/models/: pure hypothetical calculations, lesson experiments and exact protocol/period arithmetic. They do not read the DOM, browser storage or network.
 - public/data/: deployment configuration, read-only Uniswap v2/v3 adapters, snapshot/period schemas, saved experiments, learning progress and temporary Learn-return storage.
 - public/lib/: compatible scenario links, exports, formatting and rendering utilities.
-- public/learning/: essential and applied lesson definitions, optional deeper reading and the ten-example progression.
+- public/learning/: essential and applied lesson definitions, optional deeper reading and the eleven-example progression.
 - public/examples/: bundled pool/position snapshots and the verified fixed-position period record; these open without RPC requests.
 - public/styles/: shared foundation and components followed by feature styles. public/styles.css preserves the existing cascade order.
 - public/index.html, public/liquidity.html, public/learn.html and public/lending.html: semantic, static markup with one module entry point per document. Each feature owns its IDs; the structure check rejects duplicates.
@@ -215,3 +215,9 @@ The existing version-1 experiment library accepts the tagged `collateral-loan-v1
 `loop-comparison.js` permits a distinct reference borrowing fraction while deriving all market assumptions from one main input set. `compareBorrow` is optional and requires `compare`; older links retain the shared-fraction behavior. Valid custom fractions survive drafts, saved records and share links. Invalid reference fields hide only the comparison and disable saving/sharing until corrected. User-defined build/unwind scenes reuse the calculation ledger, with distinct DOM ID prefixes and explicit incomplete-preview states.
 
 `data/experiment-location.js` is a lightweight, local input-link bookmark. Home imports no model or historical record. Destination pages validate the fragment before using it. It does not carry source attribution; named library entries remain the way to retain exact snapshots. Home presents lab and lesson actions equally, and keeps experiment and lesson resume independent.
+
+## Matched fee comparison
+
+`#fee-comparison` is a direct recorded-liquidity route, linked from the fee-context panels and individual replay cases. `models/collection-period.js` separates claim credits, actual payments and net new fee tokens. `data/collection-history.js` validates bounded daily/collection checkpoints, complete events and successful transaction receipts; `data/matched-comparison.js` enforces shared pool/block evidence and declared starting eligibility. `lib/matched-comparison.js` provides normalized values and daily intervals; `ui/matched-comparison.js` owns the synchronized controls, chart, ledger, export and principal-only handoffs. Original period formats and lesson records stay unchanged.
+
+`qualify:comparison` records eligibility in a declared ascending order and can resume an unfinished audit without repeating completed candidates. At most three starting metadata reads run concurrently; selection decisions remain ordered and any provider failure stops the batch. `check:comparison` captures both histories, verifies collections against pool receipts and writes only a complete comparison. Empty caches force fresh state reads; cached points are only a capture-resume mechanism. The browser RPC allowlist is unchanged. See [capture and accounting](replay.md#matched-week-comparison).

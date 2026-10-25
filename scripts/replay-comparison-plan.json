@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "weth-usdc-matched-week-2026-10-12",
+  "startUTC": "2026-10-12T00:00:00.000Z",
+  "endUTC": "2026-10-19T00:00:00.000Z",
+  "pool": "Ethereum Uniswap v3 WETH/USDC 0.3%",
+  "candidateOrder": { "firstTokenId": "1375000", "lastTokenId": "1384999", "order": "ascending" },
+  "groups": [
+    { "id": "narrower", "minWidthTicks": 1, "maxWidthTicks": 2000 },
+    { "id": "wider", "minWidthTicks": 2001, "maxWidthTicks": 1774544 }
+  ],
+  "selection": "First eligible NFT in each width group, in the declared ascending order. Positive unchanged liquidity and bounds, active at the first checkpoint; complete manager-event coverage. Fee collections are allowed. Stop once both groups are filled, or this bounded list is exhausted.",
+  "excludeOn": ["missing position", "different pair or fee tier", "zero liquidity", "outside range at start", "liquidity addition or removal during the week", "changed liquidity or bounds", "more than 32 fee collections"],
+  "notExclusionCriteria": ["fee income", "profit or loss", "later range activity", "position value", "fee collection"],
+  "dataFailure": "Stop with incomplete evidence. Do not skip a position because data, receipt attribution or independent accounting cannot be verified.",
+  "checkpoints": "First finalized block at or after each daily UTC boundary; additionally retain collection blocks for accounting checks.",
+  "context": "The dates and price path are already known from the inactive one-week case. This declaration precedes inspection of this comparison's income. Width buckets are an illustrative comparison, not a random sample or a controlled experiment isolating width.",
+  "valuation": "Each NFT keeps its own starting principal basket. Show fees relative to its own starting capital, LP versus its own holding basket, and dollar change. Collected tokens are retained at the selected checkpoint price for comparison; their recipient's subsequent trades are not reconstructed. Exclude pre-period claims, gas and incentives."
+}

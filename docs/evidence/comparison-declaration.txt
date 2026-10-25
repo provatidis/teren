@@ -1,0 +1,6 @@
+tree 1ca95c0488de9e109ce54ac1990d74da03c03901
+parent 0bb5721b1fb8fd04cf52823d97de609c254e93ca
+author provatidis <provatidis@users.noreply.github.com> 1792913200 +0200
+committer provatidis <provatidis@users.noreply.github.com> 1792913200 +0200
+
+Declare matched-week range selection before reading earnings

@@ -51,11 +51,11 @@ export async function checkReviewPolish({ evaluate, click, fill, text, navigate,
 
   await navigate(base + 'liquidity.html#historical-case');
   await evaluate(`new Promise((resolve,reject)=>{const end=Date.now()+10000;const poll=()=>{if(!document.getElementById('period-result').hidden)resolve();else if(Date.now()>end)reject(new Error('Record did not load'));else setTimeout(poll,20)};poll()})`);
-  const disclosure = await evaluate("Array.from(document.querySelectorAll('.period-details:not([hidden])>summary')).map(el=>({height:el.getBoundingClientRect().height,outline:getComputedStyle(el).outlineStyle}))");
+  const disclosure = await evaluate("Array.from(document.querySelectorAll('#historical-case .period-details:not([hidden])>summary')).map(el=>({height:el.getBoundingClientRect().height,outline:getComputedStyle(el).outlineStyle}))");
   assert.equal(disclosure.length, 2); assert.ok(disclosure.every(el => el.height >= 44));
-  await evaluate("document.querySelector('.period-details:not([hidden])>summary').focus()");
+  await evaluate("document.querySelector('#historical-case .period-details:not([hidden])>summary').focus()");
   await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
   await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
-  assert.equal(await evaluate("document.querySelector('.period-details:not([hidden])').open"), true);
+  assert.equal(await evaluate("document.querySelector('#historical-case .period-details:not([hidden])').open"), true);
   console.log('PASS: historical evidence disclosures provide full touch targets and native keyboard access');
 }

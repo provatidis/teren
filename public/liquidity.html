@@ -440,6 +440,7 @@
     </div>
     <div id="replay-workspace" class="app-workspace" hidden>
       <section id="historical-case" class="card period-card" aria-labelledby="period-title" aria-busy="false">
+        <p class="period-reading"><a href="#fee-comparison">Compare two ranges over the same week →</a></p>
         <div class="period-case-picker"><label for="period-case">Recorded cases</label><select id="period-case" aria-describedby="period-case-detail"></select></div>
         <p id="period-case-detail" class="body-copy"></p>
         <p class="eyebrow">UNISWAP V3 · CHECKED AT CAPTURE</p><h2 id="period-title">Choose a recorded case</h2>
@@ -473,6 +474,54 @@
         </div>
         <p class="period-reading"><a class="learn-explore" href="learn.html#applied=fees-over-time">Learn with these recorded cases →</a></p>
         <div class="period-actions"><button id="period-apply" class="button secondary" type="button" disabled>Explore this checkpoint in Experiment →</button><button id="period-export" class="button secondary" type="button" disabled>Export recorded case</button></div>
+      </section>
+      <section id="fee-comparison" class="card matched-comparison" aria-labelledby="comparison-title" hidden>
+        <p class="period-reading"><a href="#historical-case">← Individual recorded cases</a></p>
+        <p class="eyebrow">UNISWAP V3 · ETHEREUM · WETH/USDC 0.3%</p>
+        <h2 id="comparison-title">Two ranges, the same week</h2>
+        <p class="body-copy">Both positions started in range. Follow their fees, then check whether those fees covered the gap against holding.</p>
+        <p id="comparison-status" class="fine-print" role="status"></p>
+        <button id="comparison-retry" type="button" class="button secondary" hidden>Try opening the comparison again</button>
+        <div id="comparison-result" hidden>
+          <div class="matched-controls">
+            <label class="period-slider-label" for="comparison-day">Move both positions through the week</label>
+            <input id="comparison-day" type="range" min="0" max="7" step="1" value="7">
+            <p id="comparison-current" class="fine-print" aria-live="polite"></p>
+            <div id="comparison-days" class="period-milestones period-daily-milestones" role="group" aria-label="Choose a shared recorded day"></div>
+          </div>
+          <figure class="matched-figure">
+            <figcaption>New fees as a share of each position’s starting capital</figcaption>
+            <p class="matched-legend"><span class="matched-legend-a">A · Narrower</span><span class="matched-legend-b">B · Wider</span></p>
+            <svg id="comparison-chart" viewBox="0 0 570 220" role="img" aria-label="Recorded fee income comparison">
+              <path id="comparison-zero" class="matched-zero"/>
+              <text id="comparison-y-max" x="8" y="32" class="chart-label"></text>
+              <text id="comparison-y-zero" x="8" y="184" class="chart-label">0%</text>
+              <path id="comparison-line-narrower" class="matched-line matched-line-a"/>
+              <path id="comparison-line-wider" class="matched-line matched-line-b"/>
+              <circle id="comparison-dot-narrower" r="5" class="matched-dot-a"/>
+              <circle id="comparison-dot-wider" r="5" class="matched-dot-b"/>
+              <text x="110" y="214" class="chart-label">12 Oct</text><text x="540" y="214" text-anchor="end" class="chart-label">19 Oct</text>
+            </svg>
+            <p class="fine-print">Lines join daily samples. Fee tokens use each day’s ETH price, so their dollar value can fall.</p>
+          </figure>
+          <p class="matched-reading">Fees, the comparison with holding, and dollar change are separate outcomes. Results are before gas and incentives.</p>
+          <p class="fine-print">The starting mixes differ. Each position is compared with holding its own tokens; all percentages use its own starting capital.</p>
+          <div id="comparison-mobile-summary"></div>
+          <div id="comparison-cards" class="matched-cards"></div>
+          <details class="model-details period-details">
+            <summary>What this comparison establishes</summary>
+            <div class="period-reading">
+              <p>The first eligible position in each width group was selected in a declared NFT order. Both were active at the start; later exits, losses and fee collections were allowed. The week’s price path was already known from the earlier inactive case.</p>
+              <p>Each position keeps its own starting token mix and holding benchmark. Range placement and starting mix also differ, so this pair cannot isolate the effect of range width or establish typical earnings.</p>
+              <p>Collected tokens are valued as if retained until the selected checkpoint. Their recipient’s later trades are not tracked. USDC is valued at $1. New fee income excludes everything already collectable at the start.</p>
+              <p>Contract reads, complete position-event queries, collection receipts and simulated collections were checked at capture. This browser checks the bundled evidence and arithmetic; it does not re-read the chain.</p>
+              <p id="comparison-providers" class="fine-print"></p>
+              <p><a href="https://github.com/provatidis/teren/blob/main/docs/replay.md#matched-week-comparison" target="_blank" rel="noopener noreferrer">Methods and reproduction ↗</a> · <a href="https://github.com/provatidis/teren/blob/main/docs/evidence/comparison-selection.json" target="_blank" rel="noopener noreferrer">Selection evidence ↗</a></p>
+            </div>
+          </details>
+          <p class="period-reading"><a href="#historical-case=one-week">Compare with a week outside the range →</a></p>
+        </div>
+        <button id="comparison-export" class="button secondary" type="button" disabled>Export both positions and their evidence</button>
       </section>
     </div>
     <footer class="site-footer">
