@@ -1,3 +1,4 @@
+import { checkWeekReplay, checkMobileWeekReplay } from './browser/week-replay-checks.js';
 import { checkExperiencedExperiments } from './browser/experienced-experiment-checks.js';
 import { checkFeeContext } from './browser/fee-context-checks.js';
 import { checkPredictions } from './browser/prediction-checks.js';
@@ -439,6 +440,7 @@ try {
   await checkSavedExperiments({ evaluate, click, fill, text, navigate, reload, downloadFile, call, base, profile });
   await checkWorkspaces({ evaluate, click, fill, text, navigate, base, downloadFile });
   await checkReplay({ evaluate, click, fill, text, navigate, base, downloadFile, call });
+  await checkWeekReplay({ evaluate, click, fill, text, navigate, base, downloadFile, call });
   await checkNavigation({ evaluate, click, fill, navigate, base, nextEvent, call });
 
   const swappedPortfolio = await text('portfolio');
@@ -592,6 +594,7 @@ try {
   console.log('PASS: 320px historical case, checkpoint scrubbing and initial holding equality');
   await checkMobileNavigation({ evaluate, click, navigate, base, call });
   await checkMobileReplay({ evaluate, click, fill, text, navigate, base, call });
+  await checkMobileWeekReplay({ evaluate, click, text, navigate, base, call });
   await checkPolish({ evaluate, navigate, call, base });
   await checkExperimentFlow({ evaluate, click, fill, text, navigate, base, call });
   await checkMobileInspect({ evaluate, call, click, fill, navigate, nextEvent, base });

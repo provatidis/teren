@@ -23,12 +23,14 @@ export async function checkFeeContext({ evaluate, click, fill, text, navigate, b
   await fill('scenario-fees', '500');
   assert.match(await text('scenario-fee-assumption'), /Covers the model’s fee target/);
   await evaluate("window.failFeeRecord=false;document.querySelector('#scenario-fee-context .fee-context-records button').click()");
-  await wait("document.querySelectorAll('#scenario-fee-context .fee-context-record').length===2");
+  await wait("document.querySelectorAll('#scenario-fee-context .fee-context-record').length===3");
   const body = await text('scenario-fee-context');
   const flows = await evaluate("Array.from(document.querySelectorAll('#scenario-fee-context .fee-record-flow')).map(flow=>Array.from(flow.children).map(step=>({label:step.querySelector('dt').textContent,value:step.querySelector('dd').textContent,detail:step.querySelector('.fee-record-detail').textContent})))");
   assert.deepEqual(flows[0].map(step=>step.label), ['Starting capital', 'Recorded time', 'New fees earned']);
   assert.deepEqual(flows[0].map(step=>step.value), ['$47,793.97', '1h 23m 12s', '$2.36']);
   assert.deepEqual(flows[1].map(step=>step.value), ['$5,022.44', '33h 27m 48s', '$0.45']);
+  assert.deepEqual(flows[2].map(step=>step.value), ['$140.75', '7d', '$0.00']);
+  assert.equal(flows[2][1].detail, '0.0% in range');
   assert.equal(flows[0][2].detail, '0.0049% of starting capital');
   assert.equal(flows[1][1].detail, '41.7% in range');
   assert.match(body, /not typical returns/);
@@ -50,14 +52,14 @@ export async function checkFeeContext({ evaluate, click, fill, text, navigate, b
   await window('cl', 1);
   assert.match(await text('cl-fee-daily'), /Over 1 day,/);
   await records('cl');
-  await wait("document.querySelectorAll('#cl-fee-context .fee-context-record').length===2");
+  await wait("document.querySelectorAll('#cl-fee-context .fee-context-record').length===3");
   assert.equal(await evaluate("Array.from(document.querySelectorAll('[id]')).map(x=>x.id).length===new Set(Array.from(document.querySelectorAll('[id]')).map(x=>x.id)).size"), true);
   for (const id of ['fee-break-even', 'final-challenge']) {
     await navigate(base + 'learn.html#lesson=' + id);
     const before = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");
     const scope = await text('comparison-scope');
     await open('comparison'); await window('comparison', 1); await records('comparison');
-    await wait("document.querySelectorAll('#comparison-fee-context .fee-context-record').length===2");
+    await wait("document.querySelectorAll('#comparison-fee-context .fee-context-record').length===3");
     assert.equal(await text('comparison-scope'), scope);
     assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), before);
     assert.equal(await evaluate("new URL(document.querySelector('#comparison-fee-context .fee-context-record a').href).pathname"), new URL(base + 'liquidity.html').pathname);
@@ -73,7 +75,7 @@ export async function checkFeeContext({ evaluate, click, fill, text, navigate, b
   for (const width of [390, 320]) {
     await call('Emulation.setDeviceMetricsOverride', { width, height: 740, deviceScaleFactor: 1, mobile: true });
     await navigate(base + 'learn.html#lesson=fee-break-even'); await open('comparison'); await records('comparison');
-    await wait("document.querySelectorAll('#comparison-fee-context .fee-context-record').length===2");
+    await wait("document.querySelectorAll('#comparison-fee-context .fee-context-record').length===3");
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
     assert.equal(await evaluate("(()=>{const steps=document.querySelector('#comparison-fee-context .fee-record-flow').children;return steps[1].getBoundingClientRect().top>=steps[0].getBoundingClientRect().bottom})()"), true);
     assert.equal(await evaluate("document.getElementById('comparison-fee-window').labels.length"), 1);

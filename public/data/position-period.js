@@ -14,17 +14,10 @@ function raw(value,bits) {
   if(typeof value!=='string'||!/^(0|[1-9]\d*)$/.test(value)||value.length>78||BigInt(value)>=1n<<BigInt(bits))throw new Error('Invalid period integer.');
   return value;
 }
-export function validatePositionPeriod(input) {
-  if(input?.version!==1||input.kind!=='fixed-position-period'||input.chainId!==1)throw new Error('Unsupported historical case.');
-  if(!Array.isArray(input.points)||input.points.length<2||input.points.length>32)throw new Error('Unsupported checkpoint count.');
-  const points=input.points.map(point=>{
-    const snapshot=validatePositionSnapshot(point.snapshot);
-    if(snapshot.version!==2||BigInt(snapshot.position.liquidity)===0n)throw new Error('Historical checkpoints require positive liquidity and fee accounting.');
-    if(!Array.isArray(point.simulatedCollect)||point.simulatedCollect.length!==2)throw new Error('Missing independent fee check.');
-    return {snapshot,secondsInside:raw(point.secondsInside,32),simulatedCollect:point.simulatedCollect.map(value=>raw(value,128))};
-  });
+// Call with already validated checkpoints. Compositions use the same first-point
+// accounting as a single segment, preserving carries across segment boundaries.
+export function periodValidation(points) {
   const first=points[0],last=points.at(-1),start=periodModelPoint(first);
-  if(input.id!=='position-'+first.snapshot.tokenId)throw new Error('Historical position ID differs.');
   const initialPosition=JSON.stringify(first.snapshot.position);
   let previous=null, previousResult=null;
   for(const point of points){
@@ -42,6 +35,29 @@ export function validatePositionPeriod(input) {
     }
     previous=point; previousResult=result;
   }
+  const result=calculateFixedPositionPeriod(start,periodModelPoint(last));
+  const earnedRaw=[result.earned0,result.earned1].map(String);
+  const collectDeltaRaw=last.simulatedCollect.map((value,i)=>(BigInt(value)-BigInt(first.simulatedCollect[i])).toString());
+  return {method:'unchanged-nft-and-collect-difference',earnedRaw,collectDeltaRaw,roundingDeltaRaw:collectDeltaRaw.map((value,i)=>(BigInt(value)-BigInt(earnedRaw[i])).toString()),durationSeconds:result.durationSeconds,secondsInRange:result.secondsInRange};
+}
+
+export function canonicalPeriodPoint(point) {
+  const {provider,capturedAt,...snapshot}=point.snapshot;
+  return {snapshot,secondsInside:point.secondsInside,simulatedCollect:point.simulatedCollect};
+}
+
+export function validatePositionPeriod(input) {
+  if(input?.version!==1||input.kind!=='fixed-position-period'||input.chainId!==1)throw new Error('Unsupported historical case.');
+  if(!Array.isArray(input.points)||input.points.length<2||input.points.length>32)throw new Error('Unsupported checkpoint count.');
+  const points=input.points.map(point=>{
+    const snapshot=validatePositionSnapshot(point.snapshot);
+    if(snapshot.version!==2||BigInt(snapshot.position.liquidity)===0n)throw new Error('Historical checkpoints require positive liquidity and fee accounting.');
+    if(!Array.isArray(point.simulatedCollect)||point.simulatedCollect.length!==2)throw new Error('Missing independent fee check.');
+    return {snapshot,secondsInside:raw(point.secondsInside,32),simulatedCollect:point.simulatedCollect.map(value=>raw(value,128))};
+  });
+  const first=points[0],last=points.at(-1);
+  if(input.id!=='position-'+first.snapshot.tokenId)throw new Error('Historical position ID differs.');
+  const validation=periodValidation(points);
   const startBlock=BigInt(first.snapshot.block.number),endBlock=BigInt(last.snapshot.block.number);
   if(endBlock-startBlock>10000n)throw new Error('Historical case exceeds the supported block span.');
   if(!Array.isArray(input.eventQueries)||input.eventQueries.length<1||input.eventQueries.length>20)throw new Error('Missing continuity evidence.');
@@ -53,10 +69,6 @@ export function validatePositionPeriod(input) {
     return {provider:validateProvider(query.provider),fromBlock:from.toString(),toBlock:to.toString(),matchingEvents:0};
   });
   if(next!==endBlock+1n)throw new Error('The continuity evidence does not cover the period.');
-  const result=calculateFixedPositionPeriod(start,periodModelPoint(last));
-  const earnedRaw=[result.earned0,result.earned1].map(String);
-  const collectDeltaRaw=last.simulatedCollect.map((value,i)=>(BigInt(value)-BigInt(first.simulatedCollect[i])).toString());
-  const validation={method:'unchanged-nft-and-collect-difference',earnedRaw,collectDeltaRaw,roundingDeltaRaw:collectDeltaRaw.map((value,i)=>(BigInt(value)-BigInt(earnedRaw[i])).toString()),durationSeconds:result.durationSeconds,secondsInRange:result.secondsInRange};
   if(JSON.stringify(input.validation)!==JSON.stringify(validation))throw new Error('The historical validation summary differs.');
   if(typeof input.capturedAt!=='string'||!Number.isFinite(Date.parse(input.capturedAt)))throw new Error('Invalid historical capture time.');
   return {version:1,kind:input.kind,id:input.id,chainId:1,points,eventQueries,validation,capturedAt:input.capturedAt};

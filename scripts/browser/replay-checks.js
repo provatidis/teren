@@ -68,7 +68,7 @@ export async function checkMobileReplay({ evaluate, click, fill, text, navigate,
     assert.ok(geometry.top >= geometry.header + 10);
     await evaluate("document.querySelector('#period-milestones button[data-index=\"8\"]').click()");
     assert.match(await text('period-interval-explanation'), /Both sampled endpoints are outside/);
-    await evaluate("document.querySelector('.period-details>summary').click()");
+    await evaluate("document.querySelector('.period-details:not([hidden])>summary').click()");
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
     await fill('period-checkpoint', '0'); assert.equal(await text('period-lp'), await text('period-hold'));
     await click('nav-experiment'); await wait(evaluate, "location.hash==='#experiment'&&scrollY<=1");

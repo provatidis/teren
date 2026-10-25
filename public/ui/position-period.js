@@ -1,4 +1,4 @@
-import { validatePositionPeriod } from '../data/position-period.js';
+import { validateRecordedCase, recordedPeriod, REPLAY_MAX_BYTES } from '../data/position-history.js';
 import { REPLAY_CASES, replayCaseFromHash, isReplayHash } from '../data/replay-cases.js';
 import { positionScenario } from '../data/position-snapshot.js';
 import { periodPointView, periodIntervalView, periodMilestones, periodDuration, periodChartRange } from '../lib/period-presentation.js';
@@ -10,11 +10,18 @@ import { downloadBlob } from '../lib/download.js';
 export function initPositionPeriod({ rangeLab }) {
   const $ = id => document.getElementById(id);
   const records = new Map(), requests = new Map(), checkpoints = new Map();
-  let period = null, selected = REPLAY_CASES[0], index = 0, revision = 0;
+  let period = null, sourceRecord = null, selected = REPLAY_CASES[0], index = 0, revision = 0;
   const utc = timestamp => new Date(timestamp * 1000).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
   const tokens = (zero, one) => formatUnits(zero, 6) + ' USDC + ' + formatUnits(one, 18) + ' WETH';
   const stateLabels = { inside: 'In range · both tokens', above: 'Above ETH price range · all USDC', below: 'Below ETH price range · all WETH' };
   const comparison = gap => Math.abs(gap) < .005 ? 'approximately equal to holding' : usd(Math.abs(gap)) + (gap < 0 ? ' behind holding' : ' ahead of holding');
+  const dayDate = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const node = (tag, text, className) => {
+    const element = document.createElement(tag);
+    if (text !== undefined) element.textContent = text;
+    if (className) element.className = className;
+    return element;
+  };
 
   for (const item of REPLAY_CASES) {
     const option = document.createElement('option'); option.value = item.id; option.textContent = item.title;
@@ -42,6 +49,10 @@ export function initPositionPeriod({ rangeLab }) {
     $('period-raw-fees').textContent = view.earned0 + ' USDC base units; ' + view.earned1 + ' WETH base units';
     $('period-counter').textContent = view.point.secondsInside;
     for (const button of $('period-milestones').children) button.setAttribute('aria-pressed', String(Number(button.dataset.index) === index));
+    for (const button of $('period-daily-rows').querySelectorAll('button')) {
+      const active = Number(button.dataset.index) === index;
+      button.setAttribute('aria-pressed', String(active)); button.closest('tr').dataset.selected = String(active);
+    }
 
     $('period-interval-title').textContent = index ? 'Since the previous checkpoint' : 'Starting checkpoint';
     $('period-interval-metrics').hidden = !index;
@@ -54,7 +65,7 @@ export function initPositionPeriod({ rangeLab }) {
     $('period-interval-explanation').textContent = !index
       ? 'Period fees start at zero. Earlier fees and owed balances are excluded from both strategies.'
       : interval.secondsInRange === 0 && interval.earned0 === 0n && interval.earned1 === 0n
-        ? 'The range-time counter adds no active seconds, and recorded fee growth adds no tokens in this interval. Earlier fee tokens are still held; their dollar value can change with ETH’s price.'
+        ? 'The range-time counter adds no active seconds, and recorded fee growth adds no tokens in this interval.' + (view.earned0 > 0n || view.earned1 > 0n ? ' Earlier fee tokens are still held; their dollar value can change with ETH’s price.' : '')
         : interval.secondsInRange === 0
           ? 'The counter adds no active seconds, but fee growth adds tokens. Swaps can enter and leave a range within one block without adding elapsed seconds to the counter.'
           : view.state !== 'inside' && interval.startState !== 'inside'
@@ -64,7 +75,10 @@ export function initPositionPeriod({ rangeLab }) {
             : 'The counter records the entire interval in range. Fee income depends on swaps and liquidity; active time alone does not determine earnings.';
     $('period-outcome').textContent = !index
       ? 'LP principal and holding are equal at the start.'
+      : view.earned0 === 0n && view.earned1 === 0n && view.principal.amount0 === view.holding.amount0 && view.principal.amount1 === view.holding.amount1
+        ? 'The position holds the same token amounts as at the start. No new fees were earned, so it matches holding.'
       : 'Before period fees, LP principal is ' + comparison(view.principalGapUSD) + '. Recorded fee tokens add ' + feeUSD(view.feesUSD) + ' at this checkpoint’s price. Including them, the LP is ' + comparison(view.gapUSD) + '.';
+    $('period-capital-change').textContent = 'Change from the starting value of ' + usd(view.startingUSD) + ': LP including new fees ' + signedUSD(view.lpChangeUSD) + '; holding ' + signedUSD(view.holdingChangeUSD) + '. Before gas and incentives.';
 
     const { views, bottom, top, lowerVisible, upperVisible } = periodChartRange(period);
     const boundsNote = !lowerVisible && !upperVisible ? ' Both bounds lie outside the chart’s price window.' : !lowerVisible || !upperVisible ? ' The chart focuses on recorded prices; the ' + (!lowerVisible ? 'lower' : 'upper') + ' bound is outside this view.' : '';
@@ -96,12 +110,40 @@ export function initPositionPeriod({ rangeLab }) {
     index = next; checkpoints.set(selected.id, index); render();
   }
   function buildMilestones() {
-    const buttons = periodMilestones(period).map(item => {
+    const milestones = selected.daily ? period.points.map((_, index) => ({ index, label: index ? 'Day ' + index : 'Start' })) : periodMilestones(period);
+    $('period-milestones').classList.toggle('period-daily-milestones', Boolean(selected.daily));
+    const buttons = milestones.map(item => {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'button secondary';
       button.textContent = item.label; button.dataset.index = item.index; button.setAttribute('aria-controls', 'period-result');
       button.addEventListener('click', () => selectCheckpoint(item.index)); return button;
     });
     $('period-milestones').replaceChildren(...buttons);
+  }
+  function buildDailyContext() {
+    $('period-week-summary').hidden = !selected.daily;
+    $('period-daily-details').hidden = !selected.daily;
+    $('period-selection-details').hidden = !selected.daily;
+    $('period-daily-rows').replaceChildren();
+    if (!selected.daily) return;
+    const final = periodPointView(period, period.points.length - 1);
+    $('period-week-capital').textContent = usd(final.startingUSD);
+    $('period-week-time').textContent = periodDuration(final.durationSeconds);
+    $('period-week-fees').textContent = feeUSD(final.feesUSD);
+    $('period-week-takeaway').textContent = final.earned0 === 0n && final.earned1 === 0n
+      ? 'Seven days passed without new fee tokens. ' + (final.secondsInRange === 0 ? 'The contract counter records no time in range. ' : '') + 'More elapsed time did not create fee income for this position.'
+      : 'The week’s fees are recorded token amounts. Compare the daily intervals to see how income accumulated; equal time does not require equal fees.';
+    const rows = period.points.slice(1).map((_, offset) => {
+      const pointIndex = offset + 1, interval = periodIntervalView(period, pointIndex);
+      const row = node('tr'), label = node('th'); label.scope = 'row';
+      const date = dayDate.formatRange(new Date(interval.start.timestamp * 1000), new Date(interval.end.timestamp * 1000));
+      const button = node('button', date, 'period-day-button'); button.type = 'button'; button.dataset.index = String(pointIndex);
+      button.setAttribute('aria-label', 'Show day ' + pointIndex + ', ' + date + ' UTC');
+      button.setAttribute('aria-controls', 'period-result'); button.addEventListener('click', () => selectCheckpoint(pointIndex)); label.append(button);
+      const fees = node('td'); fees.append(node('strong', feeUSD(interval.feesUSD)), node('span', feeTokenAmounts(interval.earned0, interval.earned1)));
+      const active = node('td', periodDuration(interval.secondsInRange));
+      row.append(label, fees, active); return row;
+    });
+    $('period-daily-rows').replaceChildren(...rows);
   }
   async function readRecord(item) {
     if (records.has(item.id)) return records.get(item.id);
@@ -109,9 +151,10 @@ export function initPositionPeriod({ rangeLab }) {
       const request = (async () => {
         const response = await fetch(new URL('../examples/' + item.file, import.meta.url));
         if (!response.ok) throw new Error('The recorded case could not be opened.');
-        const body = await response.text(); if (body.length > 131072) throw new Error('The recorded case is too large.');
-        const record = validatePositionPeriod(JSON.parse(body));
-        if (item.id === 'range-return' && !periodMilestones(record).some(point => point.label === 'Return sample')) throw new Error('The recorded case lacks a sampled exit and return.');
+        const body = await response.text(); if (body.length > REPLAY_MAX_BYTES) throw new Error('The recorded case is too large.');
+        const record = validateRecordedCase(JSON.parse(body)), view = recordedPeriod(record);
+        if (item.id === 'range-return' && !periodMilestones(view).some(point => point.label === 'Return sample')) throw new Error('The recorded case lacks a sampled exit and return.');
+        if (item.daily && (view.points.length !== 8 || record.kind !== 'fixed-position-history')) throw new Error('The daily case lacks its complete recorded week.');
         records.set(item.id, record); return record;
       })();
       requests.set(item.id, request);
@@ -120,7 +163,7 @@ export function initPositionPeriod({ rangeLab }) {
     return requests.get(item.id);
   }
   async function load(item, invalid = false) {
-    const currentRevision = ++revision; selected = item; period = null;
+    const currentRevision = ++revision; selected = item; period = null; sourceRecord = null;
     $('period-case').value = item.id; $('period-case-detail').textContent = item.detail;
     $('historical-case').setAttribute('aria-busy', 'true'); $('period-result').hidden = true;
     $('period-export').disabled = true; $('period-apply').disabled = true; $('period-retry').hidden = true;
@@ -129,14 +172,14 @@ export function initPositionPeriod({ rangeLab }) {
     try {
       const record = await readRecord(item);
       if (currentRevision !== revision) return;
-      period = record; index = checkpoints.get(item.id) ?? period.points.length - 1;
+      sourceRecord = record; period = recordedPeriod(record); index = checkpoints.get(item.id) ?? period.points.length - 1;
       const first = period.points[0].snapshot, last = period.points.at(-1).snapshot;
       $('period-title').textContent = 'Position #' + first.tokenId + ' · ' + periodDuration(last.block.timestamp - first.block.timestamp);
       $('period-description').textContent = 'Recorded Ethereum WETH/USDC · ' + first.position.fee / 10000 + '% pool · unchanged liquidity and bounds.';
       $('period-window').textContent = utc(first.block.timestamp) + ' → ' + utc(last.block.timestamp);
       $('period-captured').textContent = record.capturedAt;
-      $('period-providers').textContent = [...new Set([...record.points.map(point => point.snapshot.provider), ...record.eventQueries.map(query => query.provider)])].join(' · ');
-      buildMilestones(); render();
+      $('period-providers').textContent = [...new Set([...period.points.map(point => point.snapshot.provider), ...period.eventQueries.map(query => query.provider)])].join(' · ');
+      buildMilestones(); buildDailyContext(); render();
       const dates = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
         .formatRange(new Date(first.block.timestamp * 1000), new Date(last.block.timestamp * 1000));
       $('period-status').textContent = (invalid ? 'That case is unavailable. Showing the baseline. ' : '') + dates + ' · ' + period.points.length + ' checkpoints · checked at capture on ' + record.capturedAt.slice(0, 10);
@@ -159,7 +202,7 @@ export function initPositionPeriod({ rangeLab }) {
   $('period-retry').addEventListener('click', () => load(selected));
   $('period-checkpoint').addEventListener('input', () => selectCheckpoint(Number($('period-checkpoint').value)));
   $('period-export').addEventListener('click', () => {
-    if (period) downloadBlob(new Blob([JSON.stringify(period, null, 2) + '\n'], { type: 'application/json' }), 'teren-' + period.id + '-' + period.points[0].snapshot.block.number + '-' + period.points.at(-1).snapshot.block.number + '-historical-case.json');
+    if (period && sourceRecord) downloadBlob(new Blob([JSON.stringify(sourceRecord, null, 2) + '\n'], { type: 'application/json' }), 'teren-' + period.id + '-' + period.points[0].snapshot.block.number + '-' + period.points.at(-1).snapshot.block.number + '-historical-case.json');
   });
   $('period-apply').addEventListener('click', () => {
     if (!period) return;

@@ -12,6 +12,7 @@ These are durable working choices, not a feature backlog. Revisit them when evid
 - Treat hypothetical models, recorded single-block snapshots and independently checked historical accounting as different kinds of evidence.
 - Keep chain reads read-only and block-pinned. Use integers for contract accounting and pure models for calculations.
 - A holding comparison uses that experiment’s exact starting token basket. Fees, withdrawn principal and recorded owed balances must not be conflated.
+- Declare historical dates, eligibility and candidate order before inspecting outcomes. Retain low fees, inactivity and losses; provider failure is incomplete evidence, never zero income.
 - Verify one bounded historical case before presenting editable replay. Hourly price samples alone do not establish arbitrary-range fee earnings.
 - Keep the frontend static while that serves the product. Add dependencies or maintained data services when their benefit justifies their cost.
 - Prefer depth and clearer workflows before more chains, wallet discovery or library features.

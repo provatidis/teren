@@ -10,8 +10,10 @@ export function periodPointView(period,index) {
   const value=(zero,one)=>Number(zero)/1e6+Number(one)/1e18*price;
   const principalUSD=value(result.principal.amount0,result.principal.amount1);
   const feesUSD=value(result.earned0,result.earned1),holdingUSD=value(result.holding.amount0,result.holding.amount1);
+  const startingPrice=usdPerETH(BigInt(period.points[0].snapshot.pool.sqrtPriceX96));
+  const startingUSD=Number(result.holding.amount0)/1e6+Number(result.holding.amount1)/1e18*startingPrice;
   const state = s.pool.tick < s.position.tickLower ? 'above' : s.pool.tick >= s.position.tickUpper ? 'below' : 'inside';
-  return {...result,point,price,state,range:positionRange(s.position.tickLower,s.position.tickUpper),principalUSD,feesUSD,holdingUSD,lpUSD:principalUSD+feesUSD,gapUSD:principalUSD+feesUSD-holdingUSD,principalGapUSD:principalUSD-holdingUSD,secondsOutOfRange:result.durationSeconds-result.secondsInRange};
+  return {...result,point,price,state,range:positionRange(s.position.tickLower,s.position.tickUpper),principalUSD,feesUSD,holdingUSD,startingUSD,lpChangeUSD:principalUSD+feesUSD-startingUSD,holdingChangeUSD:holdingUSD-startingUSD,lpUSD:principalUSD+feesUSD,gapUSD:principalUSD+feesUSD-holdingUSD,principalGapUSD:principalUSD-holdingUSD,secondsOutOfRange:result.durationSeconds-result.secondsInRange};
 }
 
 // Differences of cumulative credits carry integer rounding across checkpoints.
@@ -56,6 +58,7 @@ export function periodChartRange(period) {
 }
 
 export function periodDuration(seconds) {
-  const hours = Math.floor(seconds / 3600), minutes = Math.floor(seconds % 3600 / 60), remainder = seconds % 60;
-  return [hours && hours + 'h', minutes && minutes + 'm', (remainder || !seconds) && remainder + 's'].filter(Boolean).join(' ');
+  const days = seconds >= 172800 ? Math.floor(seconds / 86400) : 0;
+  const hours = Math.floor((seconds - days * 86400) / 3600), minutes = Math.floor(seconds % 3600 / 60), remainder = seconds % 60;
+  return [days && days + 'd', hours && hours + 'h', minutes && minutes + 'm', (remainder || !seconds) && remainder + 's'].filter(Boolean).join(' ');
 }

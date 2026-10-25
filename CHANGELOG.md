@@ -1,5 +1,12 @@
 # Release history
 
+## 1.34.0 · 2026-10-25
+
+- Add a fixed-position week for Ethereum WETH/USDC 0.3% NFT #1375090: eight daily checkpoints over 604,800 seconds, with zero newly earned fees and zero recorded active seconds. Preserve the original fixed dates, publish candidate exclusions and a fallback list declared before its earnings were inspected, and retain the first eligible outcome.
+- Join seven independently checked bounded segments through identical canonical checkpoints. Check cumulative fees from the week's first checkpoint, preserve rounding carries, reject missing or conflicting evidence, and retain complete per-segment exports. Existing record formats and both earlier cases remain unchanged.
+- Add daily checkpoint shortcuts, a seven-interval comparison, selection evidence, starting-capital context and dollar change separately from the holding benchmark. The eleventh example and fee-context panels link directly to the week; checkpoint handoffs remain new principal-only experiments with zero assumed future fees.
+- Add resumable capture and selection commands, bounded event-read retries and support for fresh week recapture in the existing evidence-check workflow. Arithmetic, continuity, capture recovery, keyboard/mobile access and export/handoff checks cover the new record.
+
 ## 1.33.0 · 2026-10-25
 
 - Give Home equally prominent lab and lesson entries, with independent Continue experimenting and Continue learning routes. Restore edited model assumptions locally; keep saved source snapshots in named experiments.
