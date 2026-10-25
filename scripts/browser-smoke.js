@@ -1,5 +1,6 @@
 import { checkWeekReplay, checkMobileWeekReplay } from './browser/week-replay-checks.js';
 import { checkMatchedComparison } from './browser/matched-comparison-checks.js';
+import { checkWidthComparison } from './browser/width-comparison-checks.js';
 import { checkExperiencedExperiments } from './browser/experienced-experiment-checks.js';
 import { checkFeeContext } from './browser/fee-context-checks.js';
 import { checkPredictions } from './browser/prediction-checks.js';
@@ -177,6 +178,11 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (process.env.BROWSER_CHECKS === 'width') {
+    await checkWidthComparison({ evaluate, click, fill, text, navigate, reload, base, call });
+    assert.deepEqual(errors, [], 'No uncaught browser errors');
+    return;
+  }
   if (process.env.BROWSER_CHECKS === 'matched') {
     await call('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: profile, eventsEnabled: true });
     await checkMatchedComparison({ evaluate, click, fill, text, navigate, base, call, nextEvent, downloadFile });
@@ -628,6 +634,7 @@ try {
   await checkPredictions({ evaluate, click, text, navigate, reload, base, call });
   await checkExperiencedExperiments({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkMatchedComparison({ evaluate, click, fill, text, navigate, base, call, nextEvent, downloadFile });
+  await checkWidthComparison({ evaluate, click, fill, text, navigate, reload, base, call });
   assert.deepEqual(errors, [], 'No uncaught browser errors');
   console.log('PASS: mobile layout and interaction; no uncaught browser errors');
   }

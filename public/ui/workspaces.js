@@ -1,7 +1,7 @@
 import { workspaceFromHash } from '../lib/workspace-links.js';
 
 export function initWorkspaces() {
-  const panels = Object.fromEntries(['experiment', 'inspect', 'mechanics', 'replay'].map(key => [key, document.getElementById(key + '-workspace')]));
+  const panels = Object.fromEntries(['experiment', 'inspect', 'mechanics', 'replay', 'width'].map(key => [key, document.getElementById(key + '-workspace')]));
   const title = document.getElementById('workspace-title');
   const entry = document.getElementById('experiment-entry') || document.querySelector('.intro-actions, .intro-range-link');
   const toolMenu = document.getElementById('workspace-tools');
@@ -17,6 +17,7 @@ export function initWorkspaces() {
   });
   const copy = {
     experiment: ['HYPOTHETICAL MODELS', 'Compare liquidity scenarios', 'Change a price, range or fee assumption. Compare the outcome with holding.'],
+    width: ['HYPOTHETICAL MODEL · UNISWAP V3-STYLE', 'Compare range widths', 'Keep the starting capital and token mix the same. Change only the width.'],
     inspect: ['RECORDED SNAPSHOTS', 'Inspect a pool or position', 'Read principal and fee accounting at one recorded Ethereum block.'],
     replay: ['UNISWAP V3 · CHECKED AT CAPTURE', 'Replay a fixed-range position', 'Follow principal, earned fees and holding through a recorded period.'],
     mechanics: ['UNISWAP V2-STYLE · VIRTUAL POOL', 'Explore pool mechanics', 'Swap, deposit and withdraw virtual tokens. Follow the changing reserves.'],
@@ -36,7 +37,7 @@ export function initWorkspaces() {
     if (entry) entry.hidden = key !== 'experiment';
     for (const name of ['experiment', 'inspect']) {
       const link = document.getElementById('nav-' + name);
-      if (key === name || (name === 'experiment' && key === 'mechanics') || (name === 'inspect' && key === 'replay')) link.setAttribute('aria-current', 'page');
+      if (key === name || (name === 'experiment' && ['mechanics', 'width'].includes(key)) || (name === 'inspect' && key === 'replay')) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     }
     const tools = document.querySelector('.workspace-links');
@@ -58,8 +59,8 @@ export function initWorkspaces() {
       const scroll = () => requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'instant' }));
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scroll, { once: true });
       else scroll();
-    } else if (key === 'mechanics' || key === 'replay') {
-      const target = key === 'mechanics' ? 'swap-sandbox' : location.hash === '#fee-comparison' ? 'fee-comparison' : 'historical-case';
+    } else if (['mechanics', 'replay', 'width'].includes(key)) {
+      const target = key === 'width' ? 'compare-widths' : key === 'mechanics' ? 'swap-sandbox' : location.hash === '#fee-comparison' ? 'fee-comparison' : 'historical-case';
       const scroll = () => requestAnimationFrame(() => document.getElementById(target).scrollIntoView({ block: 'start', behavior: 'instant' }));
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scroll, { once: true });
       else scroll();

@@ -90,6 +90,16 @@ On mobile, a compact comparison of **LP vs holding** stays visible above the fie
 
 Price-comparison tables keep their columns on desktop. On mobile, each price becomes a labelled card showing all values, including the gap to holding, without horizontal scrolling. Selecting a price still updates the lab and retains keyboard focus.
 
+## Compare widths with a common starting mix
+
+Open [Compare widths](https://teren.sh/liquidity.html#compare-widths) from the liquidity tools, range lab or recorded comparison. Both alternatives start with the same capital and a 50/50 ETH/USDC basket by value. **Shared starting setup** changes the capital or starting price for both. A width is the total span of its price bounds as a percentage of the starting price; 20% does not mean ±20%.
+
+Change A or B, enter an exact comparison price, or move the common price slider. The bands share one price scale. Both outcome cards remain visible together on phones: token balances, principal now, dollar change and fees needed to match holding. Equal widths produce equal results. Boundary shortcuts are under **Choose a range edge or return to the start**. The optional gap chart compares hypothetical endpoints before fees.
+
+Valid edits stay in this browser, independently of lessons and the other labs. Home’s **Continue experimenting** returns to the edited comparison. **Share this comparison** preserves the exact inputs in a link. **Open A/B in range lab** carries the selected range and price with zero assumed fees; it can then be edited or saved as a named range experiment. Back returns to the comparison. A corrupt draft or unsupported link produces an explicit fallback message.
+
+This isolates width’s effect on principal under the stated model. It does not estimate what either range would earn. The separately linked recorded comparison retains its original NFT bounds, token mixes and historical fee evidence.
+
 ## Example progression
 
 Liquidity’s **Choose an example** library follows eleven ordered cases. Each states what it adds. The four stages are **Foundations → Comparisons → Ranges → Applied cases**, shared with Learn's lesson groups.

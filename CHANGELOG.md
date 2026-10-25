@@ -1,5 +1,12 @@
 # Release history
 
+## 1.36.0 · 2026-10-25
+
+- Add a controlled range-width experiment with equal capital, starting price, 50/50 token basket and comparison price. Reciprocal bounds preserve the common starting mix as either width changes; A and B can be equal or reverse order.
+- Show both ranges on one price scale, changing token balances, principal value, dollar change and the fees needed to match the common holding basket. A separate chart shows the gap across hypothetical prices. No fee earnings or historical path are inferred.
+- Keep the shared setup and boundary shortcuts available on demand, with a native price slider, exact price entry and side-by-side results on phones. Add validated share links, an independent local draft, Home resumption and exact zero-fee handoffs into the range lab.
+- Link the experiment from the range lab and recorded comparison. Preserve all historical evidence, lessons and existing saved experiments. Add reference/invariant tests and desktop/mobile checks for persistence, invalid-input recovery, keyboard/touch controls and handoffs.
+
 ## 1.35.0 · 2026-10-25
 
 - Compare two real WETH/USDC 0.3% ranges over the same declared week. Require both to start active and select the first eligible NFT in each predeclared width group, retaining later exits, losses and collections. Preserve the earlier inactive case.

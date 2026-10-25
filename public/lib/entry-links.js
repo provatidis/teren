@@ -5,8 +5,8 @@ export function isLiquidityEntry(hash) {
   const parameters = new URLSearchParams(hash.replace(/^#/, ''));
   return ['#experiment', '#inspect', '#lp-lab', '#range-lab', '#pool-lab',
     '#position-lab', '#swap-sandbox', '#example-library', '#saved-experiments',
-    '#historical-case', '#fee-comparison'].includes(hash)
-    || ['scenario', 'example', 'historical-case'].some(key => parameters.has(key));
+    '#historical-case', '#fee-comparison', '#compare-widths'].includes(hash)
+    || ['scenario', 'example', 'historical-case', 'width'].some(key => parameters.has(key));
 }
 
 export const LEARNING_ROUTES = Object.freeze({

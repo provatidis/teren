@@ -1,6 +1,10 @@
 # Review questions and open blind spots
 
-## Current priorities · 1.35.0
+## Current priorities · 1.36.0
+
+- The controlled width experiment now holds capital, the starting 50/50 basket and comparison price equal. It separates width’s effect on principal and the fee hurdle from the recorded pair’s different placements and starting mixes. This does not establish which width earns more fees or gives a better net outcome in a real pool.
+- A user may infer that the larger fee hurdle makes the narrower range worse overall. Check whether they can explain what additional swap, competition and cost evidence would be needed. Width is a total span, not an arithmetic ± percentage; verify that the displayed bounds make this understandable. These learner outcomes have not been observed.
+- Local checks cover native keyboard/touch controls and precise handoffs, including equal or reversed A/B widths. The native slider is discrete; exact price entry and boundary shortcuts preserve precise values. Browser checks still do not replace an Android device or assistive-technology user test.
 
 - The matched comparison selects two active-at-start ranges under predeclared rules and includes fee collections. It closes the absence of a same-pool, same-period illustration; it does not establish typical earnings. Range placement and starting mixes also differ, so width alone cannot explain a result.
 - Collected tokens are valued as if retained until each checkpoint. Real recipient trades, gas and NFT-sale proceeds remain outside this position comparison. Active management with liquidity additions/removals is still excluded; broader sampling should keep that selection limitation explicit.
