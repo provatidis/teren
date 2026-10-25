@@ -14,6 +14,7 @@ These are durable working choices. Revisit them when evidence or the owner's dir
 ## Learning and explanation
 
 - Explain results plainly. Keep decisive assumptions and essential misconceptions nearby; place derivations and detailed accounting in optional disclosures.
+- Before a prediction, show the starting balances, the action or condition being tested, and what stays fixed. Give explicit feedback when the outcome is revealed. Recorded lessons introduce the position first; questions about a particular historical outcome require the relevant evidence, rather than a guess about hidden data.
 - Invite an expectation with the prediction question and choices visible together. Predictions are ungraded and optional, with a clear “Not sure — show me” route. Completion checks explanation and application; arithmetic and rounding practice stay optional in Go deeper.
 - Keep the sequence: expectation, observation, explanation and application to a changed situation. Use named steps for discrete actions, sliders for continuous conditions, comparisons for trade-offs and recorded timelines for evidence. Never require animation viewing to unlock learning. A smoother interface alone does not establish better understanding.
 - Exploratory frames stay separate from assessed inputs and handoffs. Learn links carry exact setups only where the destination model supports them; swap/deposit lessons open the independent sandbox. Practical range topics follow the essentials before historical accounting. A changed historical setup is a labelled thought experiment.

@@ -144,7 +144,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       await moveFlow('ArrowRight');
     }
     await choose('prediction', prediction); await click('lend-reveal');
-    assert.match(await text('lend-prediction-feedback'), /^You expected:/);
+    assert.match(await text('lend-prediction-feedback'), /^The result differs from your prediction\./);
     assert.equal(await evaluate("document.getElementById('lend-money-flow').hidden"), false);
     if (id !== 'stress') {
       assert.equal(await flowIndex(), '1');

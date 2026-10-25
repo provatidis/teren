@@ -1,4 +1,5 @@
 import { saveLearningLocation } from '../data/learning-location.js';
+import { renderLessonSetup, managementLessonSetup } from '../lib/lesson-setup.js';
 import { focusSceneOutcome, createPredictionPrompt } from '../lib/lesson-scene.js';
 import { createRangeWidthScene } from '../lib/liquidity-lesson-scenes.js';
 import { usd } from '../lib/format.js';
@@ -6,8 +7,8 @@ import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managem
 import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../models/range-decisions.js';
 import { managementLessonFromHash } from '../lib/management-links.js';
 import { readManagementProgress, saveManagementProgress } from '../data/management-progress.js';
-import { newChoiceSeed, validChoiceSeed, predictionFeedback } from '../lib/learning-choices.js';
-import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback, focusInitialLesson } from '../lib/learning-elements.js';
+import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
+import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback } from '../lib/learning-elements.js';
 import { rangeHash } from '../lib/range-links.js';
 
 export function initManagementLearning() {
@@ -39,7 +40,7 @@ export function initManagementLearning() {
   }
   function reveal() {
     draft.revealed=true;
-    predictionFeedbackElement.textContent = predictionFeedback(presentation.predictions, draft.prediction, outcome.prediction);
+    renderPredictionFeedback(predictionFeedbackElement, presentation.predictions, draft.prediction, outcome.prediction);
     $('manage-metrics').replaceChildren(...presentation.metrics.map(items=>learningMetric(...items)));
     $('manage-explanation').textContent=lesson.explanation;$('manage-takeaway').textContent=lesson.takeaway;$('manage-pitfall').textContent=lesson.pitfall;
     $('manage-handoffs').replaceChildren(...presentation.links.map(({label,scenario})=>{
@@ -75,7 +76,8 @@ export function initManagementLearning() {
     $('learn-page-title').textContent=MANAGEMENT_CHAPTER;$('learn-page-subtitle').textContent='Explore Uniswap v3-style price ranges after the essentials. All values are supplied; explain what they mean.';
     document.title=lesson.short+' · Teren Learn';$('learn-route-note').hidden=true;
     $('manage-number').textContent='RANGE CHOICES '+(MANAGEMENT_IDS.indexOf(id)+1)+' OF 3';$('manage-title').textContent=lesson.title;
-    $('manage-adds').textContent='Uniswap v3-style · '+lesson.adds;$('manage-intro').textContent=lesson.intro;$('manage-setup').textContent=presentation.setup;
+    $('manage-adds').textContent='Uniswap v3-style · '+lesson.adds;$('manage-intro').textContent=lesson.intro;
+    renderLessonSetup($('manage-setup'), managementLessonSetup(outcome));
     $('manage-prediction-question').textContent=presentation.prediction;$('manage-variation-label').textContent='Situation '+(draft.variant+1)+' of '+MANAGEMENT_VARIANTS;
     $('manage-reason-question').textContent=presentation.reasoning||lesson.reasoning;$('manage-application-context').textContent=application.context;$('manage-application-question').textContent=application.question;
     $('manage-hint-text').textContent=lesson.hint+' '+application.hint;$('manage-hint').open=false;$('manage-deeper').open=false;
@@ -88,7 +90,6 @@ export function initManagementLearning() {
     $('manage-predict-label').textContent = visualLesson() ? 'EXPLORE THE MECHANISM' : '01 · PREDICT';
     $('manage-predict-title').textContent = visualLesson() ? 'Watch the same price cross both ranges' : 'Before opening the example';
     if (visualLesson()) {
-      $('manage-setup').textContent = 'Narrow: $1,900–$2,100. Wider: $1,500–$2,500. Each starts with $5,000 at $2,000/ETH, using its own token mix. USDC = $1.';
       $('manage-prediction-question').textContent = 'If ETH moves to ' + usd(outcome.price) + ', which position will be inside its range?';
       rangeScene = createRangeWidthScene(outcome, createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) }));
       $('manage-prediction-home').replaceChildren();

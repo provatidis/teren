@@ -17,7 +17,7 @@ test('prediction feedback distinguishes a guess from a skipped observation', () 
   const choices = [['more', 'More ETH'], ['less', 'Less ETH.']];
   assert.equal(predictionFeedback(choices, '', 'less'), 'In this setup: Less ETH.');
   assert.equal(predictionFeedback(choices, 'unknown', 'less'), 'In this setup: Less ETH.');
-  assert.equal(predictionFeedback(choices, 'more', 'less'), 'You expected: More ETH. In this setup: Less ETH.');
+  assert.equal(predictionFeedback(choices, 'more', 'less'), 'The result differs from your prediction. In this setup: Less ETH. You expected: More ETH.');
   assert.equal(predictionFeedback(choices, 'less', 'less'), 'Your prediction matches. In this setup: Less ETH.');
   assert.equal(predictionFeedback(choices, '', 'less', 'The record shows fewer tokens.'), 'The record shows fewer tokens.');
 });

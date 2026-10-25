@@ -14,7 +14,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
     assert.equal(await evaluate("document.querySelectorAll('#learn-management input[type=number]').length"),0);
     await choose('manage-prediction',prediction);await click('manage-reveal');
     assert.equal(await evaluate("document.getElementById('manage-observe').hidden"),false);
-    assert.match(await text('manage-prediction-feedback'),/^You expected:/);
+    assert.match(await text('manage-prediction-feedback'),/^The result differs from your prediction\./);
     assert.equal(await evaluate("document.getElementById('manage-observe-title').getBoundingClientRect().top>=document.querySelector('.topbar').getBoundingClientRect().bottom"),true);
     if(id==='range-width')assert.match(await text('manage-metrics'),/Narrow range Inactive.*Wider range Active/s);
     if(id==='fee-tiers')assert.match(await text('manage-metrics'),/Unknown/);

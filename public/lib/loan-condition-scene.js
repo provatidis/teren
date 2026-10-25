@@ -97,9 +97,7 @@ export function createLoanConditionScene(input, prediction) {
     if (mode === 'time') time.show(0);
     else price.show(input.start);
   }
-  element.append(node('p', 'Start with ' + fmt(input.collateral, 0) + ' ETH at ' + usd(input.start) +
-    ' and ' + fmt(input.borrow, 0) + ' USDC debt. Assume 0% supply interest and ' + fmt(input.borrowAPR, 0) + '% simple annual borrow interest.', 'loan-scene-intro'),
-  '\n', prediction, '\n', figure.element, '\n', modes, '\n', time.element, '\n', price.element,
+  element.append(prediction, '\n', figure.element, '\n', modes, '\n', time.element, '\n', price.element,
   '\n', copy, '\n', node('p', 'Wallet cash stays at ' + fmt(input.borrow, 0) + ' USDC; interest adds to debt. USDC = $1. Rates and the ' + fmt(input.threshold, 0) + '% liquidation threshold are fixed teaching assumptions. Each price is a separate comparison, not a history of this loan.', 'fine-print'));
   select('time');
   return { element, showQuestion() { select('time'); time.show(input.days); } };

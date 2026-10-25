@@ -1,9 +1,13 @@
 # Release history
 
-## Unreleased
+## 1.40.0 · 2026-10-26
 
+- Introduce each lesson with a readable starting setup, the action or condition being tested and its decisive assumptions. Keep the required facts before prediction choices, including the complete borrow → buy → supply loop.
+- Give matching, differing and skipped predictions distinct, prominent feedback. Remove the repeated scoring disclaimer while retaining optional predictions and conceptual completion checks.
+- Introduce recorded positions with their starting tokens, price and range before the prediction. Bring the historical chart forward on reveal, keep unknown intervals unknown and replace the unseen-winner guess with a question about fees and the holding comparison. Preserve earlier completion; retired prediction choices are not treated as answers to the new question.
+- Check all twenty setups and prediction flows on desktop and mobile, including loading/retry, saved progress, exact handoffs and changed question inputs. Financial models and recorded evidence are unchanged.
 - Restructure the review as a current assessment with distinct evidence types, consequential model boundaries and prioritized validation. Preserve the complete previous review body in a linked historical archive.
-- Consolidate observation tasks in Learning, group durable Decisions, improve documentation navigation and correct stale lending, replay, saved-comparison and domain-cutover descriptions. This is documentation-only; application behavior, versioned models and recorded evidence are unchanged.
+- Consolidate observation tasks in Learning, group durable Decisions, improve documentation navigation and correct stale lending, replay, saved-comparison and domain-cutover descriptions. Those documentation changes preserve the versioned models and recorded evidence.
 
 ## 1.39.1 · 2026-10-25
 

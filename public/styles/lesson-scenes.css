@@ -1,4 +1,19 @@
 /* Shared lesson patterns: a persistent scene, visible prediction, local controls. */
+.learn-setup { font-size: 16px; line-height: 1.6; color: var(--text); margin: 20px 0; padding: 18px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 10px; }
+.learn-setup .learn-setup-title { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--accent); }
+.learn-setup dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px 20px; margin: 0; }
+.learn-setup dl > div { min-width: 0; }
+.learn-setup dt { font-size: 14px; line-height: 1.6; color: var(--muted); }
+.learn-setup dd { margin: 4px 0 0; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.learn-setup dd .allocation-swatch { margin-right: 4px; }
+.learn-setup .allocation-swatch-eth { transform: rotate(45deg); border-radius: 1px; }
+.learn-setup .allocation-swatch-usdc { border-radius: 50%; }
+.learn-setup .learn-setup-action { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--border); }
+.learn-setup .learn-setup-assumptions { margin: 10px 0 0; font-size: 14px; line-height: 1.7; }
+.learn-prediction-feedback { font-size: 15px; line-height: 1.7; color: var(--text); margin: 14px 0 22px; padding: 14px 16px; background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; }
+.learn-prediction-feedback:empty { display: none; }
+.learn-prediction-feedback > strong { display: block; margin-bottom: 4px; }
+.learn-prediction-feedback > span { display: block; }
 .lesson-scene figure { margin: 0; }
 .scene-outcome-focus:focus { outline: none; }
 .scene-figure-title { margin: 0 0 20px; font-size: 16px; font-weight: 600; line-height: 1.5; }
@@ -14,6 +29,7 @@
 .scene-prediction .learn-choice { min-height: 44px; padding: 10px 12px; font-size: 14px; }
 .scene-prediction > .fine-print { margin: 12px 0; }
 .scene-prediction-show { min-height: 44px; font-size: 14px; line-height: 1.5; }
+.scene-prediction .scene-prediction-show { margin-top: 14px; }
 .scene-prediction .learn-prediction-feedback { margin: 14px 0 0; }
 .scene-prediction .learn-prediction-feedback:empty { display: none; }
 @media (min-width: 1000px) {
@@ -66,6 +82,11 @@
 #lend-visual .loop-flow-balances { margin-top: 20px; }
 #lend-visual .loop-flow-health { padding-left: 12px; border-left: 3px solid var(--accent); }
 @media (max-width: 750px) {
+  .learn-setup { padding: 14px; font-size: 15px; }
+  .learn-setup dl { display: flex; flex-direction: column; gap: 10px; }
+  .learn-setup dl > div { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .learn-setup dt { flex: 1; }
+  .learn-setup dd { margin: 0; max-width: 58%; text-align: right; }
   .scene-actions { grid-template-columns: 1fr 1fr; gap: 8px 16px; }
   .scene-actions .primary { grid-column: 1 / -1; grid-row: 1; width: 100%; justify-content: center; }
   .scene-actions button:nth-child(2) { justify-self: end; }

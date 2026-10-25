@@ -73,7 +73,7 @@
         <p id="learn-intro" class="learn-reading">A larger swap moves further along the pool’s curve. Predict what happens, then try it.</p>
         <section class="card learn-experiment" aria-labelledby="learn-experiment-title">
           <div class="card-heading"><h3 id="learn-experiment-title">Your experiment</h3><button id="learn-variation" class="learn-text-button" type="button">Try another variation ↻</button></div>
-          <p id="learn-setup" class="learn-setup"></p>
+          <div id="learn-setup" class="learn-setup"></div>
           <div id="learn-scene" hidden></div>
           <div id="learn-controls-home"><div id="learn-controls" class="learn-controls"></div></div>
           <div id="learn-prediction-home"><fieldset id="learn-prediction-field" class="learn-fieldset"><legend><span id="learn-prediction-question">Make your prediction.</span></legend><div id="learn-predictions" class="learn-choices"></div></fieldset></div>
@@ -132,7 +132,7 @@
         <p id="manage-adds" class="learn-level"></p><h2 id="manage-title" tabindex="-1"></h2><p id="manage-intro" class="learn-reading"></p>
         <section class="card learn-experiment" aria-labelledby="manage-predict-title">
           <div class="card-heading"><div><p id="manage-predict-label" class="eyebrow">01 · PREDICT</p><h3 id="manage-predict-title">Before opening the example</h3></div><button id="manage-variation" class="learn-text-button" type="button">Try another situation ↻</button></div>
-          <p id="manage-setup" class="learn-setup"></p>
+          <div id="manage-setup" class="learn-setup"></div>
           <div id="manage-range-scene" hidden></div>
           <div id="manage-prediction-home"><fieldset id="manage-prediction-field" class="learn-fieldset"><legend id="manage-prediction-question"></legend><div id="manage-predictions" class="learn-choices"></div></fieldset></div>
           <button id="manage-reveal" class="button primary" type="button" disabled>Reveal the example →</button><div class="learn-experiment-footer"><span id="manage-variation-label"></span><span>Hypothetical Uniswap v3-style · No calculations required</span></div>
@@ -163,8 +163,9 @@
         <p id="applied-intro" class="learn-reading"></p>
         <details class="applied-primer"><summary>Need a quick reminder?</summary><p>Principal is the position’s ETH and USDC, excluding fees. A range is active while the pool’s contract tick is within its bounds. Holding keeps the exact starting principal tokens.</p><a href="#lesson=range-boundaries">Revisit range boundaries →</a></details>
         <section class="card learn-experiment" aria-labelledby="applied-predict-title">
-          <p class="eyebrow">01 · PREDICT</p><h3 id="applied-predict-title">Before opening the record</h3>
-          <p id="applied-source" class="learn-setup"></p>
+          <p class="eyebrow">01 · PREDICT</p><h3 id="applied-predict-title">Meet the position</h3>
+          <div id="applied-setup" hidden></div>
+          <p id="applied-source" class="fine-print"></p>
           <div id="applied-prediction-home"><fieldset id="applied-prediction-field" class="learn-fieldset"><legend id="applied-prediction-question"></legend><div id="applied-predictions" class="learn-choices"></div></fieldset></div>
           <button id="applied-reveal" type="button" class="button primary" disabled>Reveal the recorded result →</button>
           <p id="applied-load-status" class="fine-print" role="status"></p>
@@ -173,13 +174,13 @@
           <p class="eyebrow">02 · OBSERVE</p><h3 id="applied-observe-title" tabindex="-1">Follow the recorded checkpoints</h3>
           <p id="applied-prediction-feedback" class="learn-prediction-feedback" role="status"></p>
           <p id="applied-question-window" class="applied-question-window"></p>
-          <div id="applied-metrics" class="learn-metrics"></div>
+          <figure class="applied-figure"><svg id="applied-chart" viewBox="0 0 620 220" role="img" aria-labelledby="applied-chart-title"><title id="applied-chart-title">Sampled ETH pool prices and the selected checkpoint</title></svg><figcaption id="applied-chart-caption">Dots are recorded prices. The connecting line does not reconstruct moves between samples. Sage: in-range sample; amber: outside sample.</figcaption></figure>
           <label for="applied-checkpoint" class="period-slider-label">Explore recorded checkpoints</label>
           <input id="applied-checkpoint" type="range" min="0" max="8" step="1" value="8" aria-describedby="applied-current">
           <div class="applied-checkpoint-heading"><p id="applied-current"></p><span id="applied-state" class="small-badge"></span></div>
           <button id="applied-return-question" type="button" class="learn-text-button" hidden>Return to the question checkpoint →</button>
           <div id="applied-milestones" class="period-milestones" aria-label="Recorded milestones"></div>
-          <figure class="applied-figure"><svg id="applied-chart" viewBox="0 0 620 220" role="img" aria-labelledby="applied-chart-title"><title id="applied-chart-title">Sampled ETH pool prices and the selected checkpoint</title></svg><figcaption id="applied-chart-caption">Dots are recorded prices. The connecting line does not reconstruct moves between samples. Sage: in-range sample; amber: outside sample.</figcaption></figure>
+          <div id="applied-metrics" class="learn-metrics"></div>
           <div id="applied-interval" class="applied-interval"><h4>Since the previous checkpoint</h4><p id="applied-interval-summary"></p></div>
           <p id="applied-observation" class="learn-reading"></p>
           <p id="applied-takeaway" class="learn-takeaway"></p>

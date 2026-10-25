@@ -23,7 +23,7 @@ test('applied questions use verified period earnings, interval counters and the 
   assert.ok(between.interval.earned0 > 0n && between.interval.earned1 > 0n);
   assert.equal(checkAppliedAnswer(between, '17580', 'counters').numeric, false, 'Cumulative active time is not the interval answer.');
   const final = appliedQuestion(returning, 'period-vs-holding');
-  assert.equal(final.index, 16); assert.equal(final.prediction, 'lp');
+  assert.equal(final.index, 16); assert.equal(final.prediction, 'can-trail');
   assert.equal(final.view.holding.amount0, 4982691068n); assert.equal(final.view.holding.amount1, 14920139441099507n);
   assert.ok(final.view.principalGapUSD < 0 && final.view.gapUSD > 0);
   assert.ok(Math.abs(final.answer - .17457169368572067) < 1e-12);

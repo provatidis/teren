@@ -18,7 +18,7 @@ export function appliedQuestion(period, id) {
   const view = periodPointView(period, index), interval = periodIntervalView(period, index);
   if (id === 'fees-over-time') return { index, view, interval, answer: view.feesUSD, answerDigits: 2, prediction: 'earned', reason: 'growth' };
   if (id === 'between-samples') return { index, view, interval, answer: interval.secondsInRange, answerDigits: 0, wholeAnswer: true, prediction: 'possible', reason: 'counters' };
-  return { index, view, interval, answer: view.gapUSD, answerDigits: 2, prediction: view.gapUSD >= 0 ? 'lp' : 'hold', reason: 'basket' };
+  return { index, view, interval, answer: view.gapUSD, answerDigits: 2, prediction: 'can-trail', reason: 'basket' };
 }
 export function checkAppliedAnswer(question, answer, reason) {
   const numeric = learningAnswerMatches(answer, question.answer, question.answerDigits, question.wholeAnswer);

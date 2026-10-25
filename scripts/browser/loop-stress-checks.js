@@ -74,7 +74,7 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   assert.equal(await evaluate("document.getElementById('stress-price').value"), '1500');
   assert.equal(await evaluate("Array.from(document.querySelectorAll('.stress-scene .scene-price-control [role=status]')).every(el=>el.textContent==='')"), true);
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
-  assert.match(await text('lend-prediction-feedback'), /^In this setup:/);
+  assert.match(await text('lend-prediction-feedback'), /^What happens In this setup:/);
   assert.equal(await evaluate("document.getElementById('lend-explanation').hidden"), false);
   await choose('reason', 'exposure'); await choose('application', 'falls'); await click('lend-check');
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
@@ -84,7 +84,7 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
   await choose('prediction', 'hold'); await click('lend-reveal');
-  assert.match(await text('lend-prediction-feedback'), /^You expected:/);
+  assert.match(await text('lend-prediction-feedback'), /^The result differs from your prediction\./);
   await choose('reason', 'exposure'); await choose('application', 'falls'); await click('lend-check'); await reload();
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked').value"), 'hold');

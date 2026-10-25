@@ -6,12 +6,13 @@ import { createComparisonScene, comparisonQuestion } from '../lib/comparison-les
 import { stageForLesson } from '../learning/example-path.js';
 import { DEEPER_READING } from '../learning/deeper-reading.js';
 import { lessonWalkthrough } from '../lib/lesson-walkthrough.js';
+import { renderLessonSetup, liquidityLessonSetup } from '../lib/lesson-setup.js';
 import { LESSONS } from '../learning/liquidity-essentials.js';
 import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, checkLesson } from '../models/lesson-experiments.js';
 import { checkLessonUnderstanding } from '../models/lesson-application.js';
 import { lessonApplicationCopy } from '../lib/lesson-application-copy.js';
-import { newChoiceSeed, validChoiceSeed, predictionFeedback } from '../lib/learning-choices.js';
-import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson } from '../lib/learning-elements.js';
+import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
+import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback } from '../lib/learning-elements.js';
 import { POOL_PITFALLS } from '../learning/pool-pitfalls.js';
 import { managementLessonFromHash } from '../lib/management-links.js';
 import { readProgress, saveProgress } from '../data/learning-progress.js';
@@ -122,12 +123,7 @@ export function initLearning() {
   }
   function updateSetup() {
     const s = draft.inputs;
-    $('learn-setup').textContent = lesson.id === 'swap-impact' || lesson.id === 'pool-share'
-      ? 'Starting pool: ' + fmt(s.reserveEth, 0) + ' ETH + ' + fmt(s.reserveEth * s.initialPrice, 0) + ' USDC · ' + usd(s.initialPrice) + '/ETH'
-      : 'Starting budget: ' + usd(s.investment) + ' · ETH starts at ' + usd(s.initialPrice) + ' · USDC = $1';
-    if (lesson.id === 'pool-share') $('learn-setup').textContent += ' · Your deposit: ' + fmt(s.depositEth, 0) + ' ETH + ' + fmt(s.depositEth * s.initialPrice, 0) + ' USDC';
-    if (lesson.id === 'swap-impact') $('learn-setup').textContent += ' · Your swap: ' + fmt(s.amount, 0) + ' ETH';
-    if (lesson.id === 'range-boundaries') $('learn-setup').textContent += ' · Range: ' + usd(s.initialPrice * (1 - s.width)) + '–' + usd(s.initialPrice * (1 + s.width));
+    renderLessonSetup($('learn-setup'), liquidityLessonSetup(lesson.id, s));
     $('learn-variation-label').textContent = 'Variation ' + (draft.variant + 1) + ' of ' + VARIANTS;
     const model = lesson.protocol + (lesson.id === 'range-boundaries' ? ' · Price range' : ['swap-impact', 'pool-share'].includes(lesson.id) ? ' · Virtual pool' : ' · Full-range 50/50');
     $('learn-model').textContent = model + ' · Illustrative inputs · USDC = $1';
@@ -222,7 +218,7 @@ export function initLearning() {
       if (s.fees) visual.push(bar('LP + ' + usd(s.fees) + ' assumed fees', r.lpValue / max * 100, usd(r.lpValue)));
     }
     $('learn-metrics').replaceChildren(...metrics); $('learn-visual').replaceChildren(...visual);
-    predictionFeedbackElement.textContent = predictionFeedback(lesson.predictions, draft.prediction, outcome.prediction);
+    renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, outcome.prediction);
     const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
     $('learn-explanation').textContent = (tokenCopy ? tokenCopy.exchange + (tokenCopy.direction === 'same' ? '' : ' Trading to align pool and market prices is called arbitrage.') + ' Neither token is created by the pool.' : null) || benchmarkNarration(lesson.id, outcome) || lesson.explanation;
     $('learn-reason-question').textContent = tokenCopy?.reasoning || lesson.reasoning;

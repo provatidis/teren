@@ -5,7 +5,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
   const before = await evaluate('JSON.stringify(' + JSON.stringify(existingKeys) + '.map(key=>localStorage.getItem(key)))');
   const choose = (name, value) => evaluate(`document.querySelector('input[name="${name}"][value="${value}"]').click()`);
   const ready = () => evaluate("new Promise((resolve,reject)=>{const end=Date.now()+5000;const check=()=>{if(document.getElementById('learn-applied').getAttribute('aria-busy')==='false')resolve();else if(Date.now()>end)reject(new Error('Applied record did not load'));else setTimeout(check,25)};check()})");
-  const cases = [['fees-over-time', 'earned', '2.36', 'growth', 'in-range', 'same'], ['between-samples', 'possible', '2724', 'counters', 'range-return', 'not-proof'], ['period-vs-holding', 'lp', '0.17', 'basket', 'range-return', 'hold']];
+  const cases = [['fees-over-time', 'earned', '2.36', 'growth', 'in-range', 'same'], ['between-samples', 'possible', '2724', 'counters', 'range-return', 'not-proof'], ['period-vs-holding', 'can-trail', '0.17', 'basket', 'range-return', 'hold']];
   for (const [id, prediction, answer, reason, record, application] of cases) {
     await navigate(base + 'learn.html#applied=' + id); await ready();
     assert.equal(await evaluate("document.getElementById('learn-essential').hidden"), true);
@@ -14,6 +14,9 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     assert.equal(await evaluate("document.querySelectorAll('[data-lesson-id][aria-current=step]').length"), 0);
     assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"), true);
     assert.equal(await evaluate("document.getElementById('applied-reveal').disabled"), false);
+    assert.equal(await evaluate("document.querySelector('#applied-setup .applied-start-track').checkVisibility()"), true, 'Starting price and range are introduced before the prediction');
+    assert.match(await text('applied-setup'), /WETH principal.*USDC principal/);
+    assert.equal(await evaluate("document.querySelectorAll('#applied-prediction-home button').length"), 1, 'One reveal control');
     await choose('applied-prediction', prediction); await click('applied-reveal');
     assert.equal(await evaluate("document.getElementById('applied-observe').hidden"), false);
     assert.equal(await evaluate("document.getElementById('applied-assessment').hidden"), false);
@@ -77,6 +80,12 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
   assert.equal(await text('applied-progress-count'), '3 of 3 checked');
   assert.equal(await evaluate("document.getElementById('applied-reflection').hidden"), false);
   assert.equal(await evaluate('JSON.stringify(' + JSON.stringify(existingKeys) + '.map(key=>localStorage.getItem(key)))'), before, 'Applied work preserves all existing lesson and snapshot storage.');
+  // A saved choice for the retired outcome question is not an answer to the new mechanism question.
+  await evaluate(`(() => { const key = 'passiko-applied-liquidity-v1'; const progress = JSON.parse(localStorage.getItem(key));
+    progress.drafts['period-vs-holding'].prediction = 'lp'; localStorage.setItem(key, JSON.stringify(progress)); })()`);
+  await reload(); await ready();
+  assert.equal(await evaluate("document.querySelector('input[name=applied-prediction]:checked')"), null);
+  assert.equal(await text('applied-feedback-title'), 'Both answers are correct.', 'Earlier conceptual completion remains valid');
   await navigate(base + 'learn.html#applied=between-samples'); await ready();
   await click('applied-restart'); await ready();
   assert.equal(await evaluate("document.getElementById('applied-observe').hidden"), true);
@@ -98,6 +107,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     const request = await failed;
     await call('Fetch.failRequest', {requestId:request.requestId,errorReason:'Failed'}); await opening; await ready();
     assert.equal(await text('applied-reveal'), 'Retry loading the record →');
+    assert.equal(await evaluate("document.getElementById('applied-setup').hidden"), true, 'No position preview is shown for unavailable evidence');
     await call('Fetch.disable');
     await click('applied-reveal'); await ready(); assert.match(await text('applied-source'), /#1382030/);
     await call('Fetch.enable', {patterns:[{urlPattern:'*/examples/uniswap-v3-position-*.json',requestStage:'Request'}]});
