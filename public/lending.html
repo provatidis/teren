@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://ethereum-rpc.publicnode.com https://eth.drpc.org; base-uri 'none'; object-src 'none'; form-action 'self'">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#101c27">
-    <meta name="description" content="Explore supplying, borrowing, interest and liquidation through hypothetical loan and borrowing-loop experiments, with guided lessons.">
+    <meta name="description" content="Explore loans, ETH/USDC borrowing loops and wstETH/WETH correlated-asset loops. Test interest, collateral values and exits, with guided lending lessons.">
     <title>Lending lab · Teren</title>
     <meta name="application-name" content="Teren">
     <meta name="apple-mobile-web-app-title" content="Teren">
@@ -18,7 +18,7 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Teren">
     <meta property="og:title" content="Lending lab · Teren">
-    <meta property="og:description" content="Explore supplying, borrowing, interest and liquidation through hypothetical loan and borrowing-loop experiments, with guided lessons.">
+    <meta property="og:description" content="Explore loans, ETH/USDC borrowing loops and wstETH/WETH correlated-asset loops. Test interest, collateral values and exits, with guided lending lessons.">
     <meta property="og:url" content="https://teren.sh/lending.html">
     <meta property="og:image" content="https://teren.sh/assets/social-preview.png">
     <meta property="og:image:type" content="image/png">
@@ -27,7 +27,7 @@
     <meta property="og:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Lending lab · Teren">
-    <meta name="twitter:description" content="Explore supplying, borrowing, interest and liquidation through hypothetical loan and borrowing-loop experiments, with guided lessons.">
+    <meta name="twitter:description" content="Explore loans, ETH/USDC borrowing loops and wstETH/WETH correlated-asset loops. Test interest, collateral values and exits, with guided lending lessons.">
     <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
     <meta name="twitter:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
     <link rel="stylesheet" href="styles.css">
@@ -56,7 +56,7 @@
       <div id="lending-route-note" class="notice" role="status" hidden>
         <p>That lending lesson link could not be opened. <a href="#lesson=supply">Open the first lesson →</a></p>
       </div>
-      <nav id="lending-tools" class="lending-tools" aria-label="Lending experiments"><a id="lending-tool-loan" href="#experiment" aria-current="page">Single loan</a><a id="lending-tool-loops" href="#loops">Borrowing loops</a><a href="#saved-experiments">Saved experiments</a></nav>
+      <nav id="lending-tools" class="lending-tools" aria-label="Lending experiments"><a id="lending-tool-loan" href="#experiment" aria-current="page">Single loan</a><a id="lending-tool-loops" href="#loops">Borrowing loops</a><a id="lending-tool-lst" href="#lst-loops">LST loops</a><a href="#saved-experiments">Saved experiments</a></nav>
       <section id="lending-experiment" aria-label="Lending experiment">
         <p class="loan-model-label">Illustrative ETH/USDC inputs · USDC = $1</p>
         <div id="loan-route-note" class="notice" role="status" hidden>
@@ -639,6 +639,182 @@
           </p>
         </details>
       </section>
+      <section id="lending-lst" class="lst-lab" aria-label="Correlated asset loop experiment" hidden>
+        <p class="loan-model-label">wstETH collateral · WETH debt · illustrative rates and rules</p>
+        <div id="lst-route-note" class="notice" role="status" hidden><p>This LST link could not be opened. Your previous valid setup is shown.</p></div>
+        <div class="lst-views" role="group" aria-label="Correlated loop stages">
+          <button id="lst-view-build" type="button" aria-pressed="true" aria-controls="lst-build">1 · Build</button>
+          <button id="lst-view-hold" type="button" aria-pressed="false" aria-controls="lst-hold">2 · Hold &amp; stress</button>
+          <button id="lst-view-exit" type="button" aria-pressed="false" aria-controls="lst-exit">3 · Exit</button>
+        </div>
+        <p id="lst-invalid" class="notice error" role="status" hidden>Check the highlighted assumptions. <button id="lst-fix" class="text-button" type="button">Go to the field →</button></p>
+        <section id="lst-build" class="lst-panel card" aria-labelledby="lst-build-title">
+          <h2 id="lst-build-title">Borrow ETH to hold more staked ETH</h2>
+          <p class="body-copy">Supply wstETH, borrow WETH, buy more wstETH, then supply it. Each round adds collateral and debt.</p>
+          <div class="lst-two-column">
+            <div class="lst-controls">
+              <div class="lst-slider-field">
+  <label for="lst-rounds">Borrowing rounds <output id="lst-rounds-value" for="lst-rounds"></output></label>
+  <input id="lst-rounds" type="range" min="0" max="8" step="1" value="3" aria-describedby="lst-rounds-error">
+  <p id="lst-rounds-error" class="field-error" hidden></p>
+</div>
+              <div class="scenario-field">
+  <label for="lst-borrowPercent">Borrow against each new supply <span>%</span></label>
+  <input id="lst-borrowPercent" type="number" min="1" max="95" step="any" value="75" aria-describedby="lst-borrowPercent-error">
+  <p id="lst-borrowPercent-error" class="field-error" hidden></p>
+</div>
+              <p id="lst-build-summary" class="lst-inline-result"></p>
+              <details id="lst-build-assumptions"><summary>Starting tokens, costs and collateral rules</summary>
+                <div class="lst-fields"><div class="scenario-field">
+  <label for="lst-collateral">Your starting wstETH <span>wstETH</span></label>
+  <input id="lst-collateral" type="number" min="0.001" max="1000000" step="any" value="5" aria-describedby="lst-collateral-error">
+  <p id="lst-collateral-error" class="field-error" hidden></p>
+</div>
+<div class="scenario-field">
+  <label for="lst-rate">Starting conversion rate <span>stETH per wstETH</span></label>
+  <input id="lst-rate" type="number" min="0.01" max="100" step="any" value="1.2" aria-describedby="lst-rate-error">
+  <p id="lst-rate-error" class="field-error" hidden></p>
+</div>
+<div class="scenario-field">
+  <label for="lst-swapCost">Loss on each build swap <span>%</span></label>
+  <input id="lst-swapCost" type="number" min="0" max="5" step="any" value="0.1" aria-describedby="lst-swapCost-error">
+  <p id="lst-swapCost-error" class="field-error" hidden></p>
+</div>
+<div class="scenario-field">
+  <label for="lst-maxLTV">Maximum starting LTV <span>%</span></label>
+  <input id="lst-maxLTV" type="number" min="1" max="98" step="any" value="90" aria-describedby="lst-maxLTV-error">
+  <p id="lst-maxLTV-error" class="field-error" hidden></p>
+</div>
+<div class="scenario-field">
+  <label for="lst-threshold">Liquidation threshold <span>%</span></label>
+  <input id="lst-threshold" type="number" min="1" max="99" step="any" value="94" aria-describedby="lst-threshold-error">
+  <p id="lst-threshold-error" class="field-error" hidden></p>
+</div></div>
+                <p class="fine-print">wstETH is wrapped staked ETH; WETH is wrapped ETH. Staking changes how much stETH each wstETH represents.</p>
+                <p class="fine-print">The starting wstETH is already supplied. One stETH is valued at one WETH while building. Swap loss includes an assumed fee and price impact; build gas is excluded.</p>
+              </details>
+            </div>
+            <div id="lst-build-scene" class="lst-scene" aria-label="Follow the loop construction"></div>
+          </div>
+          <button id="lst-to-hold" class="button secondary" type="button">Test the completed loop →</button>
+        </section>
+        <section id="lst-hold" class="lst-panel card" aria-labelledby="lst-hold-title" hidden>
+          <h2 id="lst-hold-title">What earns, what costs, what can break?</h2>
+          <p class="body-copy">Staking changes the value of each wstETH. Borrowing adds WETH debt. Test both over the same period.</p>
+          <div class="lst-two-column">
+            <div class="lst-controls">
+              <div class="lst-slider-field">
+  <label for="lst-days">Time held <output id="lst-days-value" for="lst-days"></output></label>
+  <input id="lst-days" type="range" min="0" max="1825" step="1" value="365" aria-describedby="lst-days-error">
+  <p id="lst-days-error" class="field-error" hidden></p>
+</div>
+              <div class="lst-fields"><div class="scenario-field">
+  <label for="lst-stakingAPY">Staking yield <span>% APY</span></label>
+  <input id="lst-stakingAPY" type="number" min="-50" max="50" step="any" value="3" aria-describedby="lst-stakingAPY-error">
+  <p id="lst-stakingAPY-error" class="field-error" hidden></p>
+</div><div class="scenario-field">
+  <label for="lst-borrowAPR">Borrow rate <span>% APR</span></label>
+  <input id="lst-borrowAPR" type="number" min="0" max="100" step="any" value="2" aria-describedby="lst-borrowAPR-error">
+  <p id="lst-borrowAPR-error" class="field-error" hidden></p>
+</div></div>
+              <div id="lst-carry-preview" class="lst-inline-result lst-mobile-result"><span>Loop minus holding</span><strong id="lst-carry-value"></strong><span>Health factor: <b id="lst-carry-health"></b></span><small>Before liquidation and exit</small></div>
+              <p id="lst-rate-summary" class="fine-print"></p>
+              <div class="lst-slider-field">
+  <label for="lst-discount">Market discount vs conversion value <output id="lst-discount-value" for="lst-discount"></output></label>
+  <input id="lst-discount" type="range" min="0" max="50" step="0.1" value="0" aria-describedby="lst-discount-error">
+  <p id="lst-discount-error" class="field-error" hidden></p>
+</div>
+              <p id="lst-discount-result" class="lst-inline-result"></p>
+              <details id="lst-rates"><summary>Change rates during the period</summary>
+                <label class="loan-checkbox"><input id="lst-rateChange" type="checkbox" aria-describedby="lst-rateChange-error"> Change the borrow rate once</label><p id="lst-rateChange-error" class="field-error" hidden></p>
+                <div id="lst-rate-change-fields" class="lst-fields" hidden><div class="scenario-field">
+  <label for="lst-changeDay">Change the rate on day <span>days</span></label>
+  <input id="lst-changeDay" type="number" min="0" max="1825" step="any" value="90" aria-describedby="lst-changeDay-error">
+  <p id="lst-changeDay-error" class="field-error" hidden></p>
+</div><div class="scenario-field">
+  <label for="lst-laterAPR">Borrow rate after the change <span>% APR</span></label>
+  <input id="lst-laterAPR" type="number" min="0" max="100" step="any" value="8" aria-describedby="lst-laterAPR-error">
+  <p id="lst-laterAPR-error" class="field-error" hidden></p>
+</div></div>
+                <p class="fine-print">Borrow rates can rise as more of a pool’s available funds are borrowed. Set the change directly here; these inputs do not reproduce a protocol’s utilization curve.</p>
+                <div class="scenario-field">
+  <label for="lst-lendingAPY">Additional collateral lending yield <span>% APY</span></label>
+  <input id="lst-lendingAPY" type="number" min="0" max="50" step="any" value="0" aria-describedby="lst-lendingAPY-error">
+  <p id="lst-lendingAPY-error" class="field-error" hidden></p>
+</div>
+                <p class="fine-print">Leave additional lending yield at zero if the collateral earns none. Staking growth is already counted in the conversion rate.</p>
+              </details>
+              <details id="lst-oracle-settings"><summary>Oracle and dollar price</summary>
+                <div class="scenario-field"><label for="lst-oracleMode">How the lender values wstETH</label>
+                  <select id="lst-oracleMode" aria-describedby="lst-oracle-help lst-oracleMode-error"><option value="market">Follow the market discount</option><option value="rate">Track the conversion rate</option></select>
+                  <p id="lst-oracleMode-error" class="field-error" hidden></p>
+                  <p id="lst-oracle-help" class="fine-print">Two simplified oracle assumptions. Actual feeds can lag, apply caps or use other rules. Neither option is labelled as a current Aave or Morpho oracle.</p>
+                </div>
+                <div class="scenario-field">
+  <label for="lst-ethUSD">ETH price in dollars <span>USD</span></label>
+  <input id="lst-ethUSD" type="number" min="0.01" max="10000000" step="any" value="2000" aria-describedby="lst-ethUSD-error">
+  <p id="lst-ethUSD-error" class="field-error" hidden></p>
+</div>
+                <p class="fine-print">A shared ETH dollar-price move changes the dollar values of collateral and WETH debt together. It does not change this model’s health factor.</p>
+              </details>
+            </div>
+            <div id="lst-hold-results" class="lst-outcomes">
+              <div class="lst-headline"><p>Assets minus debt · before liquidation and exit</p><strong id="lst-net"></strong><span id="lst-usd"></span></div>
+              <div class="lst-balance-visual"><svg id="lst-balance-chart" viewBox="0 0 500 85" role="img" aria-label="Collateral value and WETH debt"><defs><pattern id="lst-debt-hatch" patternUnits="userSpaceOnUse" width="7" height="7"><path d="M-2 2L2-2M0 7L7 0M5 9L9 5" class="lst-debt-stripe"/></pattern></defs><rect x="0" y="4" width="500" height="22" rx="3" class="lst-collateral-bar"/><rect id="lst-debt-bar" x="0" y="52" width="0" height="22" rx="3" class="lst-debt-bar"/><rect id="lst-debt-pattern" x="0" y="52" width="0" height="22" rx="3" fill="url(#lst-debt-hatch)"/></svg><p id="lst-balance-label"></p></div>
+              <dl class="lst-facts"><div><dt>Hold the original wstETH</dt><dd id="lst-holding"></dd></div><div><dt>Loop minus holding</dt><dd id="lst-difference"></dd></div><div><dt>Health factor · oracle value</dt><dd id="lst-health"></dd></div><div><dt>WETH debt</dt><dd id="lst-debt"></dd></div></dl>
+              <p id="lst-health-note" class="lst-status" role="status"></p>
+              <p id="lst-path-note" class="notice error" hidden></p>
+              <dl class="lst-prices"><div><dt>Conversion rate</dt><dd id="lst-conversion"></dd></div><div><dt>Market sale price</dt><dd id="lst-market"></dd></div><div><dt>Oracle price</dt><dd id="lst-oracle"></dd></div></dl>
+              <p class="fine-print">The discount is a stress applied at the selected endpoint. These balances assume no earlier liquidation. Unwrapping wstETH gives stETH; it does not guarantee an immediate ETH exit.</p>
+            </div>
+          </div>
+          <details id="lst-accounting"><summary>Where the difference comes from</summary><dl id="lst-ledger" class="lst-facts"></dl><p id="lst-break-even" class="body-copy"></p><p class="fine-print">The holding reference keeps your original wstETH in a wallet, earning the same staking growth. It earns no extra collateral lending yield. Rates and prices are assumptions; the comparison excludes exit costs.</p></details>
+          <details id="lst-chart-details"><summary>See health factor across market discounts</summary><figure class="lst-health-chart"><svg id="lst-health-chart" viewBox="0 0 620 230" role="img" aria-label="Health factor under market and conversion-rate oracle assumptions"><path id="lst-chart-boundary" class="lst-boundary"/><path id="lst-chart-market" class="lst-market-line"/><path id="lst-chart-rate" class="lst-rate-line"/><circle id="lst-chart-dot" r="5" class="lst-chart-dot"/><text x="12" y="26" id="lst-chart-top" class="chart-label"/><text x="14" y="198" class="chart-label">0</text><text x="65" y="224" class="chart-label">0% discount</text><text x="480" y="224" class="chart-label">50% discount</text></svg><figcaption id="lst-chart-caption" class="fine-print"></figcaption><p class="fine-print">Solid: market oracle · dashed: conversion-rate oracle · dotted: health factor 1. All other conditions stay fixed; this is a sensitivity chart, not a price history.</p></figure></details>
+          <details id="lst-liquidation" hidden><summary>What could one liquidation take?</summary><p class="body-copy">A liquidator repays some WETH debt and takes wstETH worth that repayment plus a bonus at the assumed oracle price.</p><div class="lst-fields"><div class="scenario-field">
+  <label for="lst-repayPercent">Debt repaid in this event <span>%</span></label>
+  <input id="lst-repayPercent" type="number" min="1" max="100" step="any" value="50" aria-describedby="lst-repayPercent-error">
+  <p id="lst-repayPercent-error" class="field-error" hidden></p>
+</div><div class="scenario-field">
+  <label for="lst-bonus">Liquidation bonus <span>%</span></label>
+  <input id="lst-bonus" type="number" min="0" max="30" step="any" value="3" aria-describedby="lst-bonus-error">
+  <p id="lst-bonus-error" class="field-error" hidden></p>
+</div></div><dl id="lst-liquidation-results" class="lst-facts"></dl><p class="fine-print">One hypothetical event at this endpoint. Remaining debt stays owed; this does not reproduce a protocol’s complete liquidation rules or an earlier event along the path.</p></details>
+          <button id="lst-to-exit" class="button secondary" type="button">Explore the exit →</button>
+        </section>
+        <section id="lst-exit" class="lst-panel card" aria-labelledby="lst-exit-title" hidden>
+          <h2 id="lst-exit-title">The debt has to leave with you</h2>
+          <p class="body-copy">Preview a complete exit to WETH. A temporary flash loan repays the debt before collateral is released; selling the wstETH then settles the flash loan and costs.</p>
+          <div class="lst-two-column"><div id="lst-exit-scene" class="lst-scene" aria-label="Follow the atomic exit"></div><div class="lst-controls">
+            <label class="loan-checkbox"><input id="lst-exitAvailable" type="checkbox" checked aria-describedby="lst-exitAvailable-error"> Assume the flash loan, withdrawal and swap can execute</label><p id="lst-exitAvailable-error" class="field-error" hidden></p>
+            <div class="lst-fields"><div class="scenario-field">
+  <label for="lst-exitCost">Loss on the exit swap <span>%</span></label>
+  <input id="lst-exitCost" type="number" min="0" max="20" step="any" value="0.3" aria-describedby="lst-exitCost-error">
+  <p id="lst-exitCost-error" class="field-error" hidden></p>
+</div>
+<div class="scenario-field">
+  <label for="lst-flashFee">Flash loan fee <span>%</span></label>
+  <input id="lst-flashFee" type="number" min="0" max="5" step="any" value="0.05" aria-describedby="lst-flashFee-error">
+  <p id="lst-flashFee-error" class="field-error" hidden></p>
+</div>
+<div class="scenario-field">
+  <label for="lst-gas">Flat exit cost <span>WETH</span></label>
+  <input id="lst-gas" type="number" min="0" max="100" step="any" value="0.003" aria-describedby="lst-gas-error">
+  <p id="lst-gas-error" class="field-error" hidden></p>
+</div></div>
+            <p class="fine-print">All actions are one assumed atomic transaction at the selected market price. Gas must be available up front; the flat exit cost is deducted from the final proceeds here. The conversion rate is not an instant redemption quote.</p>
+            <p id="lst-exit-status" class="lst-status" role="status"></p>
+            <dl id="lst-exit-outcome" class="lst-facts"></dl>
+          </div></div>
+        </section>
+        <div class="lst-actions"><button id="lst-save" class="button secondary" type="button">Save experiment</button><button id="lst-share" class="button secondary" type="button">Copy LST loop link</button><button id="lst-reset" class="text-button" type="button">Reset LST setup</button></div>
+        <p id="lst-save-status" class="fine-print" role="status"></p><p id="lst-storage" class="fine-print" role="status"></p><p id="lst-share-status" class="fine-print" role="status"></p><input id="lst-share-url" type="text" readonly aria-label="LST loop link" hidden>
+        <details id="lst-methods" class="loan-method card"><summary>How this experiment works</summary>
+          <p>All build rounds happen at the starting conversion rate. wstETH’s staking return changes that rate; additional collateral yield changes the supplied token balance. The two yields are counted separately. APY is an annual growth factor. Borrow APR compounds continuously, with an optional rate change, over a 365-day year.</p>
+          <p>The model tracks ETH-denominated value. A dollar-price change alone cancels out of the collateral-to-debt ratio. A market discount can change sale proceeds without changing an oracle that tracks the conversion rate. A rate-only boundary reached earlier is flagged even if the later health factor recovers.</p>
+          <p>The loop, thresholds and execution costs are hypothetical. Aave e-mode has category-specific rules; Morpho Blue markets have their own collateral, debt asset, oracle and liquidation threshold, and their collateral does not earn lending interest by default. Live rates, protocol caps, oracle limits, slashing events, withdrawal queues and real execution require separate evidence.</p>
+          <p><a href="https://docs.lido.fi/contracts/wsteth/" target="_blank" rel="noopener noreferrer">Lido: how wstETH works ↗</a> · <a href="https://aave.com/help/borrowing/e-mode" target="_blank" rel="noopener noreferrer">Aave: e-mode ↗</a> · <a href="https://docs.morpho.org/learn/concepts/blue/" target="_blank" rel="noopener noreferrer">Morpho: market parameters ↗</a> · <a href="methods.html#lst-loops">Teren’s methods →</a></p>
+        </details>
+      </section>
           <details id="saved-experiments" class="saved-experiments card">
       <summary><strong>Saved experiments</strong> <span id="experiments-count">0 saved</span></summary>
       <p class="body-copy">Save your setup and notes. Reopen it to try a variation, or compare two or three saved experiments.</p>
@@ -648,7 +824,7 @@
       <p id="experiments-status" class="fine-print" role="status"></p>
       <div id="experiments-undo-row" class="experiment-undo" hidden><span id="experiments-undo-copy"></span> <button id="experiments-undo" class="text-button" type="button">Undo remove</button></div>
       <div id="experiments-empty" class="experiment-empty"><h3>No saved experiments yet</h3><p class="body-copy">Set up a liquidity, lending or loop experiment and choose “Save experiment”.</p><div class="experiment-empty-links"><a href="liquidity.html#lp-lab">Open full-range lab →</a><a href="liquidity.html#range-lab">Open range lab →</a></div></div>
-      <div id="experiments-controls" class="experiment-library-controls" hidden><div><label for="experiments-search">Find an experiment</label><input id="experiments-search" type="search" placeholder="Search names or notes" maxlength="100"></div><div><label for="experiments-model">Model</label><select id="experiments-model"><option value="all">All models</option><option value="cp50-v1">V2-style full range</option><option value="cl-range-v1">V3-style price range</option><option value="collateral-loan-v1">Single loan</option><option value="borrowing-loop-v1">Borrowing loop</option></select></div></div>
+      <div id="experiments-controls" class="experiment-library-controls" hidden><div><label for="experiments-search">Find an experiment</label><input id="experiments-search" type="search" placeholder="Search names or notes" maxlength="100"></div><div><label for="experiments-model">Model</label><select id="experiments-model"><option value="all">All models</option><option value="cp50-v1">V2-style full range</option><option value="cl-range-v1">V3-style price range</option><option value="collateral-loan-v1">Single loan</option><option value="borrowing-loop-v1">Borrowing loop</option><option value="lst-loop-v1">Correlated-asset loop</option></select></div></div>
       <p id="experiments-no-match" class="fine-print" hidden>No experiments match this search.</p>
       <ul id="experiments-list" class="experiment-library-list" aria-label="Saved experiments"></ul>
       <div id="experiments-comparison-controls" class="experiment-comparison-controls" hidden><p id="experiments-selection">Select two or three experiments to compare.</p><button id="experiments-compare" class="button secondary" type="button" disabled>Compare selected</button><button id="experiments-clear-selection" class="text-button" type="button" hidden>Clear selection</button></div>

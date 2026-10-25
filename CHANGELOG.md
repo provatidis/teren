@@ -1,5 +1,14 @@
 # Release history
 
+## 1.39.0 · 2026-10-25
+
+- Add a separate wstETH/WETH correlated-loop experiment with directly accessible Build, Hold & stress, and Exit stages. Follow construction and atomic-exit balances without adding borrowed cash to wealth.
+- Separate staking conversion-rate growth, additional collateral lending yield and continuously compounded WETH borrow APR. Support one rate change and flag an earlier rate-only liquidation boundary even if the endpoint recovers.
+- Distinguish market discounts, oracle valuation and a shared ETH dollar price. Compare with holding the exact original wstETH, expose the value bridge and break-even borrow APR, and provide an optional health-factor sensitivity chart and bounded liquidation event.
+- Keep all debt when an exit is unavailable, underfunded or outside the preview’s boundary rules. Compare complete exits after explicit swap, flash and flat costs. Current protocol parameters and execution are not inferred.
+- Add independent drafts, strict share links, Home resumption and named LST experiments in the shared library. Preserve ETH/USDC loops and all recorded liquidity evidence. Keep the four-tool lending strip within narrow screens and show nearby mobile results.
+- Add reference, conservation, boundary, storage and desktop/mobile browser coverage. Update methods, guides and the remaining roadmap.
+
 ## 1.38.0 · 2026-10-25
 
 - Make competing LPs’ range visible alongside A and B. Change its width while keeping capital fixed, or use full-range competition. Show fee shares beside the slider, preserve each batch’s assumptions, and identify inactive competitors. New experiments use an explicit 100% competitor width; this is a teaching choice, not calibrated market data.

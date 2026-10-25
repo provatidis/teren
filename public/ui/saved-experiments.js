@@ -6,7 +6,7 @@ import { downloadBlob } from '../lib/download.js';
 
 export function initSavedExperiments({ labs, onOpen = () => {} }) {
   const $ = id => document.getElementById(id);
-  const saveButtons = { 'cp50-v1': 'scenario', 'cl-range-v1': 'cl', 'collateral-loan-v1': 'loan', 'borrowing-loop-v1': 'loop' };
+  const saveButtons = { 'cp50-v1': 'scenario', 'cl-range-v1': 'cl', 'collateral-loan-v1': 'loan', 'borrowing-loop-v1': 'loop', 'lst-loop-v1': 'lst' };
   let saved = readLibrary(), library = saved.library, temporary = saved.status === 'unavailable';
   let recovery = ['invalid','incompatible'].includes(saved.status), removed = null, editor = null, returnFocus = null;
   const selected = new Set();
@@ -128,7 +128,7 @@ export function initSavedExperiments({ labs, onOpen = () => {} }) {
       checkbox.addEventListener('change', () => {
         const other = library.experiments.find(item => selected.has(item.id));
         if (checkbox.checked && other && experimentFamily(other.model) !== family) {
-          checkbox.checked = false; status('Compare experiments within one topic. Clear the selection to switch topics.', true); return;
+          checkbox.checked = false; status(family === 'correlated' || experimentFamily(other.model) === 'correlated' ? 'Compare LST loops with other LST loops. Clear the selection to switch model families.' : 'Compare experiments within one topic. Clear the selection to switch topics.', true); return;
         }
         if (checkbox.checked && selected.size < 3) selected.add(entry.id); else selected.delete(entry.id);
         $('experiments-comparison').hidden = true; renderSelection();
@@ -155,6 +155,7 @@ export function initSavedExperiments({ labs, onOpen = () => {} }) {
     $('experiments-comparison-context').textContent = comparisonContext(entries);
     $('experiments-comparison-scope').textContent = experimentFamily(entries[0].model) === 'liquidity'
       ? 'Each holding benchmark keeps that experiment’s own starting tokens. Fees are assumed USD cash; gas, incentives and trading paths are excluded. Values use USDC = $1.'
+      : experimentFamily(entries[0].model) === 'correlated' ? 'Hypothetical wstETH/WETH balances before liquidation and exit, with staking and lending growth counted separately. A prior rate-only boundary is shown in the assumptions. Each record keeps its own conditions.'
       : 'Recalculated from saved assumptions, before liquidation. A saved loop reference is retained when reopened; these cards show each main setup. USDC = $1; rates are fixed and real execution is not simulated.';
     $('experiments-comparison-cards').replaceChildren(...entries.map(entry => {
       const { modelName } = experimentView(entry), card = element('article', 'experiment-comparison-card');

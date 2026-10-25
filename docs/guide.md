@@ -246,3 +246,15 @@ These results explain fee sharing under chosen conditions. They do not establish
 
 
 Other LPs occupy one illustrative range, not a measured pool distribution. A batch cannot be added on any exact range edge, or when one of the alternatives has no active LPs. Previous shared links and saved batches keep their full-range assumptions. **Go deeper: arbitrage and changing fee competition** contains an independent three-step price/trade illustration and a JIT diagram; neither changes your experiment. The fee-tier lesson and Methods also link to these explanations.
+
+## Correlated-asset loops
+
+Open [LST loops](https://teren.sh/lending.html#lst-loops) from Home or Lending’s tool strip. This wstETH/WETH experiment is separate from the ETH/USDC borrowing loop. All three stages are directly accessible.
+
+- **Build:** choose rounds and a borrowing fraction. Follow each borrow, purchase and supply action without doing calculations. The summary shows the completed exposure; the step viewer shows its intermediate balances. Starting tokens, conversion rate, swap losses and collateral rules are available in the disclosure.
+- **Hold & stress:** move time, change staking APY and borrow APR, or apply a market discount. The baseline keeps the same original wstETH without borrowing. Optional controls add one borrowing-rate change, separate collateral lending yield, a conversion-rate oracle, and an ETH dollar price. The nearby readout on phones keeps the effect of each change visible. Detailed accounting and a health-factor sensitivity chart are optional.
+- **Exit:** preview selling all collateral into WETH after repaying the original loan with a temporary flash loan. Both debts remain visible until settled. Change swap loss, flash fee, flat exit cost or assumed availability. Blocked exits retain collateral and debt. The after-exit holding reference uses the same swap and flat costs without a flash loan.
+
+The market discount applies at the selected endpoint. A prior boundary caused by the chosen rates is flagged separately; a recovered endpoint is not evidence the loan survived. A liquidation illustration appears when the current endpoint is at or below its boundary.
+
+**Save experiment** keeps exact assumptions and notes in the shared library. Compare LST records with other LST records; their units and benchmark differ from ETH/USDC loans. Conditions are not silently synchronized. Copying a link includes the selected stage. The working draft and Home’s resume link are independent from existing loan and loop drafts. See [model details](lst-loops.md) before interpreting these scenarios as protocol outcomes.
