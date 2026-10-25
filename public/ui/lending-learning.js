@@ -1,4 +1,5 @@
 import { saveLearningLocation } from '../data/learning-location.js';
+import { renderLessonSetup, lendingLessonSetup } from '../lib/lesson-setup.js';
 import { LENDING_LESSONS } from '../learning/lending-essentials.js';
 import { LOOP_LESSONS } from '../learning/borrowing-loops.js';
 import { lendingCase, checkLendingUnderstanding } from '../models/lending-lessons.js';
@@ -15,8 +16,8 @@ import { createLoanConditionScene } from '../lib/loan-condition-scene.js';
 import { createLoanResponseScene } from '../lib/loan-response-scene.js';
 import { createLoopStressScene } from '../lib/loop-stress-scene.js';
 import { focusSceneOutcome, createPredictionPrompt } from '../lib/lesson-scene.js';
-import { newChoiceSeed, predictionFeedback } from '../lib/learning-choices.js';
-import { learningChoices, learningMetric, learningSources, focusLearningFeedback } from '../lib/learning-elements.js';
+import { newChoiceSeed } from '../lib/learning-choices.js';
+import { learningChoices, learningMetric, learningSources, focusLearningFeedback, renderPredictionFeedback } from '../lib/learning-elements.js';
 
 export function initLendingLearning() {
   const $ = id => document.getElementById(id);
@@ -58,7 +59,7 @@ export function initLendingLearning() {
   function clearFeedback() { $('lend-feedback').hidden = true; $('lend-continue').hidden = true; }
   function reveal() {
     draft.revealed = true;
-    predictionFeedbackElement.textContent = predictionFeedback(lesson.predictions, draft.prediction, example.prediction);
+    renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, example.prediction);
     $('lend-metrics').replaceChildren(...course.metrics(lesson.id, example.result).map(items => learningMetric(...items)));
     $('lend-metrics').hidden = visualLesson();
     $('lend-observe').hidden = false;
@@ -105,7 +106,8 @@ export function initLendingLearning() {
     $('lend-own-question').href = course.experiment;
     $('lend-title').textContent = lesson.title;
     $('lend-adds').textContent = lesson.adds;
-    for (const key of ['intro', 'setup', 'question', 'takeaway', 'explanation', 'pitfall', 'reasoning']) $('lend-' + key).textContent = lesson[key];
+    for (const key of ['intro', 'question', 'takeaway', 'explanation', 'pitfall', 'reasoning']) $('lend-' + key).textContent = lesson[key];
+    renderLessonSetup($('lend-setup'), lendingLessonSetup(lesson.id, example));
     const showFlow = visualLesson();
     const conditions = chapter === 'essentials' && lesson.id === 'conditions';
     const responses = chapter === 'essentials' && lesson.id === 'respond';
@@ -118,7 +120,8 @@ export function initLendingLearning() {
     $('lend-adds').hidden = showFlow;
     $('lend-visual').hidden = !showFlow;
     $('lend-money-flow').hidden = !showFlow;
-    $('lend-setup').hidden = showFlow;
+    if (showFlow) $('lend-money-flow').before($('lend-setup'));
+    else $('lend-predict-title').after($('lend-setup'));
     $('lend-predict-card').hidden = showFlow;
     $('lend-explanation').hidden = showFlow && !foundationLesson() && !stress;
     $('lend-observe-label').textContent = showFlow ? 'CONNECT THE IDEA' : '02 · OBSERVE';

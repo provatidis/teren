@@ -31,6 +31,17 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         await navigate(base + route); await ready();
         assert.equal(await evaluate(`document.querySelector('${selector} input').checkVisibility()`), true, route + ': choices are visible immediately');
         assert.equal(await evaluate(`document.querySelector('${selector} input:checked') === null`), true);
+        const setup = await evaluate(`(() => {
+          const field = document.querySelector('${selector}');
+          const section = field.closest('article');
+          const setup = [...section.querySelectorAll('.learn-setup')].find(node => node.checkVisibility());
+          return setup ? { text: setup.textContent, size: parseFloat(getComputedStyle(setup).fontSize),
+            beforeQuestion: setup.getBoundingClientRect().bottom <= field.getBoundingClientRect().top } : null;
+        })()`);
+        assert.ok(setup?.text.length > 60, route + ': the prediction has a visible setup');
+        assert.ok(setup.size >= 15 && setup.beforeQuestion, route + ': readable setup precedes the question');
+        if (id === 'build') assert.match(setup.text, /Borrow 5,000 USDC → buy ETH with all of it → supply/);
+        assert.equal(await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').textContent.includes('scored')`), false);
         assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
         assert.equal(await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').querySelector('button').textContent`), 'Not sure — show me →');
         await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').querySelector('button').focus()`);
@@ -39,6 +50,7 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         assert.equal(await evaluate(`document.getElementById('${result}').hidden`), false, route + ': skip reveals the outcome');
         assert.equal(await evaluate(`document.querySelector('${selector} input:checked') === null`), true, 'Skipping must not invent a prediction');
         assert.doesNotMatch(await text(prefix + '-prediction-feedback'), /Your prediction matches|You expected:/);
+        assert.equal(await evaluate(`document.querySelector('#${prefix}-prediction-feedback > strong').textContent`), 'What happens');
         assert.equal(await evaluate(`document.getElementById('${prefix}-continue').hidden`), true, 'Viewing alone does not complete a lesson');
         if (nonvisual[id]) {
           for (const [group, value] of [['reason', nonvisual[id][0]], ['application', nonvisual[id][1]]]) {

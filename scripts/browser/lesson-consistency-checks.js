@@ -45,10 +45,10 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   await navigate(base + 'learn.html#applied=period-vs-holding');
   await evaluate("new Promise(resolve=>{const check=()=>document.getElementById('learn-applied').getAttribute('aria-busy')==='false'?resolve():setTimeout(check,25);check()})");
-  await choose('applied-prediction','lp'); await click('applied-reveal'); await fill('applied-checkpoint','8');
+  await choose('applied-prediction','can-trail'); await click('applied-reveal'); await fill('applied-checkpoint','8');
   assert.match(await text('applied-metrics'),/−\$0.01/);
   assert.match(await text('applied-explanation'),/At the final question checkpoint[\s\S]*Other checkpoints can have a different result/);
-  assert.match(await text('applied-prediction-feedback'),/At the final checkpoint.*higher value before costs/);
+  assert.match(await text('applied-prediction-feedback'),/Fees can leave the LP behind.*fees narrowly put the LP ahead at the final checkpoint, before costs/);
   await choose('applied-application','hold'); await choose('applied-reason','income'); await click('applied-check');
   assert.match(await text('applied-feedback-copy'),/Fees can be smaller/);
   assert.equal(await text('applied-feedback-title'),'Review your answers.');

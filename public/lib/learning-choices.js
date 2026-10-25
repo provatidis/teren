@@ -24,5 +24,5 @@ export function predictionFeedback(choices, selected, actual, finding) {
   const result = finding || 'In this setup: ' + sentence(choices.find(([id]) => id === actual)[1]);
   if (!expected) return result;
   if (selected === actual) return 'Your prediction matches. ' + result;
-  return 'You expected: ' + sentence(expected) + ' ' + result;
+  return 'The result differs from your prediction. ' + result + ' You expected: ' + sentence(expected);
 }

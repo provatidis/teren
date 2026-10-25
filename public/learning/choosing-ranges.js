@@ -39,20 +39,18 @@ export const MANAGEMENT_LESSONS = Object.freeze([
 export function managementPresentation(result) {
   const {id,variant}=result;
   if(id==='range-width')return {
-    setup:'Narrow range: $1,900–$2,100. Wider range: $1,500–$2,500. Both budgets: $5,000.00. ETH starts at $2,000.00, then moves to '+usd(result.price)+'. USDC = $1.',
     reasoning:variant===2?'Both are active here. What still differs between these positions?':null,
     prediction:'At that price, which position will be inside its range?', predictions:[['wide','Only the wider position'],['both','Both positions'],['none','Neither position']],
     metrics:[['Narrow range',result.narrow.state==='inside'?'Active':'Inactive','$1,900–$2,100'],['Wider range',result.wide.state==='inside'?'Active':'Inactive','$1,500–$2,500'],['Earned fees','Unknown','No fee income is estimated']],
     links:[{label:'Explore the narrow setup in Experiment ↗',scenario:result.narrow},{label:'Explore the wider setup in Experiment ↗',scenario:result.wide}],
     note:'Calculated hypothetical endpoints, with zero assumed fees. The links keep each range’s original funding and shown final price.'};
   if(id==='fee-tiers')return {
-    setup:'Pool A: '+fmt(result.rates[0],2)+'% per swap. Pool B: '+fmt(result.rates[1],2)+'% per swap. Same pair, equal position budgets and the same example day.',
     prediction:'From these fee tiers alone, which position will earn more swap fees?',
     predictions:[['unknown','The fee tiers alone cannot tell us'],['a','Position A'],['b','Position B']],
     metrics:[['Position A fees',result.fees?usd(result.fees[0]):'Unknown',fmt(result.rates[0],2)+'% swap fee tier'],['Position B fees',result.fees?usd(result.fees[1]):'Unknown',fmt(result.rates[1],2)+'% swap fee tier'],['Whole-period profit','Unknown','Token values and costs are not supplied']],links:[],
     note:'Fee totals in variations are supplied teaching facts. They are not calculated from the fee rate, imported data or a forecast.'};
   const held=result.first.pooled.eth===0?'USDC':'ETH';
-  return {setup:'$5,000.00 funded at $2,000.00/ETH. Keep the $1,800–$2,200 range; compare ETH at '+usd(result.prices[0])+' and then '+usd(result.prices[1])+'. USDC = $1.',
+  return {
     prediction:'After the further price move, what happens to the position’s principal value?',predictions:[['falls','It falls'],['same','It stays the same'],['rises','It rises']],
     metrics:[['After the range exit',usd(result.first.lpBeforeFees),'ETH price '+usd(result.prices[0])],['After the further move',usd(result.second.lpBeforeFees),'ETH price '+usd(result.prices[1])],['Token held',held,'Same token quantity at both outside points']],
     links:[{label:'Explore this setup in Experiment ↗',scenario:result.second}],note:'Hypothetical principal before fees, with unchanged liquidity and USDC = $1. No range changes or earned fees are simulated.'};

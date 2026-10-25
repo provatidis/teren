@@ -59,7 +59,7 @@ export function createLendingScene(result, lesson, prediction) {
   const player = createActionPlayer({ id: 'loan-scene', stages: flow.stages, onShow(stage, animate) {
     figure.show(stage, animate); copy.textContent = stage.copy;
   } });
-  element.append(node('p', flow.intro, 'loan-scene-intro'), '\n', prediction, '\n', figure.element, '\n',
+  element.append(prediction, '\n', figure.element, '\n',
     player.element, '\n', copy, '\n', scope, '\n', node('p', flow.note, 'fine-print'));
   return { element, showQuestion() { player.show(flow.questionIndex, false, false); } };
 }

@@ -6,18 +6,19 @@ export function sceneNode(tag, copy, className) {
   return element;
 }
 
-export function createPredictionPrompt(fieldset, { selected, onShow, disabled = false, feedback }) {
+export function createPredictionPrompt(fieldset, { selected, onShow, disabled = false, feedback, button }) {
   const element = sceneNode('div', undefined, 'scene-prediction');
   fieldset.querySelector('legend').classList.add('scene-prediction-question');
-  const show = sceneNode('button', undefined, 'button secondary scene-prediction-show');
+  const show = button || sceneNode('button');
+  show.className = 'button secondary scene-prediction-show';
   show.type = 'button'; show.disabled = disabled;
   const label = hasPrediction => { show.textContent = hasPrediction ? 'See what happens →' : 'Not sure — show me →'; };
   label(Boolean(selected));
   element.addEventListener('change', () => label(Boolean(fieldset.querySelector('input:checked'))));
-  show.addEventListener('click', onShow);
+  show.onclick = onShow;
   element.append(
     sceneNode('p', 'Make a prediction', 'scene-prediction-invite'), '\n', fieldset, '\n',
-    sceneNode('p', 'A guess is enough. Your prediction isn’t scored.', 'fine-print'), '\n', show,
+    show,
   );
   if (feedback) { feedback.textContent = ''; element.append('\n', feedback); }
   return element;

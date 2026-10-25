@@ -1,7 +1,7 @@
 /* Type roles keep explanations readable while preserving the hierarchy of numbers. */
 :root{--type-reading:16px;--type-control:14px;--type-detail:13px;--type-meta:12px}
 .body-copy,.section-heading p,.learn-reading,.learn-results .learn-reading,.learn-deeper-content p{font-size:var(--type-reading);line-height:1.85}
-.fine-print,.notice,.learn-note,.withdraw-box p,.pool-status,.pool-reserves,.position-current-price,.learn-independence,.learn-skill,.learn-setup,.learn-prediction-feedback,.learn-metric-note,.learn-feedback p,.learn-hint,.learn-worked-note,.learn-worked-steps p,.learn-math-note,.learn-reading-sources li p{font-size:var(--type-detail);line-height:1.8}
+.fine-print,.notice,.learn-note,.withdraw-box p,.pool-status,.pool-reserves,.position-current-price,.learn-independence,.learn-skill,.learn-metric-note,.learn-feedback p,.learn-hint,.learn-worked-note,.learn-worked-steps p,.learn-math-note,.learn-reading-sources li p{font-size:var(--type-detail);line-height:1.8}
 .button,.intro .button,.pool-buttons .button,.position-form .primary,.source-tabs button,.lab-switch button,.site-nav a,.product-nav a,.learn-text-button,.learn-continue .button,.learn-explore,.learn-choice,.learn-fieldset legend,.learn-control-label,.learn-width,.learn-answer-label,.learn-sidebar-link{font-size:var(--type-control)}
 .button,.learn-text-button,.scenario-presets button,.cl-range-presets button{min-height:44px}
 .button.secondary{white-space:normal;line-height:1.5}

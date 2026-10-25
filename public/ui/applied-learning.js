@@ -1,10 +1,11 @@
 import { createPredictionPrompt } from '../lib/lesson-scene.js';
+import { renderRecordedLessonSetup } from '../lib/recorded-lesson-setup.js';
 import { saveLearningLocation } from '../data/learning-location.js';
 import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js';
 import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js';
 import { appliedApplication, checkAppliedUnderstanding } from '../lib/applied-applications.js';
-import { newChoiceSeed, validChoiceSeed, predictionFeedback } from '../lib/learning-choices.js';
-import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson } from '../lib/learning-elements.js';
+import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
+import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback } from '../lib/learning-elements.js';
 import { POOL_PITFALLS } from '../learning/pool-pitfalls.js';
 import { readAppliedProgress, saveAppliedProgress } from '../data/applied-progress.js';
 import { createAppliedRecordLoader } from '../data/applied-records.js';
@@ -70,6 +71,8 @@ export function initAppliedLearning() {
     const x = view => 42 + view.durationSeconds / end.durationSeconds * 536;
     const y = price => 168 - (price - domain.bottom) / (domain.top - domain.bottom) * 126;
     const nodes = [node('title', { id: 'applied-chart-title' }, 'Recorded ETH pool prices. The line does not reconstruct the price path between samples.')];
+    const bandTop = Math.max(42, y(start.range.upperPrice)), bandBottom = Math.min(168, y(start.range.lowerPrice));
+    if (bandBottom > bandTop) nodes.push(node('rect', { x: 42, y: bandTop, width: 536, height: bandBottom - bandTop, class: 'applied-range-area' }));
     for (const [visible, price, name] of [[domain.lowerVisible, start.range.lowerPrice, 'Lower bound'], [domain.upperVisible, start.range.upperPrice, 'Upper bound']]) {
       if (visible) nodes.push(node('path', { d: 'M42 ' + y(price) + 'H578', class: 'period-bound' }), node('text', { x: 42, y: y(price) - 8, class: 'chart-label' }, name));
     }
@@ -120,13 +123,14 @@ export function initAppliedLearning() {
     $('applied-inspect').href = new URL('liquidity.html' + record.hash, location.href).href;
     drawChart(index);
   }
-  function reveal() {
+  function reveal(resetCheckpoint = false) {
     if (!period) return;
+    if (resetCheckpoint) draft.checkpoint = question.index;
     draft.revealed = true;
     const finding = lesson.id === 'fees-over-time' ? 'Fees accrued during this period without being collected.'
       : lesson.id === 'between-samples' ? 'The position was active between the two outside-range samples in the question.'
-      : 'At the final checkpoint, ' + (question.prediction === 'lp' ? 'the LP including period fees' : 'holding the starting tokens') + ' has the higher value before costs.';
-    $('applied-prediction-feedback').textContent = predictionFeedback(lesson.predictions, draft.prediction, question.prediction, finding);
+      : 'Fees can leave the LP behind if they do not cover its principal shortfall. In this record, fees narrowly put the LP ahead at the final checkpoint, before costs.';
+    renderPredictionFeedback($('applied-prediction-feedback'), lesson.predictions, draft.prediction, question.prediction, finding);
     $('applied-observe').hidden = false; $('applied-assessment').hidden = false;
     $('applied-reveal').textContent = 'Revisit the recorded result ↓';
     renderCheckpoint(); persist();
@@ -155,6 +159,7 @@ export function initAppliedLearning() {
     if (!id) return;
     saveLearningLocation('learn.html#applied=' + id);
     lesson = APPLIED_LESSONS.find(item => item.id === id); period = null; question = null; application = null;
+    $('applied-setup').hidden = true; $('applied-setup').replaceChildren();
     if (!matchMedia('(max-width: 750px)').matches) {
       const sidebar = document.querySelector('.learn-sidebar'), selected = document.querySelector('[data-applied-id="' + id + '"]');
       const bounds = selected.getBoundingClientRect(), visible = sidebar.getBoundingClientRect();
@@ -187,7 +192,13 @@ export function initAppliedLearning() {
       $('applied-reveal').disabled = !period; $('applied-reveal').textContent = 'Reveal the recorded result →'; persist();
     });
     choices('applied-reasons', 'applied-reason', lesson.reasons, draft.reason, value => { draft.reason = value; clearFeedback(); persist(); });
-    predictionPrompt = createPredictionPrompt(predictionField, { selected: draft.prediction, disabled: true, onShow: () => $('applied-reveal').click() });
+    predictionPrompt = createPredictionPrompt(predictionField, {
+      selected: draft.prediction, disabled: true, button: $('applied-reveal'),
+      onShow: () => {
+        if (!period) { activate(true); return; }
+        reveal(true); focusTitle('applied-observe-title');
+      },
+    });
     $('applied-prediction-home').replaceChildren(predictionPrompt);
     $('applied-reveal').disabled = true; $('applied-reveal').textContent = 'Loading the recorded case…';
     $('applied-source').textContent = 'Opening this exercise’s bundled historical case.';
@@ -198,6 +209,7 @@ export function initAppliedLearning() {
       const record = await loadRecord(lesson.caseId);
       if (token !== revision) return;
       period = record; question = appliedQuestion(period, id); application = appliedApplication(id, question);
+      renderRecordedLessonSetup($('applied-setup'), period, lesson, question); $('applied-setup').hidden = false;
       $('applied-application-context').textContent = application.context;
       $('applied-application-question').textContent = application.question;
       $('applied-hint-text').textContent = lesson.takeaway + ' ' + application.hint;
@@ -211,7 +223,7 @@ export function initAppliedLearning() {
         button.textContent = item.label + (item.index === question.index ? ' · Question' : '');
         button.addEventListener('click', () => { draft.checkpoint = item.index; renderCheckpoint(); persist(); }); return button;
       }));
-      $('applied-reveal').textContent = 'Reveal the recorded result →'; $('applied-reveal').disabled = false;
+      $('applied-reveal').textContent = draft.prediction ? 'See what happens →' : 'Not sure — show me →'; $('applied-reveal').disabled = false;
       predictionPrompt.querySelector('button').disabled = false;
       $('applied-load-status').textContent = 'Record validated. Make a prediction or open the result directly.';
       if (draft.revealed) { reveal(); if (checkAppliedUnderstanding(question, application, draft.reason, draft.application).passed) check(false); }
@@ -221,7 +233,6 @@ export function initAppliedLearning() {
       $('applied-load-status').textContent = error.message;
       $('applied-source').textContent = 'The bundled record is unavailable. Your saved answers are retained.';
       $('applied-reveal').textContent = 'Retry loading the record →'; $('applied-reveal').disabled = false;
-      predictionPrompt.querySelector('button').disabled = true;
     } finally { if (token === revision) $('learn-applied').setAttribute('aria-busy', 'false'); }
   }
   APPLIED_LESSONS.forEach((item, i) => {
@@ -232,7 +243,6 @@ export function initAppliedLearning() {
     const state = document.createElement('span'); state.className = 'learn-step-state'; copy.append(title, ' ', state); link.append(number, ' ', copy); li.append(link); $('applied-lesson-list').append(li);
     link.addEventListener('click', () => { if (matchMedia('(max-width: 750px)').matches) $('learn-course').open = false; });
   });
-  $('applied-reveal').addEventListener('click', () => { if (!period) { activate(true); return; } reveal(); focusTitle('applied-observe-title'); });
   $('applied-checkpoint').addEventListener('input', () => { if (!period) return; draft.checkpoint = Number($('applied-checkpoint').value); renderCheckpoint(); persist(); });
   $('applied-return-question').addEventListener('click', () => { draft.checkpoint = question.index; renderCheckpoint(); persist(); });
   $('applied-answer').addEventListener('input', () => { draft.answer = $('applied-answer').value; $('applied-calculation-feedback').textContent = ''; $('applied-answer').setAttribute('aria-invalid', 'false'); persist(); });

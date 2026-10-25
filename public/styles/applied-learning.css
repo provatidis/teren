@@ -13,6 +13,20 @@
 .applied-checkpoint-heading [data-state=above],.applied-checkpoint-heading [data-state=below]{color:#f2ca85}
 .applied-figure{margin:24px 0}.applied-figure svg{display:block;width:100%;height:auto}.applied-figure figcaption{font-size:13px;line-height:1.8;color:var(--muted);margin-top:12px}
 .applied-price-line{stroke:var(--accent);stroke-width:2;fill:none;stroke-dasharray:4 4}.applied-figure .period-sample[data-selected=true]{stroke:var(--text);stroke-width:2}
+.applied-range-area { fill: var(--accent); opacity: .09; }
+.applied-start-figure { margin: 20px 0; padding: 0 4px; }
+.applied-start-figure figcaption { font-size: 15px; font-weight: 600; line-height: 1.6; }
+.applied-start-track { height: 24px; position: relative; margin: 20px 0 12px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 4px; }
+.applied-start-band { position: absolute; height: 100%; background: var(--highlight); border-left: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+.applied-start-marker { position: absolute; top: -7px; bottom: -7px; width: 3px; transform: translateX(-50%); background: var(--text); }
+.applied-start-marker::before { content: ''; position: absolute; top: -5px; left: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--text); }
+.applied-start-bounds { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; font-size: 14px; line-height: 1.7; }
+.applied-start-key { font-size: 14px; line-height: 1.7; color: var(--muted); margin: 12px 0 0; }
+.applied-sample-preview { border-left: 3px solid var(--accent); padding-left: 14px; font-size: 14px; line-height: 1.7; }
+.applied-sample-preview p { margin: 8px 0; }
+#applied-source { overflow-wrap: anywhere; }
+#applied-chart .chart-label { font-size: 15px; }
+@media (max-width: 750px) { #applied-chart .chart-label { font-size: 24px; } }
 .applied-lesson .learn-metrics{margin:24px 0}.applied-lesson .learn-metric-note{font-size:13px}.applied-lesson .learn-metric .label{font-size:14px}
 .applied-interval{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin:24px 0}.applied-interval h4{font-size:15px;margin:0 0 10px}.applied-interval p{font-size:14px;line-height:1.9;color:var(--muted);margin:0;overflow-wrap:anywhere}
 .applied-handoffs{display:flex;flex-wrap:wrap;gap:16px;margin:24px 0 12px}.applied-handoffs a{font-size:14px;color:var(--accent);line-height:1.8}

@@ -42,7 +42,6 @@
 .learn-experiment,.learn-results,.learn-assessment,.learn-share{margin-top:20px}
 .learn-experiment .card-heading{gap:12px}
 .learn-text-button{background:none;border:0;padding:8px 0;color:var(--accent);font-size:11px;text-align:left}
-.learn-setup{font-size:12px;line-height:1.9;color:var(--muted);margin:16px 0 24px}
 .learn-controls{display:grid;gap:24px;margin-bottom:26px}
 .learn-control-label{display:flex;justify-content:space-between;gap:12px;font-size:12px;margin-bottom:16px}
 .learn-control output{color:var(--accent);font-variant-numeric:tabular-nums}
@@ -58,7 +57,6 @@
 .learn-choice input{accent-color:var(--accent);margin:4px 0 0;flex-shrink:0}
 .learn-experiment-footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:10px;color:var(--muted);border-top:1px solid var(--border);padding-top:16px;margin-top:16px}
 .learn-results h3,.learn-assessment h3,.learn-share h3{font-size:20px;letter-spacing:-.5px;scroll-margin-top:24px}
-.learn-prediction-feedback{font-size:12px;line-height:1.8;color:var(--accent);margin:14px 0 22px}
 .learn-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .learn-metric{min-width:0}
 .learn-metric strong{display:block;margin:12px 0 8px;font-size:clamp(18px,2vw,24px);font-weight:500;letter-spacing:-.5px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
@@ -121,7 +119,6 @@
  .learn-metric:last-child{border:0;padding-bottom:0}
  .learn-metric strong{margin:0;font-size:21px;text-align:right}
  .learn-metric-note{grid-column:1/-1}
- .learn-setup{font-size:11px}
  .learn-width{align-items:flex-start;flex-direction:column}
  .learn-width select{width:100%}
  .learn-bar-label{font-size:10px}

@@ -36,6 +36,8 @@ For a local browser smoke test, install Chromium or set `CHROMIUM_BIN` to its ex
 
 Set `TEST_BASE_URL` to a deployed site or a local server with a project subpath to test that target instead of starting the Node server. The browser smoke test checks that the home link, scripts, styles, and swaps work at that base URL.
 
+For a focused lesson check, `BROWSER_CHECKS=predictions npm run test:browser` exercises all twenty starting setups, prediction controls, keyboard skipping and progress restoration at desktop and mobile sizes. The full suite remains the release gate.
+
 Run `npm run build` before publication. The dependency-free builder hashes every JS/CSS asset after rewriting its dependencies, flattens plain local CSS imports in cascade order with nested URL rebasing, then rewrites HTML entries and preloads each entry’s transitive module graph. Unsupported CSS import forms fail before output is replaced. Shared dependencies keep one URL and identity. Source imports remain canonical and have no release queries; the old hand-maintained stamper is removed. `dist/build-manifest.json` identifies the release and every output asset. Original source paths remain as compatibility aliases for previously cached entries. An old open tab may require a reload after deployment if its earlier hashed assets are no longer published. Hashes prevent mixing changed dependencies within the new build; this is not indefinite retention of older releases. Storage keys and model versions are independent of asset URLs.
 
 ## Focused workspaces and historical records
@@ -51,6 +53,7 @@ The period model lives in `public/models/fixed-position-period.js`; record valid
 - public/models/: pure hypothetical calculations, lesson experiments and exact protocol/period arithmetic. They do not read the DOM, browser storage or network.
 - public/data/: deployment configuration, read-only Uniswap v2/v3 adapters, snapshot/period schemas, saved experiments, learning progress and temporary Learn-return storage.
 - public/lib/: compatible scenario links, exports, formatting and rendering utilities.
+- public/lib/lesson-setup.js: shared lesson setup presentation; balances come from the selected lesson inputs and results. public/lib/recorded-lesson-setup.js introduces validated historical positions without inferring intermediate price paths. Keep required context before predictions when adding or changing scenes.
 - public/learning/: essential and applied lesson definitions, optional deeper reading and the eleven-example progression.
 - public/examples/: bundled pool/position snapshots, three unchanged-position historical cases and the matched-week comparison with collections; these open without RPC requests.
 - public/styles/: shared foundation and components followed by feature styles. public/styles.css preserves the existing cascade order.

@@ -66,7 +66,7 @@ export async function checkLoanResponseLesson({ evaluate, click, fill, text, nav
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
   assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
   await choose('prediction', 'add'); await click('lend-reveal');
-  assert.match(await text('lend-prediction-feedback'), /^You expected:/);
+  assert.match(await text('lend-prediction-feedback'), /^The result differs from your prediction\./);
   await choose('reason', 'debt'); await choose('application', 'none'); await click('lend-check');
   await reload();
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');

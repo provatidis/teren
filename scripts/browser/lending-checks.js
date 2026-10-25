@@ -75,7 +75,7 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
     assert.equal(await evaluate("document.getElementById('lending-experiment').hidden"), true);
     assert.equal(await evaluate("document.querySelectorAll('#lending-learn input[type=number]').length"), 0);
     await choose('prediction', prediction); await click('lend-reveal');
-    assert.match(await text('lend-prediction-feedback'), /^You expected:/);
+    assert.match(await text('lend-prediction-feedback'), /^The result differs from your prediction\./);
     assert.ok((await text('lend-metrics')).includes(metric));
     await click('lend-check');
     assert.equal(await text('lend-feedback-title'), 'Review your answers.');

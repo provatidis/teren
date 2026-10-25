@@ -1,4 +1,13 @@
-import { orderedLearningChoices } from './learning-choices.js';
+import { orderedLearningChoices, predictionFeedback } from './learning-choices.js';
+
+export function renderPredictionFeedback(element, choices, selected, actual, finding) {
+  const copy = predictionFeedback(choices, selected, actual, finding);
+  const hasPrediction = choices.some(([id]) => id === selected);
+  const heading = hasPrediction ? copy.slice(0, copy.indexOf('.') + 1) : 'What happens';
+  const title = document.createElement('strong'); title.textContent = heading;
+  const detail = document.createElement('span'); detail.textContent = hasPrediction ? copy.slice(heading.length).trim() : copy;
+  element.replaceChildren(title, ' ', detail);
+}
 
 export function learningChapter(chapter, completed, total) {
   document.getElementById('learn-current-chapter').textContent = chapter;

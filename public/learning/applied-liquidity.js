@@ -16,7 +16,7 @@ export const APPLIED_LESSONS = Object.freeze([
   {
     id: 'between-samples', caseId: 'range-return', title: 'Look between outside-range samples', short: 'Exits and returns',
     adds: 'Add a range exit, then activity between recorded samples.',
-    intro: 'This second position leaves its range and later returns. Focus on one interval whose sampled endpoints are both outside. Predict what those two observations can tell you about the time between them.',
+    intro: 'Look at two recorded snapshots of this position. Both show a price outside its range. Consider what those observations can tell you about the time between them.',
     prediction: 'Both sampled endpoints are outside the range. Could the position have been active between them?',
     predictions: [['possible', 'Yes — the sampled endpoints do not describe the whole interval'], ['none', 'No — two outside endpoints prove it stayed outside']],
     question: 'Between the two question checkpoints, how many seconds were recorded in range? Enter a whole number of seconds.',
@@ -29,9 +29,9 @@ export const APPLIED_LESSONS = Object.freeze([
   {
     id: 'period-vs-holding', caseId: 'range-return', title: 'Explain the period’s result', short: 'Compare with holding',
     adds: 'Combine principal, period fees and the original holding basket.',
-    intro: 'Keep the same exit-and-return case and examine its final checkpoint. Compare the LP’s principal plus newly earned fee tokens with holding the exact principal tokens from the first checkpoint.',
-    prediction: 'At the end of this recorded period, which has the higher value before costs?',
-    predictions: [['lp', 'The LP, including period fees'], ['hold', 'Holding the original principal tokens']],
+    intro: 'Start with the position shown below. Consider what earning fees tells us, then examine the record to compare principal plus new fees with holding the same starting tokens.',
+    prediction: 'Could this position earn fees and still finish below holding its starting tokens?',
+    predictions: [['can-trail', 'Yes — its total value could still be lower'], ['fees-win', 'No — earning fees would put its total value ahead']],
     question: 'At the final question checkpoint, what is LP minus holding in USD? Use two decimal places; enter a negative number if the LP trails.',
     reasoning: 'What conclusion does this comparison support?',
     reasons: [['basket', 'The stated period and starting tokens, before gas and incentives.'], ['forecast', 'The return expected if this position is held for another period.'], ['income', 'The position’s fee income compared with its starting dollar budget.']],
