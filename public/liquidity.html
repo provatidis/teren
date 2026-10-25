@@ -47,7 +47,7 @@
     </section>
     <div id="workspace-tools" class="workspace-tools">
       <button id="workspace-tools-toggle" class="workspace-tools-toggle" type="button" aria-expanded="false" aria-controls="workspace-tool-links"><span id="workspace-tools-label">Explore experiment tools</span><span aria-hidden="true">⌄</span></button>
-    <nav id="workspace-tool-links" class="workspace-links" aria-label="Experiment tools"><a href="#lp-lab" data-workspaces="experiment">Full-range lab</a><a href="#range-lab" data-workspaces="experiment">Range lab</a><a href="#example-library" data-workspaces="experiment">Examples</a><a href="#saved-experiments" data-workspaces="experiment">Saved experiments</a><a href="#pool-lab" data-workspaces="inspect" hidden>V2 pool snapshot</a><a href="#position-lab" data-workspaces="inspect" hidden>V3 position</a><a href="#historical-case" data-workspaces="experiment inspect replay">Historical cases</a><a href="#swap-sandbox" data-workspaces="experiment mechanics">Pool mechanics</a><a href="#experiment" data-workspaces="inspect mechanics replay" hidden>Back to experiments</a></nav>
+    <nav id="workspace-tool-links" class="workspace-links" aria-label="Experiment tools"><a href="#lp-lab" data-workspaces="experiment">Full-range lab</a><a href="#range-lab" data-workspaces="experiment width">Range lab</a><a href="#compare-widths" data-workspaces="experiment width">Compare widths</a><a href="#example-library" data-workspaces="experiment">Examples</a><a href="#saved-experiments" data-workspaces="experiment">Saved experiments</a><a href="#pool-lab" data-workspaces="inspect" hidden>V2 pool snapshot</a><a href="#position-lab" data-workspaces="inspect" hidden>V3 position</a><a href="#historical-case" data-workspaces="experiment inspect replay width">Historical cases</a><a href="#swap-sandbox" data-workspaces="experiment mechanics">Pool mechanics</a><a href="#experiment" data-workspaces="inspect mechanics replay width" hidden>Back to experiments</a></nav>
     </div>
     <div id="experiment-workspace" class="app-workspace">
     <div id="liquidity-labs" class="lab-group">
@@ -219,6 +219,7 @@
           <details id="cl-card-preview" class="card result-card-preview cl-card-preview" hidden><summary>Your range result card</summary><img id="cl-card-image" alt="Range result card with price boundaries, starting allocation, assumptions and the three strategy outcomes."><a id="cl-image-download" class="button secondary" download="teren-range-cl-range-v1.png">Download PNG</a></details>
         </div>
       </div>
+      <p class="period-reading"><a href="#compare-widths">Compare widths with the same starting mix →</a></p>
       <details id="cl-comparison-card" class="card cl-comparisons"><summary>Compare prices at the edges</summary><p class="body-copy">Select a row to explore it. Each row keeps the same range, investment and separate fee assumptions.</p><p class="fine-print table-scroll-hint">Swipe or scroll sideways to see every column.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Range comparison table"><table role="table" class="scenario-table cl-table"><caption class="sr-only">Concentrated range outcomes at key future prices</caption><thead><tr role="row"><th scope="col">Future ETH price</th><th scope="col">Range status</th><th scope="col">Hold starting mix</th><th scope="col">V2-style 50/50 LP</th><th scope="col">Your range LP</th><th scope="col">Range LP minus holding</th></tr></thead><tbody id="cl-comparisons"></tbody></table></div></details>
       <details class="model-details"><summary>How this range model works</summary><div>
         <p>Prices are USD per ETH, with USDC fixed at $1. The starting range determines your token mix; concentrated positions do not always begin 50/50. Holding keeps those exact starting tokens. The full-range LP invests the same amount in a separate 50/50 position.</p>
@@ -253,6 +254,84 @@
       <section id="experiments-comparison" class="experiment-comparison" aria-labelledby="experiments-comparison-title" tabindex="-1" hidden><div class="experiment-comparison-heading"><h3 id="experiments-comparison-title">Compare saved experiments</h3><button id="experiments-close-comparison" class="text-button" type="button">Close comparison</button></div><p id="experiments-comparison-context" class="experiment-comparison-context"></p><p id="experiments-comparison-scope" class="fine-print">Each holding benchmark keeps that experiment’s own starting tokens. Fees are assumed USD cash; gas, incentives and trading paths are excluded. Values use USDC = $1.</p><div id="experiments-comparison-cards" class="experiment-comparison-cards"></div></section>
     </details>
     </div>
+    </div>
+    <div id="width-workspace" class="app-workspace" hidden>
+      <section id="compare-widths" class="card width-comparison" aria-labelledby="width-title">
+        <h2 id="width-title">Two ranges, one starting basket</h2>
+        <p class="body-copy">Start with the same 50/50 basket by value. Move the price and watch each range exchange ETH and USDC.</p>
+        <p id="width-notice" class="fine-print" role="status"></p>
+        <form id="width-form" novalidate>
+          <details id="width-setup" class="model-details">
+            <summary>Shared starting setup <span id="width-setup-label"></span></summary>
+            <div class="width-setup-fields">
+              <div class="scenario-field"><label for="width-capital">Capital per position · USD</label><input id="width-capital" type="number" min="1" max="1000000000" step="any" value="5000" aria-describedby="width-capital-error"><p id="width-capital-error" class="field-error" hidden></p></div>
+              <div class="scenario-field"><label for="width-start">Starting ETH price · USD</label><input id="width-start" type="number" min="1" max="1000000" step="any" value="2000" aria-describedby="width-start-error"><p id="width-start-error" class="field-error" hidden></p></div>
+            </div>
+          <div class="width-common-start"><p id="width-starting-tokens"></p><div class="width-mix" role="img" aria-label="Both start with 50% ETH and 50% USDC by value"><span class="width-eth"></span><span class="width-usdc"></span></div><p class="width-token-key"><span><i class="allocation-swatch allocation-swatch-eth" aria-hidden="true"></i> ETH · 50%</span><span><i class="allocation-swatch allocation-swatch-usdc" aria-hidden="true"></i> USDC · 50%</span></p></div>
+          </details>
+          <div class="width-settings">
+            <div class="scenario-field"><label for="width-a">Range A width · %</label><input id="width-a" type="number" min="1" max="400" step="any" value="20" aria-describedby="width-a-error width-definition"><p id="width-a-error" class="field-error" hidden></p></div>
+            <div class="scenario-field"><label for="width-b">Range B width · %</label><input id="width-b" type="number" min="1" max="400" step="any" value="100" aria-describedby="width-b-error width-definition"><p id="width-b-error" class="field-error" hidden></p></div>
+          </div>
+          <p id="width-definition" class="fine-print">Width is the total price span, measured against the starting ETH price.</p>
+          <div class="scenario-field width-price-field"><label for="width-price">Compare at this ETH price · USD</label><input id="width-price" type="number" min="0.01" max="10000000" step="any" value="2400" aria-describedby="width-price-error"><p id="width-price-error" class="field-error" hidden></p></div>
+          <p id="width-error" class="field-error" role="alert"></p>
+        </form>
+        <div id="width-results">
+          <figure class="width-bands-figure">
+            <svg id="width-bands" viewBox="0 0 600 150" role="img" aria-labelledby="width-bands-title">
+              <title id="width-bands-title">Both ranges on the same price scale</title>
+              <text x="12" y="43" class="chart-label">A</text><text x="12" y="93" class="chart-label">B</text>
+              <path d="M70 38H570 M70 88H570" class="width-track"/>
+              <rect id="width-band-a" y="24" height="28" class="width-band width-band-a"/>
+              <rect id="width-band-b" y="74" height="28" class="width-band width-band-b"/>
+              <path id="width-start-marker" class="width-start-marker"/><path id="width-price-marker" class="width-price-marker"/>
+              <text id="width-scale-low" x="70" y="138" class="chart-label"></text><text id="width-scale-high" x="570" y="138" text-anchor="end" class="chart-label"></text>
+            </svg>
+            <figcaption class="fine-print">Same price scale · solid vertical line: selected price · dotted line: starting price.</figcaption>
+          </figure>
+          <div class="width-price-controls">
+            <label for="width-price-slider">Move the same price for both ranges</label>
+            <input id="width-price-slider" type="range" min="0" max="1000" step="1" value="500">
+            <p id="width-current" class="width-current" aria-live="polite"></p>
+            <details class="width-edges"><summary>Choose a range edge or return to the start</summary><div id="width-price-shortcuts" class="width-shortcuts" role="group" aria-label="Compare at a range boundary">
+              <button type="button" data-width-price="start">Starting price</button><button type="button" data-width-price="a-lower">A lower edge</button><button type="button" data-width-price="a-upper">A upper edge</button><button type="button" data-width-price="b-lower">B lower edge</button><button type="button" data-width-price="b-upper">B upper edge</button>
+            </div></details>
+          </div>
+          <p id="width-holding" class="width-holding"></p>
+          <div id="width-cards" class="width-cards"></div>
+          <p id="width-takeaway" class="width-takeaway"></p>
+          <p class="fine-print">A narrower range concentrates more liquidity while active. Whether it earns enough extra fees depends on swaps, competing liquidity and time in range. These targets exclude costs; earnings are not estimated.</p>
+          <details id="width-chart-details" class="model-details">
+            <summary>Compare the gap against holding across prices</summary>
+            <figure class="width-gap-figure">
+              <figcaption>LP principal minus holding · before fees</figcaption>
+              <p class="width-legend"><span>A · solid line</span><span>B · dashed line</span></p>
+              <svg id="width-gap-chart" viewBox="0 0 600 230" role="img" aria-labelledby="width-gap-title">
+                <title id="width-gap-title">Gap against the shared holding basket</title>
+                <path d="M105 28H570" class="width-track"/><text x="8" y="32" class="chart-label">$0</text>
+                <text id="width-gap-min" x="8" y="185" class="chart-label"></text>
+                <path id="width-gap-a" class="width-gap-line"/><path id="width-gap-b" class="width-gap-line width-gap-b"/>
+                <circle id="width-gap-dot-a" r="5" class="width-dot-a"/><circle id="width-gap-dot-b" r="5" class="width-dot-b"/>
+                <text id="width-gap-low" x="105" y="220" class="chart-label"></text><text id="width-gap-high" x="570" y="220" text-anchor="end" class="chart-label"></text>
+              </svg>
+              <p class="fine-print">Each point is a separate possible price outcome. This is not a price path or a record of earned fees.</p>
+            </figure>
+          </details>
+        </div>
+        <div class="width-actions"><button id="width-share" type="button" class="button secondary">Share this comparison</button><button id="width-reset" type="button" class="text-button">Reset comparison</button></div>
+        <div id="width-share-result" hidden><label for="width-share-url">Comparison link</label><input id="width-share-url" type="text" readonly><p id="width-share-status" class="fine-print" role="status"></p></div>
+        <p id="width-save-status" class="fine-print" role="status"></p>
+        <details class="model-details"><summary>What stays equal, and what this model assumes</summary><div class="period-reading">
+          <p>Both positions use the same capital, starting ETH price, 50/50 token basket and comparison price. Their lower and upper bounds have the same geometric center. Changing a width changes only those bounds and the resulting liquidity.</p>
+          <p>To preserve the starting mix, the upper bound is the starting price multiplied by a factor, and the lower bound is divided by that factor. The distances above and below the starting price are slightly different in dollars. A 20% width is the total span, not ±20%.</p>
+          <p>Positions keep their initial liquidity. Fees are zero in the principal results; fee targets are hypothetical USD cash needed to match the common holding basket. The model assumes USDC = $1 and excludes gas, rebalancing, incentives, tick spacing and on-chain rounding.</p>
+          <p>Opening A or B in the range lab carries its exact bounds and selected price, with zero assumed fees. That starts a separate experiment which you can save or edit.</p>
+          <p><a href="https://blog.uniswap.org/uniswap-v3-math-primer-2" target="_blank" rel="noopener noreferrer">Uniswap liquidity math ↗</a> · <a href="methods.html" target="_blank" rel="noopener noreferrer">Teren methods ↗</a></p>
+        </div></details>
+        <p class="period-reading"><a href="#fee-comparison">Inspect two recorded positions over the same week →</a></p>
+        <p class="period-reading"><a href="learn.html#manage=range-width">Learn how range width changes a position →</a></p>
+      </section>
     </div>
     <div id="inspect-workspace" class="app-workspace" hidden>
     <section id="pool-lab" class="pool-section card" aria-label="Research snapshots">
@@ -505,7 +584,7 @@
             <p class="fine-print">Lines join daily samples. Fee tokens use each day’s ETH price, so their dollar value can fall.</p>
           </figure>
           <p class="matched-reading">Fees, the comparison with holding, and dollar change are separate outcomes. Results are before gas and incentives.</p>
-          <p class="fine-print">The starting mixes differ. Each position is compared with holding its own tokens; all percentages use its own starting capital.</p>
+          <p class="fine-print">The starting mixes differ. Each position is compared with holding its own tokens; all percentages use its own starting capital.</p><p class="period-reading"><a href="#compare-widths">Test width with the same starting mix →</a></p>
           <div id="comparison-mobile-summary"></div>
           <div id="comparison-cards" class="matched-cards"></div>
           <details class="model-details period-details">

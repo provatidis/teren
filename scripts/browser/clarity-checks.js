@@ -43,7 +43,7 @@ export async function checkMobileTools({ evaluate, click, navigate, base, call }
     assert.equal(await evaluate("document.querySelector('.workspace-links').getClientRects().length"), 0);
     await click('workspace-tools-toggle');
     assert.equal(await evaluate("document.getElementById('workspace-tools-toggle').getAttribute('aria-expanded')"), 'true');
-    assert.equal(await evaluate("Array.from(document.querySelectorAll('.workspace-links a')).filter(a=>a.getClientRects().length).length"), 6);
+    assert.equal(await evaluate("Array.from(document.querySelectorAll('.workspace-links a')).filter(a=>a.getClientRects().length).length"), 7);
     await evaluate("document.querySelector('.workspace-links a[href=\"#range-lab\"]').click()");
     assert.equal(await evaluate("document.getElementById('workspace-tools-toggle').getAttribute('aria-expanded')"), 'false');
     assert.equal(await evaluate("document.getElementById('lab-range-tab').getAttribute('aria-selected')"), 'true');

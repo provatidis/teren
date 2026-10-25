@@ -52,6 +52,16 @@ Shared links use the versioned cl-range-v1 fragment and all seven inputs (invest
 
 **Use in range lab** seeds the theoretical setup with the existing v2 snapshot's reserve ratio, a fresh range and zero fee assumptions. The v3 snapshot source separately reads an actual position and its tick-derived range; **Explore this position's range** applies its recorded principal to a new theoretical setup. Already collectable tokens are excluded from both strategies in that projection. Historical period accounting is available in the separate fixed-position case described below.
 
+## Controlled range widths
+
+`cl-width-v1` reuses `cl-range-v1` with zero fees. Both positions have the same capital C, starting price P and endpoint price. Their initial basket is exactly C/(2P) ETH and C/2 USDC, and both use that common holding benchmark. The only position-specific input is width.
+
+Width w is the total price span divided by the starting price, expressed as a percentage. Set s = w/100 and f = (√(s² + 4) + s)/2. The bounds are P/f and P×f. Their product is P² and their distance is P×s. This geometric centering makes both initial token values equal for any supported width; ±w% arithmetic bounds would change the initial mix. Bounds are continuous and do not apply protocol tick spacing or integer rounding.
+
+The selected price determines principal token amounts through the existing range model. Fee target = max(0, shared holding value − LP principal). Dollar change compares principal with starting capital. Equal widths give identical outcomes, including at either boundary; exchanging the A/B widths exchanges their results. The chart compares separate hypothetical endpoints before fees. It does not reconstruct a trading path, time active or earned fees. Gas, incentives and rebalancing remain outside this experiment.
+
+The allowed total widths are 1–400%, starting ETH prices $1–$1,000,000, capital $1–$1 billion and comparison prices $0.01–$10 million. These bounds keep the generated ranges within the existing model limits. Native slider steps are a UI convenience; exact-price entry, boundary shortcuts and shared links retain numeric precision.
+
 ## Liquidity scenario lab
 
 Enter an initial investment, starting ETH price, future ETH price, and an optional total dollar amount of fee income earned by the position. Results include:
