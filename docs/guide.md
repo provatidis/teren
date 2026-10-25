@@ -1,5 +1,9 @@
 # Using Teren
 
+[Project overview](../README.md) · [Model assumptions](models.md) · [Current review](review.md)
+
+Jump to [single loans](#lending-supply-borrow-change-conditions-respond), [ETH/USDC loops](#borrowing-loops-build-change-conditions-unwind), [LST loops](#correlated-asset-loops), [controlled widths](#compare-widths-with-a-common-starting-mix), [fee flow](#follow-the-fees), [recorded cases](#historical-cases-fees-through-a-recorded-period), [lessons](#learn-liquidity-essentials) or [saved experiments](#saved-experiments). Each tool is available directly.
+
 ## Start from Home
 
 Home introduces Liquidity and Lending. **Open the lab** and **Learn step by step** have equal prominence; every lesson and tool stays directly accessible. **Continue experimenting** restores the last valid assumptions edited or saved in this browser, independently of lesson progress. Its local bookmark contains inputs, not recorded provenance; use named saves to retain a source snapshot. **Your saved experiments** opens the shared library. Phones have a shortcut to each topic above the cards. The Teren logo returns Home, and **Continue learning** reopens the most recently visited lesson in this browser after it has been opened in this release. It is a navigation bookmark, not a completion mark.
@@ -140,9 +144,15 @@ These are fixed-position records checked against chain reads and collect simulat
 
 ## Saved experiments
 
-Choose **Save experiment** in a liquidity, single-loan or borrowing-loop lab to keep its model, exact assumptions, name and optional notes. One shared library is available from both topics. **Duplicate as variation** creates an independent named copy with the same assumptions and notes; open it to explore changes and save a new setup when ready. The [Saved experiments library](https://teren.sh/liquidity.html#saved-experiments) can search names/notes, filter by model, edit names and notes, and reopen any setup. Reopening loads a working copy; input edits leave the original record intact, and saving again creates a variation. Removal has an Undo action until another record is removed or the tab reloads.
+Choose **Save experiment** in a liquidity, single-loan, ETH/USDC-loop or LST-loop lab to keep its model, exact assumptions, name and optional notes. One shared library is available from both topics. **Duplicate as variation** creates an independent named copy with the same assumptions and notes; open it to explore changes and save a new setup when ready. The [Saved experiments library](https://teren.sh/liquidity.html#saved-experiments) can search names/notes, filter by model, edit names and notes, and reopen any setup. Reopening loads a working copy; input edits leave the original record intact, and saving again creates a variation. Removal has an Undo action until another record is removed or the tab reloads.
 
-Select two or three records from the same topic to compare. Lending cards show assets minus debt before liquidation, debt and health factor; their context identifies differing capital, market conditions or interest rules. Loan cash remains in the wallet while loop borrowing buys ETH. These saved comparisons retain their individual assumptions; the loop lab provides the shared-condition comparison. Outcomes are recalculated from the saved model inputs, rather than storing potentially stale derived results. The comparison shows each LP value, holding value and difference, with expandable assumptions and notes. Its context distinguishes identical starting baskets and future prices, different future-price scenarios, and different budgets/prices/token mixes. A concentrated range and a 50/50 position can have different starting tokens even with equal budgets; each uses its own holding benchmark. Fee inputs remain assumed USD cash, with USDC = $1 and the existing model exclusions.
+Select two or three compatible records to compare. Outcomes are recalculated from saved inputs, with expandable assumptions and notes:
+
+- **Liquidity with liquidity:** show LP value, the exact starting-token holding value and their difference. The context identifies shared baskets/prices or differing budgets, prices and token mixes. Equal budgets do not guarantee the same starting tokens. Fee inputs remain assumed USD cash and USDC is valued at $1.
+- **ETH/USDC loans and loops:** show assets minus debt before liquidation, debt and health factor. Loan cash stays in the wallet; loop borrowing buys ETH. The context identifies differing capital, market conditions or interest rules. The loop lab separately offers a comparison under shared conditions.
+- **LST loops with other LST loops:** keep WETH-denominated values and the original-wstETH holding benchmark, with differing conditions identified. These records cannot be mixed with ETH/USDC comparisons.
+
+Each saved setup retains its own assumptions; comparison does not silently synchronize them.
 
 When a setup still matches its imported pool price or NFT principal/range, saving retains the full validated source snapshot, including its block and exact integers. Changing a pool starting price, or an NFT's starting price, investment or bounds, clears that attribution. Future-price and fee-assumption changes preserve it. Reopening does not fetch the chain, contact imported provider URLs or replace the latest pool/position snapshot. Recorded collectable tokens remain outside both strategies' future principal comparison.
 
@@ -178,7 +188,7 @@ Open [range choices](https://teren.sh/learn.html#manage=range-width) after the e
 
 The width exercise calculates two continuous range positions with the same budget and starting price, each funded with its own required token mix. It compares active status, not earned fees or a shared holding basket. The fee-tier exercise uses unknown earnings or explicitly supplied fictional fee totals; the totals are teaching facts, not estimates, imports or verified history. The management exercise calculates principal at two outside prices with unchanged liquidity and shows why an inside return can reactivate it. USDC is assumed to stay at $1. It explains the actions and possible costs of changing a real v3 range; it does not simulate rebalancing or reimburse past losses.
 
-Experiment links open these hypothetical range setups in separate tabs, preserving their original funding, displayed final price and zero assumed fees. Range choices use `passiko-range-learning-v1` independently of essentials, historical learning and saved experiments. Valid drafts, stable answer order and checked exercises survive reloads. The chapter has no live chain reads and does not change the two verified historical records. See [lesson goals and research](learning.md).
+Experiment links open these hypothetical range setups in separate tabs, preserving their original funding, displayed final price and zero assumed fees. Range choices use `passiko-range-learning-v1` independently of essentials, historical learning and saved experiments. Valid drafts, stable answer order and checked exercises survive reloads. The chapter uses hypothetical inputs and has no live chain reads; the recorded historical cases remain separate. See [lesson goals and research](learning.md).
 
 ## Applied learning: fees, time and range exits
 
@@ -207,7 +217,7 @@ Applied progress uses `passiko-applied-liquidity-v1`, independently of the uncha
 
 ## Methods and feedback
 
-The footer links to [Methods](https://teren.sh/methods.html), [About](https://teren.sh/about.html) and source in separate tabs, keeping the current experiment open. Methods explains hypothetical inputs, snapshot validation and historical accounting checked at capture. **Email feedback** opens a message to hello@teren.sh without a GitHub account. **Report an issue** opens a prefilled GitHub issue for visitors who prefer it.
+The footer provides [Methods](https://teren.sh/methods.html), [About](https://teren.sh/about.html) and the project source. A ↗ marks a link that opens a separate tab; → marks a same-tab destination. Methods explains hypothetical inputs, snapshot validation and historical accounting checked at capture. **Email feedback** opens a message to hello@teren.sh without a GitHub account. **Report an issue** opens a prefilled GitHub issue for visitors who prefer it.
 
 On mobile, use **Explore experiment tools** or **Explore inspect tools** to reveal the secondary destinations. Primary Experiment, Learn and Inspect navigation stays visible. Practical lesson situations change the supplied facts and may change the correct follow-up; hints remain available and no calculation is required.
 

@@ -1,6 +1,6 @@
 # Chain reads and snapshots
 
-[Project overview](../README.md) · [Product decisions](../DECISIONS.md)
+[Project overview](../README.md) · [Models](models.md) · [Historical evidence](replay.md) · [Current review](review.md)
 
 These adapters serve Liquidity’s Inspect workspace. Lending currently uses hypothetical inputs and has no live snapshot or historical-accounting adapter.
 
@@ -52,7 +52,7 @@ New position captures use snapshot version 2 and read both global fee-growth cou
 
 **Newly accrued fees**, **recorded tokens owed**, and **estimated collectable tokens** are separate quantities. Recorded owed balances can contain fees and principal removed by decreaseLiquidity, so their composition is not inferred. Estimated collectable tokens are the manager's new fee credits plus recorded owed balances; actual collection can be slightly lower because of core rounding. Dollar values use the recorded pool ratio and USDC = $1. Principal plus the collectable estimate describes current recorded assets, not historical profit or fees since mint.
 
-The fee disclosure is collapsed during ordinary imports. [Applied example 08](https://teren.sh/#example=position-fees) opens it directly, with a four-step walkthrough connecting the balance breakdown to a new principal-only holding comparison. Applying a position keeps already collectable tokens outside both strategies and starts with zero assumed future cash fees. Learn links to this example from its fee, range and final-challenge deeper reading. Existing lesson IDs, completion, model schemas and virtual balances remain independent.
+The fee disclosure is collapsed during ordinary imports. [Applied example 08](https://teren.sh/liquidity.html#example=position-fees) opens it directly, with a four-step walkthrough connecting the balance breakdown to a new principal-only holding comparison. Applying a position keeps already collectable tokens outside both strategies and starts with zero assumed future cash fees. Learn links to this example from its fee, range and final-challenge deeper reading. Existing lesson IDs, completion, model schemas and virtual balances remain independent.
 
 Version 1 position files continue to import, save and export unchanged. Their missing fee-growth data is shown as unavailable, never zero. Version 2 requires bounded global/outside growth, correctly initialized boundaries with enough gross liquidity for the NFT, and matching derived raw estimates. The existing storage key is retained to restore both versions; unsupported future versions still require explicit recovery.
 

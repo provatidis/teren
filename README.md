@@ -47,17 +47,18 @@ Open http://127.0.0.1:3000/ after starting the development server. `npm run buil
 
 ## Documentation
 
-- [Using the tools and saved experiments](docs/guide.md)
-- [Lesson goals, misconceptions and evidence](docs/learning.md)
-- [Calculation models and assumptions](docs/models.md)
-- [Historical replay method and recorded evidence](docs/replay.md)
-- [Chain reads, fee accounting and snapshot validation](docs/data.md)
-- [Architecture, local checks and deployment](docs/development.md)
-- [Custom domain and repository cutover](docs/domain-setup.md)
-- [Product decisions](DECISIONS.md)
-- [Review questions and open blind spots](docs/review.md)
-- [Correlated-asset looping model](docs/lst-loops.md)
-- [Next discussions and roadmap choices](docs/roadmap.md)
-- [Release history](CHANGELOG.md)
+| Start here for… | Document |
+| --- | --- |
+| Using a lab, lesson, recorded case or saved setup | [User guide](docs/guide.md) |
+| Lesson goals, misconceptions and observation tasks | [Learning design](docs/learning.md) |
+| Formulas, benchmarks and model assumptions | [Calculation models](docs/models.md), with [LST-loop accounting](docs/lst-loops.md) |
+| Historical selection, capture evidence and reproduction | [Historical cases](docs/replay.md) |
+| Live reads, fee accounting and snapshot-file validation | [Chain data](docs/data.md) |
+| Architecture, local checks, releases and documentation upkeep | [Development](docs/development.md) |
+| Domain configuration and the completed repository cutover | [Domain setup](docs/domain-setup.md) |
+| Current strengths, consequential limits and next validation | [Review status, evidence gaps and limitations](docs/review.md) |
+| Durable product and engineering choices | [Decisions](DECISIONS.md) |
+| Candidate work to discuss next | [Roadmap](docs/roadmap.md) |
+| Past releases and review observations | [Changelog](CHANGELOG.md) and [historical review archive](docs/review-history.md) |
 
 MIT licensed. The adapted Uniswap tick arithmetic retains its [separate notice](public/licenses/uniswap-v3-sdk.txt).

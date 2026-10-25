@@ -38,7 +38,7 @@ This is one inactive week, not a typical yield or an estimate of how quickly ano
 
 ## Learn from these records
 
-The [Fees, time and range exits chapter](https://teren.sh/learn.html#applied=fees-over-time) uses these unchanged records for three guided prediction-and-explanation exercises. Assessment targets come from the existing period accounting: final baseline fee value, the exit-and-return case’s 2,724 active seconds between blocks 26084375–26085000, and its final LP-minus-holding result before costs. Checkpoint exploration stays independent of the fixed question. Experiment handoffs start a separate principal-only hypothetical experiment with zero assumed future fees.
+The [Fees, time and range exits chapter](https://teren.sh/learn.html#applied=fees-over-time) uses the original in-range and exit-and-return records for three guided prediction-and-explanation exercises. Assessment targets come from the existing period accounting: final baseline fee value, the exit-and-return case’s 2,724 active seconds between blocks 26084375–26085000, and its final LP-minus-holding result before costs. Checkpoint exploration stays independent of the fixed question. Experiment handoffs start a separate principal-only hypothetical experiment with zero assumed future fees.
 
 ## Calculations and checks
 
@@ -84,7 +84,7 @@ Source references: [Uniswap range counters](https://github.com/Uniswap/v3-core/b
 
 ## Recheck the bundled evidence in CI
 
-The manually triggered **Recheck recorded chain evidence** workflow runs `npm run check:records`. It recaptures all three windows (using a fresh cache for the week), checks fresh contract/collection/event evidence, and compares every canonical checkpoint with the bundled record, excluding provider labels and capture timestamps. It uploads `record-verification.json` with the run time, providers and per-case matches or errors. The original files are not overwritten. Public archive availability can fail the run; it is separate from ordinary release CI. No new run is implied by a “checked at capture” label.
+The manually triggered **Recheck recorded chain evidence** workflow runs `npm run check:records`. It recaptures the three unchanged-position cases and both histories in the matched-week comparison, using fresh temporary caches for the week and comparison. It checks fresh contract/collection/event evidence and compares canonical accounting with the bundled records, excluding provider labels and capture timestamps. The matched histories also check collection receipts. It uploads `record-verification.json` with the run time, providers and per-case matches or errors. The original files are not overwritten. Public archive availability can fail the run; it is separate from ordinary release CI. No new run is implied by a “checked at capture” label.
 
 ## Week selection and composition
 
@@ -187,4 +187,4 @@ These are differently placed ranges with different starting mixes, not a control
 
 ## Observation before further expansion
 
-Give a learner a fixed target and let them change the hypothetical window from 7 to 30 days. Ask, without calculations: “What changed? What would you need to know before expecting those fees?” Then open the week record and ask what its seven daily intervals establish about income, and whether matching holding establishes a dollar profit. Record their explanation and navigation difficulties without coaching first. This observation has not yet happened; tests are not evidence of teaching effectiveness.
+Use the [shared observation plan](learning.md#observation-plan) for fee targets, recorded income and the difference between matching holding and making a dollar profit. The [current review](review.md) tracks the evidence status; this method document owns the historical accounting and reproduction procedure.

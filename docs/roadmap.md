@@ -18,6 +18,6 @@ Candidates for a later release are an explicit utilization-to-rate experiment an
 
 ## Before expanding
 
-Review the [open blind spots](review.md). Ask users to explain what changes when competitors tighten their ranges, and why a fee total alone cannot establish LP performance. Arithmetic and browser tests establish consistency, not learning outcomes.
+Use the [current review](review.md) to distinguish scope boundaries from evidence still needed for a stronger claim. Choose relevant tasks from the [observation plan](learning.md#observation-plan) when feedback sessions are available. Keep the next feature decision tied to a question people want to explore.
 
 [Product decisions](../DECISIONS.md) · [Models](models.md)
