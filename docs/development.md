@@ -1,6 +1,8 @@
 # Development and architecture
 
-[Project overview](../README.md) · [Product decisions](../DECISIONS.md)
+[Project overview](../README.md) · [Product decisions](../DECISIONS.md) · [Current review](review.md)
+
+Jump to [local checks](#test), [project structure](#project-structure), [extension policy](#architecture-and-extension-policy), [mechanism review](#reviewing-a-mechanism-change), [documentation upkeep](#documentation-upkeep) or [publishing](#publishing-with-github-pages).
 
 ## Run
 
@@ -44,13 +46,13 @@ The period model lives in `public/models/fixed-position-period.js`; record valid
 
 ## Project structure
 
-- public/main.js, public/learn-main.js and public/lending-main.js: composition roots for liquidity Experiment/Inspect, liquidity Learn and lending respectively. They initialize each document's controllers and inject the interfaces they need.
+- public/home-main.js, public/main.js, public/learn-main.js and public/lending-main.js: composition roots for Home, liquidity Experiment/Inspect, liquidity Learn and lending respectively. They initialize each document's controllers and inject the interfaces they need.
 - public/ui/: explicit initializers for the sandbox, both labs, learning, pool/position snapshots, saved experiments, historical replay and navigation. Importing a controller does not start it.
 - public/models/: pure hypothetical calculations, lesson experiments and exact protocol/period arithmetic. They do not read the DOM, browser storage or network.
 - public/data/: deployment configuration, read-only Uniswap v2/v3 adapters, snapshot/period schemas, saved experiments, learning progress and temporary Learn-return storage.
 - public/lib/: compatible scenario links, exports, formatting and rendering utilities.
 - public/learning/: essential and applied lesson definitions, optional deeper reading and the eleven-example progression.
-- public/examples/: bundled pool/position snapshots and the verified fixed-position period record; these open without RPC requests.
+- public/examples/: bundled pool/position snapshots, three unchanged-position historical cases and the matched-week comparison with collections; these open without RPC requests.
 - public/styles/: shared foundation and components followed by feature styles. public/styles.css preserves the existing cascade order.
 - public/index.html, public/liquidity.html, public/learn.html and public/lending.html: semantic, static markup with one module entry point per document. Each feature owns its IDs; the structure check rejects duplicates.
 - scripts/: development, integration and browser checks; test/: reference calculations and adapter/storage contracts.
@@ -67,11 +69,31 @@ The static app remains dependency-free and deployable on GitHub Pages. Keep the 
 
 New financial models get their own versioned module and reference/invariant tests. New protocols get a deployment definition, adapter, exact token-unit handling and contract validation. Preserve old model links and storage keys; introduce explicit migrations when schemas change. Unit and desktop/mobile browser tests run before deployment.
 
-Release 1.8.0 shipped the first verified fixed-position period: nine checkpoints over 4,992 seconds for position #1382030 in Ethereum's WETH/USDC 0.3% pool. Release 1.9.0 adds a 17-checkpoint exit-and-return case spanning 120,468 seconds for position #1375047 in the same pool. Release 1.34.0 follows position #1375090 for 604,800 seconds through eight daily checkpoints in the same pool. A separately versioned manifest composes seven validated segments; no new fee tokens or active seconds were recorded. The dates and candidate order were declared before inspecting this outcome. Release 1.35.0 adds two active-at-start positions over that same week, with independently validated collection accounting and a published selection audit. The separate 1.36.0 controlled width experiment is hypothetical and does not modify those records. Editable historical bounds/windows and arbitrary-range backtesting remain future work; they require evidence beyond sampled prices and global fee growth. See [replay.md](replay.md#next-validation-cases) before extending the model.
+Release 1.8.0 shipped the first verified fixed-position period: nine checkpoints over 4,992 seconds for position #1382030 in Ethereum's WETH/USDC 0.3% pool. Release 1.9.0 adds a 17-checkpoint exit-and-return case spanning 120,468 seconds for position #1375047 in the same pool. Release 1.34.0 follows position #1375090 for 604,800 seconds through eight daily checkpoints in the same pool. A separately versioned manifest composes seven validated segments; no new fee tokens or active seconds were recorded. The dates and candidate order were declared before inspecting this outcome. Release 1.35.0 adds two active-at-start positions over that same week, with independently validated collection accounting and a published selection audit. The separate 1.36.0 controlled width experiment is hypothetical and does not modify those records. Editable historical bounds/windows and arbitrary-range backtesting remain future work; they require evidence beyond sampled prices and global fee growth. See [historical scope and remaining limits](replay.md#presentation-and-remaining-limits) before extending the model.
 
 A backend becomes useful for private provider credentials, shared caching, scheduled snapshots or account synchronization. Each can be added behind the data layer without rewriting the calculation models or existing labs. No scheduled collector or backend is part of the shipped replay.
 
 The cl-range-v1 model, links, CSV, presentation helpers and result cards are separate modules. A shared link router and accessible lab navigation coordinate the two calculators while preserving cp50-v1 links. Reference tests cover asymmetric funding, outside starts, exact boundaries, continuity, virtual-reserve conservation, wide-range limits, separate fees, numerical bounds and reproducible exports.
+
+## Reviewing a mechanism change
+
+Use the [current review](review.md) for unresolved evidence gaps and [Decisions](../DECISIONS.md) for persistent constraints. Before extending a mechanism, answer:
+
+- Which conclusion does the headline result support, and which assumption could change it most? Keep that assumption beside the result.
+- Do assets, wallet cash, collateral, fees and every obligation reconcile through each step? Check exact boundaries, exhausted assets, zero debt, blocked actions and partial exits without inventing a completed transaction.
+- Is a chart showing independent endpoints, connected recorded samples or an actual reconstructed path? Does the benchmark retain the exact original tokens?
+- Which checks cover calculation, interaction and chain evidence? Identify capture/check dates and distinguish an independent calculation method from an outside reviewer.
+- Can a visitor enter directly, keep a coherent draft, return to it and give feedback? Select an appropriate [observation task](learning.md#observation-plan) to investigate interpretation when participants are available.
+
+Report a newly found omission, including one deliberately retained. Engineering fixes and observed user understanding remain separately recorded evidence.
+
+## Documentation upkeep
+
+The [README documentation map](../README.md#documentation) identifies each document's role. Keep formulas and exclusions in Models, capture evidence in Replay/Data, user actions in the Guide, learning goals and observation prompts in Learning, and durable choices in Decisions. Roadmap holds candidate work. Review summarizes current strengths, consequential limits and next validation; dated observations belong in [the review archive](review-history.md).
+
+Update the current review when scope or evidence changes, rather than appending one disclaimer per release. Link to detailed boundaries instead of copying them. Preserve useful negative results and source provenance. Historical statements remain dated; a resolved gap should not reappear as current work merely because it survives in the archive.
+
+For documentation-only changes, check local links and heading anchors, verify claims against the relevant implementation/tests, and run `npm run check` and `git diff --check`. Run model tests when correcting a calculation claim. A build comparison can confirm that `public/`, model/schema files and generated output are unchanged. No application version bump or new chain-verification claim is needed. The existing release workflow still runs its normal checks when a documentation PR is merged.
 
 ## Browser identity and sharing
 
@@ -91,11 +113,11 @@ To regenerate the committed favicon, ink wordmark, social SVG and raster assets 
 
 The workflow in `.github/workflows/pages.yml` checks models and the build on Node 22 and 24. Node 24 also runs the full desktop/mobile browser suite against `dist/`, then uploads the exact tested site. Deployment publishes that artifact whenever `main` changes. Pull requests run the same checks without publishing. Hosting stays on GitHub Pages; Cloudflare manages the `teren.sh` domain and DNS. The public domain is independent of the repository name.
 
-The publishing source is **Settings → Pages → Build and deployment → Source → GitHub Actions**. The intended public address is `https://teren.sh/`. See [domain setup](domain-setup.md) for the cutover sequence and DNS records. A `CNAME` file does not configure a custom domain for this Actions-based deployment; the domain must be saved in GitHub Pages settings.
+The publishing source is **Settings → Pages → Build and deployment → Source → GitHub Actions**. The public address is `https://teren.sh/`. See [domain setup](domain-setup.md) for configuration reference and the completed cutover procedure. A `CNAME` file does not configure a custom domain for this Actions-based deployment; the domain must be saved in GitHub Pages settings.
 
 ### Repository name and saved work
 
-Keep the existing repository and its history. After renaming it to `teren`, update existing clones:
+The repository is `provatidis/teren`; its existing history is retained. An older clone can update its remote without changing its checkout directory:
 
 ```sh
 git remote set-url origin https://github.com/provatidis/teren.git
@@ -105,7 +127,7 @@ Historical names remain in the changelog and compatibility identifiers. There is
 
 The sandbox key remains `defi-sandbox-v1`. The `degenerator-*` keys, `passiko-applied-liquidity-v1` and `passiko-range-learning-v1` also stay unchanged. Exported experiment libraries retain their version-1 `degenerator-experiments` kind, so earlier backups still import. Visible names and new download filenames use Teren.
 
-These unchanged identifiers preserve saved work on the same origin. **Moving to `teren.sh` creates a different browser-storage origin:** lesson progress, sandbox balances, working drafts and snapshots do not move automatically. Export saved experiments and any pool/position JSON you want to keep before changing the published domain; import those files on Teren afterward. Exported experiments do not include lesson progress or sandbox balances. Keep this distinction explicit during the cutover.
+These unchanged identifiers preserve saved work on the same origin. **Moving to `teren.sh` creates a different browser-storage origin:** lesson progress, sandbox balances, working drafts and snapshots do not move automatically. Export saved experiments and any pool/position JSON you want to keep before changing the published domain; import those files on Teren afterward. Exported experiments do not include lesson progress or sandbox balances. These instructions apply to any future origin change; the Teren cutover is complete.
 
 ## Working drafts during a Learn visit
 
@@ -135,8 +157,6 @@ Choice order is shuffled once per draft and group, then remains stable through c
 
 The new `passiko-range-learning-v1` key stores bounded variants, choices and a validated ordering seed. Earlier lesson keys, IDs and completion remain unchanged. Navigation moves from essentials to range choices to recorded history; every topic remains directly accessible. `lib/learning-elements.js` shares radio rendering and metric elements across the three controllers, while editorial pitfalls in `learning/pool-pitfalls.js` appear in the normal results flow. The builder hashes these imports through the complete graph. Tests cover model conservation, boundary eligibility, fee-rate counterexamples, unknown earnings, outside exposure, automatic return, independent progress, mixed-route rejection, all variations, wrong predictions, feedback, restoration and desktop/mobile chapter switching.
 
-## Clear entry and project information
-
 `ui/workspaces.js` controls a mobile-only tools disclosure without duplicating destinations or changing fragment routing. Desktop links remain visible. The disclosure closes after a selection and returns keyboard focus before hiding its links. About and Methods are static HTML, share identity metadata/CSP and need no JavaScript. The builder and project check include both pages.
 
 `managementApplication` supplies situation-specific follow-ups. Width totals combine calculated principal with supplied fee/cost assumptions; fee-tier totals are explicitly fictional teaching facts; removal and fee collection remain distinct actions. These values do not modify historical records or estimate earned fees. Completed topics remain saved; a restored draft is checked against its displayed situation.
@@ -161,7 +181,7 @@ The `#learn` lending route resumes an allowlisted `currentLesson`, added to the 
 
 The build tests cover parent hash invalidation, deterministic output, shared dependency identity, missing imports and cycles. Loan reference tests cover balance conservation, capped repayment, remaining debt, zero bonus, full repayment and boundaries. CI browser checks add event sharing/drafts, independent validation, compounding differences and chart readability at 390px/320px.
 
-Review [open blind spots](review.md) before a mechanism release. Report which misleading interpretation was tested as well as which calculation checks passed.
+Use the [mechanism-review questions](#reviewing-a-mechanism-change) and [current evidence gaps](review.md) before extending a model.
 
 ## Borrowing loops
 
@@ -183,7 +203,7 @@ Presentation tests cover signed sub-cent comparisons and distinct unwind-state l
 
 `lib/lending-flow-stages.js` derives the first two lending lessons from `collateral-loan-v1`; `lib/lending-lesson-scenes.js` renders their wallet, supply, debt and capacity balances. Enabling collateral rebases the already-accrued supply at day zero, so no second year of interest is added. Remaining capacity subtracts existing debt from the borrowing limit. The fixed scenes reject other periods or price paths. The renderer uses the shared action player; the controller restores the assessed frame when opening an explanation or reloading an already-revealed lesson.
 
-Exploration has no persistence callback, so it cannot change the fixed question, answers, grading or handoff. The controller separately owns explicit question changes. Eleven visual routes allow omitted predictions, including on restoration; other lessons retain their current sequence. Browser checks cover this distinction, exact token transfers and range boundaries, native touch dragging, keyboard actions, replay, completion and state isolation. Liquidity foundation handoffs keep opening the independent sandbox; they do not seed it with the displayed lesson pool. All seven lending/loop lessons retain their exact model links and existing progress keys.
+Exploration has no persistence callback, so it cannot change the fixed question, answers, grading or handoff. The controller separately owns explicit question changes. All twenty lessons allow omitted predictions, including on restoration. Dedicated scenes cover the liquidity foundations and comparison lessons, range-width comparison and all seven lending/loop lessons; other lessons retain their metrics or recorded-timeline presentation. Browser checks cover this distinction, exact token transfers and range boundaries, native touch dragging, keyboard actions, replay, completion and state isolation. Liquidity foundation handoffs keep opening the independent sandbox; they do not seed it with the displayed lesson pool. All seven lending/loop lessons retain their exact model links and existing progress keys.
 
 `lib/loan-condition-state.js` derives fresh endpoints for the conditions lesson through `collateral-loan-v1`. It bounds time to the assessed year and price to half through one-and-a-half times the starting price, rejecting scenarios that would no longer isolate debt interest. `lib/loan-condition-scene.js` reuses native scene sliders with one active mode. Time fixes price; price fixes the full-year balances. Both bars and dashed references share one stable dollar scale. Mode changes reset that comparison, while clicking the active mode preserves it. The renderer never persists state, compounds a prior frame or applies a liquidation. The controller restores Time at one year for the explanation and revealed-draft reload. Browser coverage checks exact and adjacent boundaries, optional completion, link/draft isolation and slider stability during touch dragging at 390px/320px.
 
@@ -199,7 +219,7 @@ Tests compare geometric-series references against the step ledger across 1,000 v
 The token-balance and range-width pilot checks repeat fresh-page drags three times at each phone width. `scripts/browser/touch-range.js` enables touch mode before scrolling and measuring, waits for stable geometry and an unobscured hit target, and checks trusted touch/input events as well as the final value and stationary control. Failures include event traces. It never retries a failed gesture or writes the expected end value. Passing repetitions reduces uncertainty about the intermittent failure; it does not prove all Android/Chrome combinations reliable.
 
 
-## Home and topic navigation · 1.31.0
+## Home and topic navigation
 
 `index.html` is a lightweight topic entry with `home-main.js` and `home.css`. Its dependency graph contains no financial models, records or live adapters. `liquidity.html` retains the existing liquidity composition root and fragment router. `lib/entry-links.js` recognises existing root liquidity fragments; Home uses `location.replace` to preserve the search and fragment at the direct lab document without a Back-button redirect loop. Home anchors remain on Home. New lesson handoffs use the direct document.
 
@@ -208,7 +228,7 @@ The token-balance and range-width pilot checks repeat fresh-page drags three tim
 `styles/navigation.css` places topic choice before the topic's available modes. Current topics are non-actionable; only the other topic is a link. `styles.css` and `home.css` remain readable import lists in source; each production entry points at a flattened content-hashed stylesheet. Nested CSS URLs are rebased relative to the receiving stylesheet. The builder preserves canonical source aliases for previously cached entries.
 
 
-## Personal experiments · 1.33.0
+## Personal experiments
 
 The existing version-1 experiment library accepts the tagged `collateral-loan-v1` and `borrowing-loop-v1` models alongside liquidity. Loan entries retain validated event assumptions; loop entries retain optional `{ rounds, borrowPercent }` comparison metadata, where null fraction follows the main setup. Existing liquidity entries and sources are unchanged. Older app versions reject unfamiliar model tags through their existing recovery path; no migration overwrites an earlier backup. Shared CRUD keeps atomic import, stale-edit checks and storage recovery across topics. Presentation is model-aware; mixed-topic comparisons are blocked rather than implying equivalent benchmarks.
 
@@ -223,7 +243,7 @@ The existing version-1 experiment library accepts the tagged `collateral-loan-v1
 `qualify:comparison` records eligibility in a declared ascending order and can resume an unfinished audit without repeating completed candidates. At most three starting metadata reads run concurrently; selection decisions remain ordered and any provider failure stops the batch. `check:comparison` captures both histories, verifies collections against pool receipts and writes only a complete comparison. Empty caches force fresh state reads; cached points are only a capture-resume mechanism. The browser RPC allowlist is unchanged. See [capture and accounting](replay.md#matched-week-comparison).
 
 
-## Controlled width comparison · 1.36.0
+## Controlled width comparison
 
 `models/range-width.js` constructs reciprocal bounds and delegates principal accounting to `cl-range-v1`. Both alternatives use an explicit common 50/50 basket. `lib/width-links.js` validates versioned `#width=cl-width-v1` links; `data/width-draft.js` isolates the last valid setup in `teren-width-comparison-v1`. Invalid edits never overwrite that setup, and unreadable storage remains untouched until a deliberate valid edit or reset. Home’s experiment-location metadata supports this separate comparison.
 
@@ -243,7 +263,7 @@ Run the full unit/structure/build/browser checks for release. `BROWSER_CHECKS=fe
 
 `ui/fee-mechanics.js` owns only the isolated arbitrage steps. The scene uses the existing full-range calculation, stays separate from the fee ledger and opens directly at `#fee-mechanics`. The static JIT diagram labels its fictional liquidity units and shares. Both explanations are optional, and no LVR estimate or new lesson grading is introduced. Check the next-batch share readout, empty-liquidity alternatives, competitor boundaries, per-batch widths, legacy migration and scene isolation before extending the model.
 
-## Correlated-loop extension · 1.39.0
+## Correlated-loop extension
 
 `models/lst-loop-v1.js` owns construction, accrual, the rate-only boundary check, one liquidation event and an atomic exit ledger. `lib/lst-links.js` validates complete versioned fragments; `data/lst-state.js` keeps its independent local draft. `lib/lst-scene.js` renders intermediate balances without changing model inputs. `ui/lst-loops.js` owns controls and the three-stage view, composed from `lending-main.js`. Shared saved experiments support the model as its own comparison family. No chain adapter or protocol preset is implied.
 

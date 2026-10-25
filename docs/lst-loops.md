@@ -1,5 +1,7 @@
 # Correlated-asset loops
 
+[Models overview](models.md#correlated-asset-loops) · [Using this lab](guide.md#correlated-asset-loops) · [Current review](review.md)
+
 `lst-loop-v1` is a hypothetical wstETH-collateral/WETH-debt model. It has no chain reads, current rates or protocol presets. Its purpose is to test exposure, carry, relative prices and exit assumptions. The ETH/USDC loop remains a separate model.
 
 ## Construction and units

@@ -1,5 +1,10 @@
 # Release history
 
+## Unreleased
+
+- Restructure the review as a current assessment with distinct evidence types, consequential model boundaries and prioritized validation. Preserve the complete previous review body in a linked historical archive.
+- Consolidate observation tasks in Learning, group durable Decisions, improve documentation navigation and correct stale lending, replay, saved-comparison and domain-cutover descriptions. This is documentation-only; application behavior, versioned models and recorded evidence are unchanged.
+
 ## 1.39.1 · 2026-10-25
 
 - Keep button labels free of underlines at rest, on hover and during keyboard focus. Remove the Home-only lab-link hover override so lab and lesson buttons share the same treatment.

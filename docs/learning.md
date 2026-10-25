@@ -1,12 +1,14 @@
 # Lesson goals and misconceptions
 
-Liquidity review: 2026-10-13. Lending foundations added 2026-10-23. Teren teaches liquidity and lending mechanics, interpretation and the limits of evidence. Completion checks explanation and application; predictions are ungraded and no required question asks the learner to calculate or round a result. Numeric practice remains optional in the liquidity essentials and historical chapters.
+[Project overview](../README.md) · [User guide](guide.md) · [Current review](review.md) · [Observation plan](#observation-plan)
+
+Teren has twenty lessons across liquidity and lending. Completion checks explanation and application; predictions are ungraded and no required question asks the learner to calculate or round a result. Numeric practice remains optional in the liquidity essentials and historical chapters. The separate wstETH/WETH experiment has no dedicated lesson chapter yet; its interpretation tasks are included in the observation plan.
 
 ## What the research establishes
 
 Uniswap's primary documentation describes active ranges, token ownership and fee accounting. Published LP research separates holding benchmarks from rebalancing benchmarks. Public user questions illustrate mistaken expectations about [fee tiers](https://www.reddit.com/r/UniSwap/comments/n9oec4/), [fee APR](https://www.reddit.com/r/UniSwap/comments/zbmqz5/) and [stablecoin risk](https://www.reddit.com/r/UniSwap/comments/1cbavf6/). These questions demonstrate that confusion exists; they are not a representative survey or a measurement of how common each error is. Forum answers are not used as technical authority.
 
-The prior course covered mechanisms well but placed several practical cautions only in optional reading. The normal lesson flow now includes short, sourced pitfalls. The practical chapter connects those mechanisms to decisions without claiming to identify the best investment. Automated checks establish internal consistency and working interactions; they do not measure learning outcomes in real users.
+The normal lesson flow includes short, sourced pitfalls alongside the mechanisms. The practical chapter connects those mechanisms to decisions without claiming to identify the best investment. The observation plan below separates research informing the content, engineering checks and evidence about people using Teren.
 
 ## Progression and purpose
 
@@ -55,7 +57,7 @@ The interest lesson deliberately uses zero supply APR so only debt grows. It doe
 
 The lending lab additionally illustrates one liquidation event: debt repayment offsets part of the collateral removed, while the bonus reduces net assets. The compounding reference exposes how a fixed simple-interest assumption diverges over longer periods. These illustrations require no calculation from the learner.
 
-All lending figures are hypothetical teaching cases with fixed simple interest and USDC = $1, separate from the verified liquidity records. They are not quoted Aave market parameters. Unit tests cover reference outcomes and every reasoning/application combination; browser checks cover wrong predictions, completion, exact handoffs, independent storage and mobile navigation. These checks establish consistency, not measured teaching effectiveness.
+The four lending foundation lessons use hypothetical cases with fixed simple interest and USDC = $1, separate from the recorded liquidity evidence. They are not quoted Aave market parameters. Unit tests cover reference outcomes and every reasoning/application combination; browser checks cover wrong predictions, completion, exact handoffs, independent storage and mobile navigation. The ETH/USDC loop chapter below uses its own interest assumptions; the separate LST experiment is documented in [its model reference](lst-loops.md).
 
 ## Primary references
 
@@ -80,13 +82,13 @@ Three directly accessible lessons follow lending essentials. They use `borrowing
 | Repeat and change conditions | More collateral means less price risk; unchanged prices mean an unchanged loan. | Hold prices fixed while debt accrues interest and supply interest is zero. |
 | Explore unwinding | All collateral can be withdrawn first; withdrawing cancels debt. | Start below the liquidation boundary; the withdrawal-first preview stops. |
 
-The first lesson removes costs and interest to isolate matching debt. The second compares the same original capital with more ETH exposure; no arithmetic is required from the learner. The last explains intermediate collateral constraints and labels the unwind as an assumed sequence, not guaranteed execution. Automated checks cover every answer combination and numerical references. They do not establish learning effectiveness.
+The first lesson removes costs and interest to isolate matching debt. The second compares the same original capital with more ETH exposure; no arithmetic is required from the learner. The last explains intermediate collateral constraints and labels the unwind as an assumed sequence, not guaranteed execution. Automated checks cover every answer combination and numerical references.
 
-## Visual lesson patterns · 1.23–1.29
+## Visual lesson patterns
 
 Fourteen lessons use the visual patterns: swaps, providing liquidity, changing token balances, loss versus profit, break-even fees, the final challenge, narrow versus wide ranges, supplying, borrowing, prices/interest/time, repayment versus collateral, and building, stressing and unwinding a loop. All twenty lessons show the prediction question and its choices immediately. **See what happens** follows a selected expectation; **Not sure — show me** opens the same outcome without inventing an answer. In visual lessons, the setup and prediction come before the interactive diagram, keeping the diagram beside its controls on phones. The action restores the question’s diagram and brings it into view; nearby feedback compares the expectation with the finding. Exploration remains available before choosing, and watching every step is never required. The sequence is **starting setup → prediction invitation → exploration → explanation → changed situation**. The conceptual checks still determine completion, with no arithmetic or rounding task.
 
-- **Actions:** one named action per activation, a short visual cue, then a readable resting frame. Back revisits an earlier state without animating an undo. Replay repeats the current cue without changing balances. Direct step access groups unwind actions into withdrawal/sale/repayment passes. There is no autoplay or animation queue.
+- **Actions:** one named action per activation, a short visual cue, then a readable resting frame. Back revisits an earlier state without animating an undo. Replay repeats the current cue without changing balances. Direct step access groups the ETH/USDC unwind actions into withdrawal/sale/repayment passes. There is no autoplay or animation queue.
 - **Continuous conditions:** the token lesson changes the selected price while keeping both token quantities and their starting markers together. Arrows describe the net trades relative to the same start. The price slider is an endpoint comparison, not a recorded trading path.
 - **Comparison:** narrow and wider bands share one price scale and marker position. Bounds are directly selectable; exact boundaries are labelled separately from inside/outside states. Single-token principal remains visible outside the range. Inside means eligible to earn from swaps, not a claim about earnings.
 
@@ -108,20 +110,36 @@ The three essentials comparison lessons share one fixed dollar scale for startin
 
 ## Extending the patterns
 
-Use these four forms rather than forcing every subject into an animation:
+Choose a form that explains the mechanism: named actions, continuous conditions, comparisons or recorded timelines. Dedicated scenes already cover the subjects listed above. The remaining range-composition, management, fee-tier and historical lessons use metrics or recorded timelines; any further treatment should address an observed interpretation problem.
 
-| Lessons | Next visual treatment |
+| Subject | Candidate treatment |
 | --- | --- |
-| Concentrated liquidity and exits/returns | Reuse the price/range scene; add token composition and outside price exposure, then management costs. |
-| Fee tiers and APR | Reveal supplied facts and visibly missing information; never derive fee income from the tier alone. |
-| Historical lessons | Use recorded checkpoints. Separate principal, new fees and collection; keep unknown intervals unknown. Active-time totals do not establish crossing times. |
+| Range composition and exits/returns | Connect token composition and outside price exposure to the range; keep changing bounds distinct from recovering losses. |
+| Fee tiers and APR | Reveal supplied facts and visibly missing information; never derive earnings from the tier alone. |
+| Recorded history | Separate principal, new fees and collections at recorded checkpoints. Keep unknown intervals unknown; active-time totals do not locate every crossing. |
 
-Next extend range composition and changing-condition lessons, then evidence lessons. Each visual should replace repeated setup/result prose, retain essential assumptions nearby, and offer a changed-situation check. Keep the same starting basket within each comparison; equal budgets across ranges do not imply identical token mixes.
+Each visual should replace repeated setup/result prose, retain essential assumptions nearby, and offer a changed-situation check. Preserve the same starting basket within each comparison. Equal budgets across ranges do not imply identical token mixes. These are design candidates, not a commitment to animate every lesson or a second feature roadmap.
 
-Automated checks establish accounting and interaction consistency, not improved learning. In an observed session, pause after enabling collateral and ask whether cash or debt appeared; after borrowing, ask why more wallet cash did not increase net assets. Pause after selling ETH and ask whether debt changed; after repayment, ask where collateral remains. For the loan conditions lesson, ask which token balance changed after interest, then which value changed after a price fall. For the response lesson, ask where the extra cash went in each column and where the ETH remains after full repayment. Ask what stays exposed to ETH’s price; a larger health factor is not a return forecast. For the loop comparison, show a loss while health factor remains above 1 and ask what each measure tells you. Then hold price still and ask which balance grows. For liquidity, reverse the price direction and ask which token enters the pool. For ranges, show a new price and ask what being inside establishes about fee income. Look for a mechanism explanation rather than recall of displayed numbers.
+## Teaching emphasis
 
-## Teaching emphasis · 1.32
+A prediction makes an expectation explicit. It is visible, ungraded and deliberately skippable. Removing arithmetic and long introductory text supports this step; it does not require hiding it. Explanations and changed-situation checks remain the completion criteria, and direct Experiment access serves people who already have a question. Evaluate reviews against that sequence, including people who choose to see the outcome first.
 
-A prediction is an invitation to make an expectation explicit. It is visible, ungraded and deliberately skippable. Removing arithmetic and long introductory text supports this step; it does not require hiding it. Explanations and changed-situation checks remain the completion criteria, and direct Experiment access serves people who already have a question.
+## Observation plan
 
-Review suggestions are evaluated against that teaching sequence. The visible-choice change is a design hypothesis, not a measured learning improvement. Observe whether a learner can explain an unfamiliar variation after the lesson, including someone who chose to see the outcome first. Faster navigation or passing automated checks alone cannot answer that question.
+Automated tests establish calculation and interaction consistency in their covered cases. Research and public questions inform which misconceptions to address. The owner's informal feedback from experienced friends is encouraging, but no documented observation sessions yet establish improved understanding or repeat use. [The current review](review.md#evidence-and-what-it-establishes) summarizes those distinct evidence types.
+
+Use this task bank when participants are available. Choose two or three tasks suited to a person's experience and purpose; it is not an exam or a release gate. Record their starting explanation, let them explore, then ask about an unfamiliar variation. Supply any needed totals and avoid calculation or rounding tasks. Capture their words and navigation difficulties before offering hints, and record any help given. A correct choice alone is weaker evidence than an explanation applied to a changed situation.
+
+| Task | Prompt and distinction to observe |
+| --- | --- |
+| Swaps and pool ownership | Reverse a trade or add another provider. Ask what enters/leaves and what happens to the original LP's share. Distinguish a trade changing reserves from a deposit changing ownership percentage. |
+| Collateral, wallet and debt | Pause after enabling collateral, borrowing, purchasing, selling and repaying. Ask what is owned, where it is and what is owed. Capacity, spendable cash, supplied claims and obligations must remain distinct. After full repayment, ask where the collateral remains. |
+| Price, interest and responses | Hold price still while time passes, then hold accrued token balances still while price changes. Ask what changed. Compare repayment and collateral addition with the same extra budget; ask where that budget went and what remains exposed to ETH. |
+| Fees and benchmarks | Show an LP dollar gain that trails holding, then a falling-price case that matches holding. Ask what each comparison establishes. Change a target window from 7 to 30 days and ask what additional evidence would be needed to expect the fees. |
+| Fee competition and width | Add a batch, leave the range and tighten competitors' range at unchanged capital. Ask what happens to existing tokens and the next-batch preview. Ask whether higher fee income settles the holding comparison. If using JIT, ask what fee dilution alone establishes about total LP profit. |
+| Recorded observations | Open the inactive week and an interval whose sampled endpoints are outside. Ask what the fees, counters and sampled prices establish separately. Ask what the matched pair can show when its ranges and starting baskets differ. |
+| Correlated-asset loops | Change only ETH/USD, then a market discount under each oracle assumption. Ask what happens to WETH debt, net value and health factor. Compare with unlooped wstETH, then pause during the flash-funded exit and identify every obligation. Ask what changes when the exit is unavailable. |
+
+For an experienced user's direct workflow, start from a question they already care about. Observe them finding the tool without lessons, editing assumptions, saving a variation and sharing or reopening it. Ask which missing evidence would change their interpretation. A later return visit can establish whether the saved setup is useful again; one guided session cannot establish repeated use.
+
+Keep observation notes with the session's date, app version, device/browser, experience level, chosen task, initial and changed-situation explanations, assistance given and unresolved problems. Add findings to the current review when they change the evidence status, rather than copying every task into release notes. Real-device and assistive-technology checks have their own access goals; they should not be reported as learning measurements.

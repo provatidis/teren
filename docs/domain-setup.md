@@ -1,8 +1,10 @@
 # Publishing Teren at teren.sh
 
-Keep the current repository, commit history, issues and GitHub Pages workflow. Cloudflare provides the domain and DNS; GitHub Pages continues to host the static app. Renaming the repository and connecting the public domain are separate settings.
+The cutover is complete: the repository is `provatidis/teren` and the site is `https://teren.sh/`. Cloudflare manages DNS and GitHub Pages hosts the static app. Ordinary releases use the [publishing workflow](development.md#publishing-with-github-pages); they require no repository rename or domain cutover.
 
-## Cutover order
+The procedure below preserves the migration and DNS configuration reference. Reuse it only when changing those settings. Repository names and public domains are separate configuration choices.
+
+## Cutover procedure and configuration reference
 
 1. Before changing the published address, export any saved experiment library and pool/position JSON you want to keep from the current site. Browser storage belongs to an origin. Lesson progress, sandbox balances and working drafts do not automatically move to `teren.sh`, and the experiment export does not include them.
 2. Review the Teren release and its passing checks on the existing repository. Rename that same repository to `teren` in **Settings → General → Repository name** when ready; do not create a replacement repository. Update the local Git remote to `https://github.com/provatidis/teren.git`.
@@ -26,6 +28,6 @@ Keep the current repository, commit history, issues and GitHub Pages workflow. C
 7. Merge the verified release and confirm that the Pages deployment succeeds. Check `https://teren.sh/`, Learn, About, Methods, the favicon, a shared scenario and a nested missing URL. Confirm that the custom domain remains configured and HTTPS is enforced. Update the repository's About website to `https://teren.sh/`.
 8. Import the saved experiment library and snapshot files on the new domain. Prior-format files remain supported. Use `teren.sh` for new shared links.
 
-The source metadata already targets `teren.sh` and the repository links target `provatidis/teren`, so both settings must be in place before this release is published. No legacy redirect repository or additional hosting service is needed.
+Source metadata targets `teren.sh` and repository links target `provatidis/teren`. Keep both aligned when changing hosting settings. No legacy redirect repository or additional hosting service is maintained.
 
 Official references: [GitHub custom domains](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site), [GitHub domain verification](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/verifying-your-custom-domain-for-github-pages), and [Cloudflare DNS records](https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/).
