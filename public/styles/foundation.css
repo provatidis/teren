@@ -19,9 +19,10 @@ h1{font-size:clamp(30px,4vw,44px); letter-spacing:-1.8px; font-weight:600; margi
 h2{font-size:21px; letter-spacing:-.6px; font-weight:600; margin:0}
 h3{font-size:14px; margin:0 0 5px}
 .subtitle{color:var(--muted); font-size:15px; margin:0}
-.button{border:0; border-radius:10px; padding:13px 18px; font-weight:600}
+.button{border:0; border-radius:10px; padding:13px 18px; font-weight:600; text-decoration:none}
+.button:is(:hover,:focus-visible){text-decoration:none}
 .secondary{background:var(--surface); border:1px solid var(--border-strong); color:var(--text); white-space:nowrap}
-.secondary:hover{background:var(--hover); border-color:var(--accent)}
+.secondary:hover:not(:disabled){background:var(--hover); border-color:var(--accent)}
 .primary{display:flex; align-items:center; justify-content:space-between; width:100%; background:var(--accent); color:var(--accent-ink); padding:16px 19px; font-size:14px}
 .primary:hover:not(:disabled){background:var(--accent-hover)}
 .primary span{font-size:20px}
