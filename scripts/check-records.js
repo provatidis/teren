@@ -7,6 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { canonicalPeriodPoint } from '../public/data/position-period.js';
 import { validateRecordedCase, recordedPeriod } from '../public/data/position-history.js';
 import { REPLAY_CASES } from '../public/data/replay-cases.js';
+import { validateMatchedComparison } from '../public/data/matched-comparison.js';
+import { canonicalCollectionHistory } from '../public/data/collection-history.js';
 
 const report = { checkedAt: new Date().toISOString(), cases: [] };
 const temporary = await mkdtemp(join(tmpdir(), 'teren-record-check-'));
@@ -41,8 +43,24 @@ try {
     }
     report.cases.push(entry);
   }
+  const file = 'uniswap-v3-matched-week.json';
+  const entry = { file };
+  try {
+    const saved = validateMatchedComparison(JSON.parse(await readFile(new URL('../public/examples/' + file, import.meta.url), 'utf8')));
+    const output = join(temporary, file);
+    await new Promise((resolve, reject) => {
+      const child = spawn(process.execPath, [fileURLToPath(new URL('./check-replay-comparison.js', import.meta.url)),
+        fileURLToPath(new URL('../docs/evidence/comparison-selection.json', import.meta.url)), output, join(temporary, 'comparison-cache')], { stdio: 'inherit' });
+      child.on('error', reject);
+      child.on('exit', code => code === 0 ? resolve() : reject(new Error('Comparison recapture exited with code ' + code)));
+    });
+    const fresh = validateMatchedComparison(JSON.parse(await readFile(output, 'utf8')));
+    assert.deepEqual(fresh.records.map(item => canonicalCollectionHistory(item.record)), saved.records.map(item => canonicalCollectionHistory(item.record)));
+    entry.matched = true;
+  } catch (error) { entry.matched = false; entry.error = error.message; }
+  report.cases.push(entry);
 } finally {
   await writeFile(process.env.REPLAY_REPORT || 'record-verification.json', JSON.stringify(report, null, 2) + '\n');
   await rm(temporary, { recursive: true, force: true });
 }
-if (report.cases.length !== REPLAY_CASES.length || report.cases.some(item => !item.matched)) process.exitCode = 1;
+if (report.cases.length !== REPLAY_CASES.length + 1 || report.cases.some(item => !item.matched)) process.exitCode = 1;

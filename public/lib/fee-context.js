@@ -85,9 +85,12 @@ export function createFeeContext(prefix) {
   records.addEventListener('toggle', () => { if (records.open) showRecords(); });
   retry.addEventListener('click', showRecords);
   const next = node('p', 'For a useful comparison, match the pool, range and period. Time in range alone does not establish fee income.');
+  const matched = node('a', 'Compare two ranges over the same week →');
+  matched.href = 'liquidity.html#fee-comparison';
+  const matchedNote = node('p', 'See recorded fees, time in range and the outcome versus holding for two positions. Each keeps its own starting token mix.');
   const source = node('a', 'How Uniswap allocates fees →');
   source.href = 'https://developers.uniswap.org/docs/liquidity/overview';
-  body.append(records, next, source); element.append(summary, body);
+  body.append(matched, matchedNote, records, next, source); element.append(summary, body);
   let current;
   function update(result) {
     current = result;

@@ -214,3 +214,11 @@ Uniswap v3 can also provide full-range liquidity. The lab labels identify the ca
 Both liquidity labs, Fees & break-even and the final challenge offer **Could fees cover this?** below the comparison. It expresses the total holding-match fee target as a percentage of starting capital. A chosen time window translates that target into a required average per day; extending the window does not predict more income. The remaining gap subtracts your assumed fees from the total target, while the daily hurdle uses the full target.
 
 A separate disclosure loads three recorded v3 positions as starting capital → recorded time → new fees earned. Each retains its actual range and active time; capture details and accounting notes are available below. Their fee tokens are valued at the final recorded price with USDC = $1. They cover different dates, durations and ranges; the week earned no new fees. These observations do not establish representative yields or forecasts for either lab. Follow **Inspect this recorded case** for the accounting and providers. Opening context or changing its window does not alter the question, an experiment, or a shared link.
+
+## Compare two recorded ranges
+
+Open **Compare two ranges over the same week** from a liquidity lab’s **Could fees cover this?** panel or the historical cases. The shared slider and Start/Day buttons move both positions to the same block. The chart shows new fee value as a share of each position’s starting capital; the cards separate fee income, LP minus holding, and dollar change. Seven bars show each day’s recorded active time.
+
+Each range keeps its own starting principal basket. **Tokens, collections and evidence** shows current principal, actual withdrawals, earlier excluded claims and remaining collectable tokens. Withdrawals can include old claims, so they are not automatically new income. **Explore this range in Experiment** starts a principal-only hypothetical scenario with zero future fees. **Export both positions and their evidence** retains both complete records.
+
+The two positions share their pool and week, but differ in range placement and starting mix. This is an illustration, not typical earnings or a controlled test of width. Collected tokens are valued as if held to the selected checkpoint; gas and recipient trades are excluded.

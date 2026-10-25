@@ -29,6 +29,10 @@ export function initWorkspaces() {
     document.getElementById('workspace-eyebrow').textContent = copy[key][0];
     title.textContent = copy[key][1];
     document.getElementById('workspace-subtitle').textContent = copy[key][2];
+    if (key === 'replay' && location.hash === '#fee-comparison') {
+      title.textContent = 'Compare recorded fee income';
+      document.getElementById('workspace-subtitle').textContent = 'Two real ranges, the same pool and the same week.';
+    }
     if (entry) entry.hidden = key !== 'experiment';
     for (const name of ['experiment', 'inspect']) {
       const link = document.getElementById('nav-' + name);
@@ -55,7 +59,8 @@ export function initWorkspaces() {
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scroll, { once: true });
       else scroll();
     } else if (key === 'mechanics' || key === 'replay') {
-      const scroll = () => requestAnimationFrame(() => document.getElementById(key === 'mechanics' ? 'swap-sandbox' : 'historical-case').scrollIntoView({ block: 'start', behavior: 'instant' }));
+      const target = key === 'mechanics' ? 'swap-sandbox' : location.hash === '#fee-comparison' ? 'fee-comparison' : 'historical-case';
+      const scroll = () => requestAnimationFrame(() => document.getElementById(target).scrollIntoView({ block: 'start', behavior: 'instant' }));
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scroll, { once: true });
       else scroll();
     }

@@ -1,7 +1,10 @@
 # Review questions and open blind spots
 
-## Current priorities · 1.34.0
+## Current priorities · 1.35.0
 
+- The matched comparison selects two active-at-start ranges under predeclared rules and includes fee collections. It closes the absence of a same-pool, same-period illustration; it does not establish typical earnings. Range placement and starting mixes also differ, so width alone cannot explain a result.
+- Collected tokens are valued as if retained until each checkpoint. Real recipient trades, gas and NFT-sale proceeds remain outside this position comparison. Active management with liquidity additions/removals is still excluded; broader sampling should keep that selection limitation explicit.
+- Check whether a learner can distinguish earning fees, beating holding and gaining dollars without calculations. Ask an experienced user what additional evidence they would need before applying a fee assumption. These outcomes have not been observed.
 - The new week keeps the declared dates and first eligible position, including its zero fees and zero active seconds. Its seven daily segments pass collection and continuity checks. This is evidence of one inactive week, not a representative fee yield or a matched earning reference. Do not choose another window after seeing the outcome merely to make it more impressive.
 - Ask a learner what changed when seven days passed without fees, and why matching holding can accompany a dollar loss. This has not yet been observed; passing tests does not establish understanding.
 - Observe an experienced user reopening a loop, changing a construction choice, testing shared adverse conditions and saving a variation. Release 1.33.0 improves that workflow; repeat usage has not yet been measured.
@@ -11,7 +14,7 @@
 - Observe an unfamiliar learner finding a topic, explaining one visual change and applying it to another setup. Positive feedback from experienced friends is useful; it does not yet measure novice understanding.
 - Check actual Android Chrome and an assistive-technology workflow. Desktop/narrow browser checks do not establish either.
 - Measure loading on the deployed site before claiming a time saving. One stylesheet request and a smaller Home dependency graph are engineering facts, not a field performance estimate.
-- Further candidates: a matched-period comparison between existing ranges, an explicit LP-minus-holding chart, and a carefully bounded arbitrage explainer. A longer inactive record does not close the question of realistic fee income; the next capture needs new eligibility rules declared before its returns are inspected.
+- Further candidates: predetermined consecutive periods with the same declared selection policy, an explicit LP-minus-holding chart, and a carefully bounded arbitrage explainer. One matched pair cannot establish a realistic expected fee rate.
 
 
 [Project decisions](../DECISIONS.md) · [Models](models.md) · [Learning evidence](learning.md)
