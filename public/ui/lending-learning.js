@@ -4,13 +4,14 @@ import { LENDING_LESSONS } from '../learning/lending-essentials.js';
 import { LOOP_LESSONS } from '../learning/borrowing-loops.js';
 import { lendingCase, checkLendingUnderstanding } from '../models/lending-lessons.js';
 import { loopCase, checkLoopUnderstanding } from '../models/loop-lessons.js';
-import { readLendingProgress, saveLendingProgress } from '../data/lending-state.js';
-import { readLoopProgress, saveLoopProgress, readLendingChapter, saveLendingChapter } from '../data/loop-state.js';
+import { readLendingProgress, saveLendingProgress, LENDING_QUESTION_REVISIONS } from '../data/lending-state.js';
+import { readLoopProgress, saveLoopProgress, readLendingChapter, saveLendingChapter, LOOP_QUESTION_REVISIONS } from '../data/loop-state.js';
 import { loanHash } from '../lib/lending-links.js';
 import { loopHash } from '../lib/loop-links.js';
 import { lendingMetrics } from '../lib/lending-presentation.js';
 import { loopLessonMetrics } from '../lib/loop-presentation.js';
 import { renderLoopMoneyFlow } from '../lib/loop-money-flow.js';
+import { createUnwindApplication } from '../lib/unwind-application.js';
 import { createLendingScene } from '../lib/lending-lesson-scenes.js';
 import { createLoanConditionScene } from '../lib/loan-condition-scene.js';
 import { createLoanResponseScene } from '../lib/loan-response-scene.js';
@@ -26,13 +27,13 @@ export function initLendingLearning() {
   const courses = {
     essentials: { lessons: LENDING_LESSONS, example: lendingCase, check: checkLendingUnderstanding,
       metrics: lendingMetrics, hash: loanHash, save: saveLendingProgress, progress: readLendingProgress().progress,
-      route: '#lesson=', label: 'LENDING', experiment: '#experiment' },
+      route: '#lesson=', label: 'LENDING', experiment: '#experiment', revisions: LENDING_QUESTION_REVISIONS },
     loops: { lessons: LOOP_LESSONS, example: loopCase, check: checkLoopUnderstanding,
       metrics: loopLessonMetrics, hash: loopHash, save: saveLoopProgress, progress: readLoopProgress().progress,
-      route: '#loop-lesson=', label: 'LOOPING', experiment: '#loops' },
+      route: '#loop-lesson=', label: 'LOOPING', experiment: '#loops', revisions: LOOP_QUESTION_REVISIONS },
   };
   let chapter = 'essentials', course = courses.essentials, progress = course.progress;
-  let lesson, draft, example, lessonScene, loopScene;
+  let lesson, draft, example, lessonScene, loopScene, applicationScene;
   const foundationLesson = () => chapter === 'essentials' && ['supply', 'borrow', 'conditions', 'respond'].includes(lesson?.id);
   const stressLesson = () => chapter === 'loops' && lesson?.id === 'stress';
   const visualLesson = () => foundationLesson() || chapter === 'loops' && ['build', 'stress', 'unwind'].includes(lesson?.id);
@@ -56,7 +57,12 @@ export function initLendingLearning() {
       ? 'Lesson progress saved in this browser.' : 'Saving is unavailable. You can keep learning in this tab.';
     navigation();
   }
-  function clearFeedback() { clearUnderstandingFeedback('lend'); $('lend-feedback').hidden = true; $('lend-continue').hidden = true; }
+  function clearFeedback() {
+    clearUnderstandingFeedback('lend');
+    $('lend-feedback').hidden = true;
+    $('lend-continue').hidden = true;
+    applicationScene?.reset();
+  }
   function reveal() {
     draft.revealed = true;
     renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, example.prediction, lesson.finding);
@@ -79,7 +85,8 @@ export function initLendingLearning() {
       { container: 'lend-reason-choices', selected: draft.reason, correct: result.reasoning, explanation: reasoning },
       { container: 'lend-application-choices', selected: draft.application, correct: result.application, explanation: application },
     ]);
-    $('lend-feedback-copy').textContent = result.passed ? lesson.takeaway : 'Read the feedback beside each question, then try again. You can change either answer.';
+    $('lend-feedback-copy').textContent = result.passed ? lesson.accomplishment : 'Read the feedback beside each question, then try again. You can change either answer.';
+    if (draft.application) applicationScene?.allowReveal();
     $('lend-continue').hidden = !result.passed;
     if (result.passed && !progress.completed.includes(lesson.id)) progress.completed.push(lesson.id);
     if (save) { persist(); focusLearningFeedback('lend'); }
@@ -99,6 +106,7 @@ export function initLendingLearning() {
     if (!lesson) return;
     saveLearningLocation('lending.html#' + (name === 'loops' ? 'loop-lesson=' : 'lesson=') + id);
     draft = progress.drafts[id] || fresh();
+    if (course.revisions[id]) draft.questionRevisions = { ...course.revisions[id] };
     example = course.example(id);
     for (const [key, choices] of [['prediction', lesson.predictions], ['reason', lesson.reasons], ['application', lesson.applications]]) {
       if (!choices.some(([value]) => value === draft[key])) draft[key] = '';
@@ -132,7 +140,7 @@ export function initLendingLearning() {
     $('lend-observe-title').textContent = showFlow ? 'What to take away' : 'Read the result';
     $('lend-check-label').textContent = showFlow ? 'CHECK YOUR UNDERSTANDING' : '03 · CHECK YOUR UNDERSTANDING';
     $('lend-observe-title').after(predictionFeedbackElement);
-    lessonScene = null; loopScene = null;
+    lessonScene = null; loopScene = null; applicationScene = null;
     if (foundationLesson() || stress) {
       const prediction = createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) });
       if (stress) lessonScene = createLoopStressScene(example.input, prediction);
@@ -150,7 +158,11 @@ export function initLendingLearning() {
       $('lend-predict-card').insertBefore(revealButton, $('lend-predict-note'));
     }
     $('lend-application-context').textContent = lesson.applicationContext;
+    $('lend-application-label').textContent = lesson.applicationLabel || 'APPLY · CHANGE THE SITUATION';
     $('lend-application-question').textContent = lesson.applicationQuestion;
+    if (chapter === 'loops' && lesson.id === 'unwind') applicationScene = createUnwindApplication(example.result);
+    $('lend-application-scene').replaceChildren(...(applicationScene ? [applicationScene.element] : []));
+    $('lend-application-scene').hidden = !applicationScene;
     $('lend-hint-text').textContent = lesson.hint;
     $('lend-hint').open = false; $('lend-deeper').open = false;
     $('lend-deeper-copy').replaceChildren(...lesson.deeper.map(copy => {

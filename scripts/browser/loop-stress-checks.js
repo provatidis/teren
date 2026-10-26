@@ -76,7 +76,7 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
   assert.match(await text('lend-prediction-feedback'), /^What happens The loop loses/);
   assert.equal(await evaluate("document.getElementById('lend-explanation').hidden"), false);
-  await choose('reason', 'exposure'); await choose('application', 'loop-gain'); await click('lend-check');
+  await choose('reason', 'exposure'); await choose('application', 'backing-not-profit'); await click('lend-check');
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   await click('stress-mode-time'); await key('stress-time', 'End'); await reload();
   assert.equal(await mode(), 'price');
@@ -85,11 +85,25 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
   await choose('prediction', 'hold'); await click('lend-reveal');
   assert.match(await text('lend-prediction-feedback'), /^The result differs from your prediction\./);
-  await choose('reason', 'exposure'); await choose('application', 'loop-gain'); await click('lend-check'); await reload();
+  await choose('reason', 'exposure'); await choose('application', 'backing-not-profit'); await click('lend-check'); await reload();
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked').value"), 'hold');
   assert.deepEqual(await working(), drafts);
   assert.equal(await evaluate("document.getElementById('lend-explore').href"), handoff);
+  await evaluate(`{
+    const progress = JSON.parse(localStorage.getItem('teren-loop-learning-v1'));
+    progress.drafts.stress.application = 'loop-gain';
+    delete progress.drafts.stress.questionRevisions;
+    localStorage.setItem('teren-loop-learning-v1', JSON.stringify(progress));
+  }`);
+  await reload();
+  assert.equal(await evaluate("document.getElementById('lend-feedback').hidden"), true);
+  assert.equal(await evaluate("document.querySelector('input[name=lend-reason]:checked').value"), 'exposure');
+  assert.equal(await evaluate("document.querySelector('input[name=lend-application]:checked')"), null);
+  assert.ok(await evaluate("JSON.parse(localStorage.getItem('teren-loop-learning-v1')).completed.includes('stress')"));
+  assert.equal(await text('lend-application-label'), 'APPLY · CHECK A CLAIM');
+  await choose('application', 'backing-not-profit'); await click('lend-check');
+  assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   await navigate(base + 'lending.html#loop-lesson=unwind');
   assert.equal(await text('lend-flow-title'), 'Follow the money');
   assert.equal(await text('lend-flow-instruction'), 'Take one action, then look at what changed.');

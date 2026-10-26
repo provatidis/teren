@@ -59,7 +59,7 @@ export function lessonReasonFeedback(id, outcome, reason) {
     },
     'pool-share': {
       dollars: 'LP ownership is a fraction of the changing reserves. It does not guarantee your original dollar deposit or a yield.',
-      eth: 'A proportional deposit buys a share of both reserves. Your claim is not limited to the ETH you deposited.',
+      eth: 'Your share follows the pool’s current balances. Swaps change the token amounts behind it; your original deposit quantities are not reserved for withdrawal.',
     },
     'loss-vs-profit': {
       entry: 'Comparing with the original budget measures dollar profit or loss. Impermanent loss compares LP principal with holding the exact starting tokens.',
@@ -67,14 +67,14 @@ export function lessonReasonFeedback(id, outcome, reason) {
     },
     'fee-break-even': {
       guarantee: 'The required fee amount is a target. These price inputs do not establish the trading or liquidity history needed to earn it.',
-      compound: 'These assumed fees are separate USD cash added at the end. They are not reinvested into the principal.',
+      compound: 'The target is the amount needed to close the gap, not a record of earned or collectable fees. Actual fee balances need separate accounting.',
     },
     'range-boundaries': {
       fixed: 'Range width alone does not determine fee income. Earnings also depend on trades, competing active liquidity and the path through the range.',
     },
     'final-challenge': {
       fees: 'Fee income may still be smaller than the principal shortfall against holding. Compare the total values using the same starting tokens.',
-      forecast: 'This outcome follows your price and fee assumptions. Reproducing the calculation does not prove those assumptions will occur.',
+      forecast: 'The fee amount is an input, not a record of trading. This result follows your assumptions; it does not establish earned fees.',
     },
   };
   return feedback[id]?.[reason] || 'Choose an explanation for this setup. The result and hint explain the comparison.';

@@ -6,6 +6,10 @@ import { LIQUIDATION_LIMITS, validateLiquidation } from '../models/single-liquid
 export const LOOP_DRAFT_KEY = 'teren-loop-draft-v1';
 export const LOOP_LEARNING_KEY = 'teren-loop-learning-v1';
 export const LOOP_LESSON_IDS = ['build', 'stress', 'unwind'];
+export const LOOP_QUESTION_REVISIONS = Object.freeze({
+  stress: Object.freeze({ application: 1 }),
+  unwind: Object.freeze({ application: 1 }),
+});
 const CHAPTER_KEY = 'teren-lending-chapter-v1';
 
 export function readLoopDraft(getStorage = () => globalThis.sessionStorage) {
@@ -37,12 +41,12 @@ export function saveLoopDraft(input, getStorage = () => globalThis.sessionStorag
 }
 
 export function readLoopProgress(getStorage = () => globalThis.localStorage) {
-  try { return { progress: parseLendingProgress(JSON.parse(getStorage().getItem(LOOP_LEARNING_KEY)), LOOP_LESSON_IDS), available: true }; }
-  catch { return { progress: parseLendingProgress(null, LOOP_LESSON_IDS), available: false }; }
+  try { return { progress: parseLendingProgress(JSON.parse(getStorage().getItem(LOOP_LEARNING_KEY)), LOOP_LESSON_IDS, LOOP_QUESTION_REVISIONS), available: true }; }
+  catch { return { progress: parseLendingProgress(null, LOOP_LESSON_IDS, LOOP_QUESTION_REVISIONS), available: false }; }
 }
 
 export function saveLoopProgress(progress, getStorage = () => globalThis.localStorage) {
-  try { getStorage().setItem(LOOP_LEARNING_KEY, JSON.stringify(parseLendingProgress(progress, LOOP_LESSON_IDS))); return true; }
+  try { getStorage().setItem(LOOP_LEARNING_KEY, JSON.stringify(parseLendingProgress(progress, LOOP_LESSON_IDS, LOOP_QUESTION_REVISIONS))); return true; }
   catch { return false; }
 }
 

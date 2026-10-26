@@ -1,6 +1,6 @@
 # Review status, evidence gaps and limitations
 
-Assessed against **Teren 1.45.0, 26 October 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. The liquidity fee/cost update introduces no new chain capture, external audit or observed-user study.
+Assessed against **Teren 1.46.0, 26 October 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. The lesson update strengthens conceptual questions and adds focused applications using the existing models and records. The evidence status below is unchanged.
 
 [Project overview](../README.md) · [Models](models.md) · [Learning and observation plan](learning.md) · [Roadmap](roadmap.md) · [Historical reviews](review-history.md)
 

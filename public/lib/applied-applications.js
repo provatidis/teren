@@ -8,21 +8,26 @@ export function appliedApplication(id, question) {
     hint: 'Collecting fees and removing liquidity are separate operations.',
     feedback: 'Collecting those fee tokens transfers earned assets to the owner. With liquidity unchanged, it does not remove or reinvest the principal.'};
   if (id === 'between-samples') return {
-    expected: 'not-proof', context: 'Imagine having just two price samples that are both inside the range, rather than the two outside samples in the recorded question interval.',
-    question: 'What do those two observations establish about the interval?',
-    choices: [['not-proof','The sampled prices are inside; the intervening path is unknown.'],['whole','The position was active throughout the time between both samples.'],['no-fees','Price stayed stable, so no swap fees accrued between samples.']],
-    hint: 'A sampled status describes an instant. Counter differences supply evidence about the time between samples.',
-    feedback: 'Two in-range samples cannot establish the entire path. An exit and return could occur between them; elapsed range-time accounting provides separate evidence.'};
+    expected: 'fee-records', context: 'Imagine two intervals with the same recorded number of seconds in range. Their trades and competing liquidity may differ.',
+    question: 'What would establish whether the intervals earned the same fee tokens?',
+    choices: [['fee-records','The new fee tokens recorded separately for each interval.'],['equal-time','The matching time in range already establishes that result.'],['final-price','The pool price at each interval’s final checkpoint.']],
+    hint: 'Recorded active time and recorded fee earnings answer different questions.',
+    feedback: 'Equal active time does not imply equal fees. Compare the new fee tokens for each interval; trades and the position’s share of active liquidity can differ.'};
   if (id !== 'period-vs-holding') throw new Error('Choose an applied exercise.');
+  return {expected: 'current-values',
+    context: 'Imagine a later checkpoint where more fee tokens have been earned. You want to know whether the LP’s advantage over holding has grown.',
+    question: 'What else do you need to compare?',
+    choices: [['current-values','Updated principal, fee and holding values, with costs counted consistently.'],['active-time','The time the position spent in range since this checkpoint.'],['collection','Whether the owner collected the fee tokens during that time.']],
+    hint: 'More fee tokens do not tell you how the rest of the position or the holding basket changed.',
+    feedback: 'Value principal and all new period fees at the later checkpoint, then compare with the same starting tokens held until then, including each strategy’s costs. More fee tokens alone do not establish a larger advantage.'};
+}
+// A hypothetical cost applied to the final observation, not a change to the record.
+export function appliedCostExample(question) {
   const costUSD = 1, lpUSD = question.view.lpUSD - costUSD, gapUSD = lpUSD - question.view.holdingUSD;
-  return {expected: gapUSD < -.00000001 ? 'hold' : gapUSD > .00000001 ? 'lp' : 'tie', costUSD, lpUSD, gapUSD,
-    context: 'Keep the final recorded prices, basket and earned fees. Add a hypothetical ' + usd(costUSD) + ' LP-only cost, with no added holding cost. LP after that cost: ' + usd(lpUSD) + '. Holding: ' + usd(question.view.holdingUSD) + '.',
-    question: 'Which has the higher value after this added cost?',
-    choices: [['hold','Holding has the higher value.'],['lp','The LP has the higher value.'],['tie','The two values are equal.']],
-    hint: 'Read the two values above. Fee income and costs both contribute to the total comparison.',
-    feedback: gapUSD < 0 ? 'The LP-only cost exceeds the small before-cost advantage at the final checkpoint. Holding is ahead in this thought experiment; the recorded historical result itself has not changed.'
-      : gapUSD > 0 ? 'The LP remains ahead after this hypothetical cost. That is still a comparison over the stated period and assumptions, not a forecast.'
-        : 'The hypothetical cost exactly closes the difference. This describes the stated comparison, not a general guarantee.'};
+  return {costUSD, lpUSD, gapUSD,
+    text: 'Worked example: add a hypothetical ' + usd(costUSD) + ' LP-only cost at the final checkpoint, with no added holding cost. LP: ' + usd(lpUSD) + '; holding: ' + usd(question.view.holdingUSD) + '. '
+      + (gapUSD < 0 ? 'That cost exceeds the small before-cost advantage, leaving holding ahead.' : gapUSD > 0 ? 'The LP remains ahead after that cost.' : 'The cost exactly closes the difference.')
+      + ' The historical record is unchanged.'};
 }
 export function checkAppliedUnderstanding(question, application, reason, answer) {
   const reasoning = reason === question.reason, applied = answer === application.expected;

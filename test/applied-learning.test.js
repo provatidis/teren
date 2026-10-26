@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { APPLIED_IDS, appliedLessonFromHash, appliedQuestion, checkAppliedAnswer } from '../public/lib/applied-lessons.js';
+import { appliedApplication, appliedCostExample, checkAppliedUnderstanding } from '../public/lib/applied-applications.js';
 import { APPLIED_LESSONS } from '../public/learning/applied-liquidity.js';
 import { validatePositionPeriod } from '../public/data/position-period.js';
 import { periodPointView } from '../public/lib/period-presentation.js';
@@ -27,8 +28,8 @@ test('applied questions use verified period earnings, interval counters and the 
   assert.equal(final.view.holding.amount0, 4982691068n); assert.equal(final.view.holding.amount1, 14920139441099507n);
   assert.ok(final.view.principalGapUSD < 0 && final.view.gapUSD > 0);
   assert.ok(Math.abs(final.answer - .17457169368572067) < 1e-12);
-  assert.equal(checkAppliedAnswer(final, '0.17', 'basket').passed, true);
-  assert.equal(checkAppliedAnswer(final, '0.18', 'basket').numeric, false);
+  assert.equal(checkAppliedAnswer(final, '0.17', 'shortfall').passed, true);
+  assert.equal(checkAppliedAnswer(final, '0.18', 'shortfall').numeric, false);
   assert.ok(periodPointView(returning, 8).gapUSD < 0, 'Earning fees does not guarantee beating holding at every checkpoint.');
 });
 test('exploring a different checkpoint cannot alter the fixed question or accept unsupported evidence', () => {
@@ -85,4 +86,40 @@ test('bundled record loading shares requests, validates evidence and retries a f
   await assert.rejects(retry('range-return'), /Try again/); assert.deepEqual(await retry('range-return'), returning);
   const bad = createAppliedRecordLoader(async () => ({ok: true, json: async () => ({...raw[0], validation: {}})}));
   await assert.rejects(bad('in-range'), /summary differs/);
+});
+
+test('the final explanation uses the earlier shortfall while the cost illustration preserves the final record', () => {
+  const original=JSON.stringify(returning), question=appliedQuestion(returning,'period-vs-holding');
+  assert.equal(question.reason,'shortfall');
+  assert.ok(question.contrast.feesUSD>0 && question.contrast.feesUSD < -question.contrast.principalGapUSD);
+  const application=appliedApplication('period-vs-holding',question);
+  assert.equal(application.expected,'current-values');
+  assert.equal(checkAppliedUnderstanding(question,application,'shortfall','current-values').passed,true);
+  for(const wrong of ['collect','exit'])assert.equal(checkAppliedUnderstanding(question,application,wrong,'current-values').passed,false);
+  const example=appliedCostExample(question);
+  assert.equal(example.costUSD,1); assert.equal(example.lpUSD,question.view.lpUSD-1);
+  assert.ok(question.view.gapUSD>0 && example.gapUSD<0);
+  assert.match(example.text,/hypothetical \$1.00 LP-only cost/);
+  assert.match(example.text,/historical record is unchanged/);
+  assert.equal(JSON.stringify(returning),original);
+});
+test('applied question revisions preserve evidence navigation, optional calculations and completed lessons', () => {
+  const old={version:1,completed:APPLIED_IDS,drafts:{
+    'fees-over-time':{prediction:'earned',reason:'growth',application:'same',answer:'2.36',revealed:true,checkpoint:8},
+    'between-samples':{prediction:'possible',reason:'counters',application:'not-proof',answer:'2724',revealed:true,checkpoint:8},
+    'period-vs-holding':{prediction:'can-trail',reason:'basket',application:'hold',answer:'0.17',revealed:true,checkpoint:6,choiceSeed:7},
+  }};
+  const migrated=parseAppliedProgress(old);
+  assert.deepEqual(migrated.completed,APPLIED_IDS);
+  assert.equal(migrated.drafts['fees-over-time'].application,'same');
+  assert.equal(migrated.drafts['between-samples'].reason,'counters');
+  assert.equal(migrated.drafts['between-samples'].application,'');
+  assert.equal(migrated.drafts['period-vs-holding'].reason,'');
+  assert.equal(migrated.drafts['period-vs-holding'].application,'');
+  for(const id of APPLIED_IDS)for(const key of ['prediction','answer','revealed','checkpoint'])assert.equal(migrated.drafts[id][key],old.drafts[id][key]);
+  assert.equal(migrated.drafts['period-vs-holding'].choiceSeed,7);
+  migrated.drafts['between-samples'].application='fee-records';
+  migrated.drafts['period-vs-holding'].reason='shortfall';
+  migrated.drafts['period-vs-holding'].application='current-values';
+  assert.deepEqual(parseAppliedProgress(migrated),migrated);
 });

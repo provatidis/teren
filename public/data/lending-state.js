@@ -6,6 +6,7 @@ export const LOAN_DRAFT_KEY = 'teren-lending-draft-v1';
 export const LOAN_LEARNING_KEY = 'teren-lending-learning-v1';
 export const LIQUIDATION_DRAFT_KEY = 'teren-liquidation-draft-v1';
 export const LENDING_LESSON_IDS = ['supply', 'borrow', 'conditions', 'respond'];
+export const LENDING_QUESTION_REVISIONS = Object.freeze({ respond: Object.freeze({ reason: 1 }) });
 
 export function readLoanDraft(getStorage = () => globalThis.sessionStorage) {
   try {
@@ -39,7 +40,7 @@ export function saveLiquidationDraft(input, getStorage = () => globalThis.sessio
   catch { return false; }
 }
 
-export function parseLendingProgress(value, ids = LENDING_LESSON_IDS) {
+export function parseLendingProgress(value, ids = LENDING_LESSON_IDS, revisions = LENDING_QUESTION_REVISIONS) {
   const clean = { version: 1, completed: [], drafts: {}, currentLesson: ids[0] };
   if (value?.version !== 1) return clean;
   if (ids.includes(value.currentLesson)) clean.currentLesson = value.currentLesson;
@@ -53,6 +54,14 @@ export function parseLendingProgress(value, ids = LENDING_LESSON_IDS) {
       revealed: draft.revealed === true,
       seed: Number.isInteger(draft.seed) && draft.seed >= 0 && draft.seed <= 0xffffffff ? draft.seed : 0,
     };
+    if (revisions[id]) {
+      const current = clean.drafts[id];
+      current.questionRevisions = { ...revisions[id] };
+      for (const [field, revision] of Object.entries(revisions[id])) {
+        // Completion belongs to the learner; an answer belongs to its question.
+        if (draft.questionRevisions?.[field] !== revision) current[field] = '';
+      }
+    }
   }
   return clean;
 }

@@ -4,7 +4,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
   const keys=['degenerator-learning-liquidity-v1','passiko-applied-liquidity-v1','defi-sandbox-v1','degenerator-pool-snapshot-v1','degenerator-v3-position-snapshot-v1','degenerator-experiments-v1'];
   const before=await evaluate('JSON.stringify('+JSON.stringify(keys)+'.map(key=>localStorage.getItem(key)))');
   const choose=(name,value)=>evaluate(`document.querySelector('input[name="${name}"][value="${value}"]').click()`);
-  const cases=[['range-width','none','bounds','unknown'],['fee-tiers','b','trades','no'],['range-management','same','asset','automatic']];
+  const cases=[['range-width','none','bounds','mix'],['fee-tiers','b','trades','smaller-share'],['range-management','same','asset','automatic']];
   for(const [id,prediction,reason,application]of cases) {
     await navigate(base+'learn.html#manage='+id);
     assert.equal(await evaluate("document.getElementById('learn-essential').hidden&&document.getElementById('learn-applied').hidden&&!document.getElementById('learn-management').hidden"),true);
@@ -22,7 +22,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
     await choose('manage-reason',id==='range-width'?'budget':id==='fee-tiers'?'clock':'liquidated');await choose('manage-application',application);await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Review your answers.');
     assert.equal(await evaluate("document.getElementById('manage-continue').hidden"),true);
-    await choose('manage-reason',reason);await choose('manage-application',id==='range-width'?'narrow':id==='fee-tiers'?'a':'fees');await click('manage-check');
+    await choose('manage-reason',reason);await choose('manage-application',id==='range-width'?'capital':id==='fee-tiers'?'fixed-apr':'fees');await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Review your answers.');
     await choose('manage-application',application);await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
@@ -42,7 +42,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
       await click('manage-variation');assert.equal(await text('manage-variation-label'),'Situation '+(variant+1)+' of 3');
       assert.equal(await evaluate("document.getElementById('manage-reveal').disabled"),false);assert.equal(await evaluate("document.getElementById('manage-observe').hidden"),true);
       await choose('manage-prediction',id==='range-width'?(variant===2?'both':'wide'):id==='fee-tiers'?'unknown':variant===1?'same':'rises');await click('manage-reveal');
-      const changedAnswer=id==='range-width'?(variant===1?'narrow':'wide'):id==='fee-tiers'?(variant===1?'a':'b'):variant===1?'removed':'automatic';
+      const changedAnswer=id==='range-width'?(variant===1?'whole-period':'own-basket'):id==='fee-tiers'?(variant===1?'more-income':'smaller-advantage'):variant===1?'removed':'automatic';
       await choose('manage-reason',reason);await choose('manage-application',changedAnswer);await click('manage-check');assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
       if(id==='range-width'&&variant===2)assert.match(await text('manage-metrics'),/Narrow range Active.*Wider range Active/s);
       if(id==='fee-tiers')assert.match(await text('manage-metrics'),/Position A fees \$12.00.*Position B fees \$4.00/s);
@@ -68,7 +68,7 @@ export async function checkMobileManagementLearning({evaluate,click,text,navigat
     assert.equal(await evaluate("document.getElementById('learn-course').open"),false);
     for(let reset=0;reset<3&&(await text('manage-variation-label'))!=='Situation 1 of 3';reset++)await click('manage-variation');
     await evaluate("document.querySelector('input[name=manage-prediction][value=wide]').click()");await click('manage-reveal');
-    await evaluate("document.querySelector('input[name=manage-reason][value=bounds]').click();document.querySelector('input[name=manage-application][value=unknown]').click()");await click('manage-check');
+    await evaluate("document.querySelector('input[name=manage-reason][value=bounds]').click();document.querySelector('input[name=manage-application][value=mix]').click()");await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
     assert.equal(await text('learn-current-chapter'), 'Range choices');
     assert.equal(await text('learn-current-progress'), await text('manage-progress-count'));

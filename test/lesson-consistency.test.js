@@ -93,7 +93,7 @@ test('historical questions keep their period scope and reject every unsupported 
       if (reason !== question.reason) assert.doesNotMatch(appliedReasonFeedback(lesson.id, reason), /^Choose a conclusion/);
     }
   }
-  assert.match(APPLIED_LESSONS.at(-1).explanation, /At the final question checkpoint/);
+  assert.match(APPLIED_LESSONS.at(-1).explanation, /At the final checkpoint/);
   const interval = appliedQuestion(records[1], 'between-samples');
   assert.equal(checkAppliedAnswer(interval, '2724.4', 'counters').numeric, false);
   assert.equal(checkAppliedAnswer(interval, '2724', 'counters').numeric, true);

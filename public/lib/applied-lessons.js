@@ -22,7 +22,7 @@ export function appliedQuestion(period, id) {
   // return. Keep the final period endpoint as the assessed result and handoff.
   const contrastIndex = 6, contrast = periodPointView(period, contrastIndex);
   if (!(contrast.feesUSD > 0 && contrast.gapUSD < 0 && view.gapUSD > 0)) throw new Error('The recorded comparison checkpoints no longer match this lesson.');
-  return { index, view, interval, contrastIndex, contrast, answer: view.gapUSD, answerDigits: 2, prediction: 'can-trail', reason: 'basket' };
+  return { index, view, interval, contrastIndex, contrast, answer: view.gapUSD, answerDigits: 2, prediction: 'can-trail', reason: 'shortfall' };
 }
 export function checkAppliedAnswer(question, answer, reason) {
   const numeric = learningAnswerMatches(answer, question.answer, question.answerDigits, question.wholeAnswer);
@@ -40,8 +40,8 @@ export function appliedReasonFeedback(id, reason) {
       status: 'An outside sample describes one block. The question interval records activity and earned tokens between two outside samples.',
     },
     'period-vs-holding': {
-      forecast: 'The comparison describes the recorded period before costs. It does not predict future prices, fees or outperformance.',
-      income: 'Fees can be smaller than the shortfall in principal value. Compare principal plus period fees with holding the same starting tokens.',
+      collect: 'Earned fee tokens already have value before collection. At the earlier checkpoint, their value is smaller than the principal shortfall against holding.',
+      exit: 'A range exit stops new earnings while inactive; it does not erase earlier fees. Here those fees are still worth less than the principal shortfall.',
     },
   };
   return feedback[id]?.[reason] || 'Choose a conclusion supported by the marked question checkpoint or interval.';

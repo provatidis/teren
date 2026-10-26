@@ -1,6 +1,6 @@
 {
   "name": "teren",
-  "version": "1.45.0",
+  "version": "1.46.0",
   "private": true,
   "type": "module",
   "description": "A DeFi playground for liquidity, lending and reproducible learning experiments",

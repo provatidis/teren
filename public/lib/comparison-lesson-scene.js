@@ -1,5 +1,6 @@
 import { createFeeContext } from './fee-context.js';
 import { comparisonSceneState } from './comparison-scene-state.js';
+import { createComparisonBars } from './comparison-bars.js';
 import { createSceneExplorer, sceneNode } from './lesson-scene.js';
 import { fmt, usd } from './format.js';
 
@@ -18,40 +19,19 @@ export function createComparisonScene(id, input, prediction) {
   let fees = id === 'final-challenge' ? input.fees : 0;
   const element = sceneNode('div', undefined, 'lesson-scene comparison-scene');
   element.append(prediction, '\n');
-  const figure = sceneNode('figure', undefined, 'comparison-figure');
-  const title = sceneNode('figcaption', '', 'scene-figure-title'); title.id = 'comparison-title';
-  const rows = {};
-  for (const [key, label] of [['start', 'Starting capital'], ['hold', 'Holding starting tokens'], ['lp', withFees ? 'LP + assumed fees' : 'LP before fees']]) {
-    const row = sceneNode('div', undefined, 'comparison-row'); row.dataset.comparison = key;
-    const heading = sceneNode('div', undefined, 'comparison-heading');
-    const value = sceneNode('strong'); value.id = 'comparison-' + key + '-value';
-    heading.append(sceneNode('span', label), ' ', value);
-    const track = sceneNode('div', undefined, 'comparison-track'); track.setAttribute('aria-hidden', 'true');
-    const principal = sceneNode('span', undefined, 'comparison-principal');
-    const fee = sceneNode('span', undefined, 'comparison-fees');
-    track.append(principal, fee); row.append(heading, '\n', track);
-    rows[key] = { row, value, principal, fee };
-  }
-  const parts = sceneNode('p', '', 'comparison-parts'); parts.id = 'comparison-parts'; parts.hidden = !withFees;
+  const bars = createComparisonBars(input, { withFees });
+  const figure = bars.figure;
   const verdict = sceneNode('div', undefined, 'comparison-verdict');
   const profit = sceneNode('p'); profit.id = 'comparison-profit';
   const holding = sceneNode('p'); holding.id = 'comparison-holding';
   verdict.append(profit, '\n', holding);
   const basket = sceneNode('p', '', 'scene-key');
   const scope = sceneNode('p', '', 'scene-question-scope'); scope.id = 'comparison-scope';
-  figure.append(title, '\n', rows.start.row, '\n', rows.hold.row, '\n', rows.lp.row, '\n', parts);
 
   function draw() {
     const state = comparisonSceneState(input, price, fees), r = state.result;
     feeContext?.update(r);
-    title.textContent = 'Value at ' + usd(price) + ' per ETH';
-    for (const [key, value] of [['start', input.investment], ['hold', r.holdValue], ['lp', r.lpValue]]) {
-      const row = rows[key];
-      row.value.textContent = usd(value);
-      row.principal.style.width = (key === 'lp' ? r.lpBeforeFees : value) / state.ceiling * 100 + '%';
-      row.fee.style.width = (key === 'lp' ? fees : 0) / state.ceiling * 100 + '%';
-    }
-    parts.textContent = 'Solid: ' + usd(r.lpBeforeFees) + ' principal · Striped: ' + usd(fees) + ' assumed fees';
+    bars.draw(state);
     const subject = withFees ? 'LP + fees' : 'LP';
     profit.textContent = subject + (state.versusStart === 'equal' ? ' matches the starting capital.'
       : ' is ' + usd(Math.abs(state.fromStart)) + ' ' + state.versusStart + ' the starting capital.');

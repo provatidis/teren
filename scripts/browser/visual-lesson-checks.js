@@ -64,15 +64,29 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   assert.equal(await evaluate("localStorage.getItem('passiko-range-learning-v1')"), rangeSaved);
   await click('manage-reveal');
   assert.equal(await evaluate("document.getElementById('range-scene-price').value"), '2300');
-  await choose('manage-reason', 'bounds'); await choose('manage-application', 'unknown'); await click('manage-check');
+  await choose('manage-reason', 'bounds'); await choose('manage-application', 'mix'); await click('manage-check');
   assert.equal(await text('manage-feedback-title'), 'Both answers are correct.');
   await fill('range-scene-price', '2000');
   assert.match(await text('range-scene-price-scope'), /checks below still use \$2,300.00/);
   await reload();
   assert.equal(await text('manage-feedback-title'), 'Both answers are correct.');
   assert.equal(await evaluate("document.getElementById('range-scene-price').value"), '2300');
+  const completedRange = await evaluate("localStorage.getItem('passiko-range-learning-v1')");
+  await evaluate(`(() => {
+    const key='passiko-range-learning-v1', progress=JSON.parse(localStorage.getItem(key));
+    const draft=progress.drafts['range-width']; draft.application='unknown';
+    draft.questionRevisions.application=1; localStorage.setItem(key,JSON.stringify(progress));
+  })()`);
+  await reload();
+  assert.equal(await evaluate("document.querySelector('input[name=manage-application]:checked')"),null,'A retired comparison answer cannot answer the new mechanism question.');
+  assert.equal(await evaluate("document.querySelector('input[name=manage-reason]:checked').value"),'bounds','The unchanged explanation remains answered.');
+  assert.equal(await evaluate("document.getElementById('manage-feedback').hidden"),true,'Retired answers must not restore success feedback.');
+  assert.equal(await evaluate("JSON.parse(localStorage.getItem('passiko-range-learning-v1')).completed.includes('range-width')"),true,'Earlier completion remains saved.');
+  await evaluate(`localStorage.setItem('passiko-range-learning-v1',${JSON.stringify(completedRange)})`);
+  await reload();
+  assert.equal(await text('manage-feedback-title'),'Both answers are correct.','Current revision answers still restore.');
 
-  for (const [id, reason, application] of [['build', 'debt', 'supplied'], ['unwind', 'backing', 'blocked']]) {
+  for (const [id, reason, application] of [['build', 'debt', 'supplied'], ['unwind', 'backing', 'repay-wallet']]) {
     await navigate(base + 'lending.html#loop-lesson=' + id);
     await click('lend-reveal'); await click('lend-retry');
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), await text('lend-question'));

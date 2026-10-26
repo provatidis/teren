@@ -1,5 +1,12 @@
 # Release history
 
+## 1.46.0 · 2026-10-26
+
+- Review all twenty lessons around explanation and application. Replace weak number comparisons and predictable repeat questions with changes in conditions, plausible misconceptions and feedback tied to the selected answer. Keep Predict → Observe → Check, optional predictions and direct lesson access.
+- Add a separate visual challenge to the liquidity finale: construct an example that matches holding while both lose dollars, then explain what the assumed fees covered. Exact matching and a worked example remove arithmetic and slider precision as barriers.
+- Pause the borrowing unwind application after selling ETH so learners identify the repayment still needed, with an optional repayment contrast. Replace the recorded finale’s cost-ranking question with interpreting principal, fees and the holding benchmark; retain the cost reversal as a worked illustration.
+- Keep application state separate from the fixed observation and lab handoffs. Preserve completed progress while retiring answers to materially revised questions, and label sharing as the worked example. Extend model, migration and desktop/mobile interaction checks. Financial models and recorded blockchain evidence are unchanged.
+
 ## 1.45.0 · 2026-10-26
 
 - Add an assumed average position fee APR and duration alongside cash fees in both liquidity endpoint labs. Apply APR to starting deployed capital over the entire period, without compounding or multiplying by concentration.

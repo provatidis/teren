@@ -6,7 +6,7 @@ import { usd } from '../lib/format.js';
 import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js';
 import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../models/range-decisions.js';
 import { managementLessonFromHash } from '../lib/management-links.js';
-import { readManagementProgress, saveManagementProgress } from '../data/management-progress.js';
+import { readManagementProgress, saveManagementProgress, MANAGEMENT_QUESTION_REVISIONS } from '../data/management-progress.js';
 import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback, renderUnderstandingFeedback, clearUnderstandingFeedback } from '../lib/learning-elements.js';
 import { rangeHash } from '../lib/range-links.js';
@@ -17,7 +17,7 @@ export function initManagementLearning() {
   const predictionFeedbackElement = $('manage-prediction-feedback');
   const predictionField = $('manage-prediction-field');
   const visualLesson = () => lesson?.id === 'range-width';
-  const fresh=(variant=0)=>({variant,prediction:'',reason:'',application:'',revealed:false,choiceSeed:newChoiceSeed()});
+  const fresh=(variant=0)=>({variant,prediction:'',reason:'',application:'',revealed:false,choiceSeed:newChoiceSeed(),questionRevisions:{...MANAGEMENT_QUESTION_REVISIONS[lesson.id]}});
   function focus(id) {$(id).focus({preventScroll:true});$(id).scrollIntoView({block:'start',behavior:'instant'});}
   function navigation() {
     $('manage-progress-count').textContent=progress.completed.length+' of 3 checked';
@@ -61,7 +61,7 @@ export function initManagementLearning() {
       { container: 'manage-reasons', selected: draft.reason, correct: result.reasoning, explanation: result.reasoning ? lesson.takeaway : reasonFeedback },
       { container: 'manage-applications', selected: draft.application, correct: result.application, explanation: applicationFeedback },
     ]);
-    $('manage-feedback-copy').textContent=result.passed?lesson.takeaway:'Read the feedback beside each question, then try again. You can change either answer.';
+    $('manage-feedback-copy').textContent=result.passed?(application.accomplishment||lesson.accomplishment):'Read the feedback beside each question, then try again. You can change either answer.';
     $('manage-continue').hidden=!result.passed;
     if(result.passed&&!progress.completed.includes(lesson.id))progress.completed.push(lesson.id);
     const next=MANAGEMENT_LESSONS[MANAGEMENT_IDS.indexOf(lesson.id)+1];

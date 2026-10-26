@@ -23,12 +23,7 @@ test('range widths use the same budget and price but each range’s own funding 
     assert.equal(result.wide.state,'inside');assert.equal(result.prediction,variant===2?'both':'wide');
     assert.equal(result.narrow.state,['above','below','inside'][variant]);
     if(variant===2)assert.match(managementPresentation(result).reasoning,/Both are active/);
-    assert.equal(result.application,['unknown','narrow','wide'][variant]);
-    if(result.comparison){
-      assert.equal(result.comparison.narrow,result.narrow.lpBeforeFees+result.comparison.fees[0]-result.comparison.costs[0]);
-      assert.equal(result.comparison.wide,result.wide.lpBeforeFees+result.comparison.fees[1]-result.comparison.costs[1]);
-      assert.equal(result.comparison.narrow>result.comparison.wide,variant===1);
-    }
+    assert.equal(result.application,['mix','whole-period','own-basket'][variant]);
     for(const {scenario} of managementPresentation(result).links){
       const restored=rangeFromHash(rangeHash(scenario));assert.equal(restored.futurePrice,result.price);assert.equal(restored.fees,0);assert.equal(restored.fullRangeFees,0);
     }
@@ -38,10 +33,9 @@ test('fee tiers alone never establish earnings, including supplied totals that r
   assert.deepEqual(managementCase('fee-tiers',0).fees,[12,4]);
   for(let variant=0;variant<3;variant++){
     const result=managementCase('fee-tiers',variant),presentation=managementPresentation(result);
-    assert.equal(result.prediction,'unknown');assert.equal(result.application,['no','a','b'][variant]);
+    assert.equal(result.prediction,'unknown');assert.equal(result.application,['smaller-share','more-income','smaller-advantage'][variant]);
     assert.match(presentation.note,/supplied teaching facts/);assert.equal(presentation.links.length,0);
     if(variant===1)assert.ok(result.fees[0]>result.fees[1]&&result.rates[0]<result.rates[1]);
-    if(variant===2){assert.ok(result.fees[0]>result.fees[1]);assert.ok(result.totals[0]<result.totals[1]);}
   }
 });
 test('an unchanged outside position retains its tokens and returns to activity without a new deposit',()=>{
@@ -83,7 +77,7 @@ test('management routes reject duplicates and mixed chapter fragments without hi
 test('new progress is bounded and independent of existing work, including blocked or damaged storage',()=>{
   const value={version:1,completed:['range-width','range-width','unknown'],drafts:{'range-width':{variant:2,prediction:'both',reason:'bounds',application:'unknown',revealed:true,choiceSeed:0,answer:999},'fee-tiers':{variant:1,prediction:'x'.repeat(25),reason:null,choiceSeed:-1},'range-management':{variant:99}}};
   const clean=parseManagementProgress(value);assert.deepEqual(clean.completed,['range-width']);
-  assert.equal(clean.drafts['range-width'].choiceSeed,0);assert.equal(clean.drafts['range-width'].application,'unknown');assert.equal(clean.drafts['range-width'].answer,undefined);
+  assert.equal(clean.drafts['range-width'].choiceSeed,0);assert.equal(clean.drafts['range-width'].application,'');assert.equal(clean.drafts['range-width'].answer,undefined);
   assert.equal(clean.drafts['fee-tiers'].prediction,'');assert.equal(clean.drafts['fee-tiers'].choiceSeed,null);assert.equal(clean.drafts['range-management'],undefined);
   assert.deepEqual(parseManagementProgress({version:2}),emptyManagementProgress());
   const map=new Map([['degenerator-learning-liquidity-v1','old essentials'],['passiko-applied-liquidity-v1','old history'],['defi-sandbox-v1','old balances']]);
@@ -107,4 +101,26 @@ test('every existing subject has a plain visible pitfall, and the fee-target que
   const html=await readFile(new URL('../public/learn.html',import.meta.url),'utf8');
   assert.match(html,/id="learn-pitfall"/);assert.match(html,/id="applied-pitfall"/);
   assert.doesNotMatch(html.slice(html.indexOf('<article id="learn-management"'),html.indexOf('<article id="learn-applied"')),/type="number"/);
+});
+
+test('range question revisions retire only changed draft answers and preserve completed work', () => {
+  const old = {version:1, completed:MANAGEMENT_IDS, drafts:{
+    'range-width':{variant:2,prediction:'both',reason:'bounds',application:'wide',revealed:true,choiceSeed:42},
+    'fee-tiers':{variant:1,prediction:'unknown',reason:'trades',application:'a',revealed:true},
+    'range-management':{variant:1,prediction:'same',reason:'asset',application:'removed',revealed:true},
+  }};
+  const migrated = parseManagementProgress(old);
+  assert.deepEqual(migrated.completed, MANAGEMENT_IDS);
+  for (const id of ['range-width','fee-tiers']) {
+    assert.equal(migrated.drafts[id].application, '');
+    assert.equal(migrated.drafts[id].prediction, old.drafts[id].prediction);
+    assert.equal(migrated.drafts[id].reason, old.drafts[id].reason);
+    assert.equal(migrated.drafts[id].revealed, true);
+    assert.equal(migrated.drafts[id].variant, old.drafts[id].variant);
+  }
+  assert.equal(migrated.drafts['range-width'].choiceSeed,42);
+  assert.equal(migrated.drafts['range-management'].application,'removed');
+  migrated.drafts['range-width'].application='own-basket';
+  migrated.drafts['fee-tiers'].application='more-income';
+  assert.deepEqual(parseManagementProgress(migrated),migrated,'Current answers survive repeated saves and reloads.');
 });

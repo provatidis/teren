@@ -1,6 +1,8 @@
 // Keep legacy storage and format identifiers so existing work survives rebranding.
 import { LESSON_IDS, VARIANTS, validateLessonInputs } from '../models/lesson-experiments.js';
 import { validChoiceSeed } from '../lib/learning-choices.js';
+import { essentialQuestionRevisions } from '../models/lesson-application.js';
+import { challengeSetup } from '../models/liquidity-challenge.js';
 export const LEARNING_KEY = 'degenerator-learning-liquidity-v1';
 export function emptyProgress() { return { version: 1, completed: [], lastLesson: LESSON_IDS[0], drafts: {} }; }
 export function parseProgress(value) {
@@ -13,13 +15,22 @@ export function parseProgress(value) {
     if (!draft || !Number.isInteger(draft.variant) || draft.variant < 0 || draft.variant >= VARIANTS) continue;
     try {
       const inputs = validateLessonInputs(id, draft.inputs, draft.variant);
+      const revisions = essentialQuestionRevisions(id, draft.variant);
+      const sameReason = (draft.reasonRevision ?? 1) === revisions.reason;
+      const sameApplication = (draft.applicationRevision ?? 1) === revisions.application;
       clean.drafts[id] = { variant: draft.variant, inputs,
         prediction: typeof draft.prediction === 'string' && draft.prediction.length <= 16 ? draft.prediction : '',
         answer: typeof draft.answer === 'string' && draft.answer.length <= 32 ? draft.answer : '',
-        reason: typeof draft.reason === 'string' && draft.reason.length <= 16 ? draft.reason : '',
-        application: typeof draft.application === 'string' && draft.application.length <= 24 ? draft.application : '',
+        reason: sameReason && typeof draft.reason === 'string' && draft.reason.length <= 24 ? draft.reason : '',
+        application: sameApplication && typeof draft.application === 'string' && draft.application.length <= 24 ? draft.application : '',
+        reasonRevision: revisions.reason, applicationRevision: revisions.application,
         choiceSeed: validChoiceSeed(draft.choiceSeed) ? draft.choiceSeed : null,
         ran: draft.ran === true };
+      if (id === 'final-challenge') {
+        const task = sameApplication ? challengeSetup(inputs, draft.task) : null;
+        clean.drafts[id].task = task;
+        clean.drafts[id].taskChecked = Boolean(task && sameReason && sameApplication && draft.taskChecked === true);
+      }
     } catch { /* Ignore an invalid exercise without losing other progress. */ }
   }
   return clean;
