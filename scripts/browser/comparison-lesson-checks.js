@@ -13,7 +13,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     for (let i = 0; i < 3 && !(await text('learn-variation-label')).includes('1 of 3'); i++) await click('learn-variation');
   };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
-  for (const [id, reason, application] of [['loss-vs-profit', 'benchmark', 'loss-and-gap'], ['fee-break-even', 'assumption', 'same'], ['final-challenge', 'total', 'relative-gap']]) {
+  for (const [id, reason, application] of [['loss-vs-profit', 'benchmark', 'gap-unchanged'], ['fee-break-even', 'assumption', 'gap-reopens'], ['final-challenge', 'total', 'relative-gap']]) {
     await navigate(base + 'learn.html#lesson=' + id); await reset();
     assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false);
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
@@ -44,6 +44,17 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     await click('learn-run');
     assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked')===null"), true);
     assert.match(await text('comparison-scope'), /^Showing the question setup/);
+    const questionEvidence = await text('learn-application-evidence');
+    if (id === 'fee-break-even') {
+      for (const phrase of ['Starting ETH price', '$2,000.00', 'fees covered the gap', '$4,000.00', 'Later ETH price', '$6,000.00']) assert.ok(questionEvidence.includes(phrase));
+      assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), false);
+      await fill('comparison-fees', '2500');
+      assert.equal(await text('learn-application-evidence'), questionEvidence, 'Exploring assumed fees must not change the changed-price evidence beside the application.');
+      await choose('learn-reason', reason); await choose('learn-application', 'still-matches');
+      await click('learn-check');
+      assert.match(await text('learn-applications-feedback'), /Matching holding at one price does not lock in that result/);
+      assert.equal(await text('learn-feedback-title'), 'Review your answers.');
+    } else assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), true);
     await choose('learn-reason', reason); await choose('learn-application', application);
     if (id === 'final-challenge') await click('liquidity-task-example');
     await click('learn-check');
@@ -53,6 +64,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     assert.match(link, id === 'loss-vs-profit' ? /fees=0/ : /fees=100/);
     if (id === 'fee-break-even') await fill('comparison-fees', '0');
     else await fill('comparison-price', '1000');
+    assert.equal(await text('learn-application-evidence'), questionEvidence);
     assert.equal(await evaluate("document.getElementById('learn-explore').href"), link);
     await reload();
     assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
@@ -111,6 +123,11 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
       } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
       assert.equal(await evaluate(`document.getElementById('${slider}').value`), await evaluate(`document.getElementById('${slider}').max`));
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+      if (id === 'fee-break-even') {
+        await click('learn-run');
+        assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), false);
+        assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+      }
     }
   }
   await call('Emulation.setEmulatedMedia', { features: [] });

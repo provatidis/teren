@@ -33,7 +33,7 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   await navigate(base + 'learn.html#lesson=fee-break-even');
   await fill('learn-input-futurePrice','4000'); await fill('learn-input-fees','100'); await choose('learn-prediction','short'); await click('learn-run');
   assert.match(await text('learn-explanation'),/total fee target is \$428.93[\s\S]*\$328.93 additional/);
-  await choose('learn-reason','assumption'); await choose('learn-application','same'); await click('learn-check');
+  await choose('learn-reason','assumption'); await choose('learn-application','gap-reopens'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   await evaluate("document.querySelector('#learn-deeper summary').click();document.querySelector('#learn-calculation summary').click()");
   await fill('learn-answer','428.94'); await click('learn-calculation-check');

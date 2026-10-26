@@ -15,7 +15,7 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
   const working = await isolated();
   const completed = JSON.parse(await saved()).completed;
   for (const [id, questionStage, reason, application] of [
-    ['supply', '2', 'separate', 'enable'], ['borrow', '1', 'liability', 'boundary'],
+    ['supply', '2', 'separate', 'enable'], ['borrow', '1', 'liability', 'borrowing-blocked'],
   ]) {
     await navigate(base + 'lending.html#lesson=' + id);
     await click('lend-retry');

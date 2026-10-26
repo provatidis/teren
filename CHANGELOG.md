@@ -1,5 +1,12 @@
 # Release history
 
+## 1.47.0 · 2026-10-26
+
+- Review predictions, explanations and applications across all twenty lessons and their variations. Retain strong swap, ownership, range and unwind checks; replace weak applications with withdrawals, a fee target that changes with price, movement before range re-entry, reinvestment, and a price recovery after a hypothetical liquidation.
+- Name each application’s situation and supply relevant prices, recorded facts or wallet/collateral balances beside its question. Keep the recent recorded finale and constructed liquidity challenge. No required question asks for calculation or precise slider placement.
+- Give feedback for the selected misconception while retaining price-dependent token explanations. Distinguish all collectable tokens from new period fees, active time from fee share, and a recovered health factor from returned collateral.
+- Preserve completed lessons and compatible answers; retire answers to materially changed questions. Extend accounting, migration and desktop/mobile checks. Financial models, recorded blockchain evidence and Experiment handoffs are unchanged.
+
 ## 1.46.1 · 2026-10-26
 
 - Replace the recorded comparison lesson’s final checks with two concrete situations: collecting earned fees without changing total value, and a further ETH rise while the position remains above its range. Use concise, parallel answer choices and explain the consequences after checking.

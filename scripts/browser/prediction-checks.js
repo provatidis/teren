@@ -17,7 +17,7 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
   const nonvisual = {
     'range-boundaries': ['path', 'both-inside'], 'fee-tiers': ['trades', 'smaller-share'],
     'range-management': ['asset', 'automatic'], 'fees-over-time': ['growth', 'same'],
-    'between-samples': ['counters', 'fee-records'], 'period-vs-holding': ['same-gap', 'smaller-lead'],
+    'between-samples': ['returned', 'smaller-share'], 'period-vs-holding': ['same-gap', 'smaller-lead'],
     'final-challenge': ['total', 'relative-gap'],
   };
   try {
@@ -55,6 +55,16 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         assert.equal(await evaluate(`document.getElementById('${prefix}-prediction-feedback').dataset.state`), 'skipped');
         assert.equal(await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').querySelector('button').textContent`), 'Show the outcome again ↓');
         assert.equal(await evaluate(`document.getElementById('${prefix}-continue').hidden`), true, 'Viewing alone does not complete a lesson');
+        if (id !== 'period-vs-holding') {
+          const label = await text(prefix + '-application-label');
+          assert.ok(label.trim().length > 4, route + ': name the next situation');
+          assert.doesNotMatch(label, /APPLY|THOUGHT EXPERIMENT|CHANGE THE SITUATION/);
+        }
+        const evidenceFits = await evaluate(`Array.from(document.querySelectorAll('.learn-question-evidence')).filter(el => el.checkVisibility()).every(el => {
+          const box = el.getBoundingClientRect();
+          return box.left >= 0 && box.right <= innerWidth && !!document.getElementById(el.getAttribute('aria-labelledby'))?.textContent;
+        })`);
+        assert.equal(evidenceFits, true, route + ': question evidence fits and has an accessible heading');
         if (nonvisual[id]) {
           for (const [group, value] of [['reason', nonvisual[id][0]], ['application', nonvisual[id][1]]]) {
             await evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);

@@ -15,14 +15,15 @@ export function managementCase(id, variant = 0) {
   if (id === 'range-width') {
     const price = [2300,1700,2000][variant], narrow = position(.05,price), wide = position(.25,price);
     const active = narrow.state === 'inside' && wide.state === 'inside' ? 'both' : wide.state === 'inside' ? 'wide' : 'none';
-    const application = ['mix', 'whole-period', 'own-basket'][variant];
-    return {id, variant, price, narrow, wide, prediction:active, reason:'bounds', application};
+    const application = ['mix', 'wide-mix', 'own-basket'][variant];
+    const next = variant === 1 ? {price:1800, narrow:position(.05,1800), wide:position(.25,1800)} : null;
+    return {id, variant, price, narrow, wide, next, prediction:active, reason:'bounds', application};
   }
   if (id === 'fee-tiers') {
     // Supplied teaching facts, not an earnings estimate or observations from a real pool.
     const rates = variant === 2 ? [.3,.05] : [.05,.3];
     const fees = [12, 4];
-    const application = ['smaller-share', 'more-income', 'smaller-advantage'][variant];
+    const application = ['smaller-share', 'more-income', 'larger-share'][variant];
     return {id, variant, rates, fees, prediction:'unknown', reason:'trades', application};
   }
   const prices = [[1600,1400],[2400,2800],[1400,1600]][variant];

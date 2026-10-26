@@ -43,7 +43,7 @@ export function rangeBoundaryNarration(outcome) {
     + ' Outside the range, swaps stop changing its token amounts until price returns. This final token mix does not tell us how much it earned earlier.';
 }
 
-export function lessonReasonFeedback(id, outcome, reason) {
+export function lessonReasonFeedback(id, outcome, reason, feedbackByChoice = {}) {
   if (id === 'token-balances') {
     const copy = tokenBalanceNarration(outcome);
     if (reason === 'mint') return 'The pool does not create ETH or USDC. ' + copy.exchange;
@@ -52,32 +52,7 @@ export function lessonReasonFeedback(id, outcome, reason) {
   if (id === 'range-boundaries' && reason === 'zero') return outcome.prediction === 'both'
     ? 'This endpoint is inside the range, but that does not establish earlier earnings. Past fees require historical fee accounting, separate from the final token mix.'
     : 'This endpoint is at or outside a range boundary. That does not prove it was inactive earlier. Past fees require historical fee accounting, separate from the final token mix.';
-  const feedback = {
-    'swap-impact': {
-      fixed: 'A finite swap changes the reserves, so it cannot receive the starting spot price for every ETH. The 0.3% input fee also reduces the quoted output.',
-      forecast: 'This is a quote against the specified reserves, not a market forecast. Your own trade changes the pool ratio.',
-    },
-    'pool-share': {
-      dollars: 'LP ownership is a fraction of the changing reserves. It does not guarantee your original dollar deposit or a yield.',
-      eth: 'Your share follows the pool’s current balances. Swaps change the token amounts behind it; your original deposit quantities are not reserved for withdrawal.',
-    },
-    'loss-vs-profit': {
-      entry: 'Comparing with the original budget measures dollar profit or loss. Impermanent loss compares LP principal with holding the exact starting tokens.',
-      'all-eth': 'An all-ETH investment has a different starting basket. The holding benchmark keeps both original ETH and USDC amounts.',
-    },
-    'fee-break-even': {
-      guarantee: 'The required fee amount is a target. These price inputs do not establish the trading or liquidity history needed to earn it.',
-      compound: 'The target is the amount needed to close the gap, not a record of earned or collectable fees. Actual fee balances need separate accounting.',
-    },
-    'range-boundaries': {
-      fixed: 'Range width alone does not determine fee income. Earnings also depend on trades, competing active liquidity and the path through the range.',
-    },
-    'final-challenge': {
-      fees: 'Fee income may still be smaller than the principal shortfall against holding. Compare the total values using the same starting tokens.',
-      forecast: 'The fee amount is an input, not a record of trading. This result follows your assumptions; it does not establish earned fees.',
-    },
-  };
-  return feedback[id]?.[reason] || 'Choose an explanation for this setup. The result and hint explain the comparison.';
+  return feedbackByChoice[reason] || 'Choose an explanation for this setup. The result and hint explain the comparison.';
 }
 
 export function benchmarkNarration(id, outcome) {

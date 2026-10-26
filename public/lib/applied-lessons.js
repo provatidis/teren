@@ -17,7 +17,7 @@ export function appliedQuestion(period, id) {
   if (!Number.isInteger(index)) throw new Error('The recorded between-samples interval is missing.');
   const view = periodPointView(period, index), interval = periodIntervalView(period, index);
   if (id === 'fees-over-time') return { index, view, interval, answer: view.feesUSD, answerDigits: 2, prediction: 'earned', reason: 'growth' };
-  if (id === 'between-samples') return { index, view, interval, answer: interval.secondsInRange, answerDigits: 0, wholeAnswer: true, prediction: 'possible', reason: 'counters' };
+  if (id === 'between-samples') return { index, view, interval, answer: interval.secondsInRange, answerDigits: 0, wholeAnswer: true, prediction: 'possible', reason: 'returned' };
   // A named teaching checkpoint in this fixed record, not a search for its worst
   // return. Keep the final period endpoint as the assessed result and handoff.
   const contrastIndex = 6, contrast = periodPointView(period, contrastIndex);
@@ -36,8 +36,8 @@ export function appliedReasonFeedback(id, reason) {
       principal: 'Price changes alter principal value. New fee tokens are accounted for separately through fee growth; a principal value change is not fee income.',
     },
     'between-samples': {
-      line: 'The line joins recorded samples. It does not reconstruct crossings between them; the range-time counter records active seconds independently.',
-      status: 'An outside sample describes one block. The question interval records activity and earned tokens between two outside samples.',
+      'stayed-out': 'This position supplies active liquidity only inside its range. Its recorded active time therefore rules out staying above the range for the whole interval.',
+      'moved-bounds': 'The recorded bounds never change. Price crossed back inside them and then left again; the position did not move its range.',
     },
     'period-vs-holding': {
       'narrower-gap': 'The earned fees already count in the comparison. Collecting them moves the same tokens into the owner’s wallet, so the total value and the gap stay the same.',
@@ -46,5 +46,5 @@ export function appliedReasonFeedback(id, reason) {
   };
   return feedback[id]?.[reason] || (id === 'period-vs-holding'
     ? 'Choose what collecting these earned fees changes.'
-    : 'Choose a conclusion supported by the marked question checkpoint or interval.');
+    : 'Choose what the recorded balances or active time tell you.');
 }

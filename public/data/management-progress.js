@@ -2,8 +2,8 @@ import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS } from '../models/range-decisions.j
 import { validChoiceSeed } from '../lib/learning-choices.js';
 export const MANAGEMENT_KEY = 'passiko-range-learning-v1';
 export const MANAGEMENT_QUESTION_REVISIONS = Object.freeze({
-  'range-width': Object.freeze({prediction:1,reason:1,application:2}),
-  'fee-tiers': Object.freeze({prediction:1,reason:1,application:2}),
+  'range-width': Object.freeze({prediction:1,reason:1,application:3}),
+  'fee-tiers': Object.freeze({prediction:1,reason:1,application:3}),
   'range-management': Object.freeze({prediction:1,reason:1,application:1}),
 });
 export const emptyManagementProgress = () => ({version:1,completed:[],drafts:{}});

@@ -43,12 +43,16 @@ export function managementPresentation(result) {
   const {id,variant}=result;
   if(id==='range-width')return {
     finding: result.prediction === 'both' ? 'That price sits inside both ranges. The narrower range has less room before a boundary.' : 'Only the wider range includes this price. The narrow position still owns its tokens, but cannot take part in swaps here.',
-    reasoning:variant===2?'Both are active here. What still differs between these positions?':null,
+    reasoning:variant===2?'Both are active here. Why can the wider position stay active over more prices?':null,
+    reasonLabel:'The same price, two ranges',
+    reasonContext:'At ETH '+usd(result.price)+', compare the narrow $1,900–$2,100 range with the wider $1,500–$2,500 range. Both started with $5,000.',
     prediction:'At that price, which position will be inside its range?', predictions:[['wide','Only the wider position'],['both','Both positions'],['none','Neither position']],
     metrics:[['Narrow range',result.narrow.state==='inside'?'Active':'Inactive','$1,900–$2,100'],['Wider range',result.wide.state==='inside'?'Active':'Inactive','$1,500–$2,500'],['Earned fees','Unknown','No fee income is estimated']],
     links:[{label:'Explore the narrow setup in Experiment ↗',scenario:result.narrow},{label:'Explore the wider setup in Experiment ↗',scenario:result.wide}],
     note:'Calculated hypothetical endpoints, with zero assumed fees. The links keep each range’s original funding and shown final price.'};
   if(id==='fee-tiers')return {
+    reasonLabel:'The fee tier is one ingredient',
+    reasonContext:'Each position started with the same dollar budget, in a different WETH/USDC pool. The fee tier is the charge per swap.',
     finding: 'The fee tiers do not establish which position earns more. Now add a fictional day’s fee totals below and see how the result can differ from the tier ranking.',
     prediction:'From these fee tiers alone, which position will earn more swap fees?',
     predictions:[['unknown','The fee tiers alone cannot tell us'],['a','Position A'],['b','Position B']],
@@ -56,17 +60,20 @@ export function managementPresentation(result) {
     note:'The fee totals are supplied teaching facts. They are not calculated from the fee rate, imported data or a forecast.'};
   const held=result.first.pooled.eth===0?'USDC':'ETH';
   return {
+    reasonLabel:'Outside the range',
+    reasonContext:'ETH moves from '+usd(result.prices[0])+' to '+usd(result.prices[1])+', outside the unchanged $1,800–$2,200 range. Principal holds '+held+' at both prices. USDC stays at $1.',
     finding: held === 'ETH' ? 'Outside the lower bound, principal remains in ETH. Its dollar value follows ETH’s price even though the token amount stays fixed.' : 'Outside the upper bound, principal remains in USDC. Its value stays fixed here because USDC is assumed to stay at $1.',
     prediction:'After the further price move, what happens to the position’s principal value?',predictions:[['falls','It falls'],['same','It stays the same'],['rises','It rises']],
     metrics:[['After the range exit',usd(result.first.lpBeforeFees),'ETH price '+usd(result.prices[0])],['After the further move',usd(result.second.lpBeforeFees),'ETH price '+usd(result.prices[1])],['Token held',held,'Same token quantity at both outside points']],
     links:[{label:'Explore this setup in Experiment ↗',scenario:result.second}],note:'Hypothetical principal before fees, with unchanged liquidity and USDC = $1. No range changes or earned fees are simulated.'};
 }
 
-// Follow-ups change one condition or ask which evidence supports a comparison.
+// Follow-ups change one condition or ask the learner to diagnose a mistaken conclusion.
 // The learner explains consequences; no arithmetic is required.
 export function managementApplication(result) {
   if (result.id === 'range-width') {
     if (result.variant === 0) return {
+      label:'Active but behind holding',
       context: 'Move ETH to $2,090, inside both ranges. Before fees, each position is worth less than holding its own starting tokens.',
       question: 'How can a position be active and still trail holding?',
       choices: [
@@ -76,20 +83,30 @@ export function managementApplication(result) {
       ],
       hint: 'Active describes whether swaps can use the liquidity. Compare the tokens now held with the starting basket.',
       feedback: 'Swaps change the position’s token mix even inside the range. Being active makes it eligible for fees; it does not make its principal worth as much as holding.',
+      feedbackByChoice: {
+        capital:'The starting deposit has not changed. Swaps change the tokens held after deposit, which changes the comparison with keeping the starting basket.',
+        uncollected:'This comparison excludes fees. Uncollected fees are separate assets, not a charge deducted from principal.',
+      },
     };
     if (result.variant === 1) return {
-      context: 'The narrower position is now outside its range. It earned more fees during an earlier active spell than the wider position.',
-      question: 'What evidence would let you compare their final values?',
-      accomplishment: 'You identified the whole-period evidence needed to compare two ranges.',
+      label: 'A rise before re-entry',
+      context: 'ETH rises from ' + usd(result.price) + ' to ' + usd(result.next.price) + '. Keep the narrow $1,900–$2,100 and wider $1,500–$2,500 ranges unchanged.',
+      question: 'Which position changes how much ETH and USDC it holds during this rise?',
+      accomplishment: 'You used the bounds to identify which position changes its token mix as price moves.',
       choices: [
-        ['whole-period', 'Final token values, all period fees and each position’s costs.'],
-        ['active-time', 'The time each position spent active during this period.'],
-        ['early-fees', 'The fee amounts from the earlier active spell.'],
+        ['narrow-mix', 'Only the narrow position.'],
+        ['wide-mix', 'Only the wider position.'],
+        ['both-mixes', 'Both positions.'],
       ],
-      hint: 'Earlier fees and current activity describe only parts of the result.',
-      feedback: 'Compare final token values plus all period fees, minus costs. A position can finish ahead despite being inactive at the endpoint; the earlier fee ranking is not enough.',
+      hint: 'Check which range contains the whole $1,700–$1,800 move.',
+      feedback: 'The wider position stays active and swaps some ETH for USDC as price rises. The narrow position is still below its range and keeps the same ETH amount.',
+      feedbackByChoice: {
+        'narrow-mix': 'Price is still below the narrow position’s $1,900 lower bound. Its ETH amount stays fixed; the wider position is the one trading.',
+        'both-mixes': 'Both positions gain dollar value as ETH rises, but only the wider position changes its token amounts. The narrow position remains all ETH below its range.',
+      },
     };
     return {
+      label:'Choose the holding comparison',
       context: 'Both ranges started with $5,000, but they required different amounts of ETH and USDC. You want to know what providing liquidity added compared with keeping those tokens.',
       question: 'Which holding benchmark is fair for each position?',
       accomplishment: 'You matched each position with its own starting-token benchmark.',
@@ -100,47 +117,67 @@ export function managementApplication(result) {
       ],
       hint: 'Holding keeps the tokens you would otherwise have deposited.',
       feedback: 'Each position is compared with its own starting tokens. Equal dollar budgets can contain different token amounts, so their holding values can differ when ETH moves.',
+      feedbackByChoice: {
+        'same-mix':'These ranges required different token mixes. A common 50/50 basket would change the comparison rather than show what each owner gave up by providing liquidity.',
+        'start-dollars':'The starting dollar amount measures profit or loss. Holding instead follows the value of the tokens that could have stayed in the wallet.',
+      },
     };
   }
   if (result.id === 'fee-tiers') {
     if (result.variant === 0) return {
+      label:'More competition today',
       context: 'A dashboard turns yesterday’s fees into a yearly fee APR. Today the trades, fee tier and your liquidity stay the same, but more liquidity competes at every traded price.',
       question: 'What happens to your fee income from those trades?',
       accomplishment: 'You explained why more competition can lower fee income despite an unchanged fee tier.',
       choices: [
         ['smaller-share', 'It falls because your share of active liquidity is smaller.'],
-        ['fixed-apr', 'It stays the same because yesterday’s APR sets the payment.'],
-        ['larger-pool', 'It rises because the pool now contains more liquidity.'],
+        ['fixed-apr', 'It stays the same because the trades and fee tier are unchanged.'],
+        ['larger-pool', 'It rises because the larger pool earns more fees overall.'],
       ],
       hint: 'The APR describes earlier fee income. Today’s fees are shared among today’s active liquidity.',
       feedback: 'The same trades produce the same fee pool, but your smaller share earns less. Yesterday’s annualized fee income is not a rate credited to your deposit.',
+      feedbackByChoice: {
+        'fixed-apr':'The trades and fee tier are unchanged, but the fees are shared among more active liquidity. Your smaller share earns less.',
+        'larger-pool':'More liquidity does not create extra fees from the same trades. It shares those fees more widely.',
+      },
     };
     if (result.variant === 1) return {
+      label:'More trading at the same fee tier',
       context: 'Keep the fee tier and your share of active liquidity unchanged. More trading volume now uses your position while it is active.',
       question: 'What changes because of that extra trading?',
       accomplishment: 'You linked increased trading activity to fee income without changing the fee tier.',
       choices: [
-        ['more-income', 'Your position earns more swap fees from that activity.'],
-        ['same-income', 'Your fee income stays fixed until the fee tier changes.'],
-        ['higher-tier', 'Your position moves into a higher fee tier automatically.'],
+        ['more-income', 'Your fee income rises at the same fee tier.'],
+        ['same-income', 'Your fee income stays the same at that fee tier.'],
+        ['higher-tier', 'Your fee income rises because the fee tier increases.'],
       ],
       hint: 'The fee tier charges a percentage of each swap. Your share is unchanged here.',
       feedback: 'More volume using the same active share at the same tier produces more fee income. The pool’s fee tier has not changed.',
+      feedbackByChoice: {
+        'same-income':'The fee tier sets a percentage per swap, not a fixed payment. More volume produces more fees at that same percentage.',
+        'higher-tier':'The tier stays fixed. Earnings rise because more volume pays that fee, not because the rate increases.',
+      },
     };
     return {
-      context: 'Between two checkpoints, no new fee tokens accrue. The existing fees keep the same dollar value, costs stay unchanged, and the principal falls further behind holding.',
-      question: 'What happens to the LP’s result compared with holding?',
-      accomplishment: 'You traced a worsening comparison to principal value even when fee income stays the same.',
+      label: 'Putting earned fees back to work',
+      context: 'You use collected fees to add liquidity in the same range. Other LPs also supply active liquidity; their amounts, the price and the fee tier stay the same.',
+      question: 'How does this change your share of the fees from the next swap inside your range?',
+      accomplishment: 'You distinguished collecting fees from reinvesting them to increase active liquidity.',
       choices: [
-        ['smaller-advantage', 'It worsens because the principal shortfall has grown.'],
-        ['same-result', 'It stays the same because the fee income is unchanged.'],
-        ['higher-apr', 'It improves because the earned fees remain collectable.'],
+        ['larger-share', 'Your share increases.'],
+        ['same-share', 'Your share stays the same.'],
+        ['smaller-deposit-share', 'Your share decreases.'],
       ],
-      hint: 'Fee income is one part of the comparison; principal value matters too.',
-      feedback: 'With fee value and costs unchanged, a larger principal shortfall makes the LP’s comparison worse. Collectable fees are assets, but their existence does not determine the whole result.',
+      hint: 'Compare your liquidity with everyone else’s. The fee tier and your share are different things.',
+      feedback: 'The added liquidity gives you a larger share of active liquidity, so you receive a larger share of that swap’s fees. Collection alone would not change your share.',
+      feedbackByChoice: {
+        'same-share': 'The fee tier is unchanged, but your share is not. Depositing the fees increases your liquidity while everyone else’s stays fixed.',
+        'smaller-deposit-share': 'You added to your own liquidity, not someone else’s. Your part of the active total grows, so your share of the fees grows.',
+      },
     };
   }
   return {
+    label:result.variant===1?'Remove liquidity, then price returns':result.variant===2?'Collect fees, then price returns':'Keep liquidity in place, then price returns',
     context: result.variant === 1
       ? 'Before price returns, you remove all liquidity and withdraw its tokens. ETH then returns to $2,000, inside the old $1,800–$2,200 bounds.'
       : result.variant === 2
@@ -153,6 +190,12 @@ export function managementApplication(result) {
       ['fees', 'The position earns the swap fees missed while it was outside.'],
     ],
     hint: 'Check whether the owner removed liquidity or only collected fees. Those actions are different.',
+    feedbackByChoice: {
+      ...(result.variant === 1
+        ? {automatic:'There is no liquidity left in the position to reactivate. Returning price does not move the withdrawn wallet tokens back into the pool.'}
+        : {removed:'Liquidity was left in place. It becomes active when price returns inside its existing bounds; no new deposit is needed.'}),
+      fees:'There is no catch-up payment for time spent outside. An active position can earn from new swaps using its liquidity.',
+    },
     feedback: result.variant === 1
       ? 'All liquidity was removed. The old bounds cannot supply liquidity by themselves; a new deposit is needed.'
       : 'The liquidity remains, so it becomes active again inside its bounds. Collecting only fee tokens does not remove principal. Activity does not recover fees missed outside the range.',

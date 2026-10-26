@@ -1,5 +1,6 @@
 import { saveLearningLocation } from '../data/learning-location.js';
 import { renderLessonSetup, managementLessonSetup } from '../lib/lesson-setup.js';
+import { renderQuestionEvidence } from '../lib/lesson-question-evidence.js';
 import { focusSceneOutcome, createPredictionPrompt, markPredictionRevealed } from '../lib/lesson-scene.js';
 import { createRangeWidthScene } from '../lib/liquidity-lesson-scenes.js';
 import { usd } from '../lib/format.js';
@@ -56,7 +57,7 @@ export function initManagementLearning() {
     $('manage-feedback').hidden=false;$('manage-feedback').className='learn-feedback '+(result.passed?'learn-pass':'learn-retry');
     $('manage-feedback-title').textContent=result.passed?'Both answers are correct.':'Review your answers.';
     const reasonFeedback=lesson.reasonFeedback[draft.reason]||'Choose an explanation for the example. '+lesson.hint;
-    const applicationFeedback=draft.application?application.feedback:'Choose an answer for the changed situation. '+application.hint;
+    const applicationFeedback=draft.application?(application.feedbackByChoice?.[draft.application]||application.feedback):'Choose an answer. '+application.hint;
     renderUnderstandingFeedback('manage', [
       { container: 'manage-reasons', selected: draft.reason, correct: result.reasoning, explanation: result.reasoning ? lesson.takeaway : reasonFeedback },
       { container: 'manage-applications', selected: draft.application, correct: result.application, explanation: applicationFeedback },
@@ -85,6 +86,10 @@ export function initManagementLearning() {
     renderLessonSetup($('manage-setup'), managementLessonSetup(outcome));
     $('manage-prediction-question').textContent=presentation.prediction;$('manage-variation-label').textContent='Situation '+(draft.variant+1)+' of '+MANAGEMENT_VARIANTS;
     $('manage-reason-question').textContent=presentation.reasoning||lesson.reasoning;$('manage-application-context').textContent=application.context;$('manage-application-question').textContent=application.question;
+    $('manage-reason-context').textContent=presentation.reasonContext||'';
+    $('manage-reason-context').hidden=!presentation.reasonContext;
+    $('manage-application-label').textContent=application.label||'Another situation';
+    renderQuestionEvidence($('manage-application-evidence'),application.evidence);
     $('manage-hint-text').textContent=lesson.hint+' '+application.hint;$('manage-hint').open=false;$('manage-deeper').open=false;
     $('manage-deeper-copy').replaceChildren(...lesson.deeper.map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));
     learningSources($('manage-sources'),lesson.sources);

@@ -8,9 +8,9 @@ const cases = {
 };
 const answers = {
   supply: ['earn', 'separate', 'enable'],
-  borrow: ['same', 'liability', 'boundary'],
+  borrow: ['same', 'liability', 'borrowing-blocked'],
   conditions: ['lower', 'interest', 'backing-faster'],
-  respond: ['repay', 'tradeoff', 'none'],
+  respond: ['repay', 'tradeoff', 'remaining-backing'],
 };
 
 export function lendingCase(id) {

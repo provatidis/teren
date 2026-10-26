@@ -203,3 +203,11 @@
 
 /* The closed catalogue shows current progress; the expanded list shows chapter counts. */
 .learn-course[open] .learn-course-current{display:none}
+
+.learn-question-evidence { margin: 18px 0; padding: 16px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); }
+.learn-question-evidence h4 { margin: 0 0 12px; font-size: 16px; line-height: 1.5; }
+.learn-question-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px 18px; margin: 0; }
+.learn-question-facts dt { font-size: 14px; line-height: 1.6; color: var(--muted); }
+.learn-question-facts dd { margin: 5px 0 0; font-size: 16px; font-weight: 600; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.learn-question-evidence .learn-question-note { margin: 14px 0 0; font-size: 14px; line-height: 1.7; color: var(--muted); }
+.learn-application-setup .learn-question-evidence { margin: 14px 0 0; padding: 0; border: 0; background: none; }

@@ -66,9 +66,9 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
   const choose = (name, value) => evaluate(`document.querySelector('input[name="lend-${name}"][value="${value}"]').click()`);
   const cases = [
     ['supply', 'neither', 'separate', 'enable', '5.10 ETH'],
-    ['borrow', 'more', 'liability', 'boundary', '$10,000.00'],
+    ['borrow', 'more', 'liability', 'borrowing-blocked', '$10,000.00'],
     ['conditions', 'same', 'interest', 'backing-faster', '$5,500.00'],
-    ['respond', 'same', 'tradeoff', 'none', '1.36'],
+    ['respond', 'same', 'tradeoff', 'remaining-backing', '1.36'],
   ];
   const oldLiquidity = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");
   for (const [index, [id, prediction, reason, application, metric]] of cases.entries()) {
@@ -146,7 +146,7 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
     await navigate(base + 'lending.html#lesson=respond');
     assert.equal(await evaluate("document.getElementById('lend-course').open"), false);
     await click('lend-retry'); await choose('prediction', 'same'); await click('lend-reveal');
-    await choose('reason', 'tradeoff'); await choose('application', 'none'); await click('lend-check'); await settle(evaluate);
+    await choose('reason', 'tradeoff'); await choose('application', 'remaining-backing'); await click('lend-check'); await settle(evaluate);
     assert.equal(await evaluate('document.activeElement.id'), 'lend-feedback');
     assert.ok(await evaluate("document.getElementById('lend-next').getBoundingClientRect().bottom <= innerHeight"), 'The next step stays with the takeaway on mobile.');
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);

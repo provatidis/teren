@@ -1,3 +1,5 @@
+import { formatTokenQuantity } from '../lib/format.js';
+
 const borrowing = { title: 'Aave: borrowing and debt', url: 'https://aave.com/help/borrowing/borrow-tokens' };
 const health = { title: 'Aave: health factor and liquidations', url: 'https://aave.com/help/borrowing/liquidations' };
 const repayment = { title: 'Aave: repaying a loan', url: 'https://aave.com/help/borrowing/repay-tokens' };
@@ -22,10 +24,27 @@ export const LOOP_LESSONS = [
       cash: 'The USDC was spent to buy ETH. It cannot also remain in the wallet.',
       'deposit-cost': 'Supplied ETH is still an asset you own. The matching debt, rather than a deposit cost, offsets the added ETH value.',
     },
+    applicationLabel: 'After buying, before supplying',
     applicationContext: 'Pause after buying the new ETH, before supplying it as collateral.',
+    applicationEvidence: ({ result }) => {
+      const bought = result.steps.find(step => step.action === 'swap').position;
+      return {
+        title: 'Where the ETH is now',
+        rows: [
+          ['Supplied as collateral', formatTokenQuantity(bought.collateralTokens, 4) + ' ETH'],
+          ['In the wallet', formatTokenQuantity(bought.walletETH, 4) + ' ETH'],
+          ['Debt still owed', formatTokenQuantity(bought.debt, 2) + ' USDC'],
+        ],
+      };
+    },
     applicationQuestion: 'Which ETH backs the loan at that moment?',
     applications: [['supplied', 'Only the ETH already supplied as collateral.'], ['wallet', 'The newly purchased ETH still in the wallet.'], ['both', 'Both balances, because they belong to the same person.']],
     applicationFeedback: 'Buying ETH does not supply it. Until it is supplied and enabled, wallet ETH is outside the loan’s collateral balance.',
+    applicationFeedbackByChoice: {
+      supplied: 'The original ETH is already supplied as collateral. The newly bought ETH is yours too, but it does not back this loan while it remains in the wallet.',
+      wallet: 'The purchased ETH is still in the wallet. Buying it did not move the original collateral out of the pool or supply the new ETH.',
+      both: 'Ownership is not enough for collateral. Wallet ETH can change your total wealth, but it must be supplied and enabled before it backs the loan.',
+    },
     hint: 'Separate what you own from what you have actually supplied to back the loan.',
     deeper: ['Each round borrows a chosen fraction of the value supplied in the preceding step, at the unchanged starting price. Later rounds use the ETH bought and supplied by the preceding round.', 'The ledger separates borrowing, swapping and supplying. Health factor can fall when debt is borrowed and improve when purchased ETH is supplied, while price exposure has still increased.'],
     sources: [borrowing, health],
@@ -48,13 +67,18 @@ export const LOOP_LESSONS = [
       'debt-falls': 'USDC stays at $1 here. Its debt does not shrink with ETH’s price, so it does not offset the loss in ETH value.',
       'borrowed-only': 'Every ETH in the position changes value, whether it came from your starting funds or a loan.',
     },
-    applicationLabel: 'APPLY · CHECK A CLAIM',
+    applicationLabel: 'A loan above its boundary, with a loss',
     applicationContext: 'At $1,500 per ETH, the loop is still above its liquidation boundary, but it has lost more than holding the original ETH. A friend thinks those results contradict each other.',
     applicationQuestion: 'How can both results be true?',
     applications: [['backing-not-profit', 'The collateral still backs the debt, while the extra ETH made the price loss larger.'], ['protected-value', 'Staying above the liquidation boundary means the starting value is protected.'], ['debt-offset', 'The USDC debt falls with ETH and offsets the additional price loss.']],
     applicationFeedback: 'Health factor checks the collateral backing against debt. It does not measure profit. The loan still meets its collateral rule here, even though the extra ETH has made its price loss larger.',
+    applicationFeedbackByChoice: {
+      'backing-not-profit': 'Both results can hold: enough collateral remains to back the debt, while more ETH has lost value than in the holding strategy.',
+      'protected-value': 'The boundary concerns debt repayment, not preservation of your starting money. More ETH can lose more value while still leaving enough collateral to back the debt.',
+      'debt-offset': 'USDC stays at $1, so this debt does not fall with ETH. The loop takes the larger ETH price loss and still owes the same USDC.',
+    },
     hint: 'Check the amount of ETH exposed to the price, and the currency in which debt is owed.',
-    deeper: ['All rounds are built at one starting price before the selected interest period. The price example has zero interest. The separate Time example holds ETH at $2,000, with 0% supply APR and 10% borrow APR using continuous compounding for up to one year. These chosen rates illustrate the changed situation; they are not live rates. Opening the explanation restores the original $1,500 price question with no interest.', 'The lab can compare fixed simple interest with continuous compounding at the same entered APRs. Neither reproduces changing protocol rates or Aave’s reserve-index accounting.', 'A final price cannot establish that a position survived earlier prices. Eligible endpoints retain pre-liquidation balances rather than inventing a liquidation path. Holding means keeping the original ETH without supplying or borrowing; it earns no supply interest.'],
+    deeper: ['All rounds are built at one starting price before the selected interest period. The price example has zero interest. The separate Time example holds ETH at $2,000, with 0% supply APR and 10% borrow APR using continuous compounding for up to one year. These chosen rates illustrate the changed situation; they are not live rates.', 'The lab can compare fixed simple interest with continuous compounding at the same entered APRs. Neither reproduces changing protocol rates or Aave’s reserve-index accounting.', 'A final price cannot establish that a position survived earlier prices. Eligible endpoints retain pre-liquidation balances rather than inventing a liquidation path. Holding means keeping the original ETH without supplying or borrowing; it earns no supply interest.'],
     sources: [borrowing, health],
   },
   {
@@ -75,11 +99,16 @@ export const LOOP_LESSONS = [
       'pending-sale': 'The debt remains until it is repaid. A future sale cannot back an earlier withdrawal in this sequential preview.',
       'loan-bought': 'Once supplied as collateral, that ETH helps back the outstanding debt too. Its source does not exempt it from withdrawal limits.',
     },
-    applicationLabel: 'APPLY · FIND THE MISSING ACTION',
+    applicationLabel: 'After selling, before repaying',
     applicationContext: 'Revisit the first pass, paused after Sell ETH. The sale put USDC in your wallet. A friend says it has already freed more collateral.',
     applicationQuestion: 'What is missing from their explanation?',
     applications: [['repay-wallet', 'Use the wallet USDC to repay the loan.'], ['keep-cash', 'Keep the sale proceeds in the wallet so they offset the debt.'], ['withdraw-rest', 'Withdraw the remaining ETH before making a repayment.']],
     applicationFeedback: 'The sale changes your wallet, not the debt. Repayment spends wallet USDC and reduces the amount owed by the same amount. The remaining ETH stays supplied.',
+    applicationFeedbackByChoice: {
+      'repay-wallet': 'Repayment is the missing action. It uses wallet USDC to reduce the debt, so the remaining collateral has less debt to back.',
+      'keep-cash': 'Wallet USDC is an asset, but the loan still records the same debt. The proceeds have to be paid into the loan to free more collateral.',
+      'withdraw-rest': 'The existing debt still limits withdrawals. Sell proceeds must repay some of that debt before the next withdrawal can use the newly freed collateral.',
+    },
     hint: 'Follow the debt that remains after each action, including before the sale.',
     deeper: ['The preview withdraws at most 95% of the value available above health factor 1. It keeps the intermediate health factor above 1, sells at the selected price less the assumed swap loss, then repays. This 95% is a numerical teaching convention, not an Aave withdrawal parameter or a safety recommendation.', 'Some tools use a flash loan to repay first, release collateral, sell it and repay the flash loan in one transaction. The whole transaction must succeed or revert. This preview separates the actions so you can follow the balances; it does not simulate atomic execution.', 'It uses no flash loan or outside funds. It caps the illustration at 64 steps and never silently writes off unpaid debt. Gas, oracle changes, caps, liquidity limits, collateral-specific restrictions and competing liquidations are excluded.'],
     sources: [withdrawal, repayment, health, { title: 'Aave: atomic repayment with collateral', url: 'https://www.aave.com/docs/aave-v3/smart-contracts/swap-features' }],

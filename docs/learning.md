@@ -21,18 +21,18 @@ Keep the evidence needed for a question beside it, and name the situation being 
 | Trade size | Every unit receives the starting spot price; a slippage limit removes impact. | Explain changing reserves; put the same trade through a deeper or shallower pool. |
 | Ownership | Withdrawal guarantees the original dollar deposit or original ETH. | Follow a claim through swaps in either direction; distinguish them from another provider's proportional deposit. |
 | Token balances | Rebalancing creates tokens, pays interest or protects a falling asset. | Explain swaps and a price return; distinguish holding more ETH from having more dollar value. |
-| Loss versus profit | Dollar profit means beating holding; “impermanent” promises recovery. | Identify the same-token benchmark; apply a changed price. |
-| Break-even fees | A required fee target or an assumed amount predicts earnings. | Explain what the target establishes; change only the assumed fees. |
+| Loss versus profit | Dollar profit means beating holding; withdrawal erases or charges the holding gap. | Identify the same-token benchmark; follow a withdrawal at an unchanged price. |
+| Break-even fees | Matching holding once locks in the result; a required fee target predicts earnings. | Keep earned USDC fees fixed while ETH moves farther from its starting price. |
 | Range boundaries | Outside means liquidation, no earlier fees, or no price exposure. | Identify composition near a boundary; distinguish eligibility for swaps from earned fees. |
 | Final challenge | Matching holding means making a dollar profit; a correct simulation proves safety. | Construct a case that matches holding while both finish below the starting capital, then explain the two comparisons. |
-| Narrow and wide ranges | Tighter capital concentration always means greater profit. | Compare eligibility at shown prices; explain why an earlier fee advantage is incomplete. |
-| Fee tiers and APR | The highest charge earns most; a past fee APR fixes future profit. | Identify trades and active share; interpret a short-period APR claim. |
+| Narrow and wide ranges | Tighter capital concentration always means greater profit; price exposure means a position is trading. | Compare eligibility, follow a price move below one range, and choose each position’s own holding basket. |
+| Fee tiers and APR | The highest charge earns most; a past fee APR fixes future profit; collection itself compounds liquidity. | Change competition, trading volume or the owner’s active liquidity while keeping the other conditions stated. |
 | Exits, returns and costs | Inactive means closed or protected; changing bounds refunds losses. | Interpret outside principal values; apply an inside return without changing liquidity. |
 | Period fees | All collectable tokens are new period income; collection is compounding. | Identify new fee tokens; collect them with principal unchanged. |
-| Between samples | Endpoints or a plotted line describe every crossing; equal active time means equal fees. | Interpret counters separately from fee accounting; identify the fee evidence needed to compare equally active intervals. |
+| Between samples | Endpoints or a plotted line describe every crossing; equal active time means equal fees. | Infer a return and exit from the recorded active time, then share the same fees with more competing liquidity. |
 | Period versus holding | Collecting earned fees creates value; an out-of-range LP keeps its lead as ETH rises. | Explain why fee collection leaves the holding gap unchanged, then use the token mix to predict how a further ETH rise changes the lead. |
 
-Practical follow-ups change active liquidity, trading activity or whether liquidity was removed, so the observation matters to the conclusion. Any required totals are supplied; learners do not calculate them.
+Practical follow-ups change active liquidity, trading activity or whether liquidity was removed, so the observation matters to the conclusion. Short headings name each situation. When a question depends on specific balances, prices or recorded facts, a compact panel supplies them beside the question. Feedback addresses the selected misconception. Any required totals are supplied; learners do not calculate them.
 
 Every topic is directly accessible. Three repeatable situations in each practical topic change the observation, while retaining the conceptual scope. An unchanged-price width situation explicitly says both positions are active, rather than implying one has exited.
 
@@ -55,7 +55,7 @@ The second topic introduces one collateral asset and one debt asset before any l
 | Supply and collateral | Supplying requires borrowing; earning supply interest and enabling collateral are the same action. | Enable collateral without opening a loan; identify capacity versus actual debt. |
 | Borrowing and debt | Borrowed cash increases wealth; maximum LTV is the liquidation threshold. | A price decline passes the new-loan limit while remaining above the liquidation boundary. |
 | Prices, interest and time | An unchanged ETH price means an unchanged loan. | Change the supplied growth rates; distinguish faster collateral growth from growing debt. |
-| Repay or add collateral | Adding collateral repays debt; both responses have the same effect for the same budget. | Repay all debt; distinguish absence of loan liquidation from absence of investment risk. |
+| Repay or add collateral | Adding collateral repays debt; a later price recovery restores liquidated collateral. | Compare the two responses, then distinguish improved backing from reversing an actual liquidation. |
 
 The interest lesson deliberately uses zero supply APR so only debt grows. It does not claim time always lowers health factor: different rates on both sides can change that conclusion. The response lesson displays the already-calculated outcomes. Optional reading explains collateral rules, both balance-sheet sides, variable real rates and execution limits using [Aave supply guidance](https://aave.com/help/supplying/supply-tokens), [collateral guidance](https://aave.com/help/supplying/toggle-collateral-status) and [the protocol FAQ](https://aave.com/faq).
 
@@ -86,7 +86,7 @@ Three directly accessible lessons follow lending essentials. They use `borrowing
 | Repeat and change conditions | A loan above its liquidation boundary has preserved its starting value. | Explain how the loan can still meet its collateral rule while losing more than holding. |
 | Explore unwinding | Selling collateral repays debt; wallet proceeds already free more collateral. | Pause after a sale, identify the missing repayment and compare the balances after it. |
 
-The first lesson removes costs and interest to isolate matching debt. The second compares the same original capital with more ETH exposure; no arithmetic is required from the learner. The last explains intermediate collateral constraints and labels the unwind as an assumed sequence, not guaranteed execution. Its application brings back the earlier distinction between wallet assets and debt. Automated checks cover answer combinations and numerical references.
+The first lesson removes costs and interest to isolate matching debt. Its application shows the supplied ETH, wallet ETH and debt immediately after the purchase, before supplying the purchased tokens. The second compares the same original capital with more ETH exposure; no arithmetic is required from the learner. The last explains intermediate collateral constraints and labels the unwind as an assumed sequence, not guaranteed execution. Its application brings back the earlier distinction between wallet assets and debt. Automated checks cover answer combinations and numerical references.
 
 ## Visual lesson patterns
 

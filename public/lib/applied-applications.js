@@ -1,4 +1,5 @@
-import { usd } from './format.js';
+import { usd, formatTokenQuantity } from './format.js';
+import { periodDuration } from './period-presentation.js';
 
 export function appliedPriceExposure(question) {
   const { view } = question;
@@ -21,18 +22,67 @@ export function appliedPriceExposure(question) {
 }
 
 export function appliedApplication(id, question) {
-  if (id === 'fees-over-time') return {
-    expected: 'same', context: 'Imagine collecting only the newly earned fee tokens at the question checkpoint. Liquidity, bounds and prices stay unchanged; gas is excluded.',
-    question: 'What does that collection itself do to position principal?',
-    choices: [['same','Principal stays the same; fee tokens move to the owner.'],['less','Principal shrinks by the value of the collected fees.'],['more','Collected fees automatically increase position liquidity.']],
-    hint: 'Collecting fees and removing liquidity are separate operations.',
-    feedback: 'Collecting those fee tokens transfers earned assets to the owner. With liquidity unchanged, it does not remove or reinvest the principal.'};
+  if (id === 'fees-over-time') {
+    const view = question.view;
+    const amount = (usdc, eth) => formatTokenQuantity(Number(usdc) / 1e6, 4) + ' USDC + '
+      + formatTokenQuantity(Number(eth) / 1e18, 6) + ' WETH';
+    return {
+      expected: 'same', label: 'Collecting without reinvesting',
+      reasonEvidence: {
+        title: 'New earnings and the collectable balance',
+        rows: [
+          ['New fees during this record', amount(view.earned0, view.earned1)],
+          ['All tokens available to collect at the end', amount(view.point.snapshot.fees.collectable0Raw, view.point.snapshot.fees.collectable1Raw)],
+        ],
+        note: 'Recorded period: ' + periodDuration(view.durationSeconds) + '. The full balance includes tokens that were already collectable at the start.',
+      },
+      context: 'The owner collects only the new fee tokens into their wallet. They leave the liquidity and range untouched. Prices stay the same; ignore gas.',
+      question: 'Which tokens continue providing liquidity after collection?',
+      choices: [
+        ['same', 'The same principal as before collection.'],
+        ['less', 'The principal, reduced by the collected fees.'],
+        ['more', 'The principal plus the collected fee tokens.'],
+      ],
+      hint: 'Follow where the collected tokens went: the wallet or the position.',
+      feedback: 'The principal stays in place. Collected fees now sit in the wallet; putting them to work would require adding liquidity.',
+      feedbackByChoice: {
+        less: 'Fees were separate from principal before collection. Moving those fees to the wallet does not take any principal away.',
+        more: 'The collected tokens are in the wallet. They provide liquidity only if the owner deposits them in a separate action.',
+      },
+    };
+  }
   if (id === 'between-samples') return {
-    expected: 'fee-records', context: 'Imagine two intervals with the same recorded number of seconds in range. Their trades and competing liquidity may differ.',
-    question: 'What would establish whether the intervals earned the same fee tokens?',
-    choices: [['fee-records','The new fee tokens recorded separately for each interval.'],['equal-time','The matching time in range already establishes that result.'],['final-price','The pool price at each interval’s final checkpoint.']],
-    hint: 'Recorded active time and recorded fee earnings answer different questions.',
-    feedback: 'Equal active time does not imply equal fees. Compare the new fee tokens for each interval; trades and the position’s share of active liquidity can differ.'};
+    expected: 'smaller-share', label: 'Two equally active hours',
+    reasonEvidence: {
+      title: 'Activity between the two observations',
+      rows: [
+        ['Earlier price', 'Above range · block ' + question.interval.start.number],
+        ['Later price', 'Above range · block ' + question.interval.end.number],
+        ['Recorded time inside the range', periodDuration(question.interval.secondsInRange)],
+        ['Position bounds', 'Unchanged throughout'],
+      ],
+      note: 'The active-time counter covers the interval between these observations. It does not show the exact moments of each crossing.',
+    },
+    evidence: {
+      title: 'A hypothetical comparison',
+      rows: [
+        ['Time active', 'One hour in each case'],
+        ['USDC fees shared among LPs', 'The same at every traded price'],
+        ['Your liquidity and fee tier', 'Unchanged'],
+        ['Other active liquidity', 'More in the second hour, at every traded price'],
+      ],
+      note: 'These are supplied assumptions for two new hours, not another part of the historical record.',
+    },
+    context: 'Both hours are equally active, but more liquidity competes for the same fees in the second hour.',
+    question: 'How do your USDC fee earnings compare in the second hour?',
+    choices: [['more-fees', 'You earn more.'], ['smaller-share', 'You earn less.'], ['same-fees', 'You earn the same.']],
+    hint: 'Time in range makes the position eligible. Its share of active liquidity determines its share of these fees.',
+    feedback: 'Your liquidity is unchanged, but it is a smaller part of the active total. The same USDC fees are shared more widely, so you earn less despite equal active time.',
+    feedbackByChoice: {
+      'more-fees': 'More competing liquidity does not add fees in this example. The supplied fee totals stay the same, while your share gets smaller.',
+      'same-fees': 'Equal active time does not give an equal fee payment. More competing liquidity means a smaller share of the same fees.',
+    },
+  };
   if (id !== 'period-vs-holding') throw new Error('Choose an applied exercise.');
   const exposure = appliedPriceExposure(question);
   return {expected: exposure.ethDifference < 0 ? 'smaller-lead' : exposure.ethDifference > 0 ? 'larger-lead' : 'same-lead', exposure,
