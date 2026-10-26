@@ -1,6 +1,7 @@
 import { LST_KEYS } from '../models/lst-loop-v1.js';
 import { fmt, formatTokenQuantity } from './format.js';
 import { healthLabel } from './lending-presentation.js';
+import { calculateLSTComparison } from '../models/lst-comparison.js';
 
 const weth = value => formatTokenQuantity(value, 4) + ' WETH';
 const wsteth = value => formatTokenQuantity(value, 4) + ' wstETH';
@@ -35,14 +36,34 @@ export function lstExitFacts(result) {
   return [...destination, ['WETH debt remaining', weth(0)], ['Exit swap loss', weth(e.swapLoss)],
     ['Flash loan fee', weth(e.flashCost)], ['Flat exit cost', weth(e.gas)]];
 }
-export function lstExperimentFacts(result, detailed = false) {
+export function lstExperimentFacts(result, detailed = false, comparison = null) {
   const r = result, p = r.input;
   const rows = [
-    ['Assets minus debt · before liquidation', weth(r.end.net)],
-    ['Loop minus holding original wstETH', weth(r.vsHolding)],
-    ['WETH debt', weth(r.end.debt)], ['Health factor', healthLabel(r.end.healthFactor)],
+    [comparison ? 'Your setup · assets minus debt before liquidation' : 'Assets minus debt · before liquidation', weth(r.end.net)],
+    [comparison ? 'Your setup · minus holding original wstETH' : 'Loop minus holding original wstETH', weth(r.vsHolding)],
+    [comparison ? 'Your setup · WETH debt' : 'WETH debt', weth(r.end.debt)],
+    [comparison ? 'Your setup · health factor' : 'Health factor', healthLabel(r.end.healthFactor)],
   ];
+  if (r.firstRateBoundary !== null || ['boundary', 'eligible'].includes(r.end.status)) rows.unshift([
+    comparison ? 'Your setup · liquidation boundary reached' : 'Liquidation boundary reached',
+    r.firstRateBoundary === null ? 'At the selected endpoint. Balances assume no liquidation.'
+      : 'Around day ' + fmt(r.firstRateBoundary, 1) + '. Later balances assume no liquidation.',
+  ]);
   if (!detailed) return rows;
+  const pair = comparison ? calculateLSTComparison(p, comparison) : null;
+  const referenceRows = !pair ? [] : [
+    ['Saved reference target', formatTokenQuantity(comparison.targetExposure, 6) + '× starting wstETH · same rates, time, oracle, costs and exit destination'],
+    ...(pair.status === 'unavailable' ? [['Reference', 'Unavailable: ' + pair.reason]] : [
+      ...(pair.referenceOutcome.counterfactual ? [['Reference · liquidation boundary reached', 'Balances assume no liquidation.']] : []),
+      ['Reference · assets minus debt before liquidation', weth(pair.reference.end.net)],
+      ['Reference · minus holding original wstETH', weth(pair.reference.vsHolding)],
+      ['Reference · health factor', healthLabel(pair.reference.end.healthFactor)],
+      ['Reference · earlier rate-only boundary', pair.reference.firstRateBoundary === null ? 'Not reached' : 'Day ' + fmt(pair.reference.firstRateBoundary, 1)],
+      ['Reference · exit preview', pair.reference.exit.status === 'complete'
+        ? (p.exitMode === 'wsteth' ? wsteth(pair.reference.exit.retained) : weth(pair.reference.exit.cash)) + ' after clearing debt'
+        : 'Not run · ' + pair.reference.exit.status],
+    ]),
+  ];
   return [...rows,
     ['Starting wstETH / conversion rate', fmt(p.collateral, 4) + ' / ' + fmt(p.rate, 4) + ' stETH per wstETH'],
     ['Construction', p.buildMode === 'target' ? fmt(p.targetExposure, 3) + '× starting wstETH · flash-assisted target' : p.rounds + ' rounds · ' + fmt(p.borrowPercent) + '% borrowing fraction'],
@@ -57,19 +78,21 @@ export function lstExperimentFacts(result, detailed = false) {
     ['Rate-only boundary during the period', r.firstRateBoundary === null ? 'Not reached' : 'Day ' + fmt(r.firstRateBoundary, 1)],
     ['Exit destination', p.exitMode === 'wsteth' ? 'Keep unsold wstETH' : 'Sell all to WETH'],
     ['Exit preview', r.exit.status === 'complete' ? (p.exitMode === 'wsteth' ? wsteth(r.exit.retained) : weth(r.exit.cash)) + ' after clearing debt' : 'Not run · ' + r.exit.status],
+    ...referenceRows,
   ];
 }
 export function lstExperimentContext(entries) {
   const first = entries[0].inputs;
+  const context = text => (entries.some(entry => entry.comparison) ? 'Each card shows its main setup. Open an experiment to compare its saved targets. ' : '') + text;
   if (!entries.every(entry => entry.inputs.collateral === first.collateral && entry.inputs.rate === first.rate)) {
-    return 'Different starting wstETH or conversion rates. Each comparison keeps its own original tokens; these are not equivalent budgets.';
+    return context('Different starting wstETH or conversion rates. Each comparison keeps its own original tokens; these are not equivalent budgets.');
   }
   const shared = LST_KEYS.filter(key => !['rounds', 'borrowPercent', 'swapCost'].includes(key));
   if (!entries.every(entry => shared.every(key => entry.inputs[key] === first[key]))) {
-    return 'Same starting wstETH, different conditions. Rates, discount, oracle or exit assumptions have not been synchronized; compare those assumptions before judging the outcomes.';
+    return context('Same starting wstETH, different conditions. Rates, discount, oracle or exit assumptions have not been synchronized; compare those assumptions before judging the outcomes.');
   }
   if (!entries.every(entry => (entry.inputs.exitMode ?? 'weth') === (first.exitMode ?? 'weth'))) {
-    return 'Same market conditions, different exit destinations. Before-exit balances are comparable; WETH proceeds and retained wstETH have different ongoing exposure.';
+    return context('Same market conditions, different exit destinations. Before-exit balances are comparable; WETH proceeds and retained wstETH have different ongoing exposure.');
   }
-  return 'Same starting wstETH, rates, time, discount, oracle and exit assumptions. Only construction choices may differ. The holding reference keeps the original wstETH without borrowing.';
+  return context('Same starting wstETH, rates, time, discount, oracle and exit assumptions. Only construction choices may differ. The holding reference keeps the original wstETH without borrowing.');
 }

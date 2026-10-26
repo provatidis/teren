@@ -162,7 +162,7 @@ export function initSavedExperiments({ labs, onOpen = () => {} }) {
     if (entries.length < 2) { $('experiments-comparison').hidden = true; return; }
     $('experiments-comparison-context').textContent = comparisonContext(entries);
     $('experiments-comparison-scope').textContent = experimentFamily(entries[0].model) === 'liquidity'
-      ? 'Each holding benchmark keeps that experiment’s own starting tokens. Fees are assumed USD cash; gas, incentives and trading paths are excluded. Values use USDC = $1.'
+      ? 'Each holding benchmark keeps that experiment’s own starting tokens. Assumed fee income and any entered costs are included; fees remain separate USD cash. Incentives and trading paths are excluded. Values use USDC = $1.'
       : experimentFamily(entries[0].model) === 'correlated' ? 'Hypothetical wstETH/WETH balances before liquidation and exit, with staking and lending growth counted separately. A prior rate-only boundary is shown in the assumptions. Each record keeps its own conditions.'
       : 'Recalculated from saved assumptions, before liquidation. A saved loop reference is retained when reopened; these cards show each main setup. USDC = $1; rates are fixed and real execution is not simulated.';
     $('experiments-comparison-cards').replaceChildren(...entries.map(entry => {

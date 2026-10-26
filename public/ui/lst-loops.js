@@ -6,6 +6,8 @@ import { createLSTScene } from '../lib/lst-scene.js';
 import { healthLabel, loanStatus } from '../lib/lending-presentation.js';
 import { fmt, usd, formatTokenQuantity } from '../lib/format.js';
 import { lstExitCopy, lstExitFacts } from '../lib/lst-presentation.js';
+import { validateLSTComparison, calculateLSTComparison } from '../models/lst-comparison.js';
+import { createLSTComparisonView } from '../lib/lst-comparison-view.js';
 
 const tokens = (value, token = 'WETH') => formatTokenQuantity(value, 4) + ' ' + token;
 const signed = value => (value > 0 ? '+' : value < 0 ? '−' : '') + tokens(Math.abs(value));
@@ -16,9 +18,68 @@ export function initLSTLoops() {
   const inputField = key => $('lst-' + key + (Object.hasOwn(exactControls, key) ? '-input' : ''));
   const stored = readLSTDraft();
   let view = stored.view, current = null, firstInvalid = null, revision = 0;
+  let comparison = null, comparisonError = null, showingComparison = false;
+  const comparisonView = createLSTComparisonView($('lst-comparison-results'));
   const buildScene = createLSTScene($('lst-build-scene'), 'build');
   const exitScene = createLSTScene($('lst-exit-scene'), 'exit');
   const active = () => location.hash === '#lst-loops' || readLSTHash(location.hash).status !== 'none';
+
+  function writeComparison(value = null) {
+    $('lst-compare-toggle').checked = !!value;
+    $('lst-reference-target').value = value?.targetExposure ?? 2;
+  }
+  function readComparison(input) {
+    const supported = input.buildMode === 'target';
+    const toggle = $('lst-compare-toggle');
+    toggle.disabled = !supported;
+    if (!supported) toggle.checked = false;
+    $('lst-comparison-unavailable').hidden = supported;
+    $('lst-comparison-setup').hidden = !toggle.checked;
+    $('lst-comparison-primary').textContent = 'Your setup · ' + (Number.isFinite(input.targetExposure) ? formatTokenQuantity(input.targetExposure, 6) + '×' : 'check target');
+    comparisonError = null;
+    comparison = null;
+    if (toggle.checked) {
+      const raw = $('lst-reference-target').value.trim();
+      try { comparison = validateLSTComparison(input, { targetExposure: raw === '' ? NaN : Number(raw) }); }
+      catch (error) { comparisonError = error.message; }
+    }
+    $('lst-reference-target').setAttribute('aria-invalid', String(!!comparisonError));
+    $('lst-reference-target-error').hidden = !comparisonError;
+    $('lst-reference-target-error').textContent = comparisonError || '';
+  }
+  function displayComparison(pair = null) {
+    const visible = !!pair?.comparison;
+    if (visible) comparisonView.render(pair);
+    else comparisonView.clear();
+    const details = $('lst-primary-details');
+    if (visible !== showingComparison) details.open = !visible;
+    showingComparison = visible;
+    details.dataset.comparing = String(visible);
+    $('lst-primary-details-summary').hidden = !visible;
+    if (!visible) details.open = true;
+    $('lst-carry-label').textContent = visible
+      ? 'Your setup · ' + formatTokenQuantity(pair.primary.input.targetExposure, 6) + '× vs holding' : 'Loop minus holding';
+    $('lst-reference-preview').hidden = !visible;
+    $('lst-preview-warning').hidden = true;
+    if (visible) {
+      const reference = pair.referenceOutcome;
+      $('lst-reference-carry-label').textContent = 'Reference · ' + formatTokenQuantity(pair.comparison.targetExposure, 6) + '× vs holding';
+      $('lst-reference-carry-value').textContent = reference ? compactDifference(reference.vsHolding) : 'Target unavailable';
+      $('lst-reference-carry-value').title = reference ? signed(reference.vsHolding) : pair.reason;
+      $('lst-reference-carry-health-row').hidden = !reference;
+      $('lst-reference-carry-health').textContent = reference ? healthLabel(reference.healthFactor) : '';
+      const affected = [pair.primaryOutcome.counterfactual ? 'Your setup' : null, reference?.counterfactual ? 'The reference' : null].filter(Boolean);
+      $('lst-preview-warning').hidden = !affected.length;
+      $('lst-preview-warning').textContent = affected.length === 2
+        ? 'Both reach a liquidation boundary. These balances assume no liquidation.'
+        : affected.length ? affected[0] + ' reaches a liquidation boundary. These balances assume no liquidation.' : '';
+    }
+  }
+  function compactDifference(value) {
+    return Math.abs(value) >= 1e6
+      ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2, signDisplay: 'exceptZero' }).format(value) + ' WETH'
+      : signed(value);
+  }
 
   function write(input) {
     if (!Object.hasOwn(input, 'buildMode')) input = upgradeLST(input);
@@ -47,10 +108,10 @@ export function initLSTLoops() {
     }
   }
   function persist(input) {
-    const saved = saveLSTDraft(input, view);
+    const saved = saveLSTDraft(input, view, undefined, comparison);
     $('lst-storage').textContent = saved ? 'Working setup kept in this browser. Save a named experiment or copy its link to keep a variation.' : 'Browser saving is unavailable. Copy the link to keep this setup.';
     if (active()) {
-      const hash = lstHash(input, view);
+      const hash = lstHash(input, view, comparison);
       history.replaceState(null, '', location.pathname + location.search + hash);
       saveExperimentLocation(LST_MODEL, hash);
     }
@@ -81,6 +142,7 @@ export function initLSTLoops() {
     $('lst-share-status').textContent = '';
     $('lst-save-status').textContent = '';
     const input = read(), errors = validateLST(input);
+    readComparison(input);
     $('lst-target-settings').hidden = input.buildMode !== 'target';
     $('lst-round-settings').hidden = input.buildMode !== 'rounds';
     $('lst-build-flash-setting').hidden = input.buildMode !== 'target';
@@ -104,8 +166,8 @@ export function initLSTLoops() {
       $('lst-' + key + '-error').textContent = errors[key] || '';
     }
     $('lst-invalid').hidden = !firstInvalid;
-    $('lst-save').disabled = !!firstInvalid;
-    $('lst-share').disabled = !!firstInvalid;
+    $('lst-save').disabled = !!firstInvalid || !!comparisonError;
+    $('lst-share').disabled = !!firstInvalid || !!comparisonError;
     $('lst-rate-change-fields').hidden = !input.rateChange && !errors.changeDay && !errors.laterAPR;
     $('lst-rounds-value').textContent = Number.isFinite(input.rounds) ? fmt(input.rounds, 0) + ' rounds' : 'Check value';
     for (const [key, { unit }] of Object.entries(exactControls)) {
@@ -116,7 +178,10 @@ export function initLSTLoops() {
     }
     displayView();
     for (const id of ['lst-build-scene', 'lst-hold-results', 'lst-accounting', 'lst-chart-details', 'lst-exit-scene', 'lst-exit-outcome']) $(id).hidden = !!firstInvalid;
+    $('lst-carry-threshold').hidden = !!firstInvalid;
+    $('lst-break-even-note').hidden = !!firstInvalid;
     if (firstInvalid) {
+      displayComparison();
       current = null;
       $('lst-build-summary').textContent = 'Check the inputs to calculate this loop.';
       $('lst-build-risk').textContent = '';
@@ -135,6 +200,7 @@ export function initLSTLoops() {
       return;
     }
     current = calculateLST(input);
+    displayComparison(comparison ? calculateLSTComparison(input, comparison) : null);
     const r = current, p = r.end;
     $('lst-build-summary').textContent = (r.start.debt === 0 ? 'No borrowing: ' : input.buildMode === 'target' ? 'Flash-assisted build: ' : 'After all rounds: ') + formatTokenQuantity(r.exposure, 3) + '× starting wstETH · ' + tokens(r.start.collateral, 'wstETH') + ' supplied · ' + tokens(r.start.debt) + ' owed.';
     $('lst-build-risk').textContent = 'Starting LTV: ' + fmt(r.start.debt / r.start.collateralValue * 100, 2) + '% · Health factor: ' + healthLabel(r.start.healthFactor) + '. Collateral / net equity after build costs: ' + fmt(r.start.collateralValue / r.start.net, 3) + '×.';
@@ -145,9 +211,7 @@ export function initLSTLoops() {
     $('lst-usd').textContent = usd(p.net * input.ethUSD) + ' at ' + usd(input.ethUSD) + '/ETH';
     $('lst-holding').textContent = tokens(r.holding);
     $('lst-difference').textContent = signed(r.vsHolding);
-    $('lst-carry-value').textContent = Math.abs(r.vsHolding) >= 1e6
-      ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2, signDisplay: 'exceptZero' }).format(r.vsHolding) + ' WETH'
-      : signed(r.vsHolding);
+    $('lst-carry-value').textContent = compactDifference(r.vsHolding);
     $('lst-carry-value').title = signed(r.vsHolding);
     $('lst-carry-health').textContent = healthLabel(p.healthFactor);
     $('lst-health').textContent = healthLabel(p.healthFactor);
@@ -178,8 +242,13 @@ export function initLSTLoops() {
       ['WETH borrowing interest', signed(-r.borrowInterest)], ['Market discount on all collateral', signed(-r.discountLoss)],
       ['Assets minus debt', tokens(p.net)],
     ]);
-    $('lst-break-even').textContent = r.breakEvenAPR === null ? 'A break-even borrow rate needs a nonzero loan and holding period.'
-      : 'Average borrow APR that would match holding in this setup: ' + fmt(r.breakEvenAPR) + '%.' + (r.breakEvenAPR < 0 ? ' Matching holding would require a borrowing subsidy at these assumptions.' : '') + ' Your time-weighted borrow APR: ' + fmt(r.averageBorrowAPR) + '%. This compares value, not liquidation safety.';
+    $('lst-break-even-value').textContent = r.breakEvenAPR === null ? 'Not applicable'
+      : (Math.abs(r.breakEvenAPR) >= 10000 ? r.breakEvenAPR.toExponential(2) : fmt(r.breakEvenAPR)) + '%';
+    $('lst-average-apr').textContent = fmt(r.averageBorrowAPR) + '%';
+    const rateNote = r.breakEvenAPR === null ? 'A break-even borrow rate needs a loan and time for interest to accrue.'
+      : r.breakEvenAPR < 0 ? 'Matching holding would require a borrowing subsidy at these assumptions.' : '';
+    $('lst-break-even-note').hidden = !rateNote;
+    $('lst-break-even-note').textContent = rateNote;
     chart(r);
     $('lst-liquidation').hidden = !r.liquidation;
     $('lst-liquidation-results').hidden = false;
@@ -206,18 +275,27 @@ export function initLSTLoops() {
         : destination === 'weth' ? 'After repayment and costs. No wstETH or loan remains.'
           : 'Market value now: ' + tokens(e.remaining.net) + '. No loan remains; the unsold tokens stay invested.';
     }
-    if (save) persist(input);
+    if (save && !comparisonError) persist(input);
   }
   function changeView(next) {
     view = next;
     displayView();
-    if (current) persist(current.input);
+    if (current && !comparisonError) persist(current.input);
   }
   for (const name of LST_VIEWS) $('lst-view-' + name).addEventListener('click', () => changeView(name));
-  for (const [id, target] of [['lst-to-hold', 'hold'], ['lst-to-exit', 'exit']]) $(id).addEventListener('click', () => {
+  for (const [id, target] of [['lst-to-hold', 'hold'], ['lst-to-exit', 'exit'], ['lst-check-exit', 'exit']]) $(id).addEventListener('click', () => {
     changeView(target);
     $('lst-view-' + target).focus();
     $('lending-lst').scrollIntoView({ block: 'start', behavior: 'instant' });
+  });
+  $('lst-compare-toggle').addEventListener('change', () => {
+    render(true);
+    if ($('lst-compare-toggle').checked) $('lst-reference-target').focus();
+  });
+  $('lst-reference-target').addEventListener('input', () => render(true));
+  for (const id of ['lst-comparison-edit', 'lst-comparison-build']) $(id).addEventListener('click', () => {
+    changeView('build');
+    $(id === 'lst-comparison-edit' ? 'lst-targetExposure' : 'lst-buildMode').focus();
   });
   for (const key of LST_KEYS) inputField(key).addEventListener('input', () => {
     if (key === 'buildMode') {
@@ -271,14 +349,14 @@ export function initLSTLoops() {
     field.focus();
   });
   $('lst-reset').addEventListener('click', () => {
-    view = 'build'; write(LST_DEFAULTS); render(true, true);
+    view = 'build'; write(LST_DEFAULTS); writeComparison(); render(true, true);
     $('lst-view-build').focus({ preventScroll: true });
     $('lending-lst').scrollIntoView({ block: 'start', behavior: 'instant' });
   });
   $('lst-share').addEventListener('click', async () => {
-    if (!current) return;
+    if (!current || comparisonError) return;
     const currentRevision = revision, url = new URL(location.href);
-    url.hash = lstHash(current.input, view);
+    url.hash = lstHash(current.input, view, comparison);
     try {
       await navigator.clipboard.writeText(url.href);
       if (currentRevision === revision) $('lst-share-status').textContent = 'LST loop link copied with all assumptions.';
@@ -292,16 +370,17 @@ export function initLSTLoops() {
   function loadRoute() {
     const link = readLSTHash(location.hash);
     $('lst-route-note').hidden = link.status !== 'invalid';
-    if (link.status === 'ready') { write(link.input); view = link.view; render(true, true); }
+    if (link.status === 'ready') { write(link.input); writeComparison(link.comparison); view = link.view; render(true, true); }
   }
   write(stored.input);
+  writeComparison(stored.comparison);
   render();
   if (stored.status === 'invalid') $('lst-storage').textContent = 'The saved working copy could not be read. Defaults are shown; the stored copy is unchanged until you edit.';
   else if (stored.status === 'unavailable') $('lst-storage').textContent = 'Browser saving is unavailable. Copy a link to keep your setup.';
   loadRoute();
   window.addEventListener('hashchange', loadRoute);
   return {
-    getExperimentDraft: () => current ? { model: LST_MODEL, inputs: { ...current.input }, origin: null } : null,
-    setExperiment(entry) { write(entry.inputs); view = 'hold'; render(false, true); if (current) persist(current.input); },
+    getExperimentDraft: () => current && !comparisonError ? { model: LST_MODEL, inputs: { ...current.input }, origin: null, ...(comparison ? { comparison: { ...comparison } } : {}) } : null,
+    setExperiment(entry) { write(entry.inputs); writeComparison(entry.comparison); view = 'hold'; render(false, true); if (current && !comparisonError) persist(current.input); },
   };
 }
