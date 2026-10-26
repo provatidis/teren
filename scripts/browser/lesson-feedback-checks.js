@@ -104,7 +104,7 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
     assert.match(await text('applied-comparison'), /−\$0.51[\s\S]*\+\$0.17/);
     await evaluate("document.querySelector('#applied-comparison button').click()");
     assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"), '6');
-    assert.match(await text('applied-question-window'), /final block/);
+    assert.match(await text('applied-question-window'), /Final comparison checkpoint: block 26090000/);
     assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
     for (const lesson of ['build', 'unwind']) {
       const route = base + 'lending.html#loop-lesson=' + lesson;
