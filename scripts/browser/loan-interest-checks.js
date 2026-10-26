@@ -95,6 +95,12 @@ export async function checkLoanInterest({ evaluate, click, fill, text, navigate,
     for (const width of [390, 320]) {
       await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
       await navigate(base + 'lending.html#experiment'); await click('loan-reset');
+      const controlHeight = await evaluate("document.querySelector('.loan-accrual-control').getBoundingClientRect().height");
+      for (const days of ['0', '22.2525', '1824.9999']) {
+        await fill('loan-days', days);
+        assert.equal(await evaluate("document.querySelector('.loan-accrual-control').getBoundingClientRect().height"), controlHeight,
+          'Time labels must not reflow as a drag produces longer fractional values at ' + width + 'px.');
+      }
       await evaluate("document.getElementById('loan-time-slider').focus();document.getElementById('loan-time-slider').scrollIntoView({block:'center'})");
       await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'End', code: 'End', windowsVirtualKeyCode: 35 });
       await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'End', code: 'End', windowsVirtualKeyCode: 35 });

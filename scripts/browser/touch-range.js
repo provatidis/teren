@@ -37,7 +37,8 @@ export async function dragRangeToMax({ evaluate, call, fill }, id, { inset = 26 
     for (const fraction of [.25, .5, .75, 1]) {
       await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(fraction)] });
       await settle(evaluate);
-      assert.ok(Math.abs(await evaluate(`document.getElementById(${selector}).getBoundingClientRect().top`) - box.top) < 1, id + ': control moved during drag');
+      const current = await evaluate(`({top:document.getElementById(${selector}).getBoundingClientRect().top,value:document.getElementById(${selector}).value,width:innerWidth})`);
+      assert.ok(Math.abs(current.top - box.top) < 1, id + ': control moved during drag: ' + JSON.stringify({ before: box.top, ...current }));
     }
     await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     gestureStarted = false;

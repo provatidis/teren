@@ -37,6 +37,7 @@
 .loan-accrual h3{font-size:18px;line-height:1.5;margin:0 0 18px}
 .loan-accrual-control{display:flex;justify-content:space-between;gap:12px;font-size:14px;line-height:1.7}
 .loan-accrual-control output{font-variant-numeric:tabular-nums;white-space:nowrap}
+.loan-accrual-control label{white-space:nowrap}
 .loan-accrual-row{margin:16px 0 20px;min-width:0}
 .loan-accrual-heading{display:flex;justify-content:space-between;align-items:baseline;gap:8px 16px;flex-wrap:wrap;font-size:14px;line-height:1.7;margin:0 0 8px}
 .loan-accrual-heading strong{font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
