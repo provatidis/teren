@@ -1,4 +1,4 @@
-import { createPredictionPrompt } from '../lib/lesson-scene.js';
+import { createPredictionPrompt, markPredictionRevealed } from '../lib/lesson-scene.js';
 import { renderRecordedLessonSetup } from '../lib/recorded-lesson-setup.js';
 import { renderRecordedComparison } from '../lib/recorded-comparison-scene.js';
 import { saveLearningLocation } from '../data/learning-location.js';
@@ -140,7 +140,7 @@ export function initAppliedLearning() {
       $('applied-current').scrollIntoView({ block: 'center', behavior: 'instant' });
     });
     $('applied-observe').hidden = false; $('applied-assessment').hidden = false;
-    $('applied-reveal').textContent = 'Revisit the recorded result ↓';
+    markPredictionRevealed(predictionField);
     renderCheckpoint(); persist();
   }
   function check(save = true) {

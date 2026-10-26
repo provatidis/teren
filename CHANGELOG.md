@@ -1,5 +1,12 @@
 # Release history
 
+## 1.41.1 · 2026-10-26
+
+- Restore the assessed build/unwind diagram alongside saved lesson explanations. Opening an explanation after exploring another step returns to the same assessed outcome.
+- Align range boundaries, price markers and labelled scales in hypothetical and recorded lesson diagrams. Stagger boundary labels for narrow screens while keeping width-comparison boundaries selectable.
+- Keep the question and selected answer in view when focusing corrective feedback, with the question included in its accessible name. Distinguish first reveal, return to the outcome, action replay and explanation controls.
+- Explain range composition through the direction of swaps and make the historical holding-comparison answer a complete conclusion. Preserve optional predictions, progress, financial models, recorded evidence and calculator handoffs.
+
 ## 1.41.0 · 2026-10-26
 
 - Give matching, differing and skipped predictions green, amber and neutral states respectively, with explicit findings. Keep selected answers neutral until checked. Explain each understanding-check answer beside its question and focus the first answer needing attention; explanations are available on the first check.

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
-import { lessonFinding } from '../public/lib/lesson-narration.js';
+import { lessonFinding, rangeBoundaryNarration } from '../public/lib/lesson-narration.js';
 import { rangePositionState, rangeSceneState } from '../public/lib/liquidity-scene-state.js';
 import { managementCase } from '../public/models/range-decisions.js';
 import { lendingCase, checkLendingUnderstanding } from '../public/models/lending-lessons.js';
@@ -36,6 +36,21 @@ test('range scenes show token endpoints and the different gaps to each original 
   assert.equal(rangePositionState(narrow, 2100).result.pooled.eth, 0);
   assert.ok(rangePositionState(narrow, 2090).result.pooled.eth > 0);
   assert.equal(rangePositionState(narrow, 1900).result.pooled.usdc, 0);
+});
+
+test('range explanations follow the assessed price direction and token endpoint', () => {
+  for (const variant of [0, 1, 2]) {
+    for (const width of [.05, .1, .5]) {
+      const base = lessonSetup('range-boundaries', variant);
+      for (const factor of [.5, .95, 1, 1.05, 2]) {
+        const outcome = runLesson('range-boundaries', { ...base, width, futurePrice: base.initialPrice * factor }, variant);
+        const copy = rangeBoundaryNarration(outcome);
+        assert.match(copy, factor > 1 ? /ETH for USDC/ : factor < 1 ? /USDC for ETH/ : /unchanged price/);
+        assert.match(copy, outcome.result.pooled.eth === 0 ? /all USDC/ : outcome.result.pooled.usdc === 0 ? /all ETH/ : /contains both ETH and USDC/);
+        assert.match(copy, /does not tell us how much it earned earlier/);
+      }
+    }
+  }
 });
 
 test('new lending and leverage follow-ups follow the existing financial models', () => {

@@ -19,7 +19,15 @@ export function focusLearningFeedback(prefix) {
   const feedback = document.querySelector('[data-check="' + prefix + '"][data-state="different"], [data-check="' + prefix + '"][data-state="unanswered"]')
     || document.getElementById(prefix + '-feedback');
   feedback.focus({ preventScroll: true });
-  feedback.scrollIntoView({ block: 'start', behavior: 'instant' });
+  const field = feedback.closest('fieldset');
+  let target = field || feedback;
+  const context = field?.previousElementSibling;
+  if (context?.classList.contains('learn-application-setup')) {
+    const topInset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    if (field.getBoundingClientRect().bottom - context.getBoundingClientRect().top <= innerHeight - topInset - 48) target = context;
+  }
+  // Keep the question and chosen answer in view, while announcing its feedback.
+  target.scrollIntoView({ block: 'start', behavior: 'instant' });
 }
 
 // Explain each answer where it was chosen. These states are transient; completion
@@ -41,9 +49,12 @@ export function renderUnderstandingFeedback(prefix, entries) {
     const state = !selected ? 'unanswered' : correct ? 'match' : 'different';
     feedback.dataset.state = state;
     const title = document.createElement('strong');
+    title.id = id + '-title';
     title.textContent = state === 'match' ? 'That’s right.' : state === 'different' ? 'Not quite — here’s why.' : 'Choose an answer to compare.';
-    const detail = document.createElement('p'); detail.textContent = explanation;
+    const detail = document.createElement('p'); detail.id = id + '-detail'; detail.textContent = explanation;
     feedback.replaceChildren(title, '\n', detail);
+    feedback.setAttribute('aria-labelledby', field.querySelector('legend').id + ' ' + title.id);
+    feedback.setAttribute('aria-describedby', detail.id);
     const describedBy = new Set((field.getAttribute('aria-describedby') || '').split(' ').filter(Boolean));
     describedBy.add(id); field.setAttribute('aria-describedby', [...describedBy].join(' '));
   }

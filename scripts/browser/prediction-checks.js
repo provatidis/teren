@@ -52,6 +52,7 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         assert.doesNotMatch(await text(prefix + '-prediction-feedback'), /Your prediction matches|You expected:/);
         assert.equal(await evaluate(`document.querySelector('#${prefix}-prediction-feedback > strong').textContent`), 'What happens');
         assert.equal(await evaluate(`document.getElementById('${prefix}-prediction-feedback').dataset.state`), 'skipped');
+        assert.equal(await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').querySelector('button').textContent`), 'Show the outcome again ↓');
         assert.equal(await evaluate(`document.getElementById('${prefix}-continue').hidden`), true, 'Viewing alone does not complete a lesson');
         if (nonvisual[id]) {
           for (const [group, value] of [['reason', nonvisual[id][0]], ['application', nonvisual[id][1]]]) {
@@ -63,6 +64,7 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         await reload(); await ready();
         assert.equal(await evaluate(`document.getElementById('${result}').hidden`), false, route + ': skipped outcomes restore');
         assert.equal(await evaluate(`document.querySelector('${selector} input:checked') === null`), true);
+        assert.equal(await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').querySelector('button').textContent`), 'Show the outcome again ↓', route + ': restored controls distinguish returning from first reveal');
         if (nonvisual[id]) assert.equal(await text(prefix + '-feedback-title'), 'Both answers are correct.', 'Skipped completion restores');
       }
     }

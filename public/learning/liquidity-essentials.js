@@ -69,8 +69,8 @@ export const LESSONS = [
     reasoning: 'What does the final range status establish about swap fees?',
     reasons: [['path', 'Whether it is active now; past fee income needs records.'], ['zero', 'Whether it earned fees throughout the whole observed period.'], ['fixed', 'The fee income earned from the position’s chosen range width.']],
     hint: 'ETH share = final ETH × future price ÷ total principal value × 100. Below the range it is 100%; above it, 0%.',
-    explanation: 'Narrowing a range changes the required starting mix and the response to price. Outside the range, token quantities stop changing until price returns. This continuous model excludes tick spacing, gas and earned fees; final status cannot reconstruct earlier activity.',
-    takeaway: 'Outside the range is an asset allocation state, not a complete history.',
+    explanation: 'Swaps change the token mix while price is inside the range. Above the range, principal is all USDC; below it, all ETH. Outside the range, token amounts stay fixed until price returns. Past fee income needs separate records.',
+    takeaway: 'The final price tells you which tokens remain. Past fees need records of earlier activity.',
   },
   {
     id: 'final-challenge', protocol: 'Uniswap v2-style', title: 'Compare liquidity with holding', short: 'Final challenge', concept: 'Apply what you learned', skill: 'Compare an LP with holding and justify the conclusion.',

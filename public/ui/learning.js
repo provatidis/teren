@@ -1,5 +1,5 @@
 import { saveLearningLocation } from '../data/learning-location.js';
-import { focusSceneOutcome, createPredictionPrompt, sceneNode } from '../lib/lesson-scene.js';
+import { focusSceneOutcome, createPredictionPrompt, markPredictionRevealed, sceneNode } from '../lib/lesson-scene.js';
 import { createTokenBalanceScene, createRangeBoundaryScene } from '../lib/liquidity-lesson-scenes.js';
 import { createFoundationScene } from '../lib/foundation-lesson-scenes.js';
 import { createComparisonScene, comparisonQuestion } from '../lib/comparison-lesson-scene.js';
@@ -21,7 +21,7 @@ import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
 import { resultCardBlob } from '../lib/result-card.js';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
-import { tokenBalanceNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding } from '../lib/lesson-narration.js';
+import { tokenBalanceNarration, rangeBoundaryNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding } from '../lib/lesson-narration.js';
 
 export function initLearning() {
   const $ = id => document.getElementById(id);
@@ -31,9 +31,6 @@ export function initLearning() {
   const foundationLesson = () => ['swap-impact', 'pool-share'].includes(lesson?.id);
   const comparisonLesson = () => ['loss-vs-profit', 'fee-break-even', 'final-challenge'].includes(lesson?.id);
   const visualLesson = () => foundationLesson() || ['token-balances', 'range-boundaries'].includes(lesson?.id) || comparisonLesson();
-  const questionLabel = () => lesson.id === 'swap-impact' ? fmt(draft.inputs.amount, 0) + ' ETH swap'
-    : lesson.id === 'pool-share' ? fmt(draft.inputs.depositEth, 0) + ' ETH deposit'
-      : comparisonLesson() ? 'question setup' : usd(draft.inputs.futurePrice) + ' example';
   const restored = readProgress();
   const progress = restored.progress;
   let available = restored.available;
@@ -139,7 +136,7 @@ export function initLearning() {
         : createTokenBalanceScene(s, prediction);
       $('learn-prediction-home').replaceChildren();
       $('learn-scene').replaceChildren(lessonScene.element);
-      $('learn-run').textContent = 'Explain the ' + questionLabel() + ' →';
+      $('learn-run').textContent = 'Why this happens ↓';
     } else {
       $('learn-prediction-home').replaceChildren(createPredictionPrompt(predictionField, { selected: draft.prediction, onShow: () => showResult() }));
     }
@@ -154,7 +151,7 @@ export function initLearning() {
     $('learn-input-status').textContent = visualLesson()
       ? 'Question setup changed. Explore the new example, then open its explanation.'
       : 'Setup changed. Predict, then run the updated experiment.';
-    $('learn-run').textContent = visualLesson() ? 'Explain this example →' : 'Run experiment →'; clearCard();
+    $('learn-run').textContent = visualLesson() ? 'Why this happens ↓' : 'Run experiment →'; clearCard();
   }
   const metric=learningMetric;
   function bar(label, percentValue, detail) {
@@ -223,8 +220,11 @@ export function initLearning() {
     }
     $('learn-metrics').replaceChildren(...metrics); $('learn-visual').replaceChildren(...visual);
     renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, outcome.prediction, lessonFinding(lesson.id, outcome));
+    markPredictionRevealed(predictionField);
     const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
-    $('learn-explanation').textContent = (tokenCopy ? tokenCopy.exchange + (tokenCopy.direction === 'same' ? '' : ' Trading to align pool and market prices is called arbitrage.') + ' Neither token is created by the pool.' : null) || benchmarkNarration(lesson.id, outcome) || lesson.explanation;
+    $('learn-explanation').textContent = (tokenCopy ? tokenCopy.exchange + (tokenCopy.direction === 'same' ? '' : ' Trading to align pool and market prices is called arbitrage.') + ' Neither token is created by the pool.' : null)
+      || (lesson.id === 'range-boundaries' ? rangeBoundaryNarration(outcome) : null)
+      || benchmarkNarration(lesson.id, outcome) || lesson.explanation;
     $('learn-reason-question').textContent = tokenCopy?.reasoning || lesson.reasoning;
     const reasons = lesson.reasons.map(([id, copy]) => [id, tokenCopy && id === 'rebalance' ? tokenCopy.correctReason : copy]);
     choices('learn-reasons', 'learn-reason', reasons, draft.reason);
@@ -236,7 +236,7 @@ export function initLearning() {
     learningPitfall($('learn-pitfall'),POOL_PITFALLS[lesson.id]);
     renderDeeper();
     $('learn-results').hidden = false; $('learn-assessment').hidden = false;
-    $('learn-run').textContent = visualLesson() ? 'Explain the ' + questionLabel() + ' →' : 'Run again →';
+    $('learn-run').textContent = visualLesson() ? 'Why this happens ↓' : 'Run again →';
     $('learn-input-status').textContent = '';
     const home = new URL('liquidity.html', location.href);
     if (lesson.id === 'range-boundaries') home.hash = rangeHash(r);
