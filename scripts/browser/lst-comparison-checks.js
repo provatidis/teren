@@ -98,6 +98,12 @@ export async function checkLSTComparison({ evaluate, click, fill, text, navigate
       assert.equal(await text('lst-net'), mainNet, 'An invalid reference does not erase the valid main setup.');
       assert.equal(await evaluate("document.getElementById('lst-hold-results').hidden"), false);
     }
+    await click('lst-view-exit');
+    assert.equal(await evaluate("document.getElementById('lst-invalid').hidden"), false, 'An invalid reference remains discoverable outside Hold.');
+    await click('lst-fix');
+    assert.equal(await evaluate('document.activeElement.id'), 'lst-reference-target');
+    assert.equal(await evaluate("document.getElementById('lst-hold').hidden"), false);
+    assert.deepEqual(await draft(), valid); assert.equal(await evaluate('location.hash'), validHash);
     await fill('lst-reference-target', '2.123456');
     assert.equal(await evaluate("document.getElementById('lst-share').disabled||document.getElementById('lst-save').disabled"), false);
     assert.deepEqual((await draft()).comparison, { targetExposure: 2.123456 });

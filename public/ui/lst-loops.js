@@ -165,7 +165,7 @@ export function initLSTLoops() {
       $('lst-' + key + '-error').hidden = !errors[key];
       $('lst-' + key + '-error').textContent = errors[key] || '';
     }
-    $('lst-invalid').hidden = !firstInvalid;
+    $('lst-invalid').hidden = !firstInvalid && !comparisonError;
     $('lst-save').disabled = !!firstInvalid || !!comparisonError;
     $('lst-share').disabled = !!firstInvalid || !!comparisonError;
     $('lst-rate-change-fields').hidden = !input.rateChange && !errors.changeDay && !errors.laterAPR;
@@ -341,7 +341,7 @@ export function initLSTLoops() {
     }
   });
   $('lst-fix').addEventListener('click', () => {
-    const field = inputField(firstInvalid);
+    const field = firstInvalid ? inputField(firstInvalid) : comparisonError ? $('lst-reference-target') : null;
     if (!field) return;
     const panel = field.closest('.lst-panel');
     changeView(panel.id.replace('lst-', ''));
