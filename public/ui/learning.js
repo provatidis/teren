@@ -8,6 +8,7 @@ import { stageForLesson } from '../learning/example-path.js';
 import { DEEPER_READING } from '../learning/deeper-reading.js';
 import { lessonWalkthrough } from '../lib/lesson-walkthrough.js';
 import { renderLessonSetup, liquidityLessonSetup } from '../lib/lesson-setup.js';
+import { renderQuestionEvidence } from '../lib/lesson-question-evidence.js';
 import { LESSONS } from '../learning/liquidity-essentials.js';
 import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, checkLesson } from '../models/lesson-experiments.js';
 import { checkLessonUnderstanding, essentialQuestionRevisions } from '../models/lesson-application.js';
@@ -240,9 +241,12 @@ export function initLearning() {
       : lesson.id === 'final-challenge' && id === 'total' ? finalReason(outcome) : copy]);
     choices('learn-reasons', 'learn-reason', reasons, draft.reason);
     $('learn-application-context').textContent = applicationCopy.context;
+    $('learn-reason-context').textContent = applicationCopy.reasonContext || '';
+    $('learn-reason-context').hidden = !applicationCopy.reasonContext;
+    renderQuestionEvidence($('learn-application-evidence'), applicationCopy.evidence);
     const hasTask = lesson.id === 'final-challenge';
     $('learn-application-task').hidden = !hasTask;
-    $('learn-application-label').textContent = hasTask ? 'APPLY · BUILD AN EXAMPLE' : 'APPLY · CHANGE THE SITUATION';
+    $('learn-application-label').textContent = applicationCopy.label || 'Build an example';
     $('learn-check').textContent = hasTask ? 'Check this setup and answers →' : 'Check answers →';
     if (hasTask) {
       applicationScene = createLiquidityApplication(s, draft.task, value => {
@@ -346,8 +350,8 @@ export function initLearning() {
     if (applicationScene && save) draft.taskChecked = true;
     $('learn-feedback').hidden = false; $('learn-feedback').className = 'learn-feedback ' + (check.passed ? 'learn-pass' : 'learn-retry');
     $('learn-feedback-title').textContent = check.passed ? 'Both answers are correct.' : check.reasoning && check.application ? 'Review your setup.' : 'Review your answers.';
-    const reasoningFeedback = lessonReasonFeedback(lesson.id, outcome, draft.reason);
-    const applicationFeedback = draft.application ? applicationCopy.feedback : 'Choose an answer for the changed setup. ' + applicationCopy.hint;
+    const reasoningFeedback = lessonReasonFeedback(lesson.id, outcome, draft.reason, lesson.reasonFeedbackByChoice);
+    const applicationFeedback = draft.application ? (applicationCopy.feedbackByChoice?.[draft.application] || applicationCopy.feedback) : 'Choose an answer. ' + applicationCopy.hint;
     renderUnderstandingFeedback('learn', [
       { container: 'learn-reasons', selected: draft.reason, correct: check.reasoning, explanation: check.reasoning ? lesson.takeaway : reasoningFeedback },
       { container: 'learn-applications', selected: draft.application, correct: check.application, explanation: applicationFeedback },

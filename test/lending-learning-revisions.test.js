@@ -4,13 +4,17 @@ import { parseLendingProgress, readLendingProgress, saveLendingProgress } from '
 import { LOOP_LEARNING_KEY, readLoopProgress, saveLoopProgress } from '../public/data/loop-state.js';
 import { checkLendingUnderstanding } from '../public/models/lending-lessons.js';
 import { checkLoopUnderstanding, loopCase } from '../public/models/loop-lessons.js';
+import { LENDING_LESSONS } from '../public/learning/lending-essentials.js';
+import { LOOP_LESSONS } from '../public/learning/borrowing-loops.js';
+import { LOAN_DEFAULTS, calculateLoan } from '../public/models/collateral-loan-v1.js';
+import { liquidateBalances } from '../public/models/single-liquidation-v1.js';
 
 const memory = () => {
   const entries = new Map();
   return { getItem: key => entries.get(key) ?? null, setItem: (key, value) => entries.set(key, value) };
 };
 
-test('a revised repayment explanation clears only that answer and retains prior completion', () => {
+test('revised loan questions clear obsolete answers and retain compatible answers and completion', () => {
   const legacy = {
     version: 1, currentLesson: 'respond', completed: ['supply', 'respond'],
     drafts: {
@@ -25,17 +29,88 @@ test('a revised repayment explanation clears only that answer and retains prior 
   assert.equal(parsed.currentLesson, 'respond');
   assert.deepEqual(parsed.drafts.supply, legacy.drafts.supply);
   assert.deepEqual(parsed.drafts.respond, {
-    prediction: 'repay', reason: '', application: 'none', revealed: true, seed: 7,
-    questionRevisions: { reason: 1 },
+    prediction: 'repay', reason: '', application: '', revealed: true, seed: 7,
+    questionRevisions: { reason: 1, application: 1 },
   });
   assert.equal(checkLendingUnderstanding('respond', parsed.drafts.respond.reason, 'none').passed, false);
   const storage = memory();
   parsed.drafts.respond.reason = 'tradeoff';
+  parsed.drafts.respond.application = 'remaining-backing';
   assert.equal(saveLendingProgress(parsed, () => storage), true);
   assert.deepEqual(readLendingProgress(() => storage).progress, parsed);
-  assert.equal(checkLendingUnderstanding('respond', 'tradeoff', 'none').passed, true);
+  assert.equal(checkLendingUnderstanding('respond', 'tradeoff', 'remaining-backing').passed, true);
   parsed.drafts.respond.questionRevisions.reason = 2;
   assert.equal(parseLendingProgress(parsed).drafts.respond.reason, '', 'An unknown revision cannot grade a current question.');
+});
+
+test('the latest loan applications preserve current explanations, predictions and completed lessons', () => {
+  const saved = {
+    version: 1, currentLesson: 'respond', completed: ['borrow', 'respond'],
+    drafts: {
+      borrow: { prediction: 'same', reason: 'liability', application: 'boundary', revealed: true, seed: 4 },
+      respond: { prediction: 'repay', reason: 'tradeoff', application: 'none', revealed: true, seed: 9, questionRevisions: { reason: 1 } },
+    },
+  };
+  const before = structuredClone(saved), parsed = parseLendingProgress(saved);
+  assert.deepEqual(saved, before);
+  assert.deepEqual(parsed.completed, saved.completed);
+  for (const id of ['borrow', 'respond']) {
+    const draft = parsed.drafts[id];
+    assert.equal(draft.reason, saved.drafts[id].reason);
+    assert.equal(draft.prediction, saved.drafts[id].prediction);
+    assert.equal(draft.seed, saved.drafts[id].seed);
+    assert.equal(draft.revealed, true);
+    assert.equal(draft.application, '');
+    assert.equal(draft.questionRevisions.application, 1);
+  }
+  parsed.drafts.borrow.application = 'borrowing-blocked';
+  parsed.drafts.respond.application = 'remaining-backing';
+  assert.deepEqual(parseLendingProgress(parsed), parsed);
+  assert.equal(checkLendingUnderstanding('borrow', 'liability', 'boundary').passed, false);
+  assert.equal(checkLendingUnderstanding('respond', 'tradeoff', 'none').passed, false);
+});
+
+test('a loan can exceed its borrowing limit before it becomes eligible for liquidation', () => {
+  const loan = calculateLoan({ ...LOAN_DEFAULTS, future: 1300, days: 0 });
+  assert.ok(loan.end.debt / loan.end.collateralValue > LOAN_DEFAULTS.maxLTV / 100);
+  assert.ok(loan.end.healthFactor > 1);
+  assert.equal(loan.end.debt, LOAN_DEFAULTS.borrow);
+  assert.equal(checkLendingUnderstanding('borrow', 'liability', 'borrowing-blocked').passed, true);
+});
+
+test('a recovery after a completed hypothetical liquidation does not restore the original token balances', () => {
+  const falling = calculateLoan({ ...LOAN_DEFAULTS, future: 1200, days: 0 });
+  assert.equal(falling.end.status, 'eligible');
+  const liquidation = liquidateBalances(falling.end, 1200, LOAN_DEFAULTS.threshold, LOAN_DEFAULTS.borrow);
+  assert.equal(liquidation.status, 'executed');
+  assert.ok(liquidation.remainingTokens < LOAN_DEFAULTS.collateral);
+  assert.ok(liquidation.remainingDebt < LOAN_DEFAULTS.borrow);
+  const atRecovery = liquidation.remainingTokens * 2000 * LOAN_DEFAULTS.threshold / 100 / liquidation.remainingDebt;
+  assert.ok(atRecovery > 1);
+  assert.ok(atRecovery > liquidation.remainingHealth);
+  assert.equal(checkLendingUnderstanding('respond', 'tradeoff', 'remaining-backing').passed, true);
+});
+
+test('the paused build application derives wallet and collateral evidence from the actual purchase step', () => {
+  const lesson = LOOP_LESSONS.find(item => item.id === 'build');
+  const example = loopCase('build'), before = structuredClone(example);
+  assert.deepEqual(lesson.applicationEvidence(example).rows, [
+    ['Supplied as collateral', '5 ETH'], ['In the wallet', '2.5 ETH'], ['Debt still owed', '5,000 USDC'],
+  ]);
+  assert.deepEqual(example, before);
+  const bought = example.result.steps.find(step => step.action === 'swap').position;
+  assert.equal(bought.collateralTokens, example.input.collateral);
+  assert.equal(bought.walletETH, 2.5);
+  assert.equal(bought.cash, 0);
+});
+
+test('each lending application responds to the selected misconception with its own explanation', () => {
+  for (const lesson of [...LENDING_LESSONS, ...LOOP_LESSONS]) {
+    assert.ok(lesson.applicationLabel);
+    assert.doesNotMatch(lesson.applicationLabel, /APPLY|CHANGE THE SITUATION/);
+    for (const [id] of lesson.applications) assert.ok(lesson.applicationFeedbackByChoice[id]);
+    assert.equal(new Set(Object.values(lesson.applicationFeedbackByChoice)).size, lesson.applications.length);
+  }
 });
 
 test('loop application revisions preserve reasoning, predictions, scene state and every completion', () => {

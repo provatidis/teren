@@ -101,7 +101,7 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   assert.equal(await evaluate("document.querySelector('input[name=lend-reason]:checked').value"), 'exposure');
   assert.equal(await evaluate("document.querySelector('input[name=lend-application]:checked')"), null);
   assert.ok(await evaluate("JSON.parse(localStorage.getItem('teren-loop-learning-v1')).completed.includes('stress')"));
-  assert.equal(await text('lend-application-label'), 'APPLY · CHECK A CLAIM');
+  assert.equal(await text('lend-application-label'), 'A loan above its boundary, with a loss');
   await choose('application', 'backing-not-profit'); await click('lend-check');
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   await navigate(base + 'lending.html#loop-lesson=unwind');

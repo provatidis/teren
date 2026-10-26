@@ -153,6 +153,10 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       await moveFlow('Home');
     }
     if (id === 'build') {
+      assert.equal(await text('lend-application-label'), 'After buying, before supplying');
+      assert.equal(await text('lend-application-evidence-title'), 'Where the ETH is now');
+      assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#lend-application-evidence dd')).map(value=>value.textContent)"), ['5 ETH', '2.5 ETH', '5,000 USDC']);
+      const questionEvidence = await text('lend-application-evidence');
       assert.equal(await text('loop-flow-supplied'), '5 ETH');
       assert.equal(await text('loop-flow-debt'), '0 USDC');
       assert.equal(await evaluate("document.querySelectorAll('.scene-jump [data-stage]').length"), 4);
@@ -169,6 +173,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       assert.equal(await text('loop-flow-wallet-change'), '5,000 USDC → 2.5 ETH');
       assert.equal(await text('loop-flow-debt-change'), 'Unchanged');
       await moveFlow('End');
+      assert.equal(await text('lend-application-evidence'), questionEvidence, 'Exploring a completed round does not change the paused application balances.');
       assert.equal(await text('loop-flow-supplied'), '7.5 ETH');
       assert.equal(await text('loop-flow-debt'), '5,000 USDC');
       assert.ok(await evaluate("document.getElementById('loop-flow-next').checkVisibility()"));
@@ -240,7 +245,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await choose('reason', reason); await choose('application', application); await click('lend-check');
     assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
     if (id === 'unwind') {
-      assert.equal(await text('lend-application-label'), 'APPLY · FIND THE MISSING ACTION');
+      assert.equal(await text('lend-application-label'), 'After selling, before repaying');
       assert.equal(await text('unwind-application-title'), 'Paused after Sell ETH');
       assert.match(await text('unwind-application-wallet'), /7,378.34 USDC/);
       assert.equal(await text('unwind-application-debt'), '8,735.01 USDC');
@@ -266,6 +271,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       assert.equal(await evaluate("document.getElementById('unwind-application-show').hidden"), true);
       await click('lend-check');
       assert.equal(await text('lend-feedback-title'), 'Review your answers.');
+      assert.match(await text('lend-application-choices-feedback'), /same debt.*paid into the loan/);
       assert.equal(await evaluate("document.getElementById('unwind-application-show').hidden"), false, 'A wrong answer can inspect the same repayment evidence.');
       await choose('application', application); await click('lend-check');
       assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');

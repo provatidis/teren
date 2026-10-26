@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { LESSON_IDS, VARIANTS, lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
 import { lessonApplication, checkLessonUnderstanding } from '../public/models/lesson-application.js';
+import { calculateScenario } from '../public/models/cp50-v1.js';
 import { lessonApplicationCopy } from '../public/lib/lesson-application-copy.js';
 import { appliedApplication, appliedCostExample, checkAppliedUnderstanding } from '../public/lib/applied-applications.js';
 import { appliedQuestion } from '../public/lib/applied-lessons.js';
@@ -64,13 +65,14 @@ test('transfer changes the actual selected setup, including extremes and falling
         assert.ok(balances.next.result.lpValue<start.investment);
       } else assert.deepEqual(balances.next.result.pooled,balances.next.result.held);
       const loss=lessonApplication('loss-vs-profit',runLesson('loss-vs-profit',{futurePrice},variant));
-      assert.equal(loss.expected,multiplier<1?'gain-and-gap':'loss-and-gap');
+      assert.equal(loss.expected,'gap-unchanged');
       assert.ok(loss.next.result.lpBeforeFees < loss.next.result.holdValue);
       assert.equal(loss.next.result.lpReturn>0,multiplier<1);
       for (const fees of [0,100,start.investment/2]) {
         const original=runLesson('fee-break-even',{futurePrice,fees},variant), changed=lessonApplication('fee-break-even',original);
-        assert.notEqual(changed.fees,fees); assert.equal(changed.next.result.breakEvenFees,original.result.breakEvenFees);
-        assert.equal(changed.expected,'same');
+        assert.equal(changed.fees,original.result.breakEvenFees);
+        assert.ok(changed.next.result.breakEvenFees>original.result.breakEvenFees);
+        assert.equal(changed.expected,'gap-reopens');
       }
       for (const width of [.05,.1,.5]) {
         const original=runLesson('range-boundaries',{futurePrice,width},variant), changed=lessonApplication('range-boundaries',original);
@@ -86,11 +88,82 @@ test('transfer changes the actual selected setup, including extremes and falling
   }
   assert.throws(()=>lessonApplication('unknown',{setup:{}}));
 });
+test('withdrawal changes custody without creating or erasing the holding shortfall', () => {
+  for (let variant=0;variant<VARIANTS;variant++) {
+    for (const multiplier of [.5,1,2]) {
+      const setup=lessonSetup('loss-vs-profit',variant);
+      const original=runLesson('loss-vs-profit',{futurePrice:setup.initialPrice*multiplier},variant);
+      const application=lessonApplication('loss-vs-profit',original);
+      const {pooled,held}=application.next.result;
+      const walletValue=pooled.eth*application.futurePrice+pooled.usdc;
+      const holdingValue=held.eth*application.futurePrice+held.usdc;
+      assert.ok(Math.abs(walletValue-application.next.result.lpValue)<1e-8);
+      assert.ok(Math.abs(walletValue-holdingValue-application.next.result.difference)<1e-8);
+      assert.ok(walletValue<holdingValue);
+      assert.equal(application.expected,'gap-unchanged');
+    }
+  }
+});
+test('a further price move can reopen a gap that earned USDC fees had covered', () => {
+  for (let variant=0;variant<VARIANTS;variant++) {
+    const setup=lessonSetup('fee-break-even',variant);
+    for (const multiplier of [.5,.75,1,1.5,2]) {
+      const original=runLesson('fee-break-even',{futurePrice:setup.initialPrice*multiplier,fees:setup.fees},variant);
+      const before=structuredClone(original);
+      const application=lessonApplication('fee-break-even',original);
+      const matched=calculateScenario({...original.setup,fees:application.fees});
+      assert.ok(Math.abs(matched.difference)<1e-8);
+      assert.equal(application.next.setup.fees,application.fees);
+      assert.deepEqual(application.next.result.held,matched.held);
+      assert.ok(application.next.result.lpValue<application.next.result.holdValue);
+      assert.equal(application.futurePrice>original.setup.futurePrice,multiplier>=1);
+      assert.equal(application.expected,'gap-reopens');
+      assert.deepEqual(original,before);
+    }
+  }
+});
+test('every essentials misconception has specific feedback and every application names its situation', () => {
+  for (const item of LESSONS) for (let variant=0;variant<VARIANTS;variant++) {
+    const result=runLesson(item.id,lessonSetup(item.id,variant),variant);
+    const copy=lessonApplicationCopy(item.id,result);
+    assert.ok(copy.label);
+    for (const [reason] of item.reasons) {
+      const dynamic=item.id==='token-balances'||(item.id==='range-boundaries'&&reason==='zero');
+      if(reason!==result.reason&&!dynamic) assert.ok(item.reasonFeedbackByChoice[reason]);
+    }
+    for (const [answer] of copy.choices) if(answer!==copy.expected) assert.ok(copy.feedbackByChoice[answer]);
+    if(item.id==='fee-break-even') {
+      assert.equal(copy.evidence.rows.length,3);
+      assert.match(copy.evidence.note,/USDC/);
+    }
+  }
+});
+test('revised essentials applications clear obsolete answers without erasing completion or compatible drafts', () => {
+  for(const id of ['loss-vs-profit','fee-break-even']) for(let variant=0;variant<VARIANTS;variant++) {
+    const result=runLesson(id,lessonSetup(id,variant),variant);
+    const old={version:1,completed:[id],lastLesson:id,drafts:{[id]:{
+      variant,inputs:result.setup,reason:result.reason,reasonRevision:1,
+      application:id==='loss-vs-profit'?'loss-and-gap':'same',applicationRevision:2,
+      prediction:result.prediction,answer:'123',ran:true,choiceSeed:19,
+    }}};
+    const migrated=parseProgress(old), draft=migrated.drafts[id];
+    assert.deepEqual(migrated.completed,[id]);
+    assert.equal(draft.application,'');
+    assert.equal(draft.applicationRevision,3);
+    assert.equal(draft.reason,result.reason);
+    assert.equal(draft.prediction,result.prediction);
+    assert.equal(draft.answer,'123');
+    assert.equal(draft.ran,true);
+    assert.equal(draft.choiceSeed,19);
+    draft.application=lessonApplication(id,result).expected;
+    assert.deepEqual(parseProgress(migrated),migrated);
+  }
+});
 test('applied transfer exercises distinguish thought experiments from unchanged verified evidence', () => {
   const before = [JSON.stringify(baseline),JSON.stringify(returning)];
   for (const item of APPLIED_LESSONS) {
     const question=appliedQuestion(item.caseId==='in-range'?baseline:returning,item.id), app=appliedApplication(item.id,question);
-    assert.equal(app.expected,item.id==='fees-over-time'?'same':item.id==='between-samples'?'fee-records':'smaller-lead');
+    assert.equal(app.expected,item.id==='fees-over-time'?'same':item.id==='between-samples'?'smaller-share':'smaller-lead');
     for (const [reason] of item.reasons) for (const [answer] of app.choices) {
       assert.equal(checkAppliedUnderstanding(question,app,reason,answer).passed,reason===question.reason && answer===app.expected);
     }

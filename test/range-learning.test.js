@@ -23,7 +23,7 @@ test('range widths use the same budget and price but each range’s own funding 
     assert.equal(result.wide.state,'inside');assert.equal(result.prediction,variant===2?'both':'wide');
     assert.equal(result.narrow.state,['above','below','inside'][variant]);
     if(variant===2)assert.match(managementPresentation(result).reasoning,/Both are active/);
-    assert.equal(result.application,['mix','whole-period','own-basket'][variant]);
+    assert.equal(result.application,['mix','wide-mix','own-basket'][variant]);
     for(const {scenario} of managementPresentation(result).links){
       const restored=rangeFromHash(rangeHash(scenario));assert.equal(restored.futurePrice,result.price);assert.equal(restored.fees,0);assert.equal(restored.fullRangeFees,0);
     }
@@ -33,7 +33,7 @@ test('fee tiers alone never establish earnings, including supplied totals that r
   assert.deepEqual(managementCase('fee-tiers',0).fees,[12,4]);
   for(let variant=0;variant<3;variant++){
     const result=managementCase('fee-tiers',variant),presentation=managementPresentation(result);
-    assert.equal(result.prediction,'unknown');assert.equal(result.application,['smaller-share','more-income','smaller-advantage'][variant]);
+    assert.equal(result.prediction,'unknown');assert.equal(result.application,['smaller-share','more-income','larger-share'][variant]);
     assert.match(presentation.note,/supplied teaching facts/);assert.equal(presentation.links.length,0);
     if(variant===1)assert.ok(result.fees[0]>result.fees[1]&&result.rates[0]<result.rates[1]);
   }
@@ -59,12 +59,14 @@ test('every situation has one supported explanation and transfer answer, indepen
     for(const [reason]of lesson.reasons)for(const [application]of transfer.choices){
       assert.equal(checkManagementUnderstanding(lesson.id,variant,reason,application).passed,reason===result.reason&&application===result.application);
       if(reason!==result.reason)assert.ok(lesson.reasonFeedback[reason]);
+      if(application!==result.application)assert.ok(transfer.feedbackByChoice[application]);
     }
     assert.equal(checkManagementUnderstanding(lesson.id,variant,'',result.application).passed,false);
     assert.equal(checkManagementUnderstanding(lesson.id,variant,result.reason,'').passed,false);
     assert.equal(checkManagementUnderstanding(lesson.id,variant,'unknown','unknown').passed,false);
     assert.doesNotMatch(JSON.stringify(presentation),/NaN|undefined|Infinity/);
-    assert.ok(transfer.context&&transfer.question&&transfer.hint&&transfer.feedback);
+    assert.ok(transfer.context&&transfer.question&&transfer.hint&&transfer.feedback&&transfer.label);
+    assert.ok(presentation.reasonContext&&presentation.reasonLabel);
     assert.ok(lesson.deeper.length>=2&&lesson.sources.every(source=>new URL(source.url).protocol==='https:'));
   }
   for(const id of ['unknown',null])assert.throws(()=>managementCase(id));
@@ -123,4 +125,49 @@ test('range question revisions retire only changed draft answers and preserve co
   migrated.drafts['range-width'].application='own-basket';
   migrated.drafts['fee-tiers'].application='more-income';
   assert.deepEqual(parseManagementProgress(migrated),migrated,'Current answers survive repeated saves and reloads.');
+});
+
+
+test('a rise below the narrow range changes only the wider position’s token mix', () => {
+  const result = managementCase('range-width', 1);
+  assert.equal(result.price, 1700);
+  assert.equal(result.next.price, 1800);
+  assert.equal(result.narrow.state, 'below');
+  assert.equal(result.next.narrow.state, 'below');
+  assert.deepEqual(result.next.narrow.pooled, result.narrow.pooled);
+  assert.equal(result.wide.state, 'inside');
+  assert.equal(result.next.wide.state, 'inside');
+  assert.ok(result.next.wide.pooled.eth < result.wide.pooled.eth);
+  assert.ok(result.next.wide.pooled.usdc > result.wide.pooled.usdc);
+  assert.equal(result.application, 'wide-mix');
+});
+
+test('reinvesting fees increases fee share while collecting alone does not', () => {
+  const own = 100, competitors = 900, reinvested = 20, fees = 10;
+  const before = own / (own + competitors) * fees;
+  const collectedOnly = own / (own + competitors) * fees;
+  const after = (own + reinvested) / (own + reinvested + competitors) * fees;
+  assert.equal(collectedOnly, before);
+  assert.ok(after > before);
+  const result = managementCase('fee-tiers', 2);
+  assert.equal(result.application, 'larger-share');
+  assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'trades', 'larger-share').passed, true);
+  assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'trades', 'smaller-advantage').passed, false);
+});
+
+test('the second range-application revision clears replaced answers without losing completed situations', () => {
+  const old = {version:1,completed:['range-width','fee-tiers'],drafts:{
+    'range-width':{variant:1,prediction:'wide',reason:'bounds',application:'whole-period',revealed:true,choiceSeed:4,questionRevisions:{prediction:1,reason:1,application:2}},
+    'fee-tiers':{variant:2,prediction:'unknown',reason:'trades',application:'smaller-advantage',revealed:true,choiceSeed:9,questionRevisions:{prediction:1,reason:1,application:2}},
+  }};
+  const migrated = parseManagementProgress(old);
+  assert.deepEqual(migrated.completed, old.completed);
+  for (const id of old.completed) {
+    assert.equal(migrated.drafts[id].application, '');
+    assert.equal(migrated.drafts[id].questionRevisions.application, 3);
+    for (const key of ['prediction','reason','revealed','choiceSeed','variant']) assert.equal(migrated.drafts[id][key], old.drafts[id][key]);
+  }
+  migrated.drafts['range-width'].application = 'wide-mix';
+  migrated.drafts['fee-tiers'].application = 'larger-share';
+  assert.deepEqual(parseManagementProgress(migrated), migrated);
 });

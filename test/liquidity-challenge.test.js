@@ -5,6 +5,7 @@ import { checkLessonUnderstanding, essentialQuestionRevisions } from '../public/
 import { checkLiquidityChallenge, challengeSetup, matchChallengeHolding } from '../public/models/liquidity-challenge.js';
 import { parseProgress } from '../public/data/learning-progress.js';
 import { lessonReasonFeedback } from '../public/lib/lesson-narration.js';
+import { LESSONS } from '../public/learning/liquidity-essentials.js';
 
 test('the challenge accepts many loss-making matched cases and requires both comparisons', () => {
   for (let variant = 0; variant < 3; variant++) {
@@ -65,6 +66,7 @@ test('checked task state survives reload independently from the worked question'
 });
 
 test('corrective feedback addresses fixed-token claims and collectible-fee confusion', () => {
-  assert.match(lessonReasonFeedback('pool-share',{},'eth'),/original deposit quantities/);
-  assert.match(lessonReasonFeedback('fee-break-even',{},'compound'),/not a record of earned or collectable fees/);
+  const feedback = id => LESSONS.find(lesson => lesson.id === id).reasonFeedbackByChoice;
+  assert.match(lessonReasonFeedback('pool-share',{},'eth',feedback('pool-share')),/does not set aside your original tokens/);
+  assert.match(lessonReasonFeedback('fee-break-even',{},'compound',feedback('fee-break-even')),/not a collectable balance/);
 });

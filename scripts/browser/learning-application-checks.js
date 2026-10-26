@@ -46,7 +46,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   const originalObservation = await observed();
   assert.equal(await taskPrice(), '2000');
   assert.equal(await hidden('learn-application-task'), false);
-  assert.equal(await text('learn-application-label'), 'APPLY · BUILD AN EXAMPLE');
+  assert.equal(await text('learn-application-label'), 'Match holding while losing dollars');
   assert.equal(await text('learn-check'), 'Check this setup and answers →');
   assert.match(originalHandoff, /future=4000/);
   await noDuplicateIds();

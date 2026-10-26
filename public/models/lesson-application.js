@@ -1,5 +1,6 @@
 import { runLesson } from './lesson-experiments.js';
 import { checkLiquidityChallenge } from './liquidity-challenge.js';
+import { calculateScenario } from './cp50-v1.js';
 
 // Missing revisions describe the original questions. Keep completed lessons,
 // but do not reuse an answer when the question it answered has changed.
@@ -7,10 +8,13 @@ export function essentialQuestionRevisions(id, variant) {
   const changed = ['loss-vs-profit', 'fee-break-even', 'final-challenge'].includes(id)
     || (['swap-impact', 'token-balances'].includes(id) && variant === 1)
     || (['pool-share', 'range-boundaries'].includes(id) && variant > 0);
-  return { reason: id === 'final-challenge' ? 2 : 1, application: changed ? 2 : 1 };
+  return {
+    reason: id === 'final-challenge' ? 2 : 1,
+    application: ['loss-vs-profit', 'fee-break-even'].includes(id) ? 3 : changed ? 2 : 1,
+  };
 }
 
-// Change one assumption. Expected answers come from the same calculations as the lesson.
+// Construct the changed situation using the same calculations as the lesson.
 export function lessonApplication(id, outcome) {
   const s = outcome.setup;
   if (id === 'swap-impact') {
@@ -31,12 +35,15 @@ export function lessonApplication(id, outcome) {
   if (id === 'loss-vs-profit') {
     const futurePrice = s.futurePrice < s.initialPrice ? s.initialPrice * 2 : s.initialPrice / 2;
     const next = runLesson(id, {futurePrice}, outcome.variant);
-    return {kind: 'two-benchmarks', futurePrice, next, expected: futurePrice > s.initialPrice ? 'gain-and-gap' : 'loss-and-gap'};
+    return {kind: 'withdrawal-gap', futurePrice, next, expected: 'gap-unchanged'};
   }
   if (id === 'fee-break-even') {
-    const fees = s.fees === 0 ? Math.min(100, s.investment / 2) : 0;
-    const next = runLesson(id, {futurePrice: s.futurePrice, fees}, outcome.variant);
-    return {kind: 'fee-assumption', fees, next, expected: 'same'};
+    const fees = outcome.result.breakEvenFees;
+    const futurePrice = s.futurePrice < s.initialPrice ? s.futurePrice / 2 : s.futurePrice * 1.5;
+    const setup = {...s, futurePrice, fees};
+    const next = {setup, result: calculateScenario(setup)};
+    return {kind: 'moving-fee-target', fees, futurePrice, next,
+      expected: next.result.difference < 0 ? 'gap-reopens' : next.result.difference > 0 ? 'now-ahead' : 'still-matches'};
   }
   if (id === 'range-boundaries') {
     const futurePrice = s.initialPrice * (outcome.variant === 2 ? 1 - s.width : 1 + s.width * (outcome.variant === 1 ? -.9 : .9));

@@ -18,6 +18,9 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
     assert.equal(await evaluate("document.getElementById('manage-observe-title').getBoundingClientRect().top>=document.querySelector('.topbar').getBoundingClientRect().bottom"),true);
     if(id==='range-width')assert.match(await text('manage-metrics'),/Narrow range Inactive.*Wider range Active/s);
     if(id==='fee-tiers')assert.match(await text('manage-metrics'),/Unknown/);
+    assert.ok((await text('manage-reason-context')).length>20);
+    assert.ok((await text('manage-application-label')).length>10);
+    assert.doesNotMatch(await text('manage-application-label'),/APPLY|CHANGE/);
     if(id==='range-management')assert.match(await text('manage-pitfall'),/does not refund earlier losses/);
     await choose('manage-reason',id==='range-width'?'budget':id==='fee-tiers'?'clock':'liquidated');await choose('manage-application',application);await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Review your answers.');
@@ -42,8 +45,13 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
       await click('manage-variation');assert.equal(await text('manage-variation-label'),'Situation '+(variant+1)+' of 3');
       assert.equal(await evaluate("document.getElementById('manage-reveal').disabled"),false);assert.equal(await evaluate("document.getElementById('manage-observe').hidden"),true);
       await choose('manage-prediction',id==='range-width'?(variant===2?'both':'wide'):id==='fee-tiers'?'unknown':variant===1?'same':'rises');await click('manage-reveal');
-      const changedAnswer=id==='range-width'?(variant===1?'whole-period':'own-basket'):id==='fee-tiers'?(variant===1?'more-income':'smaller-advantage'):variant===1?'removed':'automatic';
+      const changedAnswer=id==='range-width'?(variant===1?'wide-mix':'own-basket'):id==='fee-tiers'?(variant===1?'more-income':'larger-share'):variant===1?'removed':'automatic';
       await choose('manage-reason',reason);await choose('manage-application',changedAnswer);await click('manage-check');assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
+      if(id==='range-width'&&variant===1){
+        assert.match(await text('manage-application-context'),/\$1,700.00.*\$1,800.00/);
+        assert.match(await text('manage-applications-feedback'),/wider position.*ETH for USDC/i);
+      }
+      if(id==='fee-tiers'&&variant===2)assert.match(await text('manage-applications-feedback'),/larger share.*Collection alone/s);
       if(id==='range-width'&&variant===2)assert.match(await text('manage-metrics'),/Narrow range Active.*Wider range Active/s);
       if(id==='fee-tiers')assert.match(await text('manage-metrics'),/Position A fees \$12.00.*Position B fees \$4.00/s);
       if(id==='range-management'&&variant===1)assert.match(await text('manage-metrics'),/USDC/);
@@ -51,6 +59,20 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
   }
   assert.equal(await text('manage-progress-count'),'3 of 3 checked');assert.equal(await evaluate("document.getElementById('manage-next').hash"),'#applied=fees-over-time');
   assert.equal(await evaluate('JSON.stringify('+JSON.stringify(keys)+'.map(key=>localStorage.getItem(key)))'),before,'Range lessons preserve all older progress and saved work.');
+  // Retire only changed application answers; completed chapters and compatible explanations survive.
+  await evaluate(`(() => {const key='passiko-range-learning-v1', progress=JSON.parse(localStorage.getItem(key));
+    progress.drafts['range-width']={variant:1,prediction:'wide',reason:'bounds',application:'whole-period',revealed:true,choiceSeed:41,questionRevisions:{prediction:1,reason:1,application:2}};
+    localStorage.setItem(key,JSON.stringify(progress));})()`);
+  await navigate(base+'learn.html#manage=range-width');
+  assert.equal(await evaluate("document.querySelector('input[name=manage-prediction]:checked').value"),'wide');
+  assert.equal(await evaluate("document.querySelector('input[name=manage-reason]:checked').value"),'bounds');
+  assert.equal(await evaluate("document.querySelector('input[name=manage-application]:checked')"),null);
+  assert.equal(await text('manage-progress-count'),'3 of 3 checked');
+  assert.equal(await text('manage-variation-label'),'Situation 2 of 3');
+  await choose('manage-application','wide-mix');await click('manage-check');
+  assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
+  // Continue the quota check from the range-management situation used below.
+  await navigate(base+'learn.html#manage=range-management');
   const saved=await evaluate("localStorage.getItem('passiko-range-learning-v1')");
   await evaluate("Storage.prototype.setItem=function(){throw new DOMException('Full','QuotaExceededError')}");await click('manage-variation');
   await choose('manage-prediction','falls');await click('manage-reveal');assert.match(await text('learn-storage'),/Saving is unavailable/);

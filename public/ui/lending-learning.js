@@ -1,5 +1,6 @@
 import { saveLearningLocation } from '../data/learning-location.js';
 import { renderLessonSetup, lendingLessonSetup } from '../lib/lesson-setup.js';
+import { renderQuestionEvidence } from '../lib/lesson-question-evidence.js';
 import { LENDING_LESSONS } from '../learning/lending-essentials.js';
 import { LOOP_LESSONS } from '../learning/borrowing-loops.js';
 import { lendingCase, checkLendingUnderstanding } from '../models/lending-lessons.js';
@@ -80,7 +81,7 @@ export function initLendingLearning() {
     $('lend-feedback').className = 'learn-feedback ' + (result.passed ? 'learn-pass' : 'learn-retry');
     $('lend-feedback-title').textContent = result.passed ? 'Both answers are correct.' : 'Review your answers.';
     const reasoning = draft.reason ? lesson.reasonFeedback[draft.reason] : 'Choose an explanation. ' + lesson.hint;
-    const application = draft.application ? lesson.applicationFeedback : 'Choose an answer for the new situation. ' + lesson.hint;
+    const application = draft.application ? (lesson.applicationFeedbackByChoice?.[draft.application] || lesson.applicationFeedback) : 'Choose an answer. ' + lesson.hint;
     renderUnderstandingFeedback('lend', [
       { container: 'lend-reason-choices', selected: draft.reason, correct: result.reasoning, explanation: reasoning },
       { container: 'lend-application-choices', selected: draft.application, correct: result.application, explanation: application },
@@ -158,7 +159,10 @@ export function initLendingLearning() {
       $('lend-predict-card').insertBefore(revealButton, $('lend-predict-note'));
     }
     $('lend-application-context').textContent = lesson.applicationContext;
-    $('lend-application-label').textContent = lesson.applicationLabel || 'APPLY · CHANGE THE SITUATION';
+    $('lend-application-label').textContent = lesson.applicationLabel || 'Another situation';
+    $('lend-reason-context').textContent = lesson.reasonContext || '';
+    $('lend-reason-context').hidden = !lesson.reasonContext;
+    renderQuestionEvidence($('lend-application-evidence'), typeof lesson.applicationEvidence === 'function' ? lesson.applicationEvidence(example) : lesson.applicationEvidence);
     $('lend-application-question').textContent = lesson.applicationQuestion;
     if (chapter === 'loops' && lesson.id === 'unwind') applicationScene = createUnwindApplication(example.result);
     $('lend-application-scene').replaceChildren(...(applicationScene ? [applicationScene.element] : []));

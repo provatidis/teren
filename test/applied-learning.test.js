@@ -22,7 +22,7 @@ test('applied questions use verified period earnings, interval counters and the 
   assert.equal(between.index, 8); assert.equal(between.view.state, 'above'); assert.equal(between.interval.startState, 'above');
   assert.equal(between.answer, 2724); assert.equal(between.interval.durationSeconds, 7560);
   assert.ok(between.interval.earned0 > 0n && between.interval.earned1 > 0n);
-  assert.equal(checkAppliedAnswer(between, '17580', 'counters').numeric, false, 'Cumulative active time is not the interval answer.');
+  assert.equal(checkAppliedAnswer(between, '17580', 'returned').numeric, false, 'Cumulative active time is not the interval answer.');
   const final = appliedQuestion(returning, 'period-vs-holding');
   assert.equal(final.index, 16); assert.equal(final.prediction, 'can-trail');
   assert.equal(final.view.holding.amount0, 4982691068n); assert.equal(final.view.holding.amount1, 14920139441099507n);
@@ -158,13 +158,14 @@ test('applied question revisions preserve evidence navigation, optional calculat
   const migrated=parseAppliedProgress(old);
   assert.deepEqual(migrated.completed,APPLIED_IDS);
   assert.equal(migrated.drafts['fees-over-time'].application,'same');
-  assert.equal(migrated.drafts['between-samples'].reason,'counters');
+  assert.equal(migrated.drafts['between-samples'].reason,'');
   assert.equal(migrated.drafts['between-samples'].application,'');
   assert.equal(migrated.drafts['period-vs-holding'].reason,'');
   assert.equal(migrated.drafts['period-vs-holding'].application,'');
   for(const id of APPLIED_IDS)for(const key of ['prediction','answer','revealed','checkpoint'])assert.equal(migrated.drafts[id][key],old.drafts[id][key]);
   assert.equal(migrated.drafts['period-vs-holding'].choiceSeed,7);
-  migrated.drafts['between-samples'].application='fee-records';
+  migrated.drafts['between-samples'].reason='returned';
+  migrated.drafts['between-samples'].application='smaller-share';
   migrated.drafts['period-vs-holding'].reason='same-gap';
   migrated.drafts['period-vs-holding'].application='smaller-lead';
   assert.deepEqual(parseAppliedProgress(migrated),migrated);
@@ -184,5 +185,58 @@ test('the 1.46 question revision clears only the replaced comparison answers', (
     assert.equal(draft[key], old.drafts['period-vs-holding'][key]);
   }
   draft.reason = 'same-gap'; draft.application = 'smaller-lead';
+  assert.deepEqual(parseAppliedProgress(migrated), migrated);
+});
+
+
+test('recorded fee evidence distinguishes new earnings from the whole collectable balance', () => {
+  const question = appliedQuestion(baseline, 'fees-over-time');
+  const before = JSON.stringify(baseline);
+  const application = appliedApplication('fees-over-time', question);
+  const snapshot = question.view.point.snapshot;
+  assert.ok(BigInt(snapshot.fees.collectable0Raw) > question.view.earned0);
+  assert.ok(BigInt(snapshot.fees.collectable1Raw) > question.view.earned1);
+  assert.match(application.reasonEvidence.rows[0][1], /0.1127 USDC/);
+  assert.match(application.reasonEvidence.rows[1][0], /All tokens/);
+  assert.equal(application.expected, 'same');
+  assert.ok(application.feedbackByChoice.less && application.feedbackByChoice.more);
+  assert.equal(JSON.stringify(baseline), before);
+});
+
+test('outside samples plus recorded active time require a return inside unchanged bounds', () => {
+  const question = appliedQuestion(returning, 'between-samples');
+  const before = JSON.stringify(returning);
+  const application = appliedApplication('between-samples', question);
+  assert.equal(question.reason, 'returned');
+  assert.equal(question.interval.startState, 'above');
+  assert.equal(question.view.state, 'above');
+  assert.equal(question.interval.secondsInRange, 2724);
+  assert.equal(application.reasonEvidence.rows[2][1], '45m 24s');
+  assert.match(application.reasonEvidence.rows[3][1], /Unchanged/);
+  assert.equal(application.expected, 'smaller-share');
+  assert.equal(checkAppliedUnderstanding(question, application, 'returned', 'smaller-share').passed, true);
+  assert.equal(checkAppliedUnderstanding(question, application, 'counters', 'smaller-share').passed, false);
+  assert.equal(checkAppliedUnderstanding(question, application, 'returned', 'fee-records').passed, false);
+  // Identical fee allocations at each traded price, with unchanged own liquidity.
+  // More competing active liquidity lowers every component, even if shares vary by price.
+  const samples = [{fees:10,own:5,others:10,added:2},{fees:20,own:5,others:2,added:8}];
+  const first = samples.reduce((sum, p) => sum + p.fees * p.own / (p.own + p.others), 0);
+  const second = samples.reduce((sum, p) => sum + p.fees * p.own / (p.own + p.others + p.added), 0);
+  assert.ok(second < first);
+  for (let i=0;i<returning.points.length;i++) periodPointView(returning,i);
+  assert.deepEqual(appliedApplication('between-samples', appliedQuestion(returning,'between-samples')), application);
+  assert.equal(JSON.stringify(returning), before);
+});
+
+test('revised interval questions clear obsolete selections but preserve completion and navigation', () => {
+  const old = {version:1,completed:['between-samples'],drafts:{
+    'between-samples':{prediction:'possible',reason:'counters',application:'fee-records',answer:'2724',revealed:true,checkpoint:3,choiceSeed:12,questionRevisions:{prediction:1,reason:1,application:2}},
+  }};
+  const migrated = parseAppliedProgress(old), draft = migrated.drafts['between-samples'];
+  assert.deepEqual(migrated.completed, old.completed);
+  assert.equal(draft.reason, ''); assert.equal(draft.application, '');
+  assert.deepEqual(draft.questionRevisions, {prediction:1,reason:2,application:3});
+  for (const key of ['prediction','answer','revealed','checkpoint','choiceSeed']) assert.equal(draft[key], old.drafts['between-samples'][key]);
+  draft.reason='returned'; draft.application='smaller-share';
   assert.deepEqual(parseAppliedProgress(migrated), migrated);
 });

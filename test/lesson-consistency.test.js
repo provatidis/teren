@@ -39,7 +39,7 @@ test('all foundation distractors are rejected and explain the misconception in e
     const answer = String(result.wholeAnswer ? Math.round(result.answer) : result.answer);
     for (const [reason] of lesson.reasons) {
       assert.equal(checkLesson(lesson.id, inputs, variant, answer, reason).passed, reason === result.reason);
-      if (reason !== result.reason) assert.doesNotMatch(lessonReasonFeedback(lesson.id, result, reason), /^Choose an explanation/);
+      if (reason !== result.reason) assert.doesNotMatch(lessonReasonFeedback(lesson.id, result, reason, lesson.reasonFeedbackByChoice), /^Choose an explanation/);
     }
   }
 });
@@ -95,6 +95,6 @@ test('historical questions keep their period scope and reject every unsupported 
   }
   assert.match(APPLIED_LESSONS.at(-1).explanation, /At the final checkpoint/);
   const interval = appliedQuestion(records[1], 'between-samples');
-  assert.equal(checkAppliedAnswer(interval, '2724.4', 'counters').numeric, false);
-  assert.equal(checkAppliedAnswer(interval, '2724', 'counters').numeric, true);
+  assert.equal(checkAppliedAnswer(interval, '2724.4', 'returned').numeric, false);
+  assert.equal(checkAppliedAnswer(interval, '2724', 'returned').numeric, true);
 });

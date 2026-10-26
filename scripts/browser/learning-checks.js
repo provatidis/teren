@@ -24,8 +24,8 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     ['swap-impact','less','18132','curve','deeper-less'],
     ['pool-share','less','4.76','ownership','share-same'],
     ['token-balances','less','0.884','rebalance','original-mix'],
-    ['loss-vs-profit','gain','428.93','benchmark','loss-and-gap'],
-    ['fee-break-even','short','428.93','assumption','same'],
+    ['loss-vs-profit','gain','428.93','benchmark','gap-unchanged'],
+    ['fee-break-even','short','428.93','assumption','gap-reopens'],
     ['range-boundaries','usdc','0','path','both-inside'],
     ['final-challenge','hold','328.93','total','relative-gap'],
   ];
@@ -62,11 +62,11 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     if (id === 'swap-impact') {
       await choose('learn-application','deeper-same');
       await click('learn-check');
-      assert.match(await text('learn-applications-feedback'), /smaller fraction of the deeper pool/);
+      assert.match(await text('learn-applications-feedback'), /available depth is different/);
       assert.equal(await text('learn-progress-count'), '0 of 7 checked');
       await choose('learn-application', application);
       await choose('learn-reason', 'fixed'); await click('learn-check');
-      assert.match(await text('learn-reasons-feedback'), /A finite swap changes the reserves/);
+      assert.match(await text('learn-reasons-feedback'), /Spot price describes the pool before this trade/);
       assert.equal(await text('learn-progress-count'), '0 of 7 checked');
       await choose('learn-reason', reason);
     }

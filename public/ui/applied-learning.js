@@ -2,6 +2,7 @@ import { createPredictionPrompt, markPredictionRevealed } from '../lib/lesson-sc
 import { renderRecordedLessonSetup } from '../lib/recorded-lesson-setup.js';
 import { renderRecordedComparison } from '../lib/recorded-comparison-scene.js';
 import { renderAppliedQuestionEvidence } from '../lib/applied-question-evidence.js';
+import { renderQuestionEvidence } from '../lib/lesson-question-evidence.js';
 import { saveLearningLocation } from '../data/learning-location.js';
 import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js';
 import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js';
@@ -159,7 +160,7 @@ export function initAppliedLearning() {
     $('applied-feedback').hidden = false; $('applied-feedback').className = 'learn-feedback ' + (result.passed ? 'learn-pass' : 'learn-retry');
     $('applied-feedback-title').textContent = result.passed ? 'Both answers are correct.' : 'Review your answers.';
     const reasoningFeedback = appliedReasonFeedback(lesson.id, draft.reason);
-    const applicationFeedback = draft.application ? application.feedback
+    const applicationFeedback = draft.application ? (application.feedbackByChoice?.[draft.application] || application.feedback)
       : (lesson.id === 'period-vs-holding' ? 'Choose what a further ETH rise changes. ' : 'Choose an answer for the thought experiment. ') + application.hint;
     renderUnderstandingFeedback('applied', [
       { container: 'applied-reasons', selected: draft.reason, correct: result.reasoning, explanation: result.reasoning ? (lesson.reasonFinding || lesson.takeaway) : reasoningFeedback },
@@ -181,6 +182,8 @@ export function initAppliedLearning() {
     saveLearningLocation('learn.html#applied=' + id);
     lesson = APPLIED_LESSONS.find(item => item.id === id); period = null; question = null; application = null;
     for (const name of ['applied-collection-evidence', 'applied-price-evidence']) { $(name).hidden = true; $(name).replaceChildren(); }
+    renderQuestionEvidence($('applied-reason-evidence'));
+    renderQuestionEvidence($('applied-application-evidence'));
     costExample.hidden = true; costExample.textContent = '';
     $('applied-setup').hidden = true; $('applied-setup').replaceChildren();
     if (!matchMedia('(max-width: 750px)').matches) {
@@ -234,13 +237,16 @@ export function initAppliedLearning() {
       period = record; question = appliedQuestion(period, id); application = appliedApplication(id, question);
       const comparison = id === 'period-vs-holding';
       renderAppliedQuestionEvidence($('applied-collection-evidence'), $('applied-price-evidence'), question, application);
+      renderQuestionEvidence($('applied-reason-evidence'), application.reasonEvidence);
+      renderQuestionEvidence($('applied-application-evidence'), application.evidence);
       $('applied-check-title').textContent = comparison ? 'Follow the tokens' : 'Explain the record and apply the idea';
-      $('applied-reason-context').textContent = comparison
+      $('applied-reason-context').textContent = application.reasonContext || (comparison
         ? 'The owner thinks collecting these fees will close the gap.'
-        : id === 'fees-over-time' ? 'Consider the full ' + periodDuration(question.view.durationSeconds) + ' record.'
-          : 'Between checkpoints ' + question.index + ' and ' + (question.index + 1) + ', both recorded prices are outside the range.';
+        : application.reasonEvidence ? '' : id === 'fees-over-time' ? 'Consider the full ' + periodDuration(question.view.durationSeconds) + ' record.'
+          : 'Between checkpoints ' + question.index + ' and ' + (question.index + 1) + ', both recorded prices are outside the range.');
+      $('applied-reason-context').hidden = !$('applied-reason-context').textContent;
       $('applied-application-label').hidden = comparison;
-      $('applied-application-label').textContent = id === 'fees-over-time' ? 'Collecting the fees' : 'Time in range and fee income';
+      $('applied-application-label').textContent = application.label || (id === 'fees-over-time' ? 'Collecting the fees' : 'Time in range and fee income');
       $('applied-application-context').parentElement.classList.toggle('applied-story-context', comparison);
       renderRecordedLessonSetup($('applied-setup'), period, lesson, question); $('applied-setup').hidden = false;
       $('applied-application-context').textContent = application.context;
