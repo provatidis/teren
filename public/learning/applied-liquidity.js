@@ -34,9 +34,9 @@ export const APPLIED_LESSONS = Object.freeze([
     predictions: [['can-trail', 'Yes — its total value could still be lower'], ['fees-win', 'No — earning fees would put its total value ahead']],
     question: 'At the final question checkpoint, what is LP minus holding in USD? Use two decimal places; enter a negative number if the LP trails.',
     reasoning: 'What conclusion does this comparison support?',
-    reasons: [['basket', 'The stated period and starting tokens, before gas and incentives.'], ['forecast', 'The return expected if this position is held for another period.'], ['income', 'The position’s fee income compared with its starting dollar budget.']],
+    reasons: [['basket', 'Fees left the LP slightly ahead of holding its starting tokens over this period, before costs.'], ['forecast', 'The final return estimates what this position will earn over another period.'], ['income', 'The fee income shows how much the starting dollar budget grew over this period.']],
     hint: 'LP minus holding = principal value + period fee value − holding value. Use the displayed difference, calculated before rounding the individual totals.',
-    takeaway: 'Fee income is one part of the comparison. Name the period, benchmark and omitted costs.',
-    explanation: 'At the final question checkpoint, period fees cover the principal shortfall against holding and leave a small positive difference before costs. Other checkpoints can have a different result. This final result describes the recorded period; it does not establish lifetime profit or future performance. Gas, incentives and any management outside this unchanged-position period could change a wider comparison.',
+    takeaway: 'Compare principal plus period fees with holding the same starting tokens.',
+    explanation: 'At the final question checkpoint, period fees cover the principal shortfall and leave the LP slightly ahead of holding its starting tokens. At the earlier checkpoint shown, fees had not covered that shortfall. The comparison covers this recorded period, before gas and incentives; it does not measure lifetime profit or predict the next period.',
   },
 ]);

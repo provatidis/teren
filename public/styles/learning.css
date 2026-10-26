@@ -48,7 +48,7 @@
 .learn-control input{height:8px;margin:0}
 .learn-width{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px}
 .learn-width select{background:var(--surface);border:1px solid var(--border-strong);color:var(--text);border-radius:8px;padding:10px}
-.learn-fieldset{border:0;padding:0;margin:24px 0}
+.learn-fieldset{border:0;padding:0;margin:24px 0;scroll-margin-top:24px}
 .learn-fieldset legend{font-size:13px;line-height:1.7;padding:0;margin-bottom:14px;font-weight:500}
 .learn-stage{color:var(--accent);font-size:10px;margin-right:8px}
 .learn-choices{display:grid;gap:9px}

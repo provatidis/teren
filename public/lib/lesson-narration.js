@@ -32,6 +32,17 @@ export function tokenBalanceNarration(outcome) {
     explanation: 'ETH moves from ' + usd(s.initialPrice) + ' to ' + usd(s.futurePrice) + '. ' + exchange + ' The LP starts with ' + fmt(r.held.eth, 6) + ' ETH and ' + fmt(r.held.usdc, 2) + ' USDC, and ends with ' + fmt(r.pooled.eth, 6) + ' ETH and ' + fmt(r.pooled.usdc, 2) + ' USDC. Tokens move through swaps; neither ETH nor USDC is created by the pool.' };
 }
 
+export function rangeBoundaryNarration(outcome) {
+  const { setup: s } = outcome;
+  const exchange = s.futurePrice > s.initialPrice
+    ? 'As ETH’s price rises through the range, swaps exchange the position’s ETH for USDC.'
+    : s.futurePrice < s.initialPrice
+      ? 'As ETH’s price falls through the range, swaps exchange the position’s USDC for ETH.'
+      : 'At the unchanged price, the position keeps its starting ETH and USDC amounts in this fee-free model.';
+  return exchange + ' ' + lessonFinding('range-boundaries', outcome)
+    + ' Outside the range, swaps stop changing its token amounts until price returns. This final token mix does not tell us how much it earned earlier.';
+}
+
 export function lessonReasonFeedback(id, outcome, reason) {
   if (id === 'token-balances') {
     const copy = tokenBalanceNarration(outcome);

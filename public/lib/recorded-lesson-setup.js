@@ -3,6 +3,7 @@ import { sceneNode as node } from './lesson-scene.js';
 import { periodPointView, periodDuration } from './period-presentation.js';
 import { formatUnits } from '../models/units.js';
 import { fmt, usd } from './format.js';
+import { createRangeGuide } from './range-scene-guide.js';
 
 // Only validated starting balances and the named observations are introduced.
 // The preview never infers a route through the prices between recorded blocks.
@@ -24,17 +25,11 @@ export function renderRecordedLessonSetup(container, period, lesson, question) {
   const figure = node('figure', undefined, 'applied-start-figure');
   const caption = node('figcaption', 'Starting pool price: ' + usd(start.price) + ' per ETH');
   const low = Math.min(lowerPrice, start.price), high = Math.max(upperPrice, start.price);
-  const pad = (high - low) * .15, left = low - pad, span = high - low + pad * 2;
-  const track = node('div', undefined, 'applied-start-track'); track.setAttribute('aria-hidden', 'true');
-  const band = node('span', undefined, 'applied-start-band');
-  band.style.left = (lowerPrice - left) / span * 100 + '%'; band.style.width = (upperPrice - lowerPrice) / span * 100 + '%';
-  const marker = node('span', undefined, 'applied-start-marker'); marker.style.left = (start.price - left) / span * 100 + '%';
-  track.append(band, marker);
-  const bounds = node('div', undefined, 'applied-start-bounds');
-  bounds.append(node('span', 'Lower: ' + usd(lowerPrice)), node('span', 'Upper: ' + usd(upperPrice)));
+  const pad = (high - low) * .15;
+  const guide = createRangeGuide({ min: low - pad, max: high + pad, lower: lowerPrice, upper: upperPrice, price: start.price, recorded: true });
   const state = start.state === 'inside' ? 'Inside the range · both tokens'
     : start.state === 'above' ? 'Above the range · USDC principal' : 'Below the range · WETH principal';
-  figure.append(caption, track, bounds, node('p', state + '. Band = position range; marker = starting price.', 'applied-start-key'));
+  figure.append(caption, guide.element, node('p', state + '. Band = position range; marker = starting price.', 'applied-start-key'));
   const nodes = [setup, figure];
   if (lesson.id === 'between-samples') {
     const interval = node('div', undefined, 'applied-sample-preview');

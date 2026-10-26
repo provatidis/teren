@@ -85,11 +85,11 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
     assert.equal(await evaluate("document.querySelector('.loop-flow-balances').textContent"), snapshot);
     assert.equal(await evaluate("localStorage.getItem('teren-loop-learning-v1')"), before);
     await click('lend-reveal');
-    assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), '1');
+    assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), id === 'build' ? '3' : '7');
     await choose('lend-reason', reason); await choose('lend-application', application); await click('lend-check');
     await reload();
     assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
-    assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), '0');
+    assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), id === 'build' ? '3' : '7');
     if (id === 'unwind') assert.equal(await evaluate("document.getElementById('loop-flow-health').checkVisibility()"), true);
   }
   console.log('PASS: four visual pilots, optional predictions, fixed question scope, exact handoffs, independent exploration, replay and restored completion');

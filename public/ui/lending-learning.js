@@ -15,7 +15,7 @@ import { createLendingScene } from '../lib/lending-lesson-scenes.js';
 import { createLoanConditionScene } from '../lib/loan-condition-scene.js';
 import { createLoanResponseScene } from '../lib/loan-response-scene.js';
 import { createLoopStressScene } from '../lib/loop-stress-scene.js';
-import { focusSceneOutcome, createPredictionPrompt } from '../lib/lesson-scene.js';
+import { focusSceneOutcome, createPredictionPrompt, markPredictionRevealed } from '../lib/lesson-scene.js';
 import { newChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningSources, focusLearningFeedback, renderPredictionFeedback, renderUnderstandingFeedback, clearUnderstandingFeedback } from '../lib/learning-elements.js';
 
@@ -36,7 +36,7 @@ export function initLendingLearning() {
   const foundationLesson = () => chapter === 'essentials' && ['supply', 'borrow', 'conditions', 'respond'].includes(lesson?.id);
   const stressLesson = () => chapter === 'loops' && lesson?.id === 'stress';
   const visualLesson = () => foundationLesson() || chapter === 'loops' && ['build', 'stress', 'unwind'].includes(lesson?.id);
-  const revealLabel = () => visualLesson() ? 'Explain this example →' : 'Reveal the result →';
+  const revealLabel = () => visualLesson() ? 'Why this happens ↓' : 'Read the result ↓';
   const fresh = () => ({ prediction: '', reason: '', application: '', revealed: false, seed: newChoiceSeed() });
   function navigation() {
     $('lend-progress').textContent = progress.completed.length + ' of ' + course.lessons.length + ' checked';
@@ -60,11 +60,12 @@ export function initLendingLearning() {
   function reveal() {
     draft.revealed = true;
     renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, example.prediction, lesson.finding);
+    markPredictionRevealed(predictionField);
     $('lend-metrics').replaceChildren(...course.metrics(lesson.id, example.result).map(items => learningMetric(...items)));
     $('lend-metrics').hidden = visualLesson();
     $('lend-observe').hidden = false;
     $('lend-assessment').hidden = false;
-    $('lend-reveal').textContent = visualLesson() ? 'Revisit the explanation ↓' : 'Revisit the result ↓';
+    $('lend-reveal').textContent = revealLabel();
     persist();
   }
   function check(save = true) {
@@ -181,6 +182,7 @@ export function initLendingLearning() {
     $('lend-reveal').disabled = false; $('lend-reveal').textContent = revealLabel();
     if (draft.revealed) {
       lessonScene?.showQuestion();
+      loopScene?.showQuestion();
       reveal();
       if (course.check(id, draft.reason, draft.application).passed) check(false);
     }
@@ -203,7 +205,7 @@ export function initLendingLearning() {
   buildNavigation();
   function showResult(sceneFirst = false) {
     lessonScene?.showQuestion();
-    if (sceneFirst) loopScene?.showQuestion();
+    loopScene?.showQuestion();
     reveal();
     if (sceneFirst && visualLesson()) { focusSceneOutcome($('lend-money-flow')); return; }
     const title = $('lend-observe-title');

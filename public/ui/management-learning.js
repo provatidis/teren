@@ -1,6 +1,6 @@
 import { saveLearningLocation } from '../data/learning-location.js';
 import { renderLessonSetup, managementLessonSetup } from '../lib/lesson-setup.js';
-import { focusSceneOutcome, createPredictionPrompt } from '../lib/lesson-scene.js';
+import { focusSceneOutcome, createPredictionPrompt, markPredictionRevealed } from '../lib/lesson-scene.js';
 import { createRangeWidthScene } from '../lib/liquidity-lesson-scenes.js';
 import { usd } from '../lib/format.js';
 import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js';
@@ -41,6 +41,7 @@ export function initManagementLearning() {
   function reveal() {
     draft.revealed=true;
     renderPredictionFeedback(predictionFeedbackElement, presentation.predictions, draft.prediction, outcome.prediction, presentation.finding);
+    markPredictionRevealed(predictionField);
     $('manage-metrics').replaceChildren(...presentation.metrics.map(items=>learningMetric(...items)));
     $('manage-explanation').textContent=lesson.explanation;$('manage-takeaway').textContent=lesson.takeaway;$('manage-pitfall').textContent=lesson.pitfall;
     $('manage-handoffs').replaceChildren(...presentation.links.map(({label,scenario})=>{
@@ -48,7 +49,7 @@ export function initManagementLearning() {
       link.href=home.href;link.textContent=label;link.target='_blank';link.rel='noopener noreferrer';return link;
     }));
     $('manage-explore-note').textContent=presentation.note;
-    $('manage-observe').hidden=false;$('manage-assessment').hidden=false;$('manage-reveal').textContent='Revisit the example ↓';persist();
+    $('manage-observe').hidden=false;$('manage-assessment').hidden=false;$('manage-reveal').textContent='Why this happens ↓';persist();
   }
   function check(save=true) {
     const result=checkManagementUnderstanding(lesson.id,draft.variant,draft.reason,draft.application);
@@ -104,13 +105,13 @@ export function initManagementLearning() {
     }
 
     $('manage-observe').hidden=true;$('manage-assessment').hidden=true;clearFeedback();
-    $('manage-reveal').disabled=false;$('manage-reveal').textContent=visualLesson()?'Explain this example →':'Reveal the example →';
+    $('manage-reveal').disabled=false;$('manage-reveal').textContent='Why this happens ↓';
     choices('manage-predictions','manage-prediction',presentation.predictions,draft.prediction,value=>{
       predictionFeedbackElement.textContent = '';
       draft.prediction=value;draft.revealed=false;draft.reason='';draft.application='';
       $('manage-observe').hidden=true;$('manage-assessment').hidden=true;clearFeedback();
       document.querySelectorAll('input[name="manage-reason"],input[name="manage-application"]').forEach(input=>{input.checked=false;});
-      $('manage-reveal').disabled=false;$('manage-reveal').textContent=visualLesson()?'Explain this example →':'Reveal the example →';persist();
+      $('manage-reveal').disabled=false;$('manage-reveal').textContent='Why this happens ↓';persist();
     });
     choices('manage-reasons','manage-reason',lesson.reasons,draft.reason,value=>{draft.reason=value;clearFeedback();persist();});
     choices('manage-applications','manage-application',application.choices,draft.application,value=>{draft.application=value;clearFeedback();persist();});

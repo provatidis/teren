@@ -47,7 +47,7 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   await evaluate("new Promise(resolve=>{const check=()=>document.getElementById('learn-applied').getAttribute('aria-busy')==='false'?resolve():setTimeout(check,25);check()})");
   await choose('applied-prediction','can-trail'); await click('applied-reveal'); await fill('applied-checkpoint','8');
   assert.match(await text('applied-metrics'),/−\$0.01/);
-  assert.match(await text('applied-explanation'),/At the final question checkpoint[\s\S]*Other checkpoints can have a different result/);
+  assert.match(await text('applied-explanation'),/At the final question checkpoint[\s\S]*At the earlier checkpoint shown, fees had not covered that shortfall/);
   assert.match(await text('applied-prediction-feedback'),/checkpoint 7.*\$0.23.*trails holding by \$0.51.*\$0.17 ahead, before costs/);
   await choose('applied-application','hold'); await choose('applied-reason','income'); await click('applied-check');
   assert.match(await text('applied-reasons-feedback'),/Fees can be smaller/);

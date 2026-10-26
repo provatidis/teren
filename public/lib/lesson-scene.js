@@ -24,6 +24,10 @@ export function createPredictionPrompt(fieldset, { selected, onShow, disabled = 
   return element;
 }
 
+export function markPredictionRevealed(fieldset) {
+  fieldset.closest('.scene-prediction').querySelector('button').textContent = 'Show the outcome again ↓';
+}
+
 // Keep the diagram and its controls together when a learner requests an outcome.
 export function focusSceneOutcome(container) {
   const feedback = container.querySelector('.learn-prediction-feedback');

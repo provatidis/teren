@@ -1,6 +1,7 @@
 import { sceneNode as node, createPriceExplorer } from './lesson-scene.js';
 import { tokenSceneState, rangeSceneState, rangePositionState } from './liquidity-scene-state.js';
 import { fmt, usd } from './format.js';
+import { createRangeGuide } from './range-scene-guide.js';
 
 export function createTokenBalanceScene(input, prediction) {
   const element = node('div', undefined, 'lesson-scene');
@@ -62,32 +63,21 @@ export function createRangeWidthScene(outcome, prediction) {
   figure.append('\n', priceLabel);
   const { narrow, wide } = outcome;
   const min = Math.round(wide.lowerPrice * .8), max = Math.round(wide.upperPrice * 1.12);
-  const at = price => (price - min) / (max - min) * 100;
   const rows = [narrow, wide].map((position, index) => {
     const row = node('div', undefined, 'scene-range-row');
     const heading = node('div', undefined, 'scene-range-heading');
     const name = node('strong', index === 0 ? 'Narrow' : 'Wider');
     const status = node('span'); status.id = 'range-scene-' + (index === 0 ? 'narrow' : 'wide');
     heading.append(name, ' ', status);
-    const track = node('div', undefined, 'scene-range-track'); track.setAttribute('aria-hidden', 'true');
-    const band = node('span', undefined, 'scene-range-band');
-    band.style.left = at(position.lowerPrice) + '%';
-    band.style.width = at(position.upperPrice) - at(position.lowerPrice) + '%';
-    const marker = node('span', undefined, 'scene-range-marker');
-    track.append(band, marker);
-    const bounds = node('div', undefined, 'scene-range-bounds');
-    for (const [name, value] of [['Lower', position.lowerPrice], ['Upper', position.upperPrice]]) {
-      const button = node('button', name + ' ' + usd(value), 'text-button'); button.type = 'button';
-      button.setAttribute('aria-label', (index === 0 ? 'Narrow' : 'Wider') + ' ' + name.toLowerCase() + ' boundary: ' + usd(value));
-      button.addEventListener('click', () => explorer.show(value, true)); bounds.append(' ', button);
-    }
+    const guide = createRangeGuide({ min, max, lower: position.lowerPrice, upper: position.upperPrice,
+      price: position.initialPrice, name: index === 0 ? 'Narrow' : 'Wider', onBoundary: value => explorer.show(value, true) });
     const tokens = node('p', undefined, 'scene-range-tokens');
     const gap = node('p', undefined, 'scene-range-gap');
     gap.id = 'range-scene-gap-' + (index === 0 ? 'narrow' : 'wide');
-    row.append(heading, '\n', track, '\n', bounds, '\n', tokens, '\n', gap); figure.append('\n', row);
-    return { row, status, marker, tokens, gap };
+    row.append(heading, '\n', guide.element, '\n', tokens, '\n', gap); figure.append('\n', row);
+    return { row, status, guide, tokens, gap };
   });
-  figure.append('\n', node('p', 'Vertical marker: selected price. Bands: the chosen ranges. Tap a boundary to explore it.', 'scene-key'));
+  figure.append('\n', node('p', 'Marker = selected price. Tap a boundary to explore it.', 'scene-key'));
   const consequence = node('p', undefined, 'scene-consequence'); consequence.id = 'range-scene-consequence';
   const explorer = createPriceExplorer({
     id: 'range-scene-price', min, max, step: 10, start: narrow.initialPrice,
@@ -101,11 +91,11 @@ export function createRangeWidthScene(outcome, prediction) {
     onChange(price) {
       priceLabel.textContent = 'ETH at ' + usd(price);
       const frames = rangeSceneState(narrow, wide, price);
-      rows.forEach(({ row, status, marker, tokens, gap }, index) => {
+      rows.forEach(({ row, status, guide, tokens, gap }, index) => {
         const frame = frames[index];
         row.dataset.state = frame.result.state;
         status.textContent = frame.status;
-        marker.style.left = at(price) + '%';
+        guide.showPrice(price);
         tokens.textContent = 'Principal: ' + frame.tokens;
         gap.textContent = 'Shortfall against its own starting tokens: ' + usd(frame.result.breakEvenFees) + ' before fees.';
       });
@@ -130,16 +120,10 @@ export function createRangeBoundaryScene(input, prediction) {
   const lowerPrice = input.initialPrice * (1 - input.width), upperPrice = input.initialPrice * (1 + input.width);
   const setup = { ...input, lowerPrice, upperPrice, fees: 0, fullRangeFees: 0 };
   const min = input.initialPrice / 2, max = input.initialPrice * 2;
-  const at = price => (price - min) / (max - min) * 100;
   const figure = node('figure', undefined, 'scene-range-figure scene-boundary-figure');
   figure.append(node('figcaption', 'Where the price sits, and what you hold', 'scene-figure-title'));
   const status = node('p', '', 'scene-range-price'); status.id = 'boundary-scene-status';
-  const track = node('div', undefined, 'scene-range-track'); track.setAttribute('aria-hidden', 'true');
-  const band = node('span', undefined, 'scene-range-band'), marker = node('span', undefined, 'scene-range-marker');
-  band.style.left = at(lowerPrice) + '%'; band.style.width = at(upperPrice) - at(lowerPrice) + '%';
-  track.append(band, marker);
-  const bounds = node('div', undefined, 'scene-range-bounds');
-  bounds.append(node('span', 'Lower ' + usd(lowerPrice)), node('span', 'Upper ' + usd(upperPrice)));
+  const guide = createRangeGuide({ min, max, lower: lowerPrice, upper: upperPrice, price: input.initialPrice });
   const mix = node('div', undefined, 'scene-boundary-mix'); mix.setAttribute('aria-hidden', 'true');
   const eth = node('span', undefined, 'scene-boundary-eth'), usdc = node('span', undefined, 'scene-boundary-usdc');
   mix.append(eth, usdc);
@@ -150,7 +134,7 @@ export function createRangeBoundaryScene(input, prediction) {
     swatch.setAttribute('aria-hidden', 'true'); const text = node('span'); label.append(swatch, ' ', text); amounts.append(label);
     return text;
   });
-  figure.append(status, track, bounds, node('p', 'Marker = ETH price; band = your range.', 'scene-key'), mix, amounts,
+  figure.append(status, guide.element, node('p', 'Marker = selected price; band = your range.', 'scene-key'), mix, amounts,
     node('p', 'The split bar shows each token’s share of principal value.', 'scene-key'));
   const consequence = node('p', '', 'scene-consequence'); consequence.id = 'boundary-scene-copy';
   const explorer = createPriceExplorer({
@@ -164,7 +148,7 @@ export function createRangeBoundaryScene(input, prediction) {
     onChange(price) {
       const frame = rangePositionState(setup, price), r = frame.result;
       status.textContent = usd(price) + ' · ' + frame.status;
-      marker.style.left = at(price) + '%'; figure.dataset.state = r.state;
+      guide.showPrice(price); figure.dataset.state = r.state;
       eth.style.width = r.finalEthPercent + '%'; usdc.style.width = 100 - r.finalEthPercent + '%';
       labels[0].textContent = fmt(r.pooled.eth, 4) + ' ETH'; labels[1].textContent = fmt(r.pooled.usdc, 2) + ' USDC';
       consequence.textContent = r.state === 'inside' ? 'Both tokens remain. Inside the range, swaps can use the position’s liquidity.'

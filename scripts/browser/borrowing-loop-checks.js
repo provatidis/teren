@@ -135,7 +135,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     assert.equal(await text('lend-number'), 'LOOPING ' + (index + 1) + ' OF 3');
     assert.equal(await evaluate("document.getElementById('lend-visual').hidden"), false);
     if (id !== 'stress') {
-      // Optional prediction and explanation must not reset the explored frame.
+      // Exploration stays optional; explanation restores the assessed outcome.
       assert.equal(await evaluate("document.getElementById('lend-reveal').disabled"), false);
       assert.equal(await evaluate("document.getElementById('lend-observe').hidden"), true);
       assert.equal(await evaluate("document.getElementById('loop-flow-next').checkVisibility()"), true);
@@ -147,7 +147,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     assert.match(await text('lend-prediction-feedback'), /^The result differs from your prediction\./);
     assert.equal(await evaluate("document.getElementById('lend-money-flow').hidden"), false);
     if (id !== 'stress') {
-      assert.equal(await flowIndex(), '1');
+      assert.equal(await flowIndex(), id === 'build' ? '3' : '7');
       await moveFlow('Home');
     }
     if (id === 'build') {
@@ -253,16 +253,18 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
   await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
   try {
     await navigate(base + 'lending.html#loop-lesson=unwind');
+    await moveFlow('Home');
     await click('loop-flow-next');
     assert.equal(await evaluate("getComputedStyle(document.querySelector('#loop-flow-route-supplied .loop-flow-traveller')).animationName"), 'none');
     assert.equal(await evaluate("getComputedStyle(document.getElementById('loop-flow-route-supplied')).visibility"), 'visible');
     assert.match(await text('loop-flow-copy'), /ETH moves to your wallet/);
     await navigate(base + 'lending.html#loop-lesson=build');
+    await moveFlow('Home');
     await click('loop-flow-next');
     assert.equal(await evaluate("getComputedStyle(document.querySelector('[data-pocket=wallet]')).animationName"), 'none');
     assert.equal(await text('loop-flow-debt'), '5,000 USDC');
   } finally { await call('Emulation.setEmulatedMedia', { features: [] }); }
-  console.log('PASS: visual lessons open without an answer, preserve the explored stage and explain transfers with reduced motion');
+  console.log('PASS: visual lessons support optional predictions, restore assessed outcomes and explain transfers with reduced motion');
 
   for (const [width, height] of [[390, 844], [320, 740]]) {
     await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: true });
@@ -306,6 +308,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     try {
       await navigate(base + 'lending.html#loop-lesson=build');
+      await moveFlow('Home');
       for (let stage = 1; stage <= 3; stage++) {
         await tapNext(); assert.equal(await flowIndex(), String(stage));
       }
@@ -315,6 +318,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
       await navigate(base + 'lending.html#loop-lesson=unwind');
       await click('lend-retry'); await click('lend-reveal');
+      await moveFlow('Home');
       const progressBefore = await text('lend-progress');
       for (let stage = 1; stage <= 7; stage++) {
         await tapNext(); assert.equal(await flowIndex(), String(stage));
