@@ -29,7 +29,26 @@
 .loan-condition-fields{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:20px}
 .loan-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .loan-presets button{min-height:44px;padding:8px;font-size:13px}
-#loan-slider{width:100%;accent-color:var(--accent);margin:10px 0 12px;min-height:36px}
+#loan-slider,#loan-time-slider{width:100%;accent-color:var(--accent);margin:10px 0 0;min-height:44px}
+.loan-condition-fields .fine-print{font-size:13px;line-height:1.7;margin:0}
+.loan-interest-choice select{width:100%;min-width:0;min-height:48px;padding:10px 12px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text)}
+.loan-interest-choice .fine-print,#loan-annual-growth{font-size:14px;line-height:1.7}
+.loan-accrual{border-top:1px solid var(--border-strong);margin-top:20px;padding-top:18px}
+.loan-accrual h3{font-size:18px;line-height:1.5;margin:0 0 18px}
+.loan-accrual-control{display:flex;justify-content:space-between;gap:12px;font-size:14px;line-height:1.7}
+.loan-accrual-control output{font-variant-numeric:tabular-nums;white-space:nowrap}
+.loan-accrual-control label{white-space:nowrap}
+.loan-accrual-row{margin:16px 0 20px;min-width:0}
+.loan-accrual-heading{display:flex;justify-content:space-between;align-items:baseline;gap:8px 16px;flex-wrap:wrap;font-size:14px;line-height:1.7;margin:0 0 8px}
+.loan-accrual-heading strong{font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.loan-accrual-track{display:flex;height:24px;border:1px solid var(--border-strong);border-radius:4px;overflow:hidden;background:var(--surface)}
+.loan-accrual-track span{flex:none;background:var(--allocation-eth)}
+.loan-accrual-track .loan-accrual-interest{background:repeating-linear-gradient(135deg,var(--allocation-eth) 0 5px,#6a531d 5px 8px);border-left:1px solid var(--surface);box-sizing:border-box}
+.loan-accrual-row[data-balance=debt] .loan-accrual-track{border-style:dashed}
+.loan-accrual-row[data-balance=debt] .loan-accrual-original{background:#b88b5c}
+.loan-accrual-row[data-balance=debt] .loan-accrual-interest{background:repeating-linear-gradient(135deg,#e5bd85 0 5px,#68492c 5px 8px)}
+.loan-accrual-detail,.loan-accrual .fine-print{font-size:14px;line-height:1.8;color:var(--muted);margin:8px 0 0}
+.loan-accrual-detail{font-variant-numeric:tabular-nums}
 #loan-outcomes{display:grid;gap:20px}
 .loan-risk{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 24px;border-color:var(--accent);background:var(--highlight)}
 .loan-risk .eyebrow{font-size:12px;margin-bottom:10px}
@@ -170,7 +189,7 @@
   .loan-quick-result p { margin-top: 0; }
   #loan-desktop-health { display: none; }
   #loan-risk { scroll-margin-top: calc(var(--lab-feedback-height, 0px) + 24px); }
-  .loan-layout :is(input, button, summary) {
+  .loan-layout :is(input, button, select, summary) {
     scroll-margin-top: calc(var(--lab-feedback-height, 0px) + 24px);
   }
 }

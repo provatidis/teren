@@ -14,7 +14,7 @@ The single-loan and ETH/USDC loop labs use Aave v3-style collateral concepts wit
 
 ## Three kinds of results
 
-- **Hypothetical models:** the endpoint liquidity labs use assumed USD cash fees; Follow the fees calculates token allocation from chosen trading batches. The single loan uses fixed simple interest, ETH/USDC loops offer simple interest or continuous compounding, and wstETH/WETH loops separate staking APY from continuously compounded borrow APR with one optional rate change. All use editable assumptions rather than forecasts.
+- **Hypothetical models:** the endpoint liquidity labs use assumed USD cash fees; Follow the fees calculates token allocation from chosen trading batches. Single loans and ETH/USDC loops offer fixed simple interest or continuous compounding, and wstETH/WETH loops separate staking APY from continuously compounded borrow APR with one optional rate change. All use editable assumptions rather than forecasts.
 - **Recorded snapshots:** Inspect shows v2 reserves/quotes or v3 principal from exact contract integers at one block. Version-2 v3 snapshots also include fee accounting; older files without fee-growth data show it as unavailable. A snapshot alone does not establish fees earned over a chosen period or lifetime PnL.
 - **Verified historical accounting:** the shipped fixed-position cases compare multiple recorded checkpoints, with unchanged-position evidence and independent fee checks. It calculates earned fee tokens and cumulative time in range for that recorded period.
 
@@ -99,30 +99,32 @@ Fee income is an explicit assumption added as separate USD cash at the end; it d
 
 ## Collateralized loan model
 
-`collateral-loan-v1` is a hypothetical single-collateral, single-debt teaching model. ETH represents supplied WETH, and USDC is fixed at $1. Aave v3 concepts inform the separation of maximum LTV, collateral eligibility and liquidation threshold; all entered rules and rates are illustrative assumptions. This model does not claim exact Aave interest accounting or current market parameters.
+`collateral-loan-v2` is a hypothetical single-collateral, single-debt teaching model with an explicit interest convention. The retained `collateral-loan-v1` model always uses simple interest. ETH represents supplied WETH, and USDC is fixed at $1. Aave v3 concepts inform the separation of maximum LTV, collateral eligibility and liquidation threshold; all entered rules and rates are illustrative assumptions. This model does not claim exact Aave interest accounting or current market parameters.
 
 For original supplied ETH `C`, initial borrowed USDC `B`, future ETH price `P`, elapsed days `d`, annual supply/borrow rates `s` and `b`, and liquidation threshold `t` (rates and threshold as fractions):
 
 ```text
-later supplied ETH = C × (1 + s × d / 365)
-later USDC debt    = B × (1 + b × d / 365)
+growth(r)         = 1 + r × d / 365  [simple]
+                  = exp(r × d / 365) [continuous compounding]
+later supplied ETH = C × growth(s)
+later USDC debt    = B × growth(b)
 collateral value  = later supplied ETH × P
 health factor     = collateral value × t / later debt
 boundary price    = later debt / (later supplied ETH × t)
 assets minus debt = collateral value + B − later debt
 ```
 
-Both balances use fixed simple APR over a 365-day year. Borrowed USDC remains in the wallet, earning nothing. The holding comparison retains the original ETH at `P`, so the difference is the value of supply interest minus borrow interest. Borrowing itself creates a matching asset and liability. It does not increase net assets at inception.
+Both balances use the selected convention at constant APRs over a 365-day year. Added compound interest uses `original × expm1(rate × days / 365)` to retain small positive increments. One-year compound growth is `exp(APR / 100) − 1`; this equivalent APY is not another rate input. New and reset experiments default to compounding. Legacy links, drafts, named records and existing lesson handoffs retain their simple-interest results; reopening them in the v2 editor selects simple interest. Saving creates a new variation without changing the original record. Borrowed USDC remains in the wallet, earning nothing. The holding comparison retains the original ETH at `P`, so the difference is the value of supply interest minus borrow interest. Borrowing itself creates a matching asset and liability. It does not increase net assets at inception.
 
 When supply is not enabled as collateral, new borrowing is zero, but the supplied balance can still earn assumed interest. A new loan must fit original collateral value × maximum LTV; later prices or accrued interest may move it above that starting limit. Health factor below 1 means eligible for liquidation. Exactly 1 is the boundary. No debt has no loan liquidation boundary; this does not eliminate asset or protocol risks. The display preserves the side of 1 even when ordinary two-decimal rounding would hide it.
 
 Responses use the same external USD budget at the endpoint. Repayment is capped at debt, with unused money shown separately. Adding collateral buys ETH at `P`, adds it to the supplied balance and leaves debt unchanged. Neither response receives retroactive supply interest. At 5 ETH, $1,500/ETH, $5,000 debt and an 80% threshold, the unchanged health factor is 1.20. An additional $1,000 raises it to 1.50 by repayment or 1.36 by adding collateral.
 
-Results are endpoints before any liquidation, not a reconstruction of what would have survived the intervening path. The model excludes variable rates, reserve indexes, compounding, contract rounding, oracle delays, caps, E-mode, additional assets, liquidation execution, gas and swap costs. Borrowed cash is neither spent nor reinvested in this single-loan model. The separate borrowing-loop model below spends it explicitly. Independently verified lending history is not included. Primary references: [Aave collateral rules](https://aave.com/help/supplying/toggle-collateral-status), [supply mechanics](https://aave.com/help/supplying/supply-tokens) and [borrowing/liquidation overview](https://aave.com/faq).
+Results are endpoints before any liquidation, not a reconstruction of what would have survived the intervening path. The model excludes variable rates, reserve indexes, contract rounding, oracle delays, caps, E-mode, additional assets, liquidation execution, gas and swap costs. Borrowed cash is neither spent nor reinvested in this single-loan model. The separate borrowing-loop model below spends it explicitly. Independently verified lending history is not included. Primary references: [Aave collateral rules](https://aave.com/help/supplying/toggle-collateral-status), [supply mechanics](https://aave.com/help/supplying/supply-tokens) and [borrowing/liquidation overview](https://aave.com/faq).
 
 ### Single liquidation event and interest reference
 
-`single-liquidation-v1` is a separate hypothetical event applied to an eligible `collateral-loan-v1` endpoint. At selected price `P`, let supplied collateral value be `V`, debt `D`, requested repayment fraction `q`, and bonus fraction `b`:
+`single-liquidation-v1` is a separate hypothetical event applied to an eligible single-loan endpoint under its selected interest convention. At selected price `P`, let supplied collateral value be `V`, debt `D`, requested repayment fraction `q`, and bonus fraction `b`:
 
 ```text
 repaid = min(D × q, V / (1 + b))
@@ -137,7 +139,9 @@ No event is calculated at health factor exactly 1 or above, or with no debt. Rep
 
 The price chart fixes accrued balances and varies only ETH price. Its straight line expresses health factor’s proportionality to collateral price with fixed debt; it is not a price path or evidence that earlier liquidation was avoided.
 
-The optional debt reference is `B × exp(b × d / 365)`, continuous compounding at the entered constant borrow APR. The main model remains simple interest. This reference exposes the increasing difference at high rates and long durations; it does not reproduce Aave’s interest approximation, reserve-index updates or changing rates.
+The optional debt reference compares `B × (1 + b × d / 365)` with `B × exp(b × d / 365)` independently of the selected rule. The selected rule also drives the health curve, responses and liquidation event. Continuous compounding is a mathematical assumption; it does not reproduce Aave’s interest approximation, reserve-index updates or changing rates.
+
+The time visual separates original amounts from added interest. Both bars use one USD scale at the chosen endpoint price; borrowed wallet cash is excluded from the bars and remains unchanged in the balance sheet. They show supplied collateral value, not threshold-weighted backing, so equal bar lengths do not identify the liquidation boundary.
 
 ## Fixed-position historical replay
 

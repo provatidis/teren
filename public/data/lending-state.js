@@ -1,4 +1,5 @@
-import { LOAN_DEFAULTS, LOAN_LIMITS, validateLoan } from '../models/collateral-loan-v1.js';
+import { LOAN_DEFAULTS } from '../models/collateral-loan-v2.js';
+import { loanModelForInput } from '../models/loan-models.js';
 import { LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation } from '../models/loan-explanations.js';
 
 export const LOAN_DRAFT_KEY = 'teren-lending-draft-v1';
@@ -11,14 +12,16 @@ export function readLoanDraft(getStorage = () => globalThis.sessionStorage) {
     const raw = getStorage().getItem(LOAN_DRAFT_KEY);
     if (!raw) return { input: { ...LOAN_DEFAULTS }, status: 'empty' };
     const saved = JSON.parse(raw);
-    if (saved.version !== 1 || Object.keys(validateLoan(saved.input)).length) throw new Error('Unsupported draft');
-    return { input: Object.fromEntries([...Object.keys(LOAN_LIMITS), 'collateralEnabled'].map(key => [key, saved.input[key]])), status: 'ready' };
+    const { version, keys, validateLoan } = loanModelForInput(saved.input);
+    if (saved.version !== version || Object.keys(validateLoan(saved.input)).length) throw new Error('Unsupported draft');
+    return { input: Object.fromEntries(keys.map(key => [key, saved.input[key]])), status: 'ready' };
   } catch { return { input: { ...LOAN_DEFAULTS }, status: 'unavailable' }; }
 }
 
 export function saveLoanDraft(input, getStorage = () => globalThis.sessionStorage) {
+  const { version, validateLoan } = loanModelForInput(input);
   if (Object.keys(validateLoan(input)).length) return false;
-  try { getStorage().setItem(LOAN_DRAFT_KEY, JSON.stringify({ version: 1, input })); return true; }
+  try { getStorage().setItem(LOAN_DRAFT_KEY, JSON.stringify({ version, input })); return true; }
   catch { return false; }
 }
 

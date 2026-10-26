@@ -1,0 +1,138 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { LOAN_DEFAULTS as OLD_DEFAULTS } from '../../public/models/collateral-loan-v1.js';
+import { loanHash, readLoanHash } from '../../public/lib/lending-links.js';
+import { dragRangeToMax } from './touch-range.js';
+
+export async function checkLoanInterest({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile }) {
+  await navigate(base + 'lending.html#experiment');
+  const localKeys = ['degenerator-experiments-v1', 'teren-experiment-location-v1'];
+  const sessionKeys = ['teren-lending-draft-v1', 'teren-liquidation-draft-v1'];
+  const local = await evaluate(`${JSON.stringify(localKeys)}.map(k=>[k,localStorage.getItem(k)])`);
+  const session = await evaluate(`${JSON.stringify(sessionKeys)}.map(k=>[k,sessionStorage.getItem(k)])`);
+  const value = id => evaluate(`document.getElementById('${id}').value`);
+  const hidden = id => evaluate(`document.getElementById('${id}').hidden`);
+  const draft = () => evaluate("sessionStorage.getItem('teren-lending-draft-v1')");
+  try {
+    await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
+    await evaluate("sessionStorage.removeItem('teren-lending-draft-v1')");
+    await reload();
+    assert.equal(await value('loan-interestMode'), 'compound');
+    assert.equal(await text('loan-accrual-supply-total'), '5 ETH');
+    assert.equal(await evaluate("[...document.querySelectorAll('.loan-accrual-interest')].every(el=>el.hidden)"), true);
+    await fill('loan-days', '365');
+    assert.equal(await text('loan-debt-value'), '$5,256.36');
+    assert.equal(await text('loan-accrual-debt-total'), '5,256.36 USDC');
+    assert.equal(await text('loan-accrual-supply-total'), '5.101007 ETH');
+    assert.match(await text('loan-annual-growth'), /2.02% supply.*5.13% debt.*equivalent APY/);
+    assert.match(await text('loan-chart-caption'), /continuous compounding/);
+    await fill('loan-interestMode', 'simple');
+    assert.equal(await text('loan-debt-value'), '$5,250.00');
+    assert.equal(await text('loan-accrual-supply-total'), '5.1 ETH');
+    assert.match(await text('loan-annual-growth'), /2% supply.*5% debt/);
+    await fill('loan-borrowAPR', '100'); await fill('loan-days', '1825');
+    assert.equal(await hidden('loan-interest-alert'), false);
+    await fill('loan-interestMode', 'compound');
+    assert.equal(await hidden('loan-interest-alert'), true);
+    assert.equal(await text('loan-debt-value'), '$742,065.80');
+    assert.equal(await text('loan-state'), 'Eligible for liquidation');
+    assert.match(await text('loan-liquidation-status'), /All collateral.*debt remains unpaid/);
+    assert.match(await text('loan-interest-reference-rule'), /Main results use continuous compounding/);
+    assert.equal(await text('loan-simple-debt'), '$30,000.00');
+    await click('loan-reset'); await fill('loan-days', '12.345');
+    const validDraft = await draft();
+    await fill('loan-days', '');
+    assert.equal(await hidden('loan-accrual'), true);
+    assert.equal(await draft(), validDraft);
+    await reload(); assert.equal(await value('loan-days'), '12.345');
+    assert.equal(await value('loan-time-slider'), '12.345');
+    await fill('loan-budget', '');
+    assert.equal(await hidden('loan-accrual'), false);
+    assert.equal(await evaluate("document.getElementById('loan-save').disabled"), true);
+    assert.equal(await draft(), validDraft);
+    await fill('loan-budget', '500');
+    console.log('PASS: selected interest drives both balances, risk, liquidation and references; invalid edits preserve the valid loan');
+
+    const old = { ...OLD_DEFAULTS, days: 365 };
+    await navigate(base + 'lending.html' + loanHash(old));
+    assert.equal(await value('loan-interestMode'), 'simple');
+    assert.equal(await text('loan-debt-value'), '$5,250.00');
+    await navigate(base + 'lending.html#lesson=conditions');
+    const lessonLink = await evaluate("document.getElementById('lend-explore').href");
+    assert.match(lessonLink, /collateral-loan-v1/);
+    await navigate(lessonLink);
+    assert.equal(await value('loan-interestMode'), 'simple');
+    assert.equal(await text('loan-debt-value'), '$5,500.00');
+    await fill('loan-interestMode', 'compound');
+    await evaluate("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('Clipboard unavailable')}}})");
+    await click('loan-share');
+    const shared = await value('loan-share-url');
+    assert.equal(readLoanHash(new URL(shared).hash).input.interestMode, 'compound');
+    await navigate(shared);
+    const debt = await text('loan-debt-value');
+    assert.equal(await value('loan-interestMode'), 'compound');
+    await click('loan-save'); await fill('experiment-name', 'Whole loan compounding'); await click('experiment-save-confirm');
+    assert.equal(await evaluate("document.getElementById('experiment-dialog').open"), false);
+    const entries = await evaluate("JSON.parse(localStorage.getItem('degenerator-experiments-v1')).experiments.filter(e=>e.name==='Whole loan compounding')");
+    assert.equal(entries.length, 1, 'One button click saves one variation despite two supported loan versions.');
+    assert.equal(entries[0].model, 'collateral-loan-v2');
+    assert.equal(entries[0].inputs.interestMode, 'compound');
+    if (downloadFile) {
+      await evaluate("document.getElementById('saved-experiments').open=true");
+      const data = JSON.parse(await readFile(await downloadFile('experiments-export'), 'utf8'));
+      assert.equal(data.experiments.find(e=>e.id===entries[0].id).inputs.interestMode, 'compound');
+    }
+    await navigate(base + 'liquidity.html#saved=' + entries[0].id);
+    assert.equal(await value('loan-interestMode'), 'compound'); assert.equal(await text('loan-debt-value'), debt);
+    await navigate(base);
+    assert.ok(await evaluate("!!document.querySelector('a[href*=\"collateral-loan-v2\"][href*=\"interestMode=compound\"]')"));
+    await navigate(base + 'lending.html#experiment');
+    await evaluate(`sessionStorage.setItem('teren-lending-draft-v1',${JSON.stringify(JSON.stringify({ version: 1, input: old }))})`);
+    await reload(); assert.equal(await value('loan-interestMode'), 'simple');
+    assert.equal(await text('loan-debt-value'), '$5,250.00');
+    console.log('PASS: old drafts and lesson links retain simple interest; v2 links, named saves, export, cross-topic reopening and Home preserve compounding');
+
+    for (const width of [390, 320]) {
+      await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
+      await navigate(base + 'lending.html#experiment'); await click('loan-reset');
+      const controlHeight = await evaluate("document.querySelector('.loan-accrual-control').getBoundingClientRect().height");
+      for (const days of ['0', '22.2525', '1824.9999']) {
+        await fill('loan-days', days);
+        assert.equal(await evaluate("document.querySelector('.loan-accrual-control').getBoundingClientRect().height"), controlHeight,
+          'Time labels must not reflow as a drag produces longer fractional values at ' + width + 'px.');
+      }
+      await evaluate("document.getElementById('loan-time-slider').focus();document.getElementById('loan-time-slider').scrollIntoView({block:'center'})");
+      await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'End', code: 'End', windowsVirtualKeyCode: 35 });
+      await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'End', code: 'End', windowsVirtualKeyCode: 35 });
+      assert.equal(await value('loan-days'), '1825');
+      assert.match(await text('loan-time-value'), /1,825 days/);
+      assert.equal(await value('loan-future'), '2000');
+      await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Home', code: 'Home', windowsVirtualKeyCode: 36 });
+      await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Home', code: 'Home', windowsVirtualKeyCode: 36 });
+      assert.equal(await value('loan-days'), '0');
+      await dragRangeToMax({ evaluate, call, fill }, 'loan-time-slider', { inset: 4 });
+      assert.equal(await value('loan-days'), '1825');
+      await fill('loan-time-slider', '365');
+      assert.equal(await value('loan-days'), '365');
+      assert.equal(await text('loan-accrual-debt-total'), '5,256.36 USDC');
+      assert.ok(await evaluate("['loan-interestMode','loan-time-slider'].every(id=>document.getElementById(id).getBoundingClientRect().height>=44)"));
+      assert.ok(await evaluate("[...document.querySelectorAll('.loan-accrual-track')].every(el=>{const r=el.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&[...el.children].every(c=>Number.isFinite(parseFloat(c.style.width)))})"));
+      assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
+      await fill('loan-borrow', '0');
+      assert.equal(await text('loan-accrual-debt-total'), '0 USDC');
+      assert.equal(await text('loan-health'), 'No debt');
+      await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+      await fill('loan-time-slider', '1825');
+      assert.match(await text('loan-accrual-caption'), /1,825 days/);
+      await call('Emulation.setEmulatedMedia', { features: [] });
+      await fill('loan-collateral', '1000000'); await fill('loan-future', '10000000'); await fill('loan-supplyAPR', '50');
+      assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
+    }
+    console.log('PASS: synchronized keyboard and native touch time control, fixed price, labelled token bars, zero debt, large balances and reduced motion at 390px/320px');
+  } finally {
+    await evaluate(`${JSON.stringify(local)}.forEach(([k,v])=>v===null?localStorage.removeItem(k):localStorage.setItem(k,v))`);
+    await evaluate(`${JSON.stringify(session)}.forEach(([k,v])=>v===null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v))`);
+    await call('Emulation.setEmulatedMedia', { features: [] });
+    await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
+  }
+}

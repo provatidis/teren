@@ -1,11 +1,12 @@
 import { saveExperimentLocation } from '../data/experiment-location.js';
 import { validateExperimentDraft } from '../data/saved-experiments.js';
-import { LOAN_MODEL, LOAN_DEFAULTS, LOAN_LIMITS, calculateLoan, validateLoan } from '../models/collateral-loan-v1.js';
+import { LOAN_MODEL, LOAN_DEFAULTS, LOAN_LIMITS, calculateLoan, validateLoan, upgradeLoan } from '../models/collateral-loan-v2.js';
 import { readLoanDraft, saveLoanDraft, readLiquidationDraft, saveLiquidationDraft } from '../data/lending-state.js';
 import { LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation, singleLiquidation, interestReference, healthPriceCurve } from '../models/loan-explanations.js';
 import { loanHash, readLoanHash } from '../lib/lending-links.js';
 import { healthLabel, loanStatus, boundaryDistance, loanMoney as usd } from '../lib/lending-presentation.js';
 import { signedUSD, formatTokenQuantity } from '../lib/format.js';
+import { createLoanInterestScene } from '../lib/loan-interest-scene.js';
 
 export function initLending() {
   const $ = id => document.getElementById(id);
@@ -14,7 +15,9 @@ export function initLending() {
   let firstInvalid;
   let revision = 0;
   let wasEligible = false;
-  const keys = Object.keys(LOAN_LIMITS);
+  const numericKeys = Object.keys(LOAN_LIMITS);
+  const keys = [...numericKeys, 'interestMode'];
+  const interestScene = createLoanInterestScene($('loan-accrual-figure'));
   const liquidationKeys = Object.keys(LIQUIDATION_LIMITS);
   const readLiquidation = () => Object.fromEntries(liquidationKeys.map(key => [key, $('liquidation-' + key).value === '' ? NaN : Number($('liquidation-' + key).value)]));
   function writeLiquidation(input) {
@@ -36,14 +39,15 @@ export function initLending() {
       $('loan-chart-one').setAttribute('y', boundaryY + 5);
       $('loan-chart-top').textContent = healthLabel(curve.maxHealth);
       $('loan-chart-max').textContent = usd(curve.maxPrice) + '/ETH';
-      $('loan-chart-caption').textContent = 'At ' + usd(input.future) + '/ETH, health factor is ' + healthLabel(curve.selectedHealth) + '. Interest period: ' + input.days + ' days, using simple interest. Each point is a hypothetical ETH price with the same token balances.';
+      $('loan-chart-caption').textContent = 'At ' + usd(input.future) + '/ETH, health factor is ' + healthLabel(curve.selectedHealth) + '. Interest period: ' + input.days + ' days, using ' + (input.interestMode === 'compound' ? 'continuous compounding' : 'simple interest') + '. Each point is a hypothetical ETH price with the same token balances.';
       $('loan-health-chart').setAttribute('aria-label', 'Health factor versus ETH price at fixed balances. Selected price ' + usd(input.future) + ', health factor ' + healthLabel(curve.selectedHealth) + '. Liquidation boundary ' + usd(curve.boundaryPrice) + ' per ETH.');
     }
     const interest = interestReference(input);
     $('loan-simple-debt').textContent = usd(interest.simpleDebt);
     $('loan-compound-debt').textContent = usd(interest.compoundedDebt);
     $('loan-interest-difference').textContent = 'Continuous compounding adds ' + usd(interest.difference) + ' more debt over ' + input.days + ' days at this fixed APR.';
-    $('loan-interest-alert').hidden = input.borrow === 0 || interest.difference < input.borrow * 0.01;
+    $('loan-interest-reference-rule').textContent = 'Main results use ' + (input.interestMode === 'compound' ? 'continuous compounding' : 'simple interest') + ' for both supply and debt. These two debt figures compare the same starting loan, APR and time.';
+    $('loan-interest-alert').hidden = input.interestMode === 'compound' || input.borrow === 0 || interest.difference < input.borrow * 0.01;
 
     const assumptions = readLiquidation();
     const errors = validateLiquidation(assumptions);
@@ -85,11 +89,13 @@ export function initLending() {
       : 'Remaining health factor: ' + healthLabel(event.remainingHealth) + (event.remainingHealth < 1 ? '. Still below 1; another liquidation could be possible.' : '. Future price or interest changes can make it eligible again.');
   }
   function readInputs() {
-    const input = Object.fromEntries(keys.map(key => [key, $('loan-' + key).value === '' ? NaN : Number($('loan-' + key).value)]));
+    const input = Object.fromEntries(numericKeys.map(key => [key, $('loan-' + key).value === '' ? NaN : Number($('loan-' + key).value)]));
     input.collateralEnabled = $('loan-collateralEnabled').checked;
+    input.interestMode = $('loan-interestMode').value;
     return input;
   }
   function writeInputs(input) {
+    if (!Object.hasOwn(input, 'interestMode')) input = upgradeLoan(input);
     for (const key of keys) $('loan-' + key).value = input[key];
     $('loan-collateralEnabled').checked = input.collateralEnabled;
   }
@@ -110,6 +116,7 @@ export function initLending() {
     $('loan-invalid').hidden = !invalidLoan;
     $('loan-error-summary').textContent = invalidLoan ? errors[firstInvalid] : '';
     $('loan-outcomes').hidden = invalidLoan;
+    $('loan-accrual').hidden = invalidLoan;
     $('loan-response-results').hidden = invalid;
     $('loan-share').disabled = invalid;
     $('loan-save').disabled = invalid;
@@ -122,7 +129,14 @@ export function initLending() {
       ? 'Complete the starting collateral, price and maximum LTV to see the borrowing limit.'
       : usd(input.collateralEnabled ? input.collateral * input.start * input.maxLTV / 100 : 0) + ' maximum new borrowing at the starting price.';
     $('loan-rates').textContent = errors.supplyAPR || errors.borrowAPR ? 'Check the assumed interest rates.'
-      : 'Simple APR assumptions: ' + formatTokenQuantity(input.supplyAPR, 2) + '% supply · ' + formatTokenQuantity(input.borrowAPR, 2) + '% borrow';
+      : 'Assumed APRs: ' + formatTokenQuantity(input.supplyAPR, 2) + '% supply · ' + formatTokenQuantity(input.borrowAPR, 2) + '% borrow';
+    const compound = input.interestMode === 'compound';
+    $('loan-interestMode-help').textContent = compound
+      ? 'Interest grows on the original balance and earlier interest. This choice applies to the whole loan.'
+      : 'Interest grows only on the original balance. This choice applies to the whole loan.';
+    const annualGrowth = rate => formatTokenQuantity(compound ? Math.expm1(rate / 100) * 100 : rate, 2) + '%';
+    $('loan-annual-growth').textContent = errors.supplyAPR || errors.borrowAPR || errors.interestMode ? ''
+      : 'One-year growth at these fixed rates: ' + annualGrowth(input.supplyAPR) + ' supply · ' + annualGrowth(input.borrowAPR) + ' debt' + (compound ? ' (equivalent APY).' : '.');
     $('loan-show-result').textContent = invalidLoan ? 'Check inputs ↑' : 'Full result ↓';
     current = invalid ? null : calculateLoan(input);
     if (invalidLoan) {
@@ -135,6 +149,7 @@ export function initLending() {
     // The response budget does not change the existing loan. Keep that result
     // visible while the separate response input is incomplete or invalid.
     const result = current || calculateLoan({ ...input, budget: 0 });
+    interestScene.render(result);
     const { start, end, responses } = result;
     $('loan-state').textContent = loanStatus(end);
     $('loan-risk').dataset.state = end.status;
@@ -172,6 +187,9 @@ export function initLending() {
     $('loan-slider').max = Math.max(input.start * 1.75, input.future);
     $('loan-slider').value = input.future;
     $('loan-slider').setAttribute('aria-valuetext', usd(input.future) + ' per ETH');
+    $('loan-time-slider').value = input.days;
+    $('loan-time-value').textContent = formatTokenQuantity(input.days, 4) + ' days';
+    $('loan-time-slider').setAttribute('aria-valuetext', formatTokenQuantity(input.days, 4) + ' days; ETH price stays at ' + usd(input.future));
     for (const button of document.querySelectorAll('[data-loan-price]')) button.setAttribute('aria-pressed', String(input.future === input.start * Number(button.dataset.loanPrice)));
     for (const name of ['unchanged', 'repay', 'add']) {
       const response = responses[name];
@@ -218,6 +236,7 @@ export function initLending() {
   for (const key of liquidationKeys) $('liquidation-' + key).addEventListener('input', () => render(true));
   $('loan-collateralEnabled').addEventListener('change', () => render(true));
   $('loan-slider').addEventListener('input', () => { $('loan-future').value = $('loan-slider').value; render(true); });
+  $('loan-time-slider').addEventListener('input', () => { $('loan-days').value = $('loan-time-slider').value; render(true); });
   for (const button of document.querySelectorAll('[data-loan-price]')) button.addEventListener('click', () => {
     $('loan-future').value = Number($('loan-start').value) * Number(button.dataset.loanPrice); render(true);
   });

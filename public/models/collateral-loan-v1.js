@@ -1,5 +1,6 @@
 // A teaching model, not Aave's indexed on-chain interest accounting.
 // Both rates use constant, simple APR over a 365-day year. USDC is fixed at $1.
+import { finishLoan } from './loan-accounting.js';
 export const LOAN_MODEL = 'collateral-loan-v1';
 export const LOAN_DEFAULTS = Object.freeze({
   collateral: 5, start: 2000, borrow: 5000, future: 2000, days: 0,
@@ -36,33 +37,11 @@ export function validateLoan(input) {
   return errors;
 }
 
-function position(collateralTokens, debt, price, threshold, enabled) {
-  const collateralValue = collateralTokens * price;
-  const weightedCollateral = enabled ? collateralValue * threshold / 100 : 0;
-  const healthFactor = debt === 0 ? null : weightedCollateral / debt;
-  const boundaryPrice = debt === 0 || !enabled ? null : debt / (collateralTokens * threshold / 100);
-  const status = debt === 0 ? 'no-debt' : healthFactor < 1 ? 'eligible' : healthFactor === 1 ? 'boundary' : 'above';
-  return { collateralTokens, collateralValue, debt, healthFactor, boundaryPrice, status };
-}
-
 export function calculateLoan(input) {
   const errors = validateLoan(input);
   if (Object.keys(errors).length) throw new RangeError(Object.values(errors)[0]);
   const years = input.days / 365;
   const supplyInterestTokens = input.collateral * input.supplyAPR / 100 * years;
   const borrowInterest = input.borrow * input.borrowAPR / 100 * years;
-  const start = position(input.collateral, input.borrow, input.start, input.threshold, input.collateralEnabled);
-  const end = position(input.collateral + supplyInterestTokens, input.borrow + borrowInterest, input.future, input.threshold, input.collateralEnabled);
-  const repaid = Math.min(input.budget, end.debt);
-  const repay = position(end.collateralTokens, end.debt - repaid, input.future, input.threshold, input.collateralEnabled);
-  const add = position(end.collateralTokens + input.budget / input.future, end.debt, input.future, input.threshold, input.collateralEnabled);
-  return {
-    model: LOAN_MODEL, input: { ...input }, start, end,
-    startingLimit: input.collateralEnabled ? input.collateral * input.start * input.maxLTV / 100 : 0,
-    supplyInterestTokens, borrowInterest, borrowedCash: input.borrow,
-    netAssets: end.collateralValue + input.borrow - end.debt,
-    holdingValue: input.collateral * input.future,
-    interestDifference: supplyInterestTokens * input.future - borrowInterest,
-    responses: { unchanged: end, repay: { ...repay, spent: repaid, unused: input.budget - repaid }, add: { ...add, spent: input.budget, unused: 0 } },
-  };
+  return finishLoan(input, supplyInterestTokens, borrowInterest, LOAN_MODEL);
 }

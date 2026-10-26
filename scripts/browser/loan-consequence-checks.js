@@ -38,6 +38,7 @@ export async function checkLoanConsequences({ evaluate, click, fill, text, navig
   assert.equal(await evaluate("document.getElementById('loan-liquidation-result').hidden"), true);
   assert.match(await text('loan-liquidation-status'), /not eligible for liquidation at this price/);
   await click('loan-reset');
+  await fill('loan-interestMode', 'simple');
   await fill('loan-borrowAPR', '100'); await fill('loan-days', '1825');
   assert.equal(await text('loan-simple-debt'), '$30,000.00');
   assert.equal(await text('loan-compound-debt'), '$742,065.80');

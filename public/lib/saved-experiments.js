@@ -2,7 +2,7 @@ import { MODEL as FULL_MODEL, calculateScenario } from '../models/cp50-v1.js';
 import { calculateRange } from '../models/cl-range-v1.js';
 import { scenarioHash } from './scenario-links.js';
 import { rangeHash } from './range-links.js';
-import { calculateLoan } from '../models/collateral-loan-v1.js';
+import { loanModel } from '../models/loan-models.js';
 import { calculateLoop } from '../models/borrowing-loop-v1.js';
 import { lstModel } from '../models/lst-models.js';
 import { lstHash } from './lst-links.js';
@@ -13,9 +13,9 @@ import { healthLabel, loanStatus } from './lending-presentation.js';
 import { fmt, usd, signedUSD, percent, formatTokenQuantity } from './format.js';
 import { STATE_COPY } from './range-presentation.js';
 
-const names = { 'cp50-v1': 'V2-style full range', 'cl-range-v1': 'V3-style price range', 'collateral-loan-v1': 'Single loan', 'borrowing-loop-v1': 'Borrowing loop', 'lst-loop-v1': 'Correlated-asset loop', 'lst-loop-v2': 'Correlated-asset loop' };
+const names = { 'cp50-v1': 'V2-style full range', 'cl-range-v1': 'V3-style price range', 'collateral-loan-v1': 'Single loan', 'collateral-loan-v2': 'Single loan', 'borrowing-loop-v1': 'Borrowing loop', 'lst-loop-v1': 'Correlated-asset loop', 'lst-loop-v2': 'Correlated-asset loop' };
 export const experimentModelName = model => names[model];
-export const experimentFamily = model => lstModel(model) ? 'correlated' : ['collateral-loan-v1', 'borrowing-loop-v1'].includes(model) ? 'lending' : 'liquidity';
+export const experimentFamily = model => lstModel(model) ? 'correlated' : loanModel(model) || model === 'borrowing-loop-v1' ? 'lending' : 'liquidity';
 export function experimentView(entry) {
   const family = experimentFamily(entry.model), modelName = experimentModelName(entry.model);
   if (family === 'correlated') {
@@ -24,7 +24,7 @@ export function experimentView(entry) {
   }
   if (family === 'lending') {
     const loop = entry.model === 'borrowing-loop-v1';
-    const result = loop ? calculateLoop(entry.inputs) : calculateLoan(entry.inputs);
+    const result = loop ? calculateLoop(entry.inputs) : loanModel(entry.model).calculateLoan(entry.inputs);
     const hash = loop ? loopHash(entry.inputs, entry.comparison?.rounds ?? null, entry.comparison?.borrowPercent ?? null, entry.liquidation ?? null)
       : loanHash(entry.inputs, entry.liquidation);
     return { result, family, modelName, hash, page: 'lending.html', net: loop ? result.end.netAssets : result.netAssets };

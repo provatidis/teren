@@ -35,6 +35,7 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
   await fill('loan-start', '1000');
   assert.match(await text('loan-start-limit'), /^\$3,750.00/);
   await fill('loan-start', '2000');
+  await fill('loan-interestMode', 'simple');
   await fill('loan-days', '365');
   assert.equal(await text('loan-debt-value'), '$5,250.00');
   await click('loan-collateralEnabled');
@@ -47,7 +48,7 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
   await evaluate("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('Clipboard unavailable')}}})");
   await click('loan-share');
   const shared = await evaluate("document.getElementById('loan-share-url').value");
-  assert.match(shared, /loan=collateral-loan-v1/);
+  assert.match(shared, /loan=collateral-loan-v2/);
   assert.equal(await evaluate('document.activeElement.id'), 'loan-share-url');
   await evaluate("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:()=>new Promise((resolve,reject)=>{window.rejectLoanCopy=reject})}})");
   await click('loan-share');

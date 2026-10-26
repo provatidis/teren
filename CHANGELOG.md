@@ -1,5 +1,12 @@
 # Release history
 
+## 1.44.0 · 2026-10-26
+
+- Apply a single-loan choice of simple interest or continuous compounding to supplied ETH, USDC debt, health factor, boundaries, responses and the separate liquidation illustration. New/reset experiments default to compounding at the entered constant APRs; show equivalent one-year growth beside the rates.
+- Add a time slider and original-plus-interest bars, with one dollar scale, explicit token amounts and unchanged borrowed wallet cash. Keep risk feedback nearby on mobile and preserve exact numeric time input.
+- Introduce `collateral-loan-v2` while retaining original simple-interest arithmetic for v1 links, session drafts, named records and lesson handoffs. Preserve the choice in new shares, library exports, comparison and Home resumption; saving an opened legacy setup creates a variation.
+- Extend reference, conservation, boundary, migration and desktop/mobile browser checks. Update methods and guides to distinguish the selected mathematical convention from real protocol reserve indexes or changing rates.
+
 ## 1.43.0 · 2026-10-26
 
 - Add exact wstETH exposure targets alongside borrowing rounds. Show the assumed flash-assisted construction, temporary and long-term debt, swap losses, build flash fee and LTV limit. Define exposure as a multiple of original wstETH holdings, with collateral-to-net-equity leverage shown separately.

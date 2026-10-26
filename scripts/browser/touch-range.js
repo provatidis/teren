@@ -4,7 +4,7 @@ const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFram
 
 // Enable the input mode before scrolling/measuring. A stale coordinate must
 // fail with evidence, not silently turn a drag into a tap on another element.
-export async function dragRangeToMax({ evaluate, call, fill }, id) {
+export async function dragRangeToMax({ evaluate, call, fill }, id, { inset = 26 } = {}) {
   const selector = JSON.stringify(id);
   let gestureStarted = false;
   await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
@@ -15,7 +15,7 @@ export async function dragRangeToMax({ evaluate, call, fill }, id) {
       const input=document.getElementById(${selector}), deadline=performance.now()+5000;
       let previous='', stable=0;
       const check=()=>{
-        const r=input.getBoundingClientRect(), x=r.left+26, y=r.top+r.height/2;
+        const r=input.getBoundingClientRect(), x=r.left+${inset}, y=r.top+r.height/2;
         const frame=[r.left,r.top,r.width,r.height,scrollX,scrollY].join(',');
         stable=frame===previous?stable+1:0; previous=frame;
         if(stable>=3 && document.elementFromPoint(x,y)===input && r.top>=0 && r.bottom<=innerHeight){
@@ -30,14 +30,15 @@ export async function dragRangeToMax({ evaluate, call, fill }, id) {
       }; requestAnimationFrame(check);
     })`);
     assert.ok(box.height >= 44, id + ': touch target height');
-    const point = fraction => ({ x: box.left + 26 + (box.width - 52) * fraction, y: box.top + box.height / 2, id: 0 });
+    const point = fraction => ({ x: box.left + inset + (box.width - 2 * inset) * fraction, y: box.top + box.height / 2, id: 0 });
     await call('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(0)] });
     gestureStarted = true;
     await settle(evaluate);
     for (const fraction of [.25, .5, .75, 1]) {
       await call('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point(fraction)] });
       await settle(evaluate);
-      assert.ok(Math.abs(await evaluate(`document.getElementById(${selector}).getBoundingClientRect().top`) - box.top) < 1, id + ': control moved during drag');
+      const current = await evaluate(`({top:document.getElementById(${selector}).getBoundingClientRect().top,value:document.getElementById(${selector}).value,width:innerWidth})`);
+      assert.ok(Math.abs(current.top - box.top) < 1, id + ': control moved during drag: ' + JSON.stringify({ before: box.top, ...current }));
     }
     await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     gestureStarted = false;

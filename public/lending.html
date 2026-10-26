@@ -96,7 +96,7 @@
                 <p id="loan-start-limit" class="fine-print"></p>
                 <details id="loan-assumptions" class="loan-assumptions">
                   <summary>Rates and collateral rules</summary>
-                  <p class="fine-print">Teaching assumptions, not current market quotes. Both rates use fixed simple interest over a 365-day year.</p>
+                  <p class="fine-print">Teaching assumptions, not current market quotes. APR is the quoted annual rate. Choose how interest grows beside the time controls; both rates stay fixed over a 365-day year.</p>
                   <div class="scenario-field">
                     <label for="loan-supplyAPR">Supply APR <span>% · assumed</span></label>
                     <input id="loan-supplyAPR" type="number" min="0" max="50" step="any" value="2" aria-describedby="loan-supplyAPR-error">
@@ -133,6 +133,8 @@
                   <label for="loan-future">Later ETH valuation price <span>USD</span></label>
                   <input id="loan-future" type="number" min="0.01" max="10000000" step="any" value="2000" aria-describedby="loan-future-error">
                   <p id="loan-future-error" class="field-error" hidden></p>
+                  <label class="sr-only" for="loan-slider">Explore the ETH valuation price</label>
+                  <input id="loan-slider" type="range" min="500" max="3500" step="any" value="2000">
                 </div>
                 <div class="scenario-field">
                   <label for="loan-days">Time elapsed <span>days</span></label>
@@ -140,15 +142,30 @@
                   <p id="loan-days-error" class="field-error" hidden></p>
                 </div>
               </div>
-              <label class="sr-only" for="loan-slider">Explore the ETH valuation price</label>
-              <input id="loan-slider" type="range" min="500" max="3500" step="any" value="2000">
               <div class="scenario-presets loan-presets" aria-label="ETH price changes">
                 <button type="button" data-loan-price="0.5" aria-pressed="false">−50%</button>
                 <button type="button" data-loan-price="0.75" aria-pressed="false">−25%</button>
                 <button type="button" data-loan-price="1" aria-pressed="true">Unchanged</button>
                 <button type="button" data-loan-price="1.25" aria-pressed="false">+25%</button>
               </div>
-              <div class="loan-rate-summary"><p id="loan-rates">Simple APR assumptions: 2% supply · 5% borrow</p><button id="loan-edit-rates" class="text-button" type="button">Edit rates ↑</button></div>
+              <div class="scenario-field loan-interest-choice">
+                <label for="loan-interestMode">Interest calculation</label>
+                <select id="loan-interestMode" aria-describedby="loan-interestMode-help loan-interestMode-error">
+                  <option value="compound">Continuous compounding</option>
+                  <option value="simple">Simple interest</option>
+                </select>
+                <p id="loan-interestMode-error" class="field-error" hidden></p>
+                <p id="loan-interestMode-help" class="fine-print">Interest grows on the original balance and earlier interest. This choice applies to the whole loan.</p>
+              </div>
+              <div class="loan-rate-summary"><p id="loan-rates">Assumed APRs: 2% supply · 5% borrow</p><button id="loan-edit-rates" class="text-button" type="button">Edit rates ↑</button></div>
+              <p id="loan-annual-growth" class="fine-print"></p>
+              <section id="loan-accrual" class="loan-accrual" aria-labelledby="loan-accrual-title">
+                <h3 id="loan-accrual-title">What time adds</h3>
+                <div class="loan-accrual-control"><label for="loan-time-slider">Elapsed time</label><output id="loan-time-value" for="loan-time-slider">0 days</output></div>
+                <input id="loan-time-slider" type="range" min="0" max="1825" step="any" value="0" aria-describedby="loan-time-help">
+                <p id="loan-time-help" class="fine-print">Start to 5 years. ETH’s selected price stays fixed.</p>
+                <div id="loan-accrual-figure"></div>
+              </section>
             </section>
             <div id="loan-invalid" class="notice" role="status" hidden>
               <p id="loan-error-summary">Check the highlighted loan fields to see the result.</p><button id="loan-fix-input" class="text-button" type="button">Go to field ↑</button>
@@ -219,7 +236,7 @@
                 </details>
                 <details id="loan-compounding" class="loan-interest">
                   <summary>Compare interest assumptions</summary>
-                  <p class="body-copy">For debt, the main results calculate simple interest on the amount originally borrowed. With continuous compounding, interest is also charged on earlier interest. Both debt totals use the same fixed borrow APR.</p>
+                  <p id="loan-interest-reference-rule" class="body-copy"></p>
                   <dl><dt>USDC debt · simple interest</dt><dd id="loan-simple-debt"></dd><dt>USDC debt · continuous compounding</dt><dd id="loan-compound-debt"></dd></dl>
                   <p id="loan-interest-difference" class="body-copy"></p>
                   <p class="fine-print">This reference holds the borrow APR fixed. Actual Aave debt uses reserve indexes and an approximation; changing rates and update history matter.</p>
@@ -300,7 +317,7 @@
           <summary>How this lending model works</summary>
           <p>This is a hypothetical single-collateral loan based on Aave v3 collateral concepts. The rates, maximum LTV and liquidation threshold are editable teaching assumptions, not verified current Ethereum market parameters. No wallet or live lending data is used.</p>
           <p>ETH represents supplied WETH, with wrapping costs excluded. USDC is fixed at $1. Borrowed USDC stays in the wallet without earning interest; it is not spent or reinvested. Supply interest increases ETH, and borrow interest increases USDC debt.</p>
-          <p>Both rates use simple interest: starting token amount × APR × days / 365. This keeps the lesson transparent; it does not reproduce Aave’s reserve indexes, variable rates, compounding or exact contract rounding.</p>
+          <p>Choose simple interest or continuous compounding for both supply and debt. Simple interest grows only on the original amount. Continuous compounding also grows earlier interest, giving annual growth of exp(APR / 100) − 1. Rates stay fixed, and the year is 365 days. This is a mathematical comparison, not Aave’s reserve-index accounting or a rate forecast. Older scenarios and the existing lessons keep their simple-interest assumptions.</p>
           <p>Health factor = collateral value × liquidation threshold / debt value. Below 1, the position is eligible for liquidation. With no debt, there is no loan liquidation boundary. Initial borrowing is limited by maximum LTV; later price and interest changes may move a loan above that ratio.</p>
           <p>The separate liquidation illustration applies one event at your chosen price, using the requested repayment percentage and bonus. Available collateral caps the repayment. It separates debt repayment from the bonus cost and leaves unpaid debt visible if collateral runs out. It does not enforce Aave’s close-factor or dust rules or resolve protocol shortfalls.</p><p>The main loan result is an endpoint before liquidation. The model does not reconstruct the intervening path or execute a liquidation. It excludes oracle delays, market liquidity, caps, E-mode, additional assets and transaction costs. Inspect currently contains liquidity records; independently verified lending records are a later step.</p>
           <p><a href="https://aave.com/help/supplying/toggle-collateral-status" target="_blank" rel="noopener noreferrer">Aave: collateral rules ↗</a> · <a href="https://aave.com/faq" target="_blank" rel="noopener noreferrer">Aave: borrowing and liquidation mechanics ↗</a></p>
@@ -673,7 +690,7 @@
         <details class="card loan-method">
           <summary>How this borrowing-loop model works</summary>
           <p>Each round borrows the chosen fraction of the ETH value just supplied. The first uses your original ETH; later rounds use the preceding purchase. Swapping spends the borrowed USDC and applies the assumed percentage loss. Supplying then moves that ETH into collateral. No new outside capital is added.</p>
-          <p>All rounds happen at one starting price, before the selected time period. Supply interest adds ETH and borrow interest adds USDC debt. Choose fixed simple interest or continuous compounding; neither is exact Aave accounting. The earlier single-loan lab keeps its original simple-interest model.</p>
+          <p>All rounds happen at one starting price, before the selected time period. Supply interest adds ETH and borrow interest adds USDC debt. Choose fixed simple interest or continuous compounding; neither is exact Aave accounting. The single-loan lab offers the same two interest conventions; its older scenarios and foundation lessons retain simple interest.</p>
           <p>The separate liquidation view uses already accrued collateral and debt, with no borrowed wallet cash left. It shows one assumed repayment plus bonus and keeps unpaid debt if collateral runs out. It does not change the headline, reference or unwind balances. The chart and headline values are pre-liquidation endpoints. The withdrawal-first unwind preview stops at or below health factor 1 and retains all debt. It runs at most 64 steps, showing unpaid debt if it cannot finish. It is not an execution plan or a protocol simulator. USDC = $1 is assumed. There is no wallet connection or live lending data.</p>
           <p>
             <a href="https://aave.com/help/borrowing/liquidations" target="_blank" rel="noopener noreferrer">Aave: health factor and liquidations ↗</a> · <a href="https://aave.com/help/borrowing/repay-tokens" target="_blank" rel="noopener noreferrer">Aave: repayment ↗</a>
