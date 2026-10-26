@@ -35,6 +35,6 @@ export function renderAppliedQuestionEvidence(collection, price, question, appli
     row.append(labelRow, track, node('p', detail, 'applied-evidence-detail')); figure.append(row);
   }
   figure.append(node('p', 'Both ETH bars use the same scale. ETH here is WETH, its wrapped form.', 'applied-evidence-detail'));
-  price.append(heading('applied-price-heading', 'If ETH keeps rising'),
+  price.append(heading('applied-price-heading', 'If ETH rises from here'),
     node('p', 'At the end of the record · above range · the LP leads by ' + usd(end.gapUSD) + ' before costs.', 'applied-evidence-moment'), figure);
 }

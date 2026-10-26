@@ -49,7 +49,7 @@ export function lstExperimentFacts(result, detailed = false) {
     ['Build flash fee', p.buildMode === 'target' ? fmt(p.buildFlashFee, 3) + '% · ' + weth(r.buildFlashCost) : 'None in round-by-round construction'],
     ['Staking / additional lending APY', fmt(p.stakingAPY) + '% / ' + fmt(p.lendingAPY) + '%'],
     ['Borrow APR', fmt(p.borrowAPR) + '%' + (p.rateChange ? ' → ' + fmt(p.laterAPR) + '% on day ' + p.changeDay : ' constant')],
-    ['Time / market discount', fmt(p.days, 1) + ' days / ' + fmt(p.discount, 1) + '%'],
+    ['Time / market discount', formatTokenQuantity(p.days, 6) + ' days / ' + formatTokenQuantity(p.discount, 6) + '%'],
     ['Oracle assumption', p.oracleMode === 'market' ? 'Market discount' : 'Conversion rate'],
     ['Maximum LTV / liquidation threshold', fmt(p.maxLTV) + '% / ' + fmt(p.threshold) + '%'],
     ['Build / exit swap loss', fmt(p.swapCost) + '% / ' + fmt(p.exitCost) + '%'],

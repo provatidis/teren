@@ -331,7 +331,7 @@ export function initLearning() {
     if (visualLesson()) {
       const settings = sceneNode('details', undefined, 'scene-question-settings');
       const label = lesson.id === 'swap-impact' ? 'trade size' : lesson.id === 'pool-share' ? 'deposit'
-        : ['fee-break-even', 'final-challenge'].includes(lesson.id) ? 'price and fees' : 'price';
+        : ['fee-break-even', 'final-challenge'].includes(lesson.id) ? 'price and fees' : lesson.id === 'range-boundaries' ? 'price or range' : 'price';
       settings.append(sceneNode('summary', 'Change the question ' + label), controls);
       $('learn-controls-home').replaceChildren(settings);
     } else {

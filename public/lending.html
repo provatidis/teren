@@ -787,8 +787,8 @@
           <div class="lst-two-column">
             <div class="lst-controls">
               <div class="lst-slider-field">
-  <label for="lst-days">Time held <output id="lst-days-value" for="lst-days"></output></label>
-  <input id="lst-days" type="range" min="0" max="1825" step="1" value="365" aria-describedby="lst-days-error">
+  <div class="lst-exact-heading"><label for="lst-days">Time held</label><div class="lst-exact-value"><input id="lst-days-input" type="number" min="0" max="1825" step="any" value="365" aria-label="Time held in days" aria-describedby="lst-days-error"><span aria-hidden="true">days</span></div></div>
+  <input id="lst-days" type="range" min="0" max="1825" step="any" value="365" aria-describedby="lst-days-error">
   <p id="lst-days-error" class="field-error" hidden></p>
 </div>
               <div class="lst-fields"><div class="scenario-field">
@@ -803,8 +803,8 @@
               <div id="lst-carry-preview" class="lst-inline-result lst-mobile-result"><span>Loop minus holding</span><strong id="lst-carry-value"></strong><span>Health factor: <b id="lst-carry-health"></b></span><small>Before liquidation and exit</small></div>
               <p id="lst-rate-summary" class="fine-print"></p>
               <div class="lst-slider-field">
-  <label for="lst-discount">Market discount vs conversion value <output id="lst-discount-value" for="lst-discount"></output></label>
-  <input id="lst-discount" type="range" min="0" max="50" step="0.1" value="0" aria-describedby="lst-discount-error">
+  <div class="lst-exact-heading"><label for="lst-discount">Market discount vs conversion value</label><div class="lst-exact-value"><input id="lst-discount-input" type="number" min="0" max="50" step="any" value="0" aria-label="Market discount as a percentage of conversion value" aria-describedby="lst-discount-error"><span aria-hidden="true">%</span></div></div>
+  <input id="lst-discount" type="range" min="0" max="50" step="any" value="0" aria-describedby="lst-discount-error">
   <p id="lst-discount-error" class="field-error" hidden></p>
 </div>
               <p id="lst-discount-result" class="lst-inline-result"></p>
@@ -845,7 +845,7 @@
             </div>
             <div id="lst-hold-results" class="lst-outcomes">
               <div class="lst-headline"><p>Assets minus debt · before liquidation and exit</p><strong id="lst-net"></strong><span id="lst-usd"></span></div>
-              <div class="lst-balance-visual"><svg id="lst-balance-chart" viewBox="0 0 500 85" role="img" aria-label="Collateral value and WETH debt"><defs><pattern id="lst-debt-hatch" patternUnits="userSpaceOnUse" width="7" height="7"><path d="M-2 2L2-2M0 7L7 0M5 9L9 5" class="lst-debt-stripe"/></pattern></defs><rect x="0" y="4" width="500" height="22" rx="3" class="lst-collateral-bar"/><rect id="lst-debt-bar" x="0" y="52" width="0" height="22" rx="3" class="lst-debt-bar"/><rect id="lst-debt-pattern" x="0" y="52" width="0" height="22" rx="3" fill="url(#lst-debt-hatch)"/></svg><p id="lst-balance-label"></p></div>
+              <div class="lst-balance-visual"><svg id="lst-balance-chart" viewBox="0 0 500 85" role="img" aria-label="Collateral value and WETH debt"><defs><pattern id="lst-debt-hatch" patternUnits="userSpaceOnUse" width="7" height="7"><path d="M-2 2L2-2M0 7L7 0M5 9L9 5" class="lst-debt-stripe"/></pattern></defs><rect id="lst-collateral-bar" x="0" y="4" width="500" height="22" rx="3" class="lst-collateral-bar"/><rect id="lst-debt-bar" x="0" y="52" width="0" height="22" rx="3" class="lst-debt-bar"/><rect id="lst-debt-pattern" x="0" y="52" width="0" height="22" rx="3" fill="url(#lst-debt-hatch)"/></svg><p id="lst-balance-label"></p></div>
               <dl class="lst-facts"><div><dt>Hold the original wstETH</dt><dd id="lst-holding"></dd></div><div><dt>Loop minus holding</dt><dd id="lst-difference"></dd></div><div><dt>Health factor · oracle value</dt><dd id="lst-health"></dd></div><div><dt>WETH debt</dt><dd id="lst-debt"></dd></div></dl>
               <p id="lst-health-note" class="lst-status" role="status"></p>
               <p id="lst-path-note" class="notice error" hidden></p>
@@ -916,7 +916,7 @@
       <div id="experiments-recovery" class="experiment-recovery" hidden><p id="experiments-recovery-copy" class="fine-print"></p><button id="experiments-export-recovery" class="button secondary" type="button">Download saved copy</button><button id="experiments-discard" class="text-button" type="button">Discard unreadable saved copy</button></div>
       <p id="experiments-status" class="fine-print" role="status"></p>
       <div id="experiments-undo-row" class="experiment-undo" hidden><span id="experiments-undo-copy"></span> <button id="experiments-undo" class="text-button" type="button">Undo remove</button></div>
-      <div id="experiments-empty" class="experiment-empty"><h3>No saved experiments yet</h3><p class="body-copy">Set up a liquidity, lending or loop experiment and choose “Save experiment”.</p><div class="experiment-empty-links"><a href="liquidity.html#lp-lab">Open full-range lab →</a><a href="liquidity.html#range-lab">Open range lab →</a></div></div>
+      <div id="experiments-empty" class="experiment-empty"><h3>No saved experiments yet</h3><p class="body-copy">Set up a liquidity, lending or loop experiment and choose “Save experiment”.</p><div class="experiment-empty-links"><a href="#experiment">Single loan →</a><a href="#loops">ETH loops →</a><a href="#lst-loops">LST loops →</a></div></div>
       <div id="experiments-controls" class="experiment-library-controls" hidden><div><label for="experiments-search">Find an experiment</label><input id="experiments-search" type="search" placeholder="Search names or notes" maxlength="100"></div><div><label for="experiments-model">Model</label><select id="experiments-model"><option value="all">All models</option><option value="cp50-v1">V2-style full range</option><option value="cl-range-v1">V3-style price range</option><option value="collateral-loan-v1">Single loan</option><option value="borrowing-loop-v1">Borrowing loop</option><option value="lst-loop-v1">Correlated-asset loop</option></select></div></div>
       <p id="experiments-no-match" class="fine-print" hidden>No experiments match this search.</p>
       <ul id="experiments-list" class="experiment-library-list" aria-label="Saved experiments"></ul>

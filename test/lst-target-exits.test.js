@@ -5,7 +5,7 @@ import { LST_DEFAULTS as OLD_DEFAULTS, calculateLST as calculateOld } from '../p
 import { lstHash, readLSTHash } from '../public/lib/lst-links.js';
 import { LST_DRAFT_KEY, readLSTDraft, saveLSTDraft } from '../public/data/lst-state.js';
 import { createExperiment, addExperiment, emptyLibrary, libraryJSON, parseLibrary } from '../public/data/saved-experiments.js';
-import { experimentView, comparisonContext, experimentFacts } from '../public/lib/saved-experiments.js';
+import { experimentView, comparisonContext, experimentFacts, experimentSummary, defaultExperimentName } from '../public/lib/saved-experiments.js';
 import { saveExperimentLocation, readExperimentLocation } from '../public/data/experiment-location.js';
 
 const input = changes => ({ ...LST_DEFAULTS, ...changes });
@@ -177,4 +177,15 @@ test('both model versions survive drafts, mixed saved libraries, exports and Hom
   assert.match(comparisonContext([fresh, old]), /different exit destinations/);
   assert.ok(saveExperimentLocation(LST_MODEL, view.hash, storage));
   assert.equal(readExperimentLocation(storage).route, 'lending.html' + view.hash);
+});
+
+test('saved LST descriptions retain fractional time and discount assumptions', () => {
+  for (const [model, defaults] of [['lst-loop-v1', OLD_DEFAULTS], [LST_MODEL, LST_DEFAULTS]]) {
+    for (const [days, discount] of [[7.25, .55], [7.123456, .123456]]) {
+      const entry = { model, inputs: { ...defaults, days, discount } };
+      assert.equal(experimentFacts(entry, true).find(([label]) => label === 'Time / market discount')[1], `${days} days / ${discount}%`);
+      assert.ok(experimentSummary(entry).includes(`${days} days · ${discount}% market discount`));
+      assert.ok(defaultExperimentName(entry).endsWith(`${discount}% discount`));
+    }
+  }
 });

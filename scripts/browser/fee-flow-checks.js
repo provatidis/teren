@@ -136,9 +136,23 @@ export async function checkFeeFlow({ evaluate, click, fill, text, navigate, relo
       await navigate(base + 'liquidity.html#compare-widths');
       assert.equal(await evaluate("document.getElementById('width-fee-view').hidden"), false);
     }
-    await navigate(base + 'liquidity.html#fee-mechanics');
-    assert.equal(await evaluate("document.getElementById('width-fee-view').hidden"), false);
-    assert.equal(await evaluate("document.getElementById('fee-mechanics').open"), true);
+    for (const width of [1280, 390, 320]) {
+      await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: width < 750 });
+      await navigate(base + 'liquidity.html#fee-mechanics');
+      const mechanicsVisible = async () => {
+        await evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+        assert.equal(await evaluate("document.getElementById('width-fee-view').hidden"), false);
+        assert.equal(await evaluate("document.getElementById('fee-mechanics').open"), true);
+        const target = await evaluate("(()=>{const summary=document.querySelector('#fee-mechanics>summary'),rect=summary.getBoundingClientRect(),header=document.querySelector('.topbar').getBoundingClientRect();return {focused:document.activeElement===summary,top:rect.top,bottom:rect.bottom,header:header.bottom,height:innerHeight}})()");
+        assert.equal(target.focused, true, 'The mechanics link focuses its opened disclosure.');
+        assert.ok(target.top >= target.header + 8 && target.bottom < target.height, 'The requested illustration opens in view below the navigation.');
+        assert.equal(await evaluate("[...document.querySelectorAll('.fee-scene-prices strong')].every(price=>price.scrollWidth<=price.clientWidth)"), true, 'Market and pool prices each fit their own column.');
+      };
+      await mechanicsVisible();
+      // An unchanged same-page fragment still reopens and reaches its destination.
+      await evaluate("document.getElementById('fee-mechanics').open=false;scrollTo(0,0);const link=document.createElement('a');link.href='#fee-mechanics';document.body.append(link);link.click();link.remove()");
+      await mechanicsVisible();
+    }
     console.log('PASS: fee-flow at 390px/320px, stable native price dragging, paired outcomes, focus and navigation');
   } finally {
     await evaluate(`${JSON.stringify(saved)}.forEach(([key,value])=>value===null?localStorage.removeItem(key):localStorage.setItem(key,value))`);

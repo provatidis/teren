@@ -16,7 +16,7 @@ export function initWorkspaces() {
     toolToggle.setAttribute('aria-expanded', String(!expanded));
   });
   const copy = {
-    experiment: ['HYPOTHETICAL MODELS', 'Compare liquidity scenarios', 'Change a price, range or fee assumption. Compare the outcome with holding.'],
+    experiment: ['HYPOTHETICAL MODELS', 'Compare liquidity scenarios', 'Change price, range or fees. Compare with holding.'],
     width: ['HYPOTHETICAL MODEL · UNISWAP V3-STYLE', 'Compare range widths', 'Keep the starting capital and token mix the same. Change only the width.'],
     inspect: ['RECORDED SNAPSHOTS', 'Inspect a pool or position', 'Read principal and fee accounting at one recorded Ethereum block.'],
     replay: ['UNISWAP V3 · CHECKED AT CAPTURE', 'Replay a fixed-range position', 'Follow principal, earned fees and holding through a recorded period.'],
@@ -60,8 +60,19 @@ export function initWorkspaces() {
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scroll, { once: true });
       else scroll();
     } else if (['mechanics', 'replay', 'width'].includes(key)) {
-      const target = key === 'width' ? 'compare-widths' : key === 'mechanics' ? 'swap-sandbox' : location.hash === '#fee-comparison' ? 'fee-comparison' : 'historical-case';
-      const scroll = () => requestAnimationFrame(() => document.getElementById(target).scrollIntoView({ block: 'start', behavior: 'instant' }));
+      const requestedHash = location.hash;
+      const feeMechanics = requestedHash === '#fee-mechanics';
+      const target = feeMechanics ? 'fee-mechanics' : key === 'width' ? 'compare-widths'
+        : key === 'mechanics' ? 'swap-sandbox' : requestedHash === '#fee-comparison' ? 'fee-comparison' : 'historical-case';
+      const scroll = () => requestAnimationFrame(() => {
+        if (location.hash !== requestedHash) return;
+        const destination = document.getElementById(target);
+        if (feeMechanics) {
+          destination.open = true;
+          destination.querySelector('summary').focus({ preventScroll: true });
+        }
+        destination.scrollIntoView({ block: 'start', behavior: 'instant' });
+      });
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scroll, { once: true });
       else scroll();
     }
@@ -79,6 +90,9 @@ export function initWorkspaces() {
         // navigation must not depend on the browser's later anchor default action.
         event.preventDefault();
         if (url.hash !== location.hash) location.hash = url.hash;
+        restoreLocation();
+      } else if (url.hash === '#fee-mechanics' && url.hash === location.hash) {
+        event.preventDefault();
         restoreLocation();
       } else select(workspaceFromHash(url.hash));
     }

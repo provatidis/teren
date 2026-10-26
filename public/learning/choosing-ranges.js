@@ -189,7 +189,7 @@ export function managementApplication(result) {
           {label:'Moved range',value:moved.lpBeforeFees,detail:'$1,260–$1,540 range; '+usd(cost)+' cost included'},
         ]},
         note:'Both start with the same existing position. These are calculated outcomes for this supplied price path, not a forecast.',
-        explore:{href:'liquidity.html'+rangeHash({...moved,futurePrice:moved.initialPrice}),text:'Replay the rebound with the moved range ↗'},
+        explore:{href:'liquidity.html'+rangeHash({...moved,futurePrice:moved.initialPrice}),text:'Move ETH back to $2,000 in the lab ↗'},
       },
       question:'Why does moving the range recover less value on this rebound?',
       choices:[

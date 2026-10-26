@@ -33,7 +33,7 @@
 .fee-jit-key { display: block; margin-bottom: 6px; }
 @media(max-width:750px) {
   .fee-arbitrage-scene { padding: 14px; }
-  .fee-scene-prices { gap: 10px; }
+  .fee-scene-prices { grid-template-columns: repeat(auto-fit,minmax(min(100%,7rem),1fr)); gap: 10px; }
   .fee-scene-prices strong { font-size: 20px; }
   .fee-arbitrage-scene figcaption { min-height: 10.5em; }
   .fee-benchmarks { grid-template-columns: 1fr; }

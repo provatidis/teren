@@ -21,7 +21,11 @@ export async function checkPositions({ base, call, evaluate, click, fill, text, 
   assert.equal(await evaluate("document.getElementById('position-lab').hidden"),false);
   await fill('position-id','0');
   assert.equal(await evaluate("document.getElementById('position-fetch').disabled"),true);
+  assert.equal(await evaluate("document.getElementById('position-id-error').hidden"),false);
+  assert.match(await text('position-id-error'), /positive whole-number.*NFT ID/);
+  assert.match(await evaluate("document.getElementById('position-id').getAttribute('aria-describedby')"), /position-id-error/);
   await fill('position-id','37');
+  assert.equal(await evaluate("document.getElementById('position-id-error').hidden"),true);
   await click('position-example');
   await waitStatus('Position saved');
   assert.equal(await text('position-state'),'Below range');
@@ -100,11 +104,33 @@ export async function checkPositions({ base, call, evaluate, click, fill, text, 
   };
   const position = encoded(0,0,recorded.tokens[0].address,recorded.tokens[1].address,recorded.position.fee,recorded.position.tickLower,recorded.position.tickUpper,recorded.position.liquidity,0,0,0,0);
   await evaluate(`(()=>{const original=window.fetch;window.restorePositionFetch=()=>{window.fetch=original};window.positionRequests=[];window.positionRpcMode='valid';window.fetch=async(url,options)=>{if(String(url)!==${JSON.stringify(recorded.provider)})return original(url,options);const request=JSON.parse(options.body);window.positionRequests.push(request);let result;const data=request.params?.[0]?.data;if(request.method==='eth_chainId')result='0x1';else if(request.method==='eth_getBlockByNumber')result=${JSON.stringify(block)};else if(data.startsWith('0x99fbab88'))result=window.positionRpcMode==='invalid'?'0x':${JSON.stringify(position)};else if(data.startsWith('0x1698ee82'))result=${JSON.stringify(encoded(recorded.poolAddress))};else if(data.startsWith('0xf30dba93'))result=${JSON.stringify(encoded(recorded.position.liquidity,0,0,0,0,0,0,1))};else if(data==='0x313ce567')result=request.params[0].to===${JSON.stringify(recorded.tokens[0].address)}?${JSON.stringify(encoded(6))}:${JSON.stringify(encoded(18))};else result=${JSON.stringify(responses)}[data];return new Response(JSON.stringify({jsonrpc:'2.0',id:request.id,result}),{status:200,headers:{'Content-Type':'application/json'}})}})()`);
+  const preservedPosition = await text('position-heading-id');
+  const preservedStatus = await text('position-status');
+  for (const invalid of ['', '0', '-1', '1.5', 'abc', '##37', (1n << 256n).toString()]) {
+    await fill('position-id', invalid);
+    assert.equal(await evaluate("document.getElementById('position-id').getAttribute('aria-invalid')"), 'true');
+    assert.equal(await evaluate("document.getElementById('position-id-error').hidden"), false);
+    assert.equal(await evaluate("document.getElementById('position-fetch').disabled"), true);
+    await evaluate("document.getElementById('position-form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))");
+    assert.equal(await evaluate('window.positionRequests.length'), 0, 'Invalid IDs never make RPC requests.');
+    assert.equal(await text('position-heading-id'), preservedPosition);
+    assert.equal(await text('position-status'), preservedStatus);
+    assert.equal(await evaluate("document.getElementById('position-export').disabled || document.getElementById('position-apply').disabled"), false, 'The loaded snapshot remains usable.');
+  }
+  for (const valid of ['37', '#37', '  # 37  ']) {
+    await fill('position-id', valid);
+    assert.equal(await evaluate("document.getElementById('position-id').getAttribute('aria-invalid')"), 'false');
+    assert.equal(await evaluate("document.getElementById('position-id-error').hidden"), true);
+    assert.equal(await text('position-id-error'), '');
+    assert.equal(await evaluate("document.getElementById('position-fetch').disabled"), false);
+  }
   const largeId = ((1n<<256n)-1n).toString();
-  await fill('position-id',largeId); await click('position-fetch'); await waitStatus('Position saved');
+  await fill('position-id','#' + largeId); await click('position-fetch'); await waitStatus('Position saved');
   assert.equal(await text('position-heading-id'),'Position #'+largeId);
+  assert.equal(await evaluate("document.getElementById('position-id').value"), largeId);
   assert.match(await text('position-evidence'),/checked against the contracts/);
   assert.equal(await evaluate('window.positionRequests.length'),18);
+  assert.equal(await evaluate("window.positionRequests.find(request => request.params?.[0]?.data?.startsWith('0x99fbab88')).params[0].data"), '0x99fbab88' + word(largeId));
   assert.equal(await evaluate(`window.positionRequests.filter(request=>request.method==='eth_call').every(request=>request.params[1]===${JSON.stringify(block.number)})`),true);
   assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth'),true);
   await evaluate("window.positionRpcMode='invalid'"); await fill('position-id','37');
@@ -123,7 +149,12 @@ export async function checkMobilePositions({evaluate,click,fill,text}) {
   assert.equal(await evaluate("document.getElementById('position-setup').open"),true);
   await fill('position-id','0');
   assert.equal(await evaluate("document.getElementById('position-fetch').disabled"),true);
-  await fill('position-id','37');
+  assert.equal(await evaluate("document.getElementById('position-id-error').hidden"),false);
+  assert.match(await text('position-id-error'), /positive whole-number.*NFT ID/);
+  assert.equal(await evaluate('document.documentElement.scrollWidth<=window.innerWidth'),true);
+  await fill('position-id','#37');
+  assert.equal(await evaluate("document.getElementById('position-fetch').disabled"),false);
+  assert.equal(await evaluate("document.getElementById('position-id-error').hidden"),true);
   await click('position-example');
   await evaluate("new Promise((resolve,reject)=>{const deadline=Date.now()+10000;const check=()=>{if(document.getElementById('position-lab').getAttribute('aria-busy')==='false'&&!document.getElementById('position-setup').open)resolve();else if(Date.now()>deadline)reject(new Error('Mobile position setup did not close'));else setTimeout(check,20)};check()})");
   assert.equal(await evaluate('document.activeElement.id'),'position-result');
