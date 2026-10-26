@@ -21,10 +21,10 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"), true);
   const choose = (name, value) => evaluate("document.querySelector('input[name=\"" + name + "\"][value=\"" + value + "\"]').click()");
   const cases = [
-    ['swap-impact','less','18132','curve','deeper-less'],
+    ['swap-impact','less','18132','curve','quote-received'],
     ['pool-share','less','4.76','ownership','share-same'],
     ['token-balances','less','0.884','rebalance','original-mix'],
-    ['loss-vs-profit','gain','428.93','benchmark','gap-unchanged'],
+    ['loss-vs-profit','gain','428.93','benchmark','holding-basket'],
     ['fee-break-even','short','428.93','assumption','gap-reopens'],
     ['range-boundaries','usdc','0','path','both-inside'],
     ['final-challenge','hold','328.93','total','relative-gap'],
@@ -60,9 +60,10 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     await choose('learn-reason', reason);
     await choose('learn-application', application);
     if (id === 'swap-impact') {
-      await choose('learn-application','deeper-same');
+      for (const phrase of ['18,132.22 USDC','9.07%','0.5%']) assert.ok((await text('learn-application-evidence')).includes(phrase));
+      await choose('learn-application','quote-misread');
       await click('learn-check');
-      assert.match(await text('learn-applications-feedback'), /available depth is different/);
+      assert.match(await text('learn-applications-feedback'), /Price impact and slippage tolerance are different/);
       assert.equal(await text('learn-progress-count'), '0 of 7 checked');
       await choose('learn-application', application);
       await choose('learn-reason', 'fixed'); await click('learn-check');

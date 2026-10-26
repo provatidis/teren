@@ -1,4 +1,5 @@
 import { fmt, usd } from '../lib/format.js';
+import { rangeHash } from '../lib/range-links.js';
 
 export const MANAGEMENT_CHAPTER = 'Choosing and managing a range';
 const ranges={title:'Uniswap: active liquidity and ranges',url:'https://developers.uniswap.org/docs/get-started/concepts/liquidity-providers/concentrated-liquidity'};
@@ -176,13 +177,40 @@ export function managementApplication(result) {
       },
     };
   }
+  if (result.rebalance) {
+    const {before,unchanged,moved,cost} = result.rebalance;
+    return {
+      label:'Move the range, then ETH rebounds',
+      context:'ETH has fallen to '+usd(before.futurePrice)+'. Your $1,800–$2,200 position now holds '+fmt(before.pooled.eth,4)+' ETH. Compare leaving it alone with moving to $1,260–$1,540, paying '+usd(cost)+' for gas and swaps. ETH then returns to '+usd(unchanged.futurePrice)+'. Fees are excluded.',
+      evidence:{
+        title:'Two actions, the same rebound',
+        comparison:{caption:'Position value when ETH returns to '+usd(unchanged.futurePrice),format:'usd',rows:[
+          {label:'Original range left in place',value:unchanged.lpBeforeFees,detail:'$1,800–$2,200 range'},
+          {label:'Moved range',value:moved.lpBeforeFees,detail:'$1,260–$1,540 range; '+usd(cost)+' cost included'},
+        ]},
+        note:'Both start with the same existing position. These are calculated outcomes for this supplied price path, not a forecast.',
+        explore:{href:'liquidity.html'+rangeHash({...moved,futurePrice:moved.initialPrice}),text:'Replay the rebound with the moved range ↗'},
+      },
+      question:'Why does moving the range recover less value on this rebound?',
+      choices:[
+        ['sold-earlier','The moved range converts its ETH into USDC earlier in the rebound.'],
+        ['kept-eth','The moved range keeps more ETH as the price rises toward $2,000.'],
+        ['catch-up-fees','The original range receives the fees it missed while it was inactive.'],
+      ],
+      hint:'Compare when each range finishes exchanging ETH for USDC. The original range is still below its lower bound when the moved range reaches its upper bound.',
+      feedback:'Moving the range first exchanges some ETH for the new starting mix. It then sells the remaining ETH by '+usd(moved.upperPrice)+' and holds USDC through the rest of the rebound. The original range keeps all its ETH until '+usd(unchanged.lowerPrice)+'. It finishes '+usd(unchanged.lpBeforeFees-moved.lpBeforeFees)+' ahead on this path, including the moved range’s '+usd(cost)+' cost. A different path and earned fees could change the comparison.',
+      feedbackByChoice:{
+        'kept-eth':'Moving to the lower range does the opposite: some ETH is exchanged to fund it, and the rest is sold by '+usd(moved.upperPrice)+'. The original range keeps more ETH during the early rebound.',
+        'catch-up-fees':'Neither outcome includes fees. The original range receives no catch-up payment; it recovers more here because it keeps ETH through more of the rebound.',
+      },
+      accomplishment:'You explained how moving a range changes the tokens exposed to a later rebound.',
+    };
+  }
   return {
-    label:result.variant===1?'Remove liquidity, then price returns':result.variant===2?'Collect fees, then price returns':'Keep liquidity in place, then price returns',
+    label:result.variant===1?'Remove liquidity, then price returns':'Keep liquidity in place, then price returns',
     context: result.variant === 1
       ? 'Before price returns, you remove all liquidity and withdraw its tokens. ETH then returns to $2,000, inside the old $1,800–$2,200 bounds.'
-      : result.variant === 2
-        ? 'You collect only earned fee tokens, leaving liquidity and bounds unchanged. ETH then returns to $2,000, inside the original $1,800–$2,200 range. Gas is excluded.'
-        : 'Change only the price: ETH returns to $2,000, inside the original $1,800–$2,200 range. Liquidity and bounds are unchanged.',
+      : 'Change only the price: ETH returns to $2,000, inside the original $1,800–$2,200 range. Liquidity and bounds are unchanged.',
     question: 'What happens when price returns inside those bounds?',
     choices: [
       ['automatic', 'The existing liquidity becomes active inside its original bounds.'],

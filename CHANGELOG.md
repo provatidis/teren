@@ -1,5 +1,13 @@
 # Release history
 
+## 1.48.0 · 2026-10-26
+
+- Ground selected lesson questions in wallet quotes, position dashboards, range management and borrowing limits. Keep explanations, hints, optional predictions and direct lab access available; no required arithmetic is added.
+- Distinguish price impact already included in a swap quote from slippage tolerance. Compare a fictional dashboard’s total value with the original token basket, retaining the withdrawal question in another variation. Fresh concentrated-liquidity variations now end above, below and inside the range.
+- Compare leaving a range in place with moving it after a fall, then show both outcomes when ETH rebounds. Use the recorded cases to explain range placement and separate the recovery in principal versus holding from the increase in period fee value.
+- Show the maximum-loan example’s price headroom and liquidation boundary. Add contextual lab invitations for changed scenarios while retaining the original observation handoffs.
+- Preserve completed lessons and compatible drafts; retire answers to changed questions. Extend reference, migration and desktop/mobile checks. Historical records and financial formulas remain unchanged.
+
 ## 1.47.0 · 2026-10-26
 
 - Review predictions, explanations and applications across all twenty lessons and their variations. Retain strong swap, ownership, range and unwind checks; replace weak applications with withdrawals, a fee target that changes with price, movement before range re-entry, reinvestment, and a price recovery after a hypothetical liquidation.

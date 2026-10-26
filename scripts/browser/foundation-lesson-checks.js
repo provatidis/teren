@@ -20,7 +20,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
   };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
   const sandbox = await evaluate("localStorage.getItem('defi-sandbox-v1')");
-  for (const [id, reason, application, amount] of [['swap-impact', 'curve', 'deeper-less', '10'], ['pool-share', 'ownership', 'share-same', '5']]) {
+  for (const [id, reason, application, amount] of [['swap-impact', 'curve', 'quote-received', '10'], ['pool-share', 'ownership', 'share-same', '5']]) {
     await navigate(base + 'learn.html#lesson=' + id);
     await reset();
     assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false);
@@ -63,7 +63,9 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     const checked = await saved();
     const link = await evaluate("document.getElementById('learn-explore').href");
     assert.equal(link, base + 'liquidity.html#swap-sandbox', 'Foundations retain their independent sandbox handoff.');
+    const evidence = await text('learn-application-evidence');
     await fill('foundation-amount', '1');
+    if (id === 'swap-impact') assert.equal(await text('learn-application-evidence'), evidence, 'The quoted wallet case stays fixed while the scene explores a different trade.');
     assert.equal(await saved(), checked);
     assert.equal(await evaluate("document.getElementById('learn-explore').href"), link);
     await reload();
@@ -96,6 +98,18 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
   await navigate(base + 'learn.html#lesson=range-boundaries');
   assert.equal(await evaluate("document.getElementById('learn-prediction-field').closest('.scene-prediction')===null"), false);
   assert.ok(await evaluate("document.getElementById('learn-prediction-question').getBoundingClientRect().width") > 100, 'Other lessons retain their visible group legend.');
+  await reset();
+  for (const [variant, prediction, price, direction] of [[0, 'usdc', 2400, /ETH for USDC/], [1, 'eth', 1275, /USDC for ETH/], [2, 'both', 3150, /ETH for USDC/]]) {
+    if (variant) await click('learn-variation');
+    await choose('learn-prediction', prediction); await click('learn-run');
+    assert.match(await text('learn-prediction-feedback'), /^Your prediction matches/);
+    assert.match(await text('learn-explanation'), direction);
+    assert.match(await evaluate("document.getElementById('learn-explore').href"), new RegExp('future=' + price));
+    await reload();
+    assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked').value"), prediction);
+  }
+  await reset();
+
   console.log('PASS: swap/deposit actions, exact token transfers, constant ownership through a trade, optional predictions, restoration and isolated exploration');
 
   for (const width of [390, 320]) {
@@ -105,6 +119,11 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
       await click('foundation-next');
       if (id === 'pool-share') await click('foundation-next');
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+      if (id === 'swap-impact') {
+        await click('learn-run');
+        assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), false);
+        assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+      }
       const sceneHeight = await evaluate("document.getElementById('foundation-next').getBoundingClientRect().bottom-document.querySelector('.foundation-pool').getBoundingClientRect().top");
       const available = await evaluate("innerHeight-document.querySelector('.topbar').getBoundingClientRect().height");
       assert.ok(sceneHeight <= available, `${id} at ${width}px: pool state and primary action need ${sceneHeight}px; available ${available}px.`);

@@ -1,6 +1,6 @@
 # Review status, evidence gaps and limitations
 
-Assessed against **Teren 1.47.0, 26 October 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. The lesson review replaces weak checks with concrete situations, puts necessary facts beside questions and addresses individual misconceptions in feedback. The evidence status below is unchanged.
+Assessed against **Teren 1.48.0, 26 October 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. Selected lessons now use wallet quotes, dashboards, range-management choices and borrowing headroom, with their relevant evidence and lab invitations nearby. The evidence status below is unchanged.
 
 [Project overview](../README.md) · [Models](models.md) · [Learning and observation plan](learning.md) · [Roadmap](roadmap.md) · [Historical reviews](review-history.md)
 

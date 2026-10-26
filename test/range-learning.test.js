@@ -44,7 +44,7 @@ test('an unchanged outside position retains its tokens and returns to activity w
     assert.equal(result.first.liquidity,result.second.liquidity);assert.equal(result.second.liquidity,result.returned.liquidity);
     assert.deepEqual(result.first.pooled,result.second.pooled);
     assert.equal(result.returned.state,'inside');assert.deepEqual(result.returned.pooled,result.returned.initial);
-    assert.equal(result.prediction,['falls','same','rises'][variant]);assert.equal(result.application,variant===1?'removed':'automatic');
+    assert.equal(result.prediction,['falls','same','rises'][variant]);assert.equal(result.application,['automatic','removed','sold-earlier'][variant]);
     if(variant===1){assert.equal(result.second.pooled.eth,0);assert.equal(result.second.lpBeforeFees,result.first.lpBeforeFees);}
     else{assert.equal(result.second.pooled.usdc,0);assert.equal(result.second.lpBeforeFees,result.second.pooled.eth*result.prices[1]);}
   }
@@ -170,4 +170,39 @@ test('the second range-application revision clears replaced answers without losi
   migrated.drafts['range-width'].application = 'wide-mix';
   migrated.drafts['fee-tiers'].application = 'larger-share';
   assert.deepEqual(parseManagementProgress(migrated), migrated);
+});
+
+
+test('moving a range after a fall changes exposure to the supplied rebound, with costs counted once', () => {
+  const result=managementCase('range-management',2), {before,unchanged,moved,cost}=result.rebalance;
+  assert.equal(before.futurePrice,1400); assert.equal(unchanged.futurePrice,2000);
+  assert.equal(before.pooled.usdc,0); assert.ok(Math.abs(before.pooled.eth-2.5709181086842334)<1e-12);
+  assert.equal(moved.investment,before.lpBeforeFees-cost);
+  assert.equal(cost,15); assert.equal(moved.initialPrice,1400); assert.equal(moved.futurePrice,2000);
+  assert.equal(moved.lowerPrice,1260); assert.equal(moved.upperPrice,1540);
+  assert.ok(moved.initial.eth<before.pooled.eth); assert.ok(moved.initial.usdc>0);
+  assert.equal(moved.pooled.eth,0); assert.equal(unchanged.lpBeforeFees,5000);
+  assert.ok(Math.abs(moved.lpBeforeFees-3667.485532841495)<1e-9);
+  assert.equal(result.application,'sold-earlier');
+  const application=managementApplication(result);
+  assert.deepEqual(application.evidence.comparison.rows.map(row=>row.value),[unchanged.lpBeforeFees,moved.lpBeforeFees]);
+  const link=rangeFromHash(new URL(application.evidence.explore.href,'https://teren.sh/').hash);
+  assert.equal(link.investment,moved.investment); assert.equal(link.initialPrice,1400);
+  assert.equal(link.futurePrice,1400); assert.equal(link.lowerPrice,1260); assert.equal(link.upperPrice,1540);
+  assert.equal(link.fees,0); assert.equal(link.fullRangeFees,0);
+  assert.equal(managementPresentation(result).links[0].scenario,result.second,'Observe handoff still opens the original example.');
+});
+
+test('only the replaced third management application is retired', () => {
+  for(let variant=0;variant<3;variant++) {
+    const previous={variant,prediction:'rises',reason:'asset',application:variant===1?'removed':'automatic',revealed:true,choiceSeed:6,questionRevisions:{prediction:1,reason:1,application:1}};
+    const migrated=parseManagementProgress({version:1,completed:['range-management'],drafts:{'range-management':previous}});
+    const draft=migrated.drafts['range-management'];
+    assert.deepEqual(migrated.completed,['range-management']);
+    assert.equal(draft.application,variant===2?'':previous.application);
+    assert.equal(draft.questionRevisions.application,variant===2?2:1);
+    for(const key of ['variant','prediction','reason','revealed','choiceSeed'])assert.equal(draft[key],previous[key]);
+    if(variant===2)draft.application='sold-earlier';
+    assert.deepEqual(parseManagementProgress(migrated),migrated);
+  }
 });

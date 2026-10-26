@@ -5,7 +5,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
   const before = await evaluate('JSON.stringify(' + JSON.stringify(existingKeys) + '.map(key=>localStorage.getItem(key)))');
   const choose = (name, value) => evaluate(`document.querySelector('input[name="${name}"][value="${value}"]').click()`);
   const ready = () => evaluate("new Promise((resolve,reject)=>{const end=Date.now()+5000;const check=()=>{if(document.getElementById('learn-applied').getAttribute('aria-busy')==='false')resolve();else if(Date.now()>end)reject(new Error('Applied record did not load'));else setTimeout(check,25)};check()})");
-  const cases = [['fees-over-time', 'earned', '2.36', 'growth', 'in-range', 'same'], ['between-samples', 'possible', '2724', 'returned', 'range-return', 'smaller-share'], ['period-vs-holding', 'can-trail', '0.17', 'same-gap', 'range-return', 'smaller-lead']];
+  const cases = [['fees-over-time', 'earned', '2.36', 'growth', 'in-range', 'same'], ['between-samples', 'possible', '2724', 'returned', 'range-return', 'edge-placement'], ['period-vs-holding', 'can-trail', '0.17', 'price-returned', 'range-return', 'smaller-lead']];
   for (const [id, prediction, answer, reason, record, application] of cases) {
     await navigate(base + 'learn.html#applied=' + id); await ready();
     assert.equal(await evaluate("document.getElementById('learn-essential').hidden"), true);
@@ -33,7 +33,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
       assert.match(await text('applied-interval-summary'), /26084375 → 26085000/);
       assert.match(await text('applied-observation'), /Both endpoints are outside/);
       assert.match(await text('applied-reason-evidence'), /26084375.*26085000.*45m 24s.*Unchanged/s);
-      assert.match(await text('applied-application-evidence'), /hypothetical.*One hour.*same at every traded price.*More in the second hour/s);
+      assert.match(await text('applied-application-evidence'), /Where this range started.*Starting ETH price.*Upper bound.*0.44%.*41.7%/s);
       assert.equal(await evaluate("document.getElementById('applied-reason-evidence').checkVisibility()&&document.getElementById('applied-application-evidence').checkVisibility()"),true);
     }
     if (id === 'period-vs-holding') {
@@ -41,13 +41,13 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
       assert.equal(await evaluate("document.getElementById('applied-cost-example').hidden"),false);
       assert.match(await text('applied-cost-example'),/hypothetical \$1.00 LP-only cost/);
       assert.match(await text('applied-cost-example'),/historical record is unchanged/);
-      assert.match(await text('applied-reason-question'),/collect|gap/i);
+      assert.match(await text('applied-reason-question'),/shortfall before fees shrink/i);
       assert.match(await text('applied-collection-evidence'), /\$0\.51/);
-      assert.match(await text('applied-collection-evidence'), /fees/i);
+      assert.match(await text('applied-collection-evidence'), /fee value/i);
       assert.match(await text('applied-price-evidence'), /USDC[\s\S]*ETH|ETH[\s\S]*USDC/);
       assert.match(await text('applied-price-evidence'), /holding/i);
-      assert.equal(await text('applied-collection-lp-value'), '$5,022.76');
-      assert.equal(await text('applied-collection-hold-value'), '$5,023.27');
+      assert.match(await text('applied-collection-evidence'), /Smaller principal shortfall.*\$0.47.*Increase in period fee value.*\$0.22/s);
+      assert.equal(await evaluate("document.querySelectorAll('#applied-collection-evidence .learn-evidence-track').length"),2);
       const ethAmount = value => Number(value.match(/[\d,.]+/)[0].replaceAll(',', ''));
       const lpETH = ethAmount(await text('applied-price-lp-eth')), holdingETH = ethAmount(await text('applied-price-hold-eth'));
       assert.ok(lpETH > 0 && lpETH < .0001, 'The LP still owns a small, nonzero amount of earned ETH.');
@@ -55,7 +55,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
       assert.equal(await evaluate("document.getElementById('applied-collection-evidence').checkVisibility() && document.getElementById('applied-price-evidence').checkVisibility()"), true);
       assert.deepEqual(await evaluate(`['applied-collection-evidence','applied-price-evidence'].map(id => {
         const panel = document.getElementById(id); return document.getElementById(panel.getAttribute('aria-labelledby'))?.textContent;
-      })`), ['Collecting the fees', 'If ETH keeps rising']);
+      })`), ['Why the comparison improved', 'If ETH keeps rising']);
       assert.equal(await evaluate("document.getElementById('applied-assessment-scope')"), null, 'Each question presents its evidence instead of explaining internal lesson state.');
       assert.match(await text('applied-question-window'), /Final comparison checkpoint: block 26090000/);
       assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"), '16', 'The observation still opens at the fixed final checkpoint.');
@@ -98,11 +98,11 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     await fill('applied-answer', answer); await click('applied-calculation-check');
     assert.match(await text('applied-calculation-feedback'), /Calculation matches/);
     // Explanation and transfer are independently required, regardless of optional math.
-    await choose('applied-reason', id === 'fees-over-time' ? 'owed' : id === 'between-samples' ? 'stayed-out' : 'narrower-gap'); await click('applied-check');
+    await choose('applied-reason', id === 'fees-over-time' ? 'owed' : id === 'between-samples' ? 'stayed-out' : 'reinvested'); await click('applied-check');
     assert.equal(await evaluate("document.getElementById('applied-applications-feedback').dataset.state"), 'match');
     assert.equal(await evaluate("document.getElementById('applied-reasons-feedback').dataset.state"), 'different');
     await choose('applied-reason', reason);
-    await choose('applied-application',id === 'fees-over-time' ? 'less' : id === 'between-samples' ? 'same-fees' : 'larger-lead'); await click('applied-check');
+    await choose('applied-application',id === 'fees-over-time' ? 'less' : id === 'between-samples' ? 'centered' : 'larger-lead'); await click('applied-check');
     assert.equal(await text('applied-feedback-title'),'Review your answers.');
     assert.equal(await evaluate("document.getElementById('applied-continue').hidden"),true);
     await choose('applied-application',application); await click('applied-check');
@@ -141,7 +141,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
   assert.equal(await evaluate("document.getElementById('applied-continue').hidden"),true);
   assert.equal(await text('applied-progress-count'),'3 of 3 checked');
   assert.equal(await evaluate("document.getElementById('applied-answer').value"),'0.17');
-  assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('passiko-applied-liquidity-v1')).drafts['period-vs-holding'].questionRevisions"), {prediction:1,reason:3,application:3});
+  assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('passiko-applied-liquidity-v1')).drafts['period-vs-holding'].questionRevisions"), {prediction:1,reason:4,application:3});
   await evaluate(`(() => {const key='passiko-applied-liquidity-v1', progress=JSON.parse(localStorage.getItem(key));
     progress.drafts['between-samples']={prediction:'possible',reason:'counters',application:'fee-records',answer:'2724',revealed:true,checkpoint:3,choiceSeed:12,questionRevisions:{prediction:1,reason:1,application:2}};
     localStorage.setItem(key,JSON.stringify(progress));})()`);
@@ -153,7 +153,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
   assert.equal(await evaluate("document.getElementById('applied-answer').value"),'2724');
   assert.equal(await text('applied-progress-count'),'3 of 3 checked');
   assert.match(await text('applied-reason-evidence'), /45m 24s/);
-  await choose('applied-reason','returned'); await choose('applied-application','smaller-share'); await click('applied-check');
+  await choose('applied-reason','returned'); await choose('applied-application','edge-placement'); await click('applied-check');
   assert.equal(await text('applied-feedback-title'),'Both answers are correct.');
   await click('applied-restart'); await ready();
   assert.equal(await evaluate("document.getElementById('applied-observe').hidden"), true);
@@ -210,7 +210,7 @@ export async function checkMobileAppliedLearning({ evaluate, click, fill, text, 
     assert.equal(await text('applied-reason-evidence'),fixedEvidence);
     await evaluate("document.querySelector('#applied-deeper summary').click()");
     assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
-    await evaluate("document.querySelector('input[name=applied-application][value=smaller-share]').click()"); await evaluate("document.querySelector('input[name=applied-reason][value=returned]').click()"); await click('applied-check');
+    await evaluate("document.querySelector('input[name=applied-application][value=edge-placement]').click()"); await evaluate("document.querySelector('input[name=applied-reason][value=returned]').click()"); await click('applied-check');
     assert.equal(await text('applied-feedback-title'), 'Both answers are correct.');
     assert.equal(await text('learn-current-chapter'), 'Recorded cases');
     assert.equal(await text('learn-current-progress'), await text('applied-progress-count'));
@@ -231,7 +231,7 @@ export async function checkMobileAppliedLearning({ evaluate, click, fill, text, 
     assert.deepEqual(localPanels, [{visible:true,fits:true},{visible:true,fits:true}], 'Recorded evidence is readable beside each question on a phone.');
     await fill('applied-checkpoint', '0');
     assert.deepEqual([await text('applied-collection-evidence'), await text('applied-price-evidence')], evidence);
-    await evaluate("document.querySelector('input[name=applied-reason][value=same-gap]').click(); document.querySelector('input[name=applied-application][value=smaller-lead]').click()");
+    await evaluate("document.querySelector('input[name=applied-reason][value=price-returned]').click(); document.querySelector('input[name=applied-application][value=smaller-lead]').click()");
     await click('applied-check');
     assert.equal(await text('applied-feedback-title'), 'Both answers are correct.');
     assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
