@@ -1,0 +1,23 @@
+.lp-fee-mode select { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); }
+.lp-cost-details { border-block: 1px solid var(--border); padding: 12px 0; margin: 12px 0 18px; }
+.lp-cost-details summary { cursor: pointer; font-size: 14px; font-weight: 600; }
+.lp-cost-details summary span { font-size: 12px; color: var(--muted); margin-left: 8px; }
+.lp-cost-details .scenario-field:first-of-type { margin-top: 16px; }
+.lp-economics { border-top: 1px solid var(--border); padding-top: 18px; margin: 20px 0; }
+.lp-economics h3 { font-size: 15px; margin-bottom: 8px; }
+.lp-flow { margin: 16px 0 0; display: grid; gap: 13px; }
+.lp-flow-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; }
+.lp-flow dt, .lp-flow dd { font-size: 13px; margin: 0; line-height: 1.5; }
+.lp-flow dd { font-variant-numeric: tabular-nums; font-weight: 600; }
+.lp-flow svg { display: block; grid-column: 1 / -1; width: 100%; height: 18px; overflow: visible; }
+.lp-flow rect { fill: var(--accent); }
+.lp-flow line { stroke: var(--muted); stroke-width: 1; }
+.lp-flow-0 rect { opacity: .7; }
+.lp-flow-2 rect { fill: #e5bd85; stroke: #e5bd85; stroke-dasharray: 3 2; }
+.lp-flow-3 { border-top: 1px solid var(--border); padding-top: 12px; }
+.lp-flow-3 dt { font-weight: 600; }
+.lp-flow-4 rect { fill: #a9c7f5; }
+.lp-target-apr { display: block; font-size: 12px; line-height: 1.6; margin-top: 6px; color: var(--text); }
+@media (max-width: 450px) {
+  .lp-flow dt, .lp-flow dd { font-size: 12px; }
+}

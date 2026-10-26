@@ -35,7 +35,7 @@ initExamples({
   positionSnapshots, snapshotNavigation: snapshots,
   restoreScenario: () => { fullRangeLab.restoreLocation(); rangeLab.restoreLocation(); navigation.restoreLocation(); },
 });
-initSavedExperiments({ labs: { 'cp50-v1': fullRangeLab, 'cl-range-v1': rangeLab } });
+initSavedExperiments({ labs: { 'cp50-v1': fullRangeLab, 'cp50-v2': fullRangeLab, 'cl-range-v1': rangeLab, 'cl-range-v2': rangeLab } });
 initPositionPeriod({ rangeLab });
 initMatchedComparison({ rangeLab });
 let widthComparison;

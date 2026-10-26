@@ -1,12 +1,12 @@
 # Next discussion
 
-Updated for 1.44.0. These are discussion priorities, not commitments to build every item.
+Updated for 1.45.0. These are discussion priorities, not commitments to build every item.
 
 ## Next lab iteration
 
 The lab-risk release added the ETH/USDC loop liquidation event, visible price boundaries and clearer oracle assumptions. Release 1.43.0 adds exact LST targets, the flash-assisted construction ledger and a comparison of full WETH exits with retaining unsold wstETH after repayment. Borrowing rounds and older scenarios remain available. The LTV ceiling is an accounting constraint, not proof that a transaction can execute.
 
-Release 1.44.0 makes single-loan interest explicit and consistent across balances, health, responses and liquidation, with a time visual and preserved legacy simple-interest setups. The next candidate is optional LP costs plus an assumed **position** fee APR and duration. Do not automatically multiply a pool APR by concentration: competing active liquidity and time in range remain separate assumptions. An atomic ETH/USDC exit and fee-aware sandbox arbitrage are later candidates.
+Release 1.44.0 makes single-loan interest explicit and consistent across balances, health, responses and liquidation, with a time visual and preserved legacy simple-interest setups. Release 1.45.0 adds optional LP costs, an assumed **position** fee APR and duration, and a principal → fees → costs comparison with holding. It never multiplies a pool APR by concentration; trading activity and competing liquidity remain unestimated. Next, test whether these controls help users distinguish a required fee target from attainable earnings. An atomic ETH/USDC exit and fee-aware sandbox arbitrage are later candidates.
 
 ## Learning depth
 

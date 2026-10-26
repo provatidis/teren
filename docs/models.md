@@ -10,11 +10,11 @@ The full-range lab and virtual pool use Uniswap v2-style mechanics. The price-ra
 
 The single-loan and ETH/USDC loop labs use Aave v3-style collateral concepts with editable teaching assumptions. The separate wstETH/WETH lab explores correlated assets with its own rate and oracle assumptions. None reproduces a live protocol account or current market rules.
 
-`cp50-v1`, `cl-range-v1` and `collateral-loan-v1` are Teren model-revision identifiers. Their `v1` does not refer to Uniswap v1 or Aave v1. They remain in links, exports and technical details so calculations remain reproducible; prominent labels name the protocol style instead.
+`cp50-v2`, `cl-range-v2` and `collateral-loan-v2` are current Teren model-revision identifiers. The version suffix does not identify a Uniswap or Aave protocol version. Earlier revisions remain supported. They remain in links, exports and technical details so calculations remain reproducible; prominent labels name the protocol style instead.
 
 ## Three kinds of results
 
-- **Hypothetical models:** the endpoint liquidity labs use assumed USD cash fees; Follow the fees calculates token allocation from chosen trading batches. Single loans and ETH/USDC loops offer fixed simple interest or continuous compounding, and wstETH/WETH loops separate staking APY from continuously compounded borrow APR with one optional rate change. All use editable assumptions rather than forecasts.
+- **Hypothetical models:** the endpoint liquidity labs use assumed USD cash fees or average position fee APR, plus optional costs; Follow the fees calculates token allocation from chosen trading batches. Single loans and ETH/USDC loops offer fixed simple interest or continuous compounding, and wstETH/WETH loops separate staking APY from continuously compounded borrow APR with one optional rate change. All use editable assumptions rather than forecasts.
 - **Recorded snapshots:** Inspect shows v2 reserves/quotes or v3 principal from exact contract integers at one block. Version-2 v3 snapshots also include fee accounting; older files without fee-growth data show it as unavailable. A snapshot alone does not establish fees earned over a chosen period or lifetime PnL.
 - **Verified historical accounting:** the shipped fixed-position cases compare multiple recorded checkpoints, with unchanged-position evidence and independent fee checks. It calculates earned fee tokens and cumulative time in range for that recorded period.
 
@@ -32,9 +32,9 @@ An asymmetric range, or an out-of-range starting price, can require a mix other 
 
 Tight (±5%), Moderate (±10%) and Wide (±50%) presets center a range on the starting price. The future price input, keyboard-accessible slider, chart selection, exact boundary checkpoints and comparison rows all update the same scenario. The slider's domain stays stable while dragging. Allocation bars show how the position moves between ETH and USDC; below the range it is all ETH, and above it all USDC. Exact edges receive distinct labels.
 
-Each LP strategy has its own optional total cash fee assumption. Fees remain fixed across displayed prices and never compound or alter token quantities. Being out of range at the final price does not imply the position earned no fees earlier; this endpoint model does not reconstruct a trading path or estimate fee income.
+The range accepts cash fees or an assumed average position fee APR and duration. Its optional 50/50 reference retains its own cash fee amount and subtracts the same opening, collection and closing cost budget. Fees and costs remain fixed across displayed prices and never compound or alter token quantities. Being out of range at the final price does not imply the position earned no fees earlier; this endpoint model does not reconstruct a trading path or estimate fee income.
 
-### Model cl-range-v1
+### Principal model and retained cl-range-v1
 
 Price p is USD per ETH, assuming USDC = $1. For bounds a < b, let c = clamp(p, a, b). For liquidity L:
 
@@ -48,7 +48,7 @@ The implementation rationalizes square-root differences to retain precision for 
 
 The model follows the holdings relationships in [Uniswap's math primer](https://blog.uniswap.org/uniswap-v3-math-primer-2) and [v3 whitepaper](https://app.uniswap.org/whitepaper-v3.pdf). A hand-solvable reference uses investment $5,000, starting price $4, and range $1–$9: initial assets are 500 ETH and 3,000 USDC. At $9 the range holds 6,000 USDC, versus $7,500 from holding its initial tokens. Before-fee range IL is −20% and $1,500 of assumed fees closes that gap. The separate full-range LP is worth $7,500; its own 50/50 holding benchmark is $8,125.
 
-Shared links use the versioned cl-range-v1 fragment and all seven inputs (investment, starting/future/lower/upper prices, range fees and full-range fees). They select the correct lab while leaving saved swap balances and the other lab's setup alone. CSV includes both distinct holding benchmarks and exact numeric inputs. A 1200×900 PNG result card includes the range, starting mix, separate fee assumptions and three outcomes. Editing inputs invalidates a previous card.
+New shared links use `cl-range-v2` with the original seven inputs plus fee mode, APR, days and three cost inputs. Original `cl-range-v1` links keep their cash fee amounts and open with zero costs and no duration. They select the correct lab while leaving saved swap balances and the other lab's setup alone. CSV includes both distinct holding benchmarks and exact numeric inputs. A 1200×1000 PNG result card includes the range, starting mix, fee basis, cost budget and three outcomes; legacy lesson cards keep their original dimensions. Editing inputs invalidates a previous card.
 
 **Use in range lab** seeds the theoretical setup with the existing v2 snapshot's reserve ratio, a fresh range and zero fee assumptions. The v3 snapshot source separately reads an actual position and its tick-derived range; **Explore this position's range** applies its recorded principal to a new theoretical setup. Already collectable tokens are excluded from both strategies in that projection. Historical period accounting is available in the separate fixed-position case described below.
 
@@ -64,20 +64,20 @@ The allowed total widths are 1–400%, starting ETH prices $1–$1,000,000, capi
 
 ## Liquidity scenario lab
 
-Enter an initial investment, starting ETH price, future ETH price, and an optional total dollar amount of fee income earned by the position. Results include:
+Enter starting capital and ETH prices, choose cash fees or an assumed average fee APR and duration, and optionally add LP costs. Results include:
 
 - Final dollar values and returns for holding versus providing liquidity.
 - The ETH and USDC owned by each strategy at the future price.
-- Impermanent loss before fees, the net difference after assumed fees, and fees needed to match holding.
-- A price-range chart and comparison rows with the same investment and assumed fees.
+- Impermanent loss before fees, the net difference after assumed fees and costs, and fees needed to match holding.
+- A price-range chart and comparison rows with the same investment, duration, assumed fees and costs.
 
 The default example invests $5,000 at $2,000/ETH, then values the position at $4,000/ETH with $100 in assumed fees. Holding ends at $7,500; liquidity holds 0.883883 ETH and 3,535.53 USDC, worth $7,071.07 before fees or $7,171.07 including the assumed cash income. $428.93 in total fees would match holding.
 
-**Copy scenario link** creates a URL fragment containing only the four assumptions and model version (`cp50-v1`). Opening it restores the same scenario without changing the visitor's saved swap balances or activity. Clipboard failures show a selectable link for manual copying. Invalid or unsupported links show a message and use the default scenario. Editing a shared scenario does not change the original URL; copy a new link to share the edited assumptions. Ordinary visits use the default scenario; a same-tab return from Learn restores valid working drafts captured on departure. Explicit shared scenarios take precedence over that temporary handoff. [The guide](guide.md#finding-a-tool-and-returning-to-your-setup) distinguishes working drafts from named saved experiments.
+**Copy scenario link** creates a URL fragment containing the price, investment, fee and cost assumptions and model version (`cp50-v2`). Original `cp50-v1` links remain supported. Opening it restores the same scenario without changing the visitor's saved swap balances or activity. Clipboard failures show a selectable link for manual copying. Invalid or unsupported links show a message and use the default scenario. Editing a shared scenario does not change the original URL; copy a new link to share the edited assumptions. Ordinary visits use the default scenario; a same-tab return from Learn restores valid working drafts captured on departure. Explicit shared scenarios take precedence over that temporary handoff. [The guide](guide.md#finding-a-tool-and-returning-to-your-setup) distinguishes working drafts from named saved experiments.
 
 **Export CSV** downloads the comparison rows with the inputs, model version, token balances, dollar outcomes, before-fee impermanent loss, and break-even fee income. **Reset scenario** restores the calculator's defaults; **Reset sandbox** separately clears the virtual swap session.
 
-### Model cp50-v1
+### Principal model and retained cp50-v1
 
 The calculator models a full-range constant-product position with equal initial dollar allocations and USDC fixed at $1. Ideal, frictionless arbitrage rebalances the pool to the supplied future ETH market price, preserving the position's token product before fees. It describes endpoint balances, not a transaction path or a specific deployed protocol.
 
@@ -95,7 +95,29 @@ IL before fees  = (LP before fees / holding value − 1) × 100%
 break-even fees = holding value − LP before fees
 ```
 
-Fee income is an explicit assumption added as separate USD cash at the end; it does not compound or change the token amounts. It is held fixed across comparison rows and chart prices. The calculator does not estimate fees from volume, volatility, pool share, or a time horizon. Gas costs, incentives, depegging, and concentrated liquidity are excluded. These are hypothetical outcomes, not forecasts. Reference tests cover unchanged, falling, doubled, and quadrupled prices, asset-product preservation, fee break-even, input bounds, versioned links, and CSV output. The separate pool adapter validates recorded swap arithmetic against its supported protocol; this theoretical endpoint LP model is not a protocol-specific return forecast.
+Fee income is an explicit assumption added as separate USD cash at the end; it does not compound or change the token amounts. It is held fixed across comparison rows and chart prices. The retained v1 calculation does not estimate fees from volume, volatility, pool share, or a time horizon. V1 excludes gas costs, incentives, depegging and concentrated liquidity. V2 adds the explicit fee and cost assumptions below without changing principal accounting. These are hypothetical outcomes, not forecasts. Reference tests cover unchanged, falling, doubled, and quadrupled prices, asset-product preservation, fee break-even, input bounds, versioned links, and CSV output. The separate pool adapter validates recorded swap arithmetic against its supported protocol; this theoretical endpoint LP model is not a protocol-specific return forecast.
+
+## Fee and cost assumptions · cp50-v2 / cl-range-v2
+
+Both endpoint labs reuse the v1 principal formulas. Fee mode is either a total cash amount or an **assumed average position fee APR**. With starting deployed capital V, APR a as a fraction and duration d in days:
+
+```text
+assumed fee income = V × a × d / 365          (APR mode)
+LP costs           = opening + collection + closing
+LP before costs    = principal at final price + assumed fee income
+LP after costs     = LP before costs − LP costs
+net gap to holding = LP after costs − value of the exact starting tokens
+break-even fees    = max(0, holding value − LP principal + LP costs)
+required fee APR   = break-even fees / V × 365 / d
+```
+
+The annualized target is available only with a positive duration. Cash mode can leave duration blank (`feeDays: 0`); APR mode requires it. Days use a 365-day year. Entered APR is an average for the whole period, including any time out of range, after protocol fee share and before the separate cost budget. It is neither the pool fee tier nor a pool-wide APR multiplied by concentration. No yield or active-time forecast is inferred. The fee-context panel uses this same saved duration; lesson-only contexts keep their independent hypothetical windows.
+
+Costs are extra USD cash expenses of providing liquidity relative to holding. They are paid separately from the starting investment, so they change neither the initial token basket nor before-fee IL. Returns use starting deployed capital as the denominator. Do not add acquisition costs shared by both strategies to only the LP side. Negative net outcomes remain negative. The optional 50/50 reference uses the same LP costs and its own cash fees; its holding basket is still separate. Fees are not reinvested, including in the simplified V2-style model; real V2 reserve fee growth is not reproduced.
+
+Hand-worked example: $10,000 starting at $2,000/ETH and ending at $8,000/ETH gives $25,000 holding versus $20,000 LP principal. An assumed 36.5% APR for 100 days adds $1,000. Opening/collection/closing costs of $40/$10/$50 leave $20,900, trailing holding by $4,100. Required fees are $5,100, equivalent to a 186.15% average APR for that period. This target says nothing about whether it could be earned.
+
+Shares, drafts, named saves and exports retain both inactive and active fee inputs, mode, duration and costs. CSV distinguishes gross value from value after costs and includes the required APR when defined. Legacy records remain v1; opening them supplies cash mode, zero costs and no duration, and saving creates a v2 variation. Historical records, controlled widths and lesson assessment models retain their existing assumptions.
 
 ## Collateralized loan model
 

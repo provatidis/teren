@@ -1,6 +1,5 @@
 // Keep legacy storage and format identifiers so existing work survives rebranding.
-import { MODEL as FULL_MODEL, validateScenario } from '../models/cp50-v1.js';
-import { MODEL as RANGE_MODEL, validateRange } from '../models/cl-range-v1.js';
+import { liquidityModel, isRangeModel } from '../models/liquidity-models.js';
 import { loanModel } from '../models/loan-models.js';
 import { LOOP_MODEL, LOOP_LIMITS, validateLoop } from '../models/borrowing-loop-v1.js';
 import { lstModel } from '../models/lst-models.js';
@@ -55,15 +54,15 @@ export function validateExperimentDraft(input) {
     }
     return draft;
   }
-  if (![FULL_MODEL, RANGE_MODEL].includes(model)) throw new ExperimentVersionError();
-  const inputs = model === FULL_MODEL ? validateScenario(input.inputs) : validateRange(input.inputs);
+  if (!liquidityModel(model)) throw new ExperimentVersionError();
+  const inputs = liquidityModel(model).validate(input.inputs);
   let origin = null;
   if (input.origin != null) {
     if (input.origin.kind === 'pool') {
       const snapshot = validateSnapshot(input.origin.snapshot);
       if (inputs.initialPrice !== snapshotView(snapshot).ethPrice) throw new Error('The experiment’s starting price does not match its source snapshot.');
       origin = { kind: 'pool', snapshot };
-    } else if (input.origin.kind === 'position' && model === RANGE_MODEL) {
+    } else if (input.origin.kind === 'position' && isRangeModel(model)) {
       const snapshot = validatePositionSnapshot(input.origin.snapshot);
       const source = positionScenario(snapshot);
       if (['investment','initialPrice','lowerPrice','upperPrice'].some(key => inputs[key] !== source[key])) throw new Error('The experiment’s starting principal or range does not match its source position.');

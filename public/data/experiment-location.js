@@ -1,6 +1,8 @@
 // Lightweight navigation metadata. The destination validates the model inputs.
 export const EXPERIMENT_LOCATION_KEY = 'teren-experiment-location-v1';
 const destinations = {
+  'cp50-v2': { page: 'liquidity.html', prefix: '#scenario=cp50-v2&', title: 'Liquidity · full range' },
+  'cl-range-v2': { page: 'liquidity.html', prefix: '#scenario=cl-range-v2&', title: 'Liquidity · price range' },
   'cp50-v1': { page: 'liquidity.html', prefix: '#scenario=cp50-v1&', title: 'Liquidity · full range' },
   'cl-range-v1': { page: 'liquidity.html', prefix: '#scenario=cl-range-v1&', title: 'Liquidity · price range' },
   'cl-width-fees-v1': { page: 'liquidity.html', prefix: '#width=cl-width-fees-v1&', title: 'Liquidity · follow the fees' },

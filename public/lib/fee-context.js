@@ -94,12 +94,14 @@ export function createFeeContext(prefix) {
   let current;
   function update(result) {
     current = result;
+    const costAware = result.costs !== undefined;
+    window.hidden = costAware;
     const r = feeTarget(current, Number(select.value));
     headline.textContent = fmt(r.percent, r.percent > 0 && r.percent < .01 ? 4 : 2) + '% of starting capital needed';
     target.textContent = r.total === 0
-      ? 'At these endpoint prices, the model needs no fees to match holding before costs.'
-      : usd(r.total) + ' in total cash fees would match holding at your chosen final price, before gas and other costs.';
-    daily.textContent = r.total === 0 ? 'No fee hurdle at this endpoint. Costs can still put the LP behind holding.'
+      ? 'At these endpoint prices, the model needs no fees to match holding' + (costAware ? ' after your assumed costs.' : ' before costs.')
+      : usd(r.total) + ' in total cash fees would match holding at your chosen final price' + (costAware ? ', including ' + usd(result.costs) + ' assumed costs.' : ', before gas and other costs.');
+    daily.textContent = r.days === 0 ? 'Add a duration in the assumptions to see a daily fee target and average APR.' : r.total === 0 ? 'No fee hurdle under these assumptions.'
       : 'Over ' + r.days + (r.days === 1 ? ' day' : ' days') + ', that requires an average of ' + usd(r.daily) + ' per day. Required, not predicted.';
     const gap = r.remaining < .01 ? 'Less than $0.01' : usd(r.remaining);
     assumption.textContent = 'Assumed fees: ' + usd(r.assumed) + '. '

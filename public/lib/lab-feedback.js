@@ -8,13 +8,14 @@ export function labFeedback({ prefix, fields, limits, optional = [], range = fal
   function validate(input) {
     const messages = {};
     for (const [key, id] of Object.entries(fields)) {
-      const field = $(id), { min, max, label } = limits[key];
+      const field = $(id), { min, max, label, unit } = limits[key];
       const empty = !field.value.trim();
       messages[key] = field.validity.badInput ? 'Enter a valid number.'
         : empty && !optional.includes(key) ? 'Enter the ' + label.toLowerCase() + '.'
         : !Number.isFinite(input[key]) || input[key] < min || input[key] > max
-          ? label + ' must be between ' + usd(min) + ' and ' + usd(max) + '.' : '';
+          ? label + ' must be between ' + (unit ? min + ' ' + unit : usd(min)) + ' and ' + (unit ? max + ' ' + unit : usd(max)) + '.' : '';
     }
+    if (input.feeMode === 'apr' && input.feeDays === 0) messages.feeDays = 'Enter a duration greater than zero to use fee APR.';
     if (range && !messages.lowerPrice && !messages.upperPrice && input.lowerPrice >= input.upperPrice) {
       messages.lowerPrice = 'Lower price must be below the upper price.';
       messages.upperPrice = 'Upper price must be above the lower price.';
@@ -40,7 +41,7 @@ export function labFeedback({ prefix, fields, limits, optional = [], range = fal
     }
     $(prefix + '-quick-gap').className = tied || value.difference >= 0 ? 'gain' : 'loss';
     $(prefix + '-quick-values').textContent = 'LP ' + usd(value.lpValue) + ' · Holding ' + usd(value.holdValue);
-    $(prefix + '-quick-note').textContent = (state ? state + ' · ' : '') + usd(value.fees) + ' assumed cash fees';
+    $(prefix + '-quick-note').textContent = (state ? state + ' · ' : '') + usd(value.feeIncome ?? value.fees) + ' assumed fees' + (value.costs !== undefined ? ' · ' + usd(value.costs) + ' costs' : '');
     $(prefix + '-show-results').disabled = false;
   }
   function invalid(message) {

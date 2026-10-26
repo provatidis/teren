@@ -1,16 +1,19 @@
-import { MODEL, calculateRange } from '../models/cl-range-v1.js';
+import { liquidityModelForInput } from '../models/liquidity-models.js';
+import { feeBasisText, costText } from './lp-exports.js';
 import { usd, percent } from './format.js';
 import { STATE_COPY, rangePriceLabels, assetAmounts } from './range-presentation.js';
 import { drawBrand } from './brand.js';
 
 export async function rangeCardBlob(input, siteURL) {
-  const result = calculateRange(input);
+  const model = liquidityModelForInput(input, 'range');
+  const MODEL = model.MODEL, result = model.calculate(input);
+  const costAware = result.costs !== undefined;
   const canvas = document.createElement('canvas');
   canvas.width = 1200;
-  canvas.height = 900;
+  canvas.height = costAware ? 1000 : 900;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Your browser could not create the range card.');
-  ctx.fillStyle = '#101c27'; ctx.fillRect(0, 0, 1200, 900);
+  ctx.fillStyle = '#101c27'; ctx.fillRect(0, 0, 1200, canvas.height);
   const text = (content, x, y, size, color = '#f6f4ee', weight = 400, maxWidth = 1080) => {
     ctx.fillStyle = color; ctx.font = weight + ' ' + size + 'px system-ui, sans-serif'; ctx.fillText(content, x, y, maxWidth);
   };
@@ -22,8 +25,8 @@ export async function rangeCardBlob(input, siteURL) {
   text('Your range: ' + ranges.lower + ' – ' + ranges.upper, 60, 224, 22, '#c0cbd3');
   const totals = [
     ['HOLD STARTING MIX', result.holdValue, '#a9c7f5'],
-    ['V2-STYLE 50/50 LP', result.fullRange.lpValue, '#b5a8eb'],
-    ['YOUR RANGE LP', result.lpValue, '#b3d7c8'],
+    [costAware ? '50/50 LP AFTER COSTS' : 'V2-STYLE 50/50 LP', result.fullRange.lpValue, '#b5a8eb'],
+    [costAware ? 'RANGE LP AFTER COSTS' : 'YOUR RANGE LP', result.lpValue, '#b3d7c8'],
   ];
   totals.forEach(([label, value, color], i) => {
     const x = 60 + i * 368;
@@ -34,13 +37,18 @@ export async function rangeCardBlob(input, siteURL) {
   text('Initial investment: $' + result.investment, 60, 450, 23);
   text('ETH: $' + result.initialPrice + ' → $' + result.futurePrice, 60, 490, 23);
   text('Range: $' + result.lowerPrice + ' → $' + result.upperPrice, 60, 530, 23);
-  text('Assumed fees: range $' + result.fees + ' / full-range $' + result.fullRangeFees, 60, 570, 23);
+  text('Assumed fees: range ' + usd(result.feeIncome ?? result.fees) + ' / full-range ' + usd(result.fullRangeFees), 60, 570, 23);
   text('Starting range tokens: ' + assetAmounts(result.initial), 60, 610, 23);
   text('Range IL before fees: ' + percent(result.impermanentLoss), 60, 650, 23);
   text('Range fees needed to match holding: ' + usd(result.breakEvenFees), 60, 690, 23);
-  text('Holding keeps the range’s starting mix. The full-range LP starts 50/50.', 60, 751, 18, '#c0cbd3');
-  text('Teren calculation ' + MODEL + ' · USDC = $1 · No tick rounding, gas or compounding', 60, 783, 17, '#c0cbd3');
-  text('Hypothetical endpoints and assumed fees · Not a forecast', 60, 815, 17, '#c0cbd3');
-  text(siteURL, 60, 866, 17, '#b3d7c8');
+  if (costAware) {
+    text(costText(result) + ' (same for both LPs)', 60, 730, 21);
+    text(feeBasisText(result), 60, 770, 21);
+  }
+  const shift = costAware ? 80 : 0;
+  text('Holding keeps the range’s starting mix. The full-range LP starts 50/50.', 60, 751 + shift, 18, '#c0cbd3');
+  text('Teren calculation ' + MODEL + (costAware ? ' · USDC = $1 · Costs additional to holding · No tick rounding or compounding' : ' · USDC = $1 · No tick rounding, gas or compounding'), 60, 783 + shift, 17, '#c0cbd3');
+  text('Hypothetical endpoints and assumed fees · Not a forecast', 60, 815 + shift, 17, '#c0cbd3');
+  text(siteURL, 60, canvas.height - 34, 17, '#b3d7c8');
   return new Promise((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Your browser could not export the range card.')), 'image/png'));
 }
