@@ -37,7 +37,7 @@ export async function rangeCardBlob(input, siteURL) {
   text('Initial investment: $' + result.investment, 60, 450, 23);
   text('ETH: $' + result.initialPrice + ' → $' + result.futurePrice, 60, 490, 23);
   text('Range: $' + result.lowerPrice + ' → $' + result.upperPrice, 60, 530, 23);
-  text('Assumed fees: range $' + (result.feeIncome ?? result.fees) + ' / full-range $' + result.fullRangeFees, 60, 570, 23);
+  text('Assumed fees: range ' + usd(result.feeIncome ?? result.fees) + ' / full-range ' + usd(result.fullRangeFees), 60, 570, 23);
   text('Starting range tokens: ' + assetAmounts(result.initial), 60, 610, 23);
   text('Range IL before fees: ' + percent(result.impermanentLoss), 60, 650, 23);
   text('Range fees needed to match holding: ' + usd(result.breakEvenFees), 60, 690, 23);
