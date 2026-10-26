@@ -50,6 +50,7 @@
 .width-result dt { color: var(--muted); font-size: 14px; line-height: 1.5; }
 .width-result dd { margin: 8px 0 0; font-size: 24px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .width-result dd.fine-print { font-size: 13px; }
+.width-result dd:not(.fine-print), .width-token-key > span > span { white-space: nowrap; overflow-wrap: normal; }
 .width-result > button { width: 100%; white-space: normal; line-height: 1.5; }
 .width-takeaway { font-size: 17px; line-height: 1.8; max-width: 75ch; margin: 24px 0 12px; }
 .width-gap-figure { margin: 20px 0; }
@@ -89,4 +90,11 @@
   .width-cards { gap: 8px; }
   .width-result { padding: 10px; }
   .width-result dd { font-size: 16px; }
+}
+@media(max-width:420px) {
+  .width-cards { grid-template-columns: 1fr; gap: 20px; }
+  .width-result { padding: 18px; }
+  .width-result dd { font-size: 24px; }
+  .width-result dt, .width-result-bounds, .width-result-state, .width-result .width-token-key { min-height: 0; }
+  .width-result .width-token-key { font-size: 14px; }
 }

@@ -36,6 +36,8 @@ For a local browser smoke test, install Chromium or set `CHROMIUM_BIN` to its ex
 
 Set `TEST_BASE_URL` to a deployed site or a local server with a project subpath to test that target instead of starting the Node server. The browser smoke test checks that the home link, scripts, styles, and swaps work at that base URL.
 
+For focused lab-risk checks, `BROWSER_CHECKS=risk npm run test:browser` covers loop liquidation, draft/link recovery, boundary distances, visible mobile tools and whole figures at 390px/320px. The full suite includes these checks.
+
 For a focused lesson check, `BROWSER_CHECKS=predictions npm run test:browser` exercises all twenty starting setups, prediction controls, keyboard skipping and progress restoration at desktop and mobile sizes. The full suite remains the release gate.
 
 Run `npm run build` before publication. The dependency-free builder hashes every JS/CSS asset after rewriting its dependencies, flattens plain local CSS imports in cascade order with nested URL rebasing, then rewrites HTML entries and preloads each entry’s transitive module graph. Unsupported CSS import forms fail before output is replaced. Shared dependencies keep one URL and identity. Source imports remain canonical and have no release queries; the old hand-maintained stamper is removed. `dist/build-manifest.json` identifies the release and every output asset. Original source paths remain as compatibility aliases for previously cached entries. An old open tab may require a reload after deployment if its earlier hashed assets are no longer published. Hashes prevent mixing changed dependencies within the new build; this is not indefinite retention of older releases. Storage keys and model versions are independent of asset URLs.
@@ -180,7 +182,7 @@ The `#learn` lending route resumes an allowlisted `currentLesson`, added to the 
 
 ## Lending explanations and model review
 
-`models/loan-explanations.js` adds a separate `single-liquidation-v1` illustration, a fixed-balance health/price curve and a continuous-compounding debt reference. It does not change `collateral-loan-v1`. Liquidation bonus and repayment fraction use an independent session draft. Optional versioned event fields extend loan links; older links restore their original loan with default event assumptions. Invalid event inputs hide only the event and disable sharing; invalid response budgets still preserve the loan outcome.
+`models/loan-explanations.js` adapts the shared `models/single-liquidation-v1.js` event arithmetic into a separate `single-liquidation-v1` illustration, a fixed-balance health/price curve and a continuous-compounding debt reference. It does not change `collateral-loan-v1`. Liquidation bonus and repayment fraction use an independent session draft. Optional versioned event fields extend loan links; older links restore their original loan with default event assumptions. Invalid event inputs hide only the event and disable sharing; invalid response budgets still preserve the loan outcome.
 
 The build tests cover parent hash invalidation, deterministic output, shared dependency identity, missing imports and cycles. Loan reference tests cover balance conservation, capped repayment, remaining debt, zero bonus, full repayment and boundaries. CI browser checks add event sharing/drafts, independent validation, compounding differences and chart readability at 390px/320px.
 
@@ -191,6 +193,8 @@ Use the [mechanism-review questions](#reviewing-a-mechanism-change) and [current
 The existing lending document has Single loan and Borrowing loops experiment routes. `#loops` and strict `#loop=borrowing-loop-v1` links select the loop lab; `#loop-lesson=build|stress|unwind` selects the companion chapter. The main composition root routes both without controller-to-controller imports. Experiment returns from loop lessons to loops; chapter links keep the foundations directly accessible.
 
 `models/borrowing-loop-v1.js` owns pure construction, accrued balances, price sensitivity and the withdrawal-first unwind. `models/loop-lessons.js` owns reference scenarios and conceptual grading. Editorial definitions live in `learning/borrowing-loops.js`; presentation/links in `lib/loop-presentation.js` and `lib/loop-links.js`. `ui/borrowing-loops.js` renders with DOM nodes and guards stale clipboard results.
+
+`models/loop-risk.js` applies the shared single-event arithmetic to accrued loop balances with zero wallet cash, and derives a chart domain containing both comparison boundaries. The composition root injects `ui/loop-liquidation.js` into the loop controller. Optional `liquidation=single-liquidation-v1` link fields, loop draft metadata and named-experiment metadata preserve event assumptions without changing model inputs. Invalid event edits hide only that event, disable save/share and retain the last valid draft. Old records omit the event fields and open with default event assumptions.
 
 Presentation tests cover signed sub-cent comparisons and distinct unwind-state labels. The UI separates starting-price construction from later price/time results, preserves opened rounds across edits and moves focus to the round field when a clicked minus/plus control reaches its limit. Browser checks exercise those bounds, supply-only results and blocked unwind labels at desktop and narrow mobile widths.
 

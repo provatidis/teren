@@ -18,6 +18,14 @@ export function loanStatus(position) {
   return { 'no-debt': 'No loan to liquidate', above: 'Above the liquidation boundary', boundary: 'At the liquidation boundary', eligible: 'Eligible for liquidation' }[position.status];
 }
 
+export function boundaryDistance(price, boundary) {
+  if (boundary === null) return '';
+  if (price === boundary) return 'At the boundary at these balances.';
+  const distance = Math.abs(boundary / price - 1) * 100;
+  const amount = distance < .01 ? 'Less than 0.01%' : fmt(distance) + '%';
+  return amount + (boundary < price ? ' below' : ' above') + ' the selected price, at these balances.';
+}
+
 export function lendingMetrics(id, result) {
   if (id === 'supply') return [
     ['Supplied after one year', fmt(result.end.collateralTokens, 2) + ' ETH', 'Interest stays in the supplied asset'],

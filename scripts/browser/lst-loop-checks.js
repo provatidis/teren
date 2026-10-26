@@ -34,6 +34,8 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
     assert.equal(await text('lst-health'), health); assert.equal(await text('lst-net'), net);
     assert.notEqual(await text('lst-usd'), dollars);
     await fill('lst-discount', '10');
+    assert.equal(await text('lst-health'), health, 'New setups use conversion-rate valuation');
+    await fill('lst-oracleMode', 'market');
     assert.notEqual(await text('lst-health'), health);
     const discounted = await text('lst-net');
     await fill('lst-oracleMode', 'rate');
@@ -80,7 +82,7 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
     assert.match(await text('lst-exit-outcome'), /WETH debt still owed/);
     console.log('PASS: invalid inputs retain the valid draft; atomic exit keeps flash debt and blocks unavailable or underfunded execution');
 
-    await click('lst-reset'); await click('lst-view-hold'); await fill('lst-discount', '50');
+    await click('lst-reset'); await click('lst-view-hold'); await fill('lst-oracleMode', 'market'); await fill('lst-discount', '50');
     assert.match(await text('lst-health-note'), /Eligible for liquidation/);
     assert.equal(await visible('lst-liquidation'), true);
     await open('lst-liquidation');
@@ -121,6 +123,8 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
       await dragRangeToMax({ evaluate, call, fill }, 'lst-rounds');
       assert.equal((await state()).input.rounds, 8);
       await click('lst-view-hold');
+      await open('lst-oracle-settings');
+      await fill('lst-oracleMode', 'market');
       await dragRangeToMax({ evaluate, call, fill }, 'lst-discount');
       assert.equal((await state()).input.discount, 50);
       assert.match(await text('lst-health-note'), /Eligible/);

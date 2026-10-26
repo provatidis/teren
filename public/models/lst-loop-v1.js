@@ -4,7 +4,7 @@ export const LST_MODEL = 'lst-loop-v1';
 export const LST_DEFAULTS = Object.freeze({
   collateral: 5, rate: 1.2, rounds: 3, borrowPercent: 75, maxLTV: 90, threshold: 94,
   swapCost: 0.1, days: 365, stakingAPY: 3, lendingAPY: 0, borrowAPR: 2,
-  rateChange: false, laterAPR: 8, changeDay: 90, discount: 0, oracleMode: 'market',
+  rateChange: false, laterAPR: 8, changeDay: 90, discount: 0, oracleMode: 'rate',
   ethUSD: 2000, exitCost: 0.3, flashFee: 0.05, gas: 0.003, exitAvailable: true,
   repayPercent: 50, bonus: 3,
 });

@@ -3,9 +3,11 @@ import { createFeeContext } from '../lib/fee-context.js';
 import { labFeedback } from '../lib/lab-feedback.js';
 import { MODEL, DEFAULT_RANGE, LIMITS, calculateRange, comparisonRanges, explorerDomain, rangePreset, futurePricePreset, matchHoldingFees } from '../models/cl-range-v1.js';
 import { rangeHash } from '../lib/range-links.js';
+import { centeredBounds } from '../models/range-width.js';
 import { readSharedScenario } from '../lib/link-router.js';
 import { rangeCSV } from '../lib/range-csv.js';
 import { fmt, usd, percent, signedUSD, compactUSD } from '../lib/format.js';
+import { moneyMetric } from '../lib/money-metric.js';
 import { STATE_COPY, rangePriceLabels, assetAmounts } from '../lib/range-presentation.js';
 import { rangeCardBlob } from '../lib/range-card.js';
 import { downloadBlob } from '../lib/download.js';
@@ -52,10 +54,16 @@ export function initRangeLab({ navigation }) {
     $('cl-' + prefix + '-allocation-title').textContent = fmt(eth, 1) + '% ETH and ' + fmt(100 - eth, 1) + '% USDC by asset value, excluding assumed cash fees.';
   }
 
+  function rangeButtonInput(input, button) {
+    if (!button.dataset.rangeCentered) return rangePreset(input, Number(button.dataset.rangeWidth));
+    const preset = { ...input, ...centeredBounds(input.initialPrice, Number(button.dataset.rangeCentered)) };
+    calculateRange(preset); // Disable a preset when the new bounds exceed input limits.
+    return preset;
+  }
   function renderPresets(result) {
-    for (const button of document.querySelectorAll('[data-range-width]')) {
+    for (const button of document.querySelectorAll('[data-range-width], [data-range-centered]')) {
       try {
-        const preset = rangePreset(result, Number(button.dataset.rangeWidth));
+        const preset = rangeButtonInput(result, button);
         button.disabled = false;
         button.setAttribute('aria-pressed', String(preset.lowerPrice === result.lowerPrice && preset.upperPrice === result.upperPrice));
       } catch { button.disabled = true; button.setAttribute('aria-pressed', 'false'); }
@@ -167,13 +175,13 @@ export function initRangeLab({ navigation }) {
       const prices = rangePriceLabels(result.lowerPrice, result.upperPrice);
       $('cl-range-label').textContent = prices.lower + ' – ' + prices.upper;
       $('cl-setup-overview').textContent = usd(result.investment) + ' · ' + prices.lower + ' – ' + prices.upper;
-      $('cl-hold-value').textContent = usd(result.holdValue);
+      moneyMetric($('cl-hold-value'), result.holdValue);
       $('cl-hold-return').textContent = percent(result.holdReturn) + ' vs. investment';
       $('cl-held-note').textContent = assetAmounts(result.initial);
-      $('cl-full-value').textContent = usd(result.fullRange.lpValue);
+      moneyMetric($('cl-full-value'), result.fullRange.lpValue);
       $('cl-full-return').textContent = percent(result.fullRange.lpReturn) + ' vs. investment';
       $('cl-full-note').textContent = 'Starts 50/50 · ' + usd(result.fullRangeFees) + ' assumed cash fees';
-      $('cl-value').textContent = usd(result.lpValue);
+      moneyMetric($('cl-value'), result.lpValue);
       $('cl-return').textContent = percent(result.lpReturn) + ' vs. investment';
       $('cl-fees-note').textContent = 'Includes ' + usd(result.fees) + ' assumed cash fees';
       const magnitude = Math.abs(result.difference);
@@ -190,7 +198,7 @@ export function initRangeLab({ navigation }) {
       updateAllocation('initial', result.initialEthPercent);
       updateAllocation('final', result.finalEthPercent);
       $('cl-il').textContent = percent(result.impermanentLoss);
-      $('cl-break-even').textContent = usd(result.breakEvenFees);
+      moneyMetric($('cl-break-even'), result.breakEvenFees);
       feeContext.update(result);
       $('cl-full-hold').textContent = usd(result.fullRange.holdValue);
       $('cl-match-fees').disabled = result.breakEvenFees > LIMITS.fees.max;
@@ -227,8 +235,8 @@ export function initRangeLab({ navigation }) {
     const fraction = Math.max(0, Math.min(1, (coordinate - 70) / 620));
     setFuturePrice(Number((domain.low + fraction * (domain.high - domain.low)).toPrecision(12)), false);
   });
-  for (const button of document.querySelectorAll('[data-range-width]')) button.addEventListener('click', () => {
-    try { fillInputs(rangePreset(readInputs(), Number(button.dataset.rangeWidth))); render(); }
+  for (const button of document.querySelectorAll('[data-range-width], [data-range-centered]')) button.addEventListener('click', () => {
+    try { fillInputs(rangeButtonInput(readInputs(), button)); render(); }
     catch (error) { $('cl-error').textContent = error.message; }
   });
   for (const button of document.querySelectorAll('[data-range-price]')) button.addEventListener('click', () => {

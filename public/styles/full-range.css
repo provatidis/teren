@@ -80,3 +80,8 @@
 .scenario-section{margin-bottom:35px}
 .sandbox-heading .secondary{font-size:12px; padding:10px 12px}}
 .scenario-field input[aria-invalid=true]{border-color:var(--error)}
+.scenario-totals strong, .scenario-metrics strong { overflow-wrap: normal; white-space: nowrap; }
+@media (max-width: 420px) {
+  .scenario-totals, .scenario-assets { grid-template-columns: 1fr; }
+  .scenario-totals strong { font-size: 26px; }
+}

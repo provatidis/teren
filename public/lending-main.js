@@ -3,6 +3,7 @@ import { initPageAccess } from './ui/page-access.js';
 import { initLending } from './ui/lending.js';
 import { initLendingLearning } from './ui/lending-learning.js';
 import { initBorrowingLoops } from './ui/borrowing-loops.js';
+import { initLoopLiquidation } from './ui/loop-liquidation.js';
 import { initLSTLoops } from './ui/lst-loops.js';
 import { readLSTHash } from './lib/lst-links.js';
 import { lendingLessonFromHash } from './lib/lending-links.js';
@@ -11,7 +12,7 @@ import { focusInitialLesson } from './lib/learning-elements.js';
 
 initPageAccess();
 const loanLab = initLending();
-const loopLab = initBorrowingLoops();
+const loopLab = initBorrowingLoops({ initLiquidation: initLoopLiquidation });
 const lstLab = initLSTLoops();
 const learning = initLendingLearning();
 

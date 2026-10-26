@@ -25,7 +25,7 @@ export function experimentView(entry) {
   if (family === 'lending') {
     const loop = entry.model === 'borrowing-loop-v1';
     const result = loop ? calculateLoop(entry.inputs) : calculateLoan(entry.inputs);
-    const hash = loop ? loopHash(entry.inputs, entry.comparison?.rounds ?? null, entry.comparison?.borrowPercent ?? null)
+    const hash = loop ? loopHash(entry.inputs, entry.comparison?.rounds ?? null, entry.comparison?.borrowPercent ?? null, entry.liquidation ?? null)
       : loanHash(entry.inputs, entry.liquidation);
     return { result, family, modelName, hash, page: 'lending.html', net: loop ? result.end.netAssets : result.netAssets };
   }
@@ -112,7 +112,8 @@ export function experimentFacts(entry, detailed = false) {
       ...(loop ? [['Round count / borrowing fraction', p.rounds + ' / ' + fmt(p.borrowPercent) + '%'],
         ['Swap loss per swap', fmt(p.swapCost) + '%'],
         ['Saved reference', entry.comparison ? entry.comparison.rounds + ' rounds · ' + (entry.comparison.borrowPercent === null ? 'same borrowing fraction' : fmt(entry.comparison.borrowPercent) + '%') : 'None'],
-        ['Unwind preview', r.unwind.status], ['Debt after preview', usd(r.unwind.remaining.debt)]]
+        ['Unwind preview', r.unwind.status], ['Debt after preview', usd(r.unwind.remaining.debt)],
+        ['Liquidation illustration', (entry.liquidation?.repayPercent ?? 50) + '% repayment · ' + (entry.liquidation?.bonusPercent ?? 5) + '% bonus']]
         : [['Borrowed cash in wallet', usd(r.borrowedCash)], ['Supply used as collateral', p.collateralEnabled ? 'Yes' : 'No'],
           ['Response budget', usd(p.budget)], ['Liquidation illustration', (entry.liquidation?.repayPercent ?? 50) + '% repayment · ' + (entry.liquidation?.bonusPercent ?? 5) + '% bonus']]),
     ];

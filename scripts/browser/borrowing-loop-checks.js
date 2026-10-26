@@ -9,6 +9,8 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
   await navigate(base + 'lending.html#loops');
   assert.equal(await evaluate("document.getElementById('lending-experiment').hidden"), true);
   assert.equal(await evaluate("document.getElementById('lending-loops').hidden"), false);
+  // Start this default-case check independently of preceding saved-draft checks.
+  await click('loop-reset');
   assert.equal(await text('loop-net'), '$9,985.00');
   assert.equal(await text('loop-debt'), '$5,000.00');
   assert.equal(await evaluate("document.querySelectorAll('#loop-ledger details[open]').length"), 0);

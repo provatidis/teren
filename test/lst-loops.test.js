@@ -103,7 +103,7 @@ test('an earlier rate-only liquidation boundary is not erased by a later recover
 test('an exact endpoint boundary is flagged, and liquidation keeps unpaid debt', () => {
   const base = calculateLST(input({ days: 0 }));
   const discount = 100 * (1 - 1 / base.end.healthFactor);
-  const r = calculateLST(input({ days: 0, discount }));
+  const r = calculateLST(input({ days: 0, discount, oracleMode: 'market' }));
   assert.equal(r.end.status, 'boundary');
   assert.equal(r.exit.status, 'boundary');
   near(r.liquidation.repay, r.end.debt * 0.5);

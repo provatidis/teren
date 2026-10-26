@@ -1,6 +1,6 @@
 # Review status, evidence gaps and limitations
 
-Assessed against **Teren 1.39.1, 25 October 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. This documentation revision introduces no new chain capture, external audit or observed-user study.
+Assessed against **Teren 1.42.0, 26 October 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. The lab-risk update introduces no new chain capture, external audit or observed-user study.
 
 [Project overview](../README.md) · [Models](models.md) · [Learning and observation plan](learning.md) · [Roadmap](roadmap.md) · [Historical reviews](review-history.md)
 
@@ -36,6 +36,8 @@ Independent accounting methods should not be described as independent human revi
 **Operational reach.** Keyboard, narrow-screen and native-touch checks exist; actual Android Chrome and assistive-technology workflows still need observation. Public RPC availability can interrupt live imports; saved files and bundled records work locally. Older open tabs may need reloading after a deployment because old hashed assets are not retained indefinitely. [Development](development.md) documents this policy; real failures should guide any added retention machinery.
 
 ## Resolved concerns and next attention
+
+The lab review identified a missing liquidation consequence in ETH/USDC loops and unclear differences between neighboring experiments. A separate event now retains accrued debt, caps repayment at available collateral and makes the bonus cost visible; the chart includes liquidation boundaries. New LST setups use a visibly stated conversion-rate oracle assumption while older choices remain intact. Target exposure, retaining wstETH on exit and consistent interest controls remain practical gaps for experienced users; their next steps are in [the roadmap](roadmap.md#next-lab-iteration).
 
 Earlier reviews identified confusing entry routes, uneven comparison visuals, weak fee context and the absence of a same-period reference. Home and direct lesson entry, visual comparisons, the fee-flow experiment, the inactive week and the matched pair now address those concrete gaps. Their accounting and interactions have checks. The remaining questions concern interpretation, representativeness and real execution; they should not be presented as missing shipped features. [Historical reviews](review-history.md) retain the original findings and [release history](../CHANGELOG.md) records their treatment.
 

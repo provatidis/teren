@@ -1,24 +1,27 @@
 import { saveExperimentLocation } from '../data/experiment-location.js';
 import { validateExperimentDraft } from '../data/saved-experiments.js';
 import { renderLoopMoneyFlow } from '../lib/loop-money-flow.js';
+import { loopPriceDomain } from '../models/loop-risk.js';
 import { LOOP_MODEL, LOOP_DEFAULTS, LOOP_LIMITS, calculateLoop, validateLoop, loopAtPrice } from '../models/borrowing-loop-v1.js';
 import { calculateLoopComparison, validReferenceBorrowPercent } from '../models/loop-comparison.js';
 import { readLoopDraft, saveLoopDraft } from '../data/loop-state.js';
 import { loopHash, readLoopHash } from '../lib/loop-links.js';
-import { healthLabel, loanStatus } from '../lib/lending-presentation.js';
+import { healthLabel, loanStatus, boundaryDistance } from '../lib/lending-presentation.js';
 import { loopTokens, loopMoney, loopComparison, loopUnwindLabels, loopRoundLabel } from '../lib/loop-presentation.js';
 import { fmt, compactUSD, formatTokenQuantity } from '../lib/format.js';
 
 const money = loopMoney;
 const usdc = value => formatTokenQuantity(value, 2) + ' USDC';
 
-export function initBorrowingLoops() {
+export function initBorrowingLoops({ initLiquidation }) {
   const $ = id => document.getElementById(id);
   const keys = [...Object.keys(LOOP_LIMITS), 'interestMode'];
   const stored = readLoopDraft();
   let current = null, firstInvalid, revision = 0;
   let comparisonRounds = stored.comparisonRounds;
   let comparisonBorrowPercent = stored.comparisonBorrowPercent ?? null;
+  const liquidation = initLiquidation(() => render(true));
+  liquidation.write(stored.liquidation);
 
   function node(tag, copy, className) {
     const element = document.createElement(tag);
@@ -118,8 +121,7 @@ export function initBorrowingLoops() {
   }
   function renderChart(result, reference = null) {
     const input = result.input, left = 94, right = 600, top = 28, bottom = 246;
-    const minPrice = Math.max(0.01, Math.min(input.start * 0.5, input.future * 0.8));
-    const maxPrice = Math.max(input.start * 1.5, input.future * 1.2);
+    const { low: minPrice, high: maxPrice } = loopPriceDomain(result, reference);
     const low = loopAtPrice(result, minPrice).netAssets, high = loopAtPrice(result, maxPrice).netAssets;
     const refLow = reference ? loopAtPrice(reference, minPrice).netAssets : low;
     const refHigh = reference ? loopAtPrice(reference, maxPrice).netAssets : high;
@@ -252,6 +254,7 @@ export function initBorrowingLoops() {
     $('loop-risk-copy').textContent = loanStatus(end) + '. Health factor measures backing, not profit or price exposure.';
     $('loop-risk-boundary').textContent = end.boundaryPrice === null ? 'With no debt, there is no loan liquidation boundary.'
       : 'At these balances, the price boundary is ' + money(end.boundaryPrice) + '/ETH. Below it, liquidation is possible.';
+    $('loop-risk-distance').textContent = boundaryDistance(input.future, end.boundaryPrice);
     $('loop-risk').dataset.state = end.status;
     $('loop-liquidation-warning').hidden = end.status !== 'eligible' && end.status !== 'boundary';
     $('loop-accounting').replaceChildren(...facts([
@@ -264,9 +267,14 @@ export function initBorrowingLoops() {
     for (const button of document.querySelectorAll('[data-loop-rounds]')) button.setAttribute('aria-pressed', String(Number(button.dataset.loopRounds) === input.rounds));
     for (const button of document.querySelectorAll('[data-loop-price]')) button.setAttribute('aria-pressed', String(input.future === input.start * Number(button.dataset.loopPrice)));
     renderComparison(pair); renderLedger(result); renderChart(result, pair?.reference); renderUnwind(result);
+    const event = liquidation.render(result);
+    if (!event.valid) {
+      $('loop-share').disabled = true;
+      $('loop-save').disabled = true;
+    }
     refreshFlows();
-    const resumable = save && !invalidReference && saveExperimentLocation(LOOP_MODEL, loopHash(input, comparisonRounds, comparisonBorrowPercent));
-    if (save && !invalidReference) $('loop-storage').textContent = saveLoopDraft(input, undefined, comparisonRounds, comparisonBorrowPercent)
+    const resumable = save && !invalidReference && event.valid && saveExperimentLocation(LOOP_MODEL, loopHash(input, comparisonRounds, comparisonBorrowPercent, event.assumptions));
+    if (save && !invalidReference && event.valid) $('loop-storage').textContent = saveLoopDraft(input, undefined, comparisonRounds, comparisonBorrowPercent, event.assumptions)
       ? 'Working loop kept in this tab.' + (resumable ? ' Home can resume these inputs.' : '') + ' Save a named experiment to keep alternatives.'
       : 'Tab storage is unavailable. Copy a loop link to keep your setup.';
   }
@@ -286,6 +294,7 @@ export function initBorrowingLoops() {
     const shared = readLoopHash(location.hash);
     $('loop-route-note').hidden = shared.status !== 'invalid';
     if (shared.status === 'ready') {
+      liquidation.write(shared.liquidation);
       comparisonRounds = shared.comparisonRounds; comparisonBorrowPercent = shared.comparisonBorrowPercent ?? null;
       $('loop-reference-borrow').value = comparisonBorrowPercent ?? shared.input.borrowPercent;
       write(shared.input); render(true);
@@ -329,10 +338,10 @@ export function initBorrowingLoops() {
     comparisonBorrowPercent = $('loop-reference-borrow').value.trim() === '' ? NaN : Number($('loop-reference-borrow').value);
     render(true);
   });
-  $('loop-reset').addEventListener('click', () => { comparisonRounds = null; comparisonBorrowPercent = null; write(LOOP_DEFAULTS); render(true); $('loop-share-status').textContent = 'Default loop restored.'; });
+  $('loop-reset').addEventListener('click', () => { comparisonRounds = null; comparisonBorrowPercent = null; liquidation.write(); write(LOOP_DEFAULTS); render(true); $('loop-share-status').textContent = 'Default loop restored.'; });
   $('loop-share').addEventListener('click', async () => {
     if (!current) return;
-    const url = new URL(location.href); url.hash = loopHash(current.input, comparisonRounds, comparisonBorrowPercent);
+    const url = new URL(location.href); url.hash = loopHash(current.input, comparisonRounds, comparisonBorrowPercent, liquidation.read());
     const copiedRevision = revision;
     $('loop-share-url').value = url.href;
     try {
@@ -350,10 +359,12 @@ export function initBorrowingLoops() {
     getExperimentDraft() {
       if (!current || $('loop-save').disabled) return null;
       return validateExperimentDraft({ model: LOOP_MODEL, inputs: current.input,
+        liquidation: liquidation.read(),
         comparison: comparisonRounds === null ? null : { rounds: comparisonRounds, borrowPercent: comparisonBorrowPercent } });
     },
     setExperiment(entry) {
       const draft = validateExperimentDraft(entry);
+      liquidation.write(draft.liquidation);
       comparisonRounds = draft.comparison?.rounds ?? null;
       comparisonBorrowPercent = draft.comparison?.borrowPercent ?? null;
       $('loop-reference-borrow').value = comparisonBorrowPercent ?? draft.inputs.borrowPercent;

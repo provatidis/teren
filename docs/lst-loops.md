@@ -68,6 +68,8 @@ When `D > 0`, `days > 0` and `Qt × M − holding > 0`, the constant-equivalent 
 
 The oracle price is either `M` (follows the endpoint market discount) or `Rt` (tracks conversion value). These are deliberately simplified alternatives, not descriptions of specific live feeds. Actual market feeds, exchange-rate oracles, caps and update delays require their own adapters. A conversion-rate oracle can leave health unchanged while the market exit loses value.
 
+From 1.42.0, new setups and resets select conversion-rate valuation. Existing drafts, named experiments and complete shared links preserve their explicit oracle choice. The selection is visible beside the market-discount control. [BGD's explanation of Aave's wstETH oracle](https://governance.aave.com/t/exchange-rate-for-steth-eth-hardcoded/22693) supports this illustrative starting point; the model does not implement CAPO or establish current market parameters. A falling conversion rate can reduce health even when a market discount alone does not.
+
 Health factor is `Qt × oracle price × threshold / Dt`. Zero debt has no loan boundary. Exactly 1 is labelled the boundary; below it is eligible. A numerical tolerance of `1e−12` recognizes floating-point boundary cases.
 
 Before applying the endpoint discount, the rate-only path has at most two exponential segments. Each segment's log-health slope is `(ln(1+s) + ln(1+l) − borrow APR) / 365`. An analytic crossing check preserves the first boundary even when a subsequent rate reduction restores endpoint health. If it crossed, later balances are explicitly a thought experiment without liquidation. This is not a claim that the actual position survived.

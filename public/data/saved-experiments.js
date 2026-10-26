@@ -39,11 +39,12 @@ export function validateExperimentDraft(input) {
     if (Object.keys(errors).length) throw new Error(Object.values(errors)[0]);
     const keys = model === LOAN_MODEL ? [...Object.keys(LOAN_LIMITS), 'collateralEnabled'] : [...Object.keys(LOOP_LIMITS), 'interestMode'];
     const draft = { model, inputs: Object.fromEntries(keys.map(key => [key, input.inputs[key]])), origin: null };
-    if (model === LOAN_MODEL) {
+    if (model === LOAN_MODEL || input.liquidation != null) {
       const liquidation = input.liquidation ?? LIQUIDATION_DEFAULTS;
       if (Object.keys(validateLiquidation(liquidation)).length) throw new Error('Use valid liquidation assumptions.');
       draft.liquidation = Object.fromEntries(Object.keys(LIQUIDATION_LIMITS).map(key => [key, liquidation[key]]));
-    } else if (input.comparison != null) {
+    }
+    if (model === LOOP_MODEL && input.comparison != null) {
       const { rounds, borrowPercent } = input.comparison;
       if (!validReferenceRounds(rounds) || (borrowPercent !== null && !validReferenceBorrowPercent(borrowPercent, draft.inputs.maxLTV))) {
         throw new Error('Use a valid loop reference setup.');

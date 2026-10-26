@@ -125,6 +125,9 @@ export function initLSTLoops() {
     $('lst-balance-chart').setAttribute('aria-label', $('lst-balance-label').textContent);
     $('lst-health-note').textContent = loanStatus(p) + (input.oracleMode === 'rate' && input.discount > 0 ? '. The oracle ignores this market discount, but an exit still uses the lower sale price.' : '.');
     $('lst-health-note').dataset.state = p.status;
+    $('lst-oracle-summary').textContent = input.oracleMode === 'rate'
+      ? 'Oracle: conversion rate. This market discount affects the sale price, not the lender’s valuation.'
+      : 'Oracle: market price. This market discount reduces both sale value and the lender’s valuation.';
     $('lst-path-note').hidden = r.firstRateBoundary === null;
     $('lst-path-note').textContent = r.firstRateBoundary === null ? '' : 'The assumed rates reach the liquidation boundary around day ' + fmt(r.firstRateBoundary, 1) + ', even before applying the endpoint discount. Later balances are a no-liquidation thought experiment; an actual position may already have changed.';
     $('lst-conversion').textContent = tokens(r.rate, 'stETH / wstETH');
