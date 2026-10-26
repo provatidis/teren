@@ -1,6 +1,7 @@
 /* Keep the working inputs first; libraries and exports follow the analysis. */
 .intro-actions{display:flex;flex-direction:column;gap:12px;flex:0 0 auto;max-width:100%}
 .intro-actions .primary{width:auto;gap:16px;justify-content:center;min-height:48px}
+.intro-actions .primary>span{color:inherit;font-size:inherit}
 .intro-actions>a:last-child{color:var(--accent);font-size:14px;line-height:1.7;text-align:center}
 .quick-changes{border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin:0 0 18px;background:var(--surface)}
 .quick-changes>summary{cursor:pointer;font-size:14px;min-height:28px}
@@ -26,6 +27,12 @@
 .evidence-badge{display:inline-flex;align-items:center;border:1px solid var(--border-strong);background:var(--surface);color:var(--muted);border-radius:20px;padding:6px 11px;font-size:12px;line-height:1.6;white-space:normal}
 .lab-heading>.small-badge{max-width:250px}
 @media(max-width:750px){
+ /* The tabs already name each liquidity model; keep the first inputs closer. */
+ .liquidity-page .intro-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center;gap:8px}
+ .liquidity-page .intro-actions .primary{min-height:44px;padding:10px 12px;font-size:14px}
+ .liquidity-page .intro-actions>a:last-child{display:flex;align-items:center;justify-content:center;min-height:44px}
+ .liquidity-page #experiment-workspace .lab-heading .eyebrow,.liquidity-page #experiment-workspace .lab-heading>.small-badge{display:none}
+ .liquidity-page #experiment-workspace .lab-heading{margin-bottom:16px}
  .intro-actions{width:100%;gap:10px}
  .intro-actions .primary{width:100%;padding:12px 16px}
  .quick-changes{padding:13px 16px}

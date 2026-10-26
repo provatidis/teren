@@ -55,7 +55,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
       assert.equal(await evaluate("document.getElementById('applied-collection-evidence').checkVisibility() && document.getElementById('applied-price-evidence').checkVisibility()"), true);
       assert.deepEqual(await evaluate(`['applied-collection-evidence','applied-price-evidence'].map(id => {
         const panel = document.getElementById(id); return document.getElementById(panel.getAttribute('aria-labelledby'))?.textContent;
-      })`), ['Why the comparison improved', 'If ETH keeps rising']);
+      })`), ['Why the comparison improved', 'If ETH rises from here']);
       assert.equal(await evaluate("document.getElementById('applied-assessment-scope')"), null, 'Each question presents its evidence instead of explaining internal lesson state.');
       assert.match(await text('applied-question-window'), /Final comparison checkpoint: block 26090000/);
       assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"), '16', 'The observation still opens at the fixed final checkpoint.');

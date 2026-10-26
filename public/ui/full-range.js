@@ -101,6 +101,16 @@ export function initFullRangeLab({ navigation }) {
     }
   }
 
+  function renderPricePresets(input, valid = true) {
+    const validStart = Number.isFinite(input.initialPrice)
+      && input.initialPrice >= LIMITS.initialPrice.min && input.initialPrice <= LIMITS.initialPrice.max;
+    for (const button of document.querySelectorAll('[data-price-multiple]')) {
+      const price = input.initialPrice * Number(button.dataset.priceMultiple);
+      button.disabled = !validStart || price < LIMITS.futurePrice.min || price > LIMITS.futurePrice.max;
+      button.setAttribute('aria-pressed', String(valid && !button.disabled && price === input.futurePrice));
+    }
+  }
+
   function render() {
     $('scenario-save-status').textContent = '';
     cardGeneration++;
@@ -147,15 +157,12 @@ export function initFullRangeLab({ navigation }) {
       $('scenario-lp-usdc').textContent = `${fmt(result.pooled.usdc)} USDC`;
       $('scenario-lp-before-fees').textContent = usd(result.lpBeforeFees);
       $('scenario-cash-fees').textContent = `${usd(result.feeIncome)} assumed USD cash`;
-      for (const button of document.querySelectorAll('[data-price-multiple]')) {
-        const price = result.initialPrice * Number(button.dataset.priceMultiple);
-        button.disabled = price < LIMITS.futurePrice.min || price > LIMITS.futurePrice.max;
-        button.setAttribute('aria-pressed', String(price === result.futurePrice));
-      }
+      renderPricePresets(result);
       renderChart(result);
       renderTable(result);
     } catch (error) {
       current = null;
+      renderPricePresets(inputs, false);
       if (Object.keys(economicsFields('scenario')).some(key => $(fields[key]).getAttribute('aria-invalid') === 'true')) {
         $('scenario-cost-details').open = true;
       }

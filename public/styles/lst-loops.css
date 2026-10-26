@@ -33,7 +33,13 @@
 .lst-lab :is(button, input, select, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .lst-slider-field > label { display: grid; grid-template-columns: minmax(0, 1fr) 10ch; align-items: baseline; gap: 12px; }
 .lst-slider-field output { white-space: nowrap; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
-.lst-slider-field input { display: block; appearance: none; -webkit-appearance: none; height: 48px; padding: 0 12px; margin: 8px 0 0; border: 0; background: transparent; }
+.lst-exact-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lst-exact-heading > label { min-width: 0; }
+.lst-exact-value { display: flex; flex: 0 0 auto; align-items: center; gap: 6px; }
+.lst-exact-value input[type=number] { width: 8ch; min-height: 44px; padding: 8px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-size: 16px; font-variant-numeric: tabular-nums; }
+.lst-exact-value input[aria-invalid=true] { border-color: var(--error); }
+.lst-exact-value > span { color: var(--muted); font-size: 13px; }
+.lst-slider-field input[type=range] { display: block; appearance: none; -webkit-appearance: none; height: 48px; padding: 0 12px; margin: 8px 0 0; border: 0; background: transparent; }
 .lst-slider-field input::-webkit-slider-runnable-track { height: 6px; border-radius: 4px; background: var(--border-strong); }
 .lst-slider-field input::-moz-range-track { height: 6px; border-radius: 4px; background: var(--border-strong); }
 .lst-slider-field input::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 28px; height: 28px; margin-top: -11px; border: 3px solid var(--text); border-radius: 50%; background: var(--accent-ink); }

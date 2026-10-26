@@ -1,5 +1,13 @@
 # Release history
 
+## 1.48.1 · 2026-10-26
+
+- Keep collateral and debt on a common visual scale in LST stress results, including debt above collateral value. Add exact day and market-discount entries beside the sliders, preserving fractional inputs, validation and saved assumptions.
+- Keep the active lending lab when opening Saved experiments and returning through Experiment, Back or reload. Give an empty lending library relevant starting links. Bring fee-mechanics links directly to the opened illustration.
+- Explain invalid position NFT IDs beside the input and accept a leading #. Preserve the loaded snapshot during invalid edits. Clear stale liquidity price/range preset selections until the inputs are valid.
+- Shorten the mobile liquidity entry, keep Home continuation arrows beside their destinations and separate the arbitrage illustration’s prices on narrow phones. Clarify a recorded price-rise question, range controls and the moved-range lab invitation. Mention correlated-asset loops in About.
+- Extend desktop, keyboard and narrow-phone regression checks. Financial models, historical records and lesson grading are unchanged.
+
 ## 1.48.0 · 2026-10-26
 
 - Ground selected lesson questions in wallet quotes, position dashboards, range management and borrowing limits. Keep explanations, hints, optional predictions and direct lab access available; no required arithmetic is added.

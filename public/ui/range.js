@@ -220,6 +220,7 @@ export function initRangeLab({ navigation }) {
       renderPresets(result); renderExplorer(result, updateDomain); renderChart(result); renderComparisons(result);
     } catch (error) {
       current = null;
+      renderPresets(input);
       if (Object.keys(economicsFields('cl')).some(key => $(fields[key]).getAttribute('aria-invalid') === 'true')) {
         $('cl-cost-details').open = true; $('cl-fee-details').open = true;
       }

@@ -33,7 +33,7 @@
   <link rel="stylesheet" href="styles.css">
   <script type="module" src="main.js"></script>
 </head>
-<body>
+<body class="liquidity-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
   <header class="topbar">
     <a class="brand" href="./" aria-label="Teren home"><img class="brand-logo" src="assets/teren-logo.svg" width="145" height="40" alt=""></a>
@@ -43,7 +43,7 @@
   <main id="main-content" tabindex="-1">
     <noscript><div class="notice"><p>JavaScript is needed for the calculators and snapshot imports. Enable it to use the playground.</p></div></noscript>
     <section class="intro">
-      <div><p id="workspace-eyebrow" class="eyebrow evidence-badge">HYPOTHETICAL MODELS</p><h1 id="workspace-title" tabindex="-1">Compare liquidity scenarios</h1><p id="workspace-subtitle" class="subtitle">Change a price, range or fee assumption. Compare the outcome with holding.</p></div><div id="experiment-entry" class="intro-actions intro-range-link"><a id="example-start" class="button primary" href="#lp-lab">Start with a simple example →</a><a href="learn.html#lesson=swap-impact">Learn from the beginning →</a></div>
+      <div><p id="workspace-eyebrow" class="eyebrow evidence-badge">HYPOTHETICAL MODELS</p><h1 id="workspace-title" tabindex="-1">Compare liquidity scenarios</h1><p id="workspace-subtitle" class="subtitle">Change price, range or fees. Compare with holding.</p></div><div id="experiment-entry" class="intro-actions intro-range-link"><a id="example-start" class="button primary" href="#lp-lab"><span>Try an example</span><span aria-hidden="true">→</span></a><a href="learn.html#lesson=swap-impact">Start learning →</a></div>
     </section>
     <div id="workspace-tools" class="workspace-tools">
       <button id="workspace-tools-toggle" class="workspace-tools-toggle" type="button" aria-expanded="false" aria-controls="workspace-tool-links"><span id="workspace-tools-label">Explore experiment tools</span><span aria-hidden="true">⌄</span></button>
@@ -591,10 +591,10 @@
             <p class="body-copy">Read a Uniswap v3 WETH/USDC position on Ethereum. See its range, token mix and fee accounting at a recorded block, then test future-price assumptions in the range lab.</p>
             <details id="position-setup" class="position-setup" open><summary id="position-setup-summary" class="position-setup-summary"><span id="position-setup-label">Open a position</span><span id="position-setup-overview"></span></summary><div class="position-setup-body">
             <form id="position-form" class="position-form">
-              <div class="scenario-field"><label for="position-id">Position NFT ID <span>Ethereum · Uniswap v3</span></label><input id="position-id" type="text" inputmode="numeric" autocomplete="off" maxlength="80" value="1382030" required aria-describedby="position-id-help"></div>
+              <div class="scenario-field"><label for="position-id">Position NFT ID <span>Ethereum · Uniswap v3</span></label><input id="position-id" type="text" inputmode="numeric" autocomplete="off" maxlength="80" value="1382030" required aria-describedby="position-id-help position-id-error"><p id="position-id-error" class="field-error" aria-live="polite" hidden></p></div>
               <button id="position-fetch" class="button primary" type="submit">Fetch position <span>→</span></button>
             </form>
-            <p id="position-id-help" class="fine-print position-help">Find the NFT ID in your Uniswap position or its NFT page. This release supports WETH/USDC positions; no wallet connection is needed.</p>
+            <p id="position-id-help" class="fine-print position-help">Find the NFT ID in your Uniswap position or its NFT page. Enter its number, with or without a leading #. This release supports WETH/USDC positions; no wallet connection is needed.</p>
             <div class="pool-buttons"><button id="position-example-inside" class="button secondary" type="button">In-range example</button><button id="position-example" class="button secondary" type="button">Out-of-range example</button><button id="position-example-fees" class="button secondary" type="button">With fee accounting</button><label class="button secondary file-button" for="position-file">Open position file<input id="position-file" type="file" accept=".json,application/json" aria-label="Open position file"></label></div>
             <p class="fine-print">Fetching contacts PublicNode, with dRPC as a backup for public Ethereum data. Position files open locally. Values assume USDC = $1.</p>
             </div></details>

@@ -15,13 +15,25 @@ const loanLab = initLending();
 const loopLab = initBorrowingLoops({ initLiquidation: initLoopLiquidation });
 const lstLab = initLSTLoops();
 const learning = initLendingLearning();
+let lastExperimentView = 'loan';
 
 function route(scroll = false) {
   const loopLesson = loopLessonFromHash(location.hash), essential = lendingLessonFromHash(location.hash);
   const lesson = location.hash === '#learn' ? learning.resume() : loopLesson
     ? { chapter: 'loops', id: loopLesson } : essential ? { chapter: 'essentials', id: essential } : null;
-  const loops = lesson ? lesson.chapter === 'loops' : location.hash === '#loops' || readLoopHash(location.hash).status !== 'none';
-  const lst = !lesson && (location.hash === '#lst-loops' || readLSTHash(location.hash).status !== 'none');
+  const savedLibrary = location.hash === '#saved-experiments';
+  // The library belongs to every lab. Keep its originating view in this history
+  // entry so Back and reload retain that context without changing saved drafts.
+  const recordedView = history.state?.terenLendingView;
+  const libraryView = ['loan', 'loops', 'lst'].includes(recordedView) ? recordedView : lastExperimentView;
+  const loops = lesson ? lesson.chapter === 'loops' : savedLibrary ? libraryView === 'loops'
+    : location.hash === '#loops' || readLoopHash(location.hash).status !== 'none';
+  const lst = !lesson && (savedLibrary ? libraryView === 'lst'
+    : location.hash === '#lst-loops' || readLSTHash(location.hash).status !== 'none');
+  if (!lesson) {
+    lastExperimentView = lst ? 'lst' : loops ? 'loops' : 'loan';
+    history.replaceState({ ...history.state, terenLendingView: lastExperimentView }, '');
+  }
   document.body.dataset.lendingView = lesson ? 'learn' : lst ? 'lst' : loops ? 'loops' : 'loan';
   document.getElementById('lending-experiment').hidden = !!lesson || loops || lst;
   document.getElementById('lending-loops').hidden = !!lesson || !loops;
@@ -54,7 +66,7 @@ function route(scroll = false) {
   if (lesson) learning.activate(lesson.id, scroll, lesson.chapter);
   else {
     document.title = (lst ? 'Correlated-asset loops' : loops ? 'Borrowing-loop lab' : 'Lending lab') + ' · Teren';
-    if (scroll) {
+    if (scroll && !savedLibrary) {
       document.getElementById('lending-page-title').focus({ preventScroll: true });
       window.scrollTo({ top: 0, behavior: 'instant' });
     }

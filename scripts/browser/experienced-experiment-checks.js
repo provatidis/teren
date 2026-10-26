@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
 
 export async function checkExperiencedExperiments({ evaluate, click, fill, text, navigate, reload, base, call }) {
-  const localKeys = ['degenerator-experiments-v1', 'teren-experiment-location-v1'];
+  const localKeys = ['degenerator-experiments-v1', 'teren-experiment-location-v1', 'teren-learning-location-v1', 'teren-lst-loop-draft-v1'];
   const sessionKeys = ['teren-loop-draft-v1', 'teren-lending-draft-v1', 'teren-liquidation-draft-v1'];
   const before = await evaluate(`({ local: ${JSON.stringify(localKeys)}.map(k => [k, localStorage.getItem(k)]), session: ${JSON.stringify(sessionKeys)}.map(k => [k, sessionStorage.getItem(k)]) })`);
   const library = () => evaluate("JSON.parse(localStorage.getItem('degenerator-experiments-v1'))");
@@ -86,6 +86,28 @@ export async function checkExperiencedExperiments({ evaluate, click, fill, text,
     assert.equal(await evaluate("document.getElementById('liquidation-bonusPercent').value"), '7');
     assert.equal(await evaluate("document.getElementById('loan-future').value"), '1200');
 
+    for (const [hash, view, input] of [['#experiment', 'loan', 'loan-future'], ['#loops', 'loops', 'loop-future'], ['#lst-loops', 'lst', 'lst-days']]) {
+      await navigate(base + 'lending.html' + hash);
+      const draftValue = await evaluate(`document.getElementById('${input}').value`);
+      await evaluate("document.querySelector('#lending-tools a[href=\"#saved-experiments\"]').click()");
+      await settle(evaluate);
+      assert.equal(await evaluate('document.body.dataset.lendingView'), view, 'Opening Saved keeps the originating lending lab.');
+      assert.equal(await evaluate("document.getElementById('lending-nav-experiment').getAttribute('href')"), hash);
+      await reload(); await settle(evaluate);
+      assert.equal(await evaluate('document.body.dataset.lendingView'), view, 'Reloading Saved keeps its history entry’s lab.');
+      await click('lending-nav-experiment'); await settle(evaluate);
+      assert.equal(await evaluate('location.hash'), hash);
+      assert.equal(await evaluate(`document.getElementById('${input}').value`), draftValue);
+      await evaluate("new Promise(resolve=>{addEventListener('hashchange',resolve,{once:true});history.back()})");
+      await settle(evaluate);
+      assert.equal(await evaluate('location.hash'), '#saved-experiments');
+      assert.equal(await evaluate('document.body.dataset.lendingView'), view);
+      await click('lending-tool-loan'); await settle(evaluate);
+      await evaluate("new Promise(resolve=>{addEventListener('hashchange',resolve,{once:true});history.back()})");
+      await settle(evaluate);
+      assert.equal(await evaluate('document.body.dataset.lendingView'), view, 'Back restores the library’s original lab after visiting another one.');
+    }
+
     for (const [width, height] of [[390, 844], [320, 740]]) {
       await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: true });
       await navigate(shared);
@@ -99,10 +121,13 @@ export async function checkExperiencedExperiments({ evaluate, click, fill, text,
       await navigate(base + 'lending.html#saved-experiments');
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
       await navigate(base);
+      await evaluate("localStorage.setItem('teren-learning-location-v1','lending.html#lesson=borrow');dispatchEvent(new Event('storage'))");
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
       assert.equal(await evaluate("document.querySelectorAll('.home-topic-actions .button').length"), 4);
+      const returnLinks = await evaluate("['home-experiment','home-continue'].map(id=>{const link=document.getElementById(id),title=link.querySelector('strong').getBoundingClientRect(),arrow=link.lastElementChild.getBoundingClientRect();return {shown:!link.hidden,titleRight:title.right,titleBottom:title.bottom,arrowLeft:arrow.left,arrowTop:arrow.top}})");
+      assert.ok(returnLinks.every(link => link.shown && link.arrowLeft >= link.titleRight + 8 && link.arrowTop < link.titleBottom), 'Return-link arrows stay beside their destinations, including a long lesson title.');
     }
-    console.log('PASS: personal experiments, shared-condition loop comparisons, save/duplicate/reopen, local Home resume, custom ledger visuals and mobile layouts');
+    console.log('PASS: personal experiments, shared-condition loop comparisons, save/duplicate/reopen, Saved navigation/history, local Home resume, custom ledger visuals and mobile layouts');
   } finally {
     await evaluate(`for(const [k,v] of ${JSON.stringify(before.local)})v===null?localStorage.removeItem(k):localStorage.setItem(k,v);for(const [k,v] of ${JSON.stringify(before.session)})v===null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v)`);
   }

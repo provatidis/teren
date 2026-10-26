@@ -12,6 +12,8 @@ const signed = value => (value > 0 ? '+' : value < 0 ? '−' : '') + tokens(Math
 
 export function initLSTLoops() {
   const $ = id => document.getElementById(id);
+  const exactControls = { days: { unit: 'days', step: 1 }, discount: { unit: '% discount', step: 0.1 } };
+  const inputField = key => $('lst-' + key + (Object.hasOwn(exactControls, key) ? '-input' : ''));
   const stored = readLSTDraft();
   let view = stored.view, current = null, firstInvalid = null, revision = 0;
   const buildScene = createLSTScene($('lst-build-scene'), 'build');
@@ -21,14 +23,14 @@ export function initLSTLoops() {
   function write(input) {
     if (!Object.hasOwn(input, 'buildMode')) input = upgradeLST(input);
     for (const key of LST_KEYS) {
-      const field = $('lst-' + key);
+      const field = inputField(key);
       if (field.type === 'checkbox') field.checked = input[key];
       else field.value = input[key];
     }
   }
   function read() {
     return Object.fromEntries(LST_KEYS.map(key => {
-      const field = $('lst-' + key);
+      const field = inputField(key);
       return [key, field.type === 'checkbox' ? field.checked : ['oracleMode', 'buildMode', 'exitMode'].includes(key) ? field.value : field.value.trim() === '' ? NaN : Number(field.value)];
     }));
   }
@@ -70,7 +72,7 @@ export function initLSTLoops() {
     $('lst-chart-dot').setAttribute('cx', left + input.discount / 50 * (right - left));
     $('lst-chart-dot').setAttribute('cy', y(end.healthFactor));
     $('lst-chart-top').textContent = fmt(ceiling, 1);
-    $('lst-chart-caption').textContent = 'At ' + fmt(input.discount, 1) + '% discount, the selected oracle gives health factor ' + healthLabel(end.healthFactor) + '. Boundary oracle price: ' + tokens(result.boundaryPrice) + ' per wstETH.';
+    $('lst-chart-caption').textContent = 'At ' + formatTokenQuantity(input.discount, 6) + '% discount, the selected oracle gives health factor ' + healthLabel(end.healthFactor) + '. Boundary oracle price: ' + tokens(result.boundaryPrice) + ' per wstETH.';
     $('lst-health-chart').setAttribute('aria-label', $('lst-chart-caption').textContent + ' Market-oracle health falls with the discount; conversion-rate-oracle health stays constant.');
   }
   function render(save = false, resetScenes = false) {
@@ -97,7 +99,7 @@ export function initLSTLoops() {
     }
     firstInvalid = LST_KEYS.find(key => errors[key]);
     for (const key of LST_KEYS) {
-      $('lst-' + key).setAttribute('aria-invalid', String(!!errors[key]));
+      inputField(key).setAttribute('aria-invalid', String(!!errors[key]));
       $('lst-' + key + '-error').hidden = !errors[key];
       $('lst-' + key + '-error').textContent = errors[key] || '';
     }
@@ -105,8 +107,12 @@ export function initLSTLoops() {
     $('lst-save').disabled = !!firstInvalid;
     $('lst-share').disabled = !!firstInvalid;
     $('lst-rate-change-fields').hidden = !input.rateChange && !errors.changeDay && !errors.laterAPR;
-    for (const [key, suffix] of [['rounds', ' rounds'], ['days', ' days'], ['discount', '%']]) {
-      $('lst-' + key + '-value').textContent = Number.isFinite(input[key]) ? fmt(input[key], key === 'discount' ? 1 : 0) + suffix : 'Check value';
+    $('lst-rounds-value').textContent = Number.isFinite(input.rounds) ? fmt(input.rounds, 0) + ' rounds' : 'Check value';
+    for (const [key, { unit }] of Object.entries(exactControls)) {
+      const slider = $('lst-' + key);
+      if (!errors[key]) slider.value = input[key];
+      slider.setAttribute('aria-invalid', String(!!errors[key]));
+      slider.setAttribute('aria-valuetext', errors[key] ? 'Check the entered value' : formatTokenQuantity(input[key], 6) + ' ' + unit);
     }
     displayView();
     for (const id of ['lst-build-scene', 'lst-hold-results', 'lst-accounting', 'lst-chart-details', 'lst-exit-scene', 'lst-exit-outcome']) $(id).hidden = !!firstInvalid;
@@ -146,7 +152,9 @@ export function initLSTLoops() {
     $('lst-carry-health').textContent = healthLabel(p.healthFactor);
     $('lst-health').textContent = healthLabel(p.healthFactor);
     $('lst-debt').textContent = tokens(p.debt);
-    const debtWidth = p.collateralValue > 0 ? Math.min(500, p.debt / p.collateralValue * 500) : 500;
+    const balanceScale = Math.max(p.collateralValue, p.debt);
+    $('lst-collateral-bar').setAttribute('width', balanceScale > 0 ? p.collateralValue / balanceScale * 500 : 0);
+    const debtWidth = balanceScale > 0 ? p.debt / balanceScale * 500 : 0;
     for (const id of ['lst-debt-bar', 'lst-debt-pattern']) $(id).setAttribute('width', debtWidth);
     $('lst-balance-label').textContent = tokens(p.collateral, 'wstETH') + ' collateral = ' + tokens(p.collateralValue) + ' at the market price. Hatched: ' + tokens(p.debt) + ' debt.' + (p.debt > p.collateralValue ? ' Debt exceeds the collateral’s sale value.' : '');
     $('lst-balance-chart').setAttribute('aria-label', $('lst-balance-label').textContent);
@@ -211,7 +219,7 @@ export function initLSTLoops() {
     $('lst-view-' + target).focus();
     $('lending-lst').scrollIntoView({ block: 'start', behavior: 'instant' });
   });
-  for (const key of LST_KEYS) $('lst-' + key).addEventListener('input', () => {
+  for (const key of LST_KEYS) inputField(key).addEventListener('input', () => {
     if (key === 'buildMode') {
       // Leave an invalid, unsaved edit behind when switching construction modes.
       // Valid preferences are retained and saved, including the inactive mode.
@@ -224,6 +232,26 @@ export function initLSTLoops() {
     }
     render(true, key === 'buildMode');
   });
+  for (const [key, { step }] of Object.entries(exactControls)) {
+    const slider = $('lst-' + key);
+    slider.addEventListener('input', () => {
+      // Pointer movement uses comfortable increments; typed and restored values
+      // keep the model's full supported precision.
+      inputField(key).value = Math.round(Number(slider.value) / step) / (1 / step);
+      render(true);
+    });
+    slider.addEventListener('keydown', event => {
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+      const direction = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[event.key];
+      if (!direction && event.key !== 'Home' && event.key !== 'End') return;
+      event.preventDefault();
+      const minimum = Number(slider.min), maximum = Number(slider.max);
+      const next = event.key === 'Home' ? minimum : event.key === 'End' ? maximum
+        : Number((Number(slider.value) + direction * step).toPrecision(12));
+      inputField(key).value = Math.max(minimum, Math.min(maximum, next));
+      render(true);
+    });
+  }
   for (const button of document.querySelectorAll('[data-lst-target]')) button.addEventListener('click', () => {
     $('lst-targetExposure').value = button.dataset.lstTarget; render(true);
   });
@@ -235,7 +263,7 @@ export function initLSTLoops() {
     }
   });
   $('lst-fix').addEventListener('click', () => {
-    const field = $('lst-' + firstInvalid);
+    const field = inputField(firstInvalid);
     if (!field) return;
     const panel = field.closest('.lst-panel');
     changeView(panel.id.replace('lst-', ''));

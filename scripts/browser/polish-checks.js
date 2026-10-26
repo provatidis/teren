@@ -12,6 +12,38 @@ const waitForRecord = evaluate => evaluate(`new Promise((resolve, reject) => {
 })`);
 
 export async function checkPolish({ evaluate, navigate, call, base }) {
+  const edit = (id, value) => evaluate(`(() => {
+    const input = document.getElementById(${JSON.stringify(id)});
+    input.value = ${JSON.stringify(value)};
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  })()`);
+  await navigate(base + 'liquidity.html#lp-lab');
+  await evaluate("document.getElementById('scenario-reset').click()");
+  assert.equal(await evaluate("document.querySelector('[data-price-multiple=\"2\"]').getAttribute('aria-pressed')"), 'true');
+  await edit('scenario-future', '');
+  assert.equal(await evaluate("[...document.querySelectorAll('[data-price-multiple]')].some(button => button.getAttribute('aria-pressed') === 'true')"), false);
+  assert.equal(await evaluate("document.querySelector('[data-price-multiple=\"2\"]').disabled"), false, 'A price shortcut can replace a blank future price.');
+  await evaluate("document.querySelector('[data-price-multiple=\"2\"]').click()");
+  assert.equal(await evaluate("document.getElementById('scenario-results').hidden"), false);
+  await edit('scenario-start', '');
+  assert.equal(await evaluate("[...document.querySelectorAll('[data-price-multiple]')].every(button => button.disabled && button.getAttribute('aria-pressed') === 'false')"), true, 'A missing starting price clears and disables derived price shortcuts.');
+  await edit('scenario-start', '2000');
+  assert.equal(await evaluate("document.querySelector('[data-price-multiple=\"2\"]').getAttribute('aria-pressed')"), 'true');
+  assert.equal(await evaluate("document.querySelector('[data-price-multiple=\"2\"]').disabled"), false);
+
+  await navigate(base + 'liquidity.html#range-lab');
+  await evaluate("document.getElementById('cl-reset').click(); document.querySelector('[data-range-price=\"start\"]').click()");
+  assert.equal(await evaluate("document.querySelector('[data-range-price=\"start\"]').getAttribute('aria-pressed')"), 'true');
+  await edit('cl-future', '');
+  assert.equal(await evaluate("[...document.querySelectorAll('[data-range-width], [data-range-centered], [data-range-price]')].every(button => button.disabled && button.getAttribute('aria-pressed') === 'false')"), true);
+  await edit('cl-future', '2000');
+  assert.equal(await evaluate("document.querySelector('[data-range-price=\"start\"]').getAttribute('aria-pressed')"), 'true');
+  assert.equal(await evaluate("document.querySelector('[data-range-width=\"0.1\"]').disabled"), false);
+  await edit('cl-lower', '2200');
+  assert.equal(await evaluate("[...document.querySelectorAll('[data-range-width], [data-range-centered], [data-range-price]')].some(button => button.getAttribute('aria-pressed') === 'true')"), false, 'Invalid bounds cannot retain a selected range or price preset.');
+  await evaluate("document.getElementById('cl-reset').click()");
+  console.log('PASS: price and range shortcuts clear stale selections on invalid input and recover after correction');
+
   await navigate(base + 'liquidity.html#range-lab');
   const primaryValues = await evaluate("['cl-value','cl-hold-value'].map(id=>document.getElementById(id).textContent)");
   assert.equal(await evaluate("getComputedStyle(document.getElementById('cl-chart-full')).display"), 'none');

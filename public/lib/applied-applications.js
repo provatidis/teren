@@ -93,7 +93,7 @@ export function appliedApplication(id, question) {
   if (id !== 'period-vs-holding') throw new Error('Choose an applied exercise.');
   const exposure = appliedPriceExposure(question);
   return {expected: exposure.ethDifference < 0 ? 'smaller-lead' : exposure.ethDifference > 0 ? 'larger-lead' : 'same-lead', exposure,
-    context: 'ETH now rises further and stays above the range. The owner leaves the position unchanged, with no new fees or costs. USDC stays at $1.',
+    context: 'ETH rises from the final recorded price and stays above the range. The owner leaves the position unchanged, with no new fees or costs. USDC stays at $1.',
     question: 'What happens to the LP’s lead over holding?',
     choices: [['larger-lead','It grows.'],['smaller-lead','It shrinks.'],['same-lead','It stays the same.']],
     hint: 'Look at how much ETH each side owns, including the LP’s earned fee tokens.',
