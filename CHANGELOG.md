@@ -1,5 +1,12 @@
 # Release history
 
+## 1.49.0 · 2026-10-27
+
+- Compare two exact wstETH exposure targets inside Hold & stress. Both use the same original tokens, rates, time, prices, oracle, costs and exit destination. Show differences against holding, health, oracle-price headroom and after-exit outcomes together.
+- Keep targets above the borrowing limit visible as unavailable without changing the main setup. Flag earlier liquidation boundaries and suppress executable exit outcomes after a boundary. Preserve optional comparisons in drafts, links, Home resumption and named experiment exports; older rounds and records retain their meaning.
+- Put the main setup’s break-even borrow APR beside its rate controls, explicitly before exit costs, with a direct route to the exit preview. Keep mobile readouts beside the controls and stable during touch dragging; retain complete chart-end labels on narrow screens. Correct saved liquidity comparisons to acknowledge entered LP costs.
+- Extend accounting, compatibility, keyboard and desktop/mobile checks. Existing financial formulas and recorded evidence are unchanged.
+
 ## 1.48.1 · 2026-10-26
 
 - Keep collateral and debt on a common visual scale in LST stress results, including debt above collateral value. Add exact day and market-discount entries beside the sliders, preserving fractional inputs, validation and saved assumptions.

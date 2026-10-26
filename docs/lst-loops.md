@@ -132,9 +132,17 @@ Final WETH cash and both debts are zero. Unsold wstETH remains in the wallet, re
 
 The retained-token benchmark is the original `q` wstETH held without an exit transaction. The comparison therefore shows retained tokens minus original tokens, rather than deducting hypothetical sale costs from a holder who has not sold. With no debt, flash borrowing and repayment are skipped; a positive flat exit cost still requires selling enough to fund it. With neither debt nor cost, all collateral is retained.
 
+## Shared-condition target comparison
+
+The optional comparison in Hold & stress changes only `targetExposure`. The original wstETH, build costs, LTV limit, staking and lending yields, borrowing-rate phases, elapsed time, market discount, oracle and exit assumptions are shared. It reuses the existing v2 calculation for each target; no return formula changes. Equal targets produce equal outcomes, and a 1× reference retains its configured collateral lending yield and exit costs.
+
+Each card shows the difference against holding before exit costs, endpoint health, oracle-price headroom and the selected after-exit benchmark. For a position above the liquidation boundary, additional oracle-price headroom at fixed balances is `100 × (1 − 1 / healthFactor)` percent. At or below the boundary it is zero; without debt there is no loan boundary. This is a fall in **oracle valuation**, not a market-discount allowance when the oracle follows the conversion rate. An earlier rate-only boundary is shown beside the figures; later balances assume no liquidation and no executable exit is displayed.
+
+Reference targets from 1× to 50× can be retained even when the shared LTV limit makes them unavailable. They are never silently reduced. A malformed target prevents saving or sharing the edited pair and leaves the last valid draft and link intact. The main calculation remains available. Comparisons require an exact-target build; legacy rounds are never converted automatically.
+
 ## Saved scenarios and versions
 
-`lst-loop-v1` links, drafts and named records keep their original rounds, oracle choice and full-sale calculation. Opening one in the current editor adds explicit round mode and WETH destination without changing its existing inputs. Saving that working variation creates a `lst-loop-v2` record; the original record remains unchanged. Both versions can be exported and compared, with differing construction or exit destinations identified. New drafts and links include the target, build flash fee and exit destination.
+`lst-loop-v1` links, drafts and named records keep their original rounds, oracle choice and full-sale calculation. Opening one in the current editor adds explicit round mode and WETH destination without changing its existing inputs. Saving that working variation creates a `lst-loop-v2` record; the original record remains unchanged. Both versions can be exported and compared, with differing construction or exit destinations identified. New drafts and links include the target, build flash fee and exit destination. An optional `{targetExposure}` comparison and `compareTarget` link parameter preserve a reference target through drafts, named records, exports and Home resumption. Records without this metadata keep their previous shape. Saved-library comparison cards show each record’s main setup, identify a retained reference in the assumptions, and reopen the complete pair.
 
 ## Evidence and next validation
 

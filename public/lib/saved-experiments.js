@@ -19,7 +19,7 @@ export function experimentView(entry) {
   const family = experimentFamily(entry.model), modelName = experimentModelName(entry.model);
   if (family === 'correlated') {
     const result = lstModel(entry.model).calculateLST(entry.inputs);
-    return { result, family, modelName, hash: lstHash(entry.inputs), page: 'lending.html', net: result.end.net };
+    return { result, family, modelName, hash: lstHash(entry.inputs, 'hold', entry.comparison), page: 'lending.html', net: result.end.net };
   }
   if (family === 'lending') {
     const loop = entry.model === 'borrowing-loop-v1';
@@ -35,7 +35,9 @@ export function experimentView(entry) {
 }
 export function defaultExperimentName(draft) {
   const { result } = experimentView(draft);
-  if (experimentFamily(draft.model) === 'correlated') return 'wstETH/WETH · ' + (draft.inputs.buildMode === 'target' ? formatTokenQuantity(draft.inputs.targetExposure, 3) + '× starting tokens' : draft.inputs.rounds + ' rounds') + ' · ' + formatTokenQuantity(draft.inputs.discount, 6) + '% discount';
+  if (experimentFamily(draft.model) === 'correlated') return 'wstETH/WETH · ' + (draft.inputs.buildMode === 'target'
+    ? formatTokenQuantity(draft.inputs.targetExposure, 3) + '×' + (draft.comparison ? ' vs ' + formatTokenQuantity(draft.comparison.targetExposure, 3) + '×' : ' starting tokens')
+    : draft.inputs.rounds + ' rounds') + ' · ' + formatTokenQuantity(draft.inputs.discount, 6) + '% discount';
   if (experimentFamily(draft.model) === 'lending') {
     return draft.model === 'borrowing-loop-v1'
       ? draft.inputs.rounds + ' rounds · borrow ' + fmt(draft.inputs.borrowPercent) + '% · ETH → ' + usd(draft.inputs.future)
@@ -82,7 +84,9 @@ export function comparisonContext(entries) {
 
 export function experimentSummary(entry) {
   const { result, family } = experimentView(entry);
-  if (family === 'correlated') return fmt(entry.inputs.collateral, 4) + ' wstETH · ' + (entry.inputs.buildMode === 'target' ? formatTokenQuantity(entry.inputs.targetExposure, 3) + '× target' : entry.inputs.rounds + ' rounds') + ' · ' + formatTokenQuantity(entry.inputs.days, 6) + ' days · ' + formatTokenQuantity(entry.inputs.discount, 6) + '% market discount';
+  if (family === 'correlated') return fmt(entry.inputs.collateral, 4) + ' wstETH · ' + (entry.inputs.buildMode === 'target'
+    ? formatTokenQuantity(entry.inputs.targetExposure, 3) + '×' + (entry.comparison ? ' setup / ' + formatTokenQuantity(entry.comparison.targetExposure, 3) + '× reference' : ' target')
+    : entry.inputs.rounds + ' rounds') + ' · ' + formatTokenQuantity(entry.inputs.days, 6) + ' days · ' + formatTokenQuantity(entry.inputs.discount, 6) + '% market discount';
   if (family === 'lending') {
     const p = entry.inputs;
     return formatTokenQuantity(p.collateral, 4) + ' ETH · ETH ' + usd(p.start) + ' → ' + usd(p.future) + ' · ' + formatTokenQuantity(p.days, 2) + ' days';
@@ -92,7 +96,7 @@ export function experimentSummary(entry) {
 
 export function experimentFacts(entry, detailed = false) {
   const { result: r, family, initial, net } = experimentView(entry);
-  if (family === 'correlated') return lstExperimentFacts(r, detailed);
+  if (family === 'correlated') return lstExperimentFacts(r, detailed, entry.comparison);
   if (family === 'lending') {
     const p = entry.inputs, loop = entry.model === 'borrowing-loop-v1';
     const rows = [

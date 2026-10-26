@@ -1,6 +1,6 @@
 # Review status, evidence gaps and limitations
 
-Assessed against **Teren 1.48.1, 26 October 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. The latest polish corrects LST balance-chart scaling, improves precise inputs and navigation, and clarifies lesson handoffs. The evidence status below is unchanged.
+Assessed against **Teren 1.49.0, 27 October 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. LST experiments now compare exposure targets under shared conditions, including oracle-price headroom and after-exit outcomes. The evidence status below is unchanged.
 
 [Project overview](../README.md) · [Models](models.md) · [Learning and observation plan](learning.md) · [Roadmap](roadmap.md) · [Historical reviews](review-history.md)
 

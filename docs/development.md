@@ -38,6 +38,8 @@ Set `TEST_BASE_URL` to a deployed site or a local server with a project subpath 
 
 For focused lab-risk checks, `BROWSER_CHECKS=risk npm run test:browser` covers loop liquidation, draft/link recovery, boundary distances, visible mobile tools and whole figures at 390px/320px. The full suite includes these checks.
 
+For focused LST target-comparison checks, `BROWSER_CHECKS=lst-comparison npm run test:browser` covers shared conditions, unavailable targets, boundary recovery, both exits, persistence and narrow layouts. The full suite includes these checks.
+
 For a focused lesson check, `BROWSER_CHECKS=predictions npm run test:browser` exercises all twenty starting setups, prediction controls, keyboard skipping and progress restoration at desktop and mobile sizes. The full suite remains the release gate.
 
 Run `npm run build` before publication. The dependency-free builder hashes every JS/CSS asset after rewriting its dependencies, flattens plain local CSS imports in cascade order with nested URL rebasing, then rewrites HTML entries and preloads each entry’s transitive module graph. Unsupported CSS import forms fail before output is replaced. Shared dependencies keep one URL and identity. Source imports remain canonical and have no release queries; the old hand-maintained stamper is removed. `dist/build-manifest.json` identifies the release and every output asset. Original source paths remain as compatibility aliases for previously cached entries. An old open tab may require a reload after deployment if its earlier hashed assets are no longer published. Hashes prevent mixing changed dependencies within the new build; this is not indefinite retention of older releases. Storage keys and model versions are independent of asset URLs.

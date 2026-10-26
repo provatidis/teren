@@ -3,6 +3,7 @@ import { liquidityModel, isRangeModel } from '../models/liquidity-models.js';
 import { loanModel } from '../models/loan-models.js';
 import { LOOP_MODEL, LOOP_LIMITS, validateLoop } from '../models/borrowing-loop-v1.js';
 import { lstModel } from '../models/lst-models.js';
+import { validateLSTComparison } from '../models/lst-comparison.js';
 import { LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation } from '../models/loan-explanations.js';
 import { validReferenceRounds, validReferenceBorrowPercent } from '../models/loop-comparison.js';
 import { validateSnapshot, snapshotView } from './snapshot.js';
@@ -31,7 +32,9 @@ export function validateExperimentDraft(input) {
     if (input.origin != null) throw new Error('LST loops use hypothetical assumptions, without a recorded source.');
     const errors = validateLST(input.inputs);
     if (Object.keys(errors).length) throw new Error(Object.values(errors)[0]);
-    return { model, inputs: Object.fromEntries(LST_KEYS.map(key => [key, input.inputs[key]])), origin: null };
+    const inputs = Object.fromEntries(LST_KEYS.map(key => [key, input.inputs[key]]));
+    const comparison = validateLSTComparison(inputs, input.comparison);
+    return { model, inputs, origin: null, ...(comparison ? { comparison } : {}) };
   }
   const loan = loanModel(model);
   if (loan || model === LOOP_MODEL) {

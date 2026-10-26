@@ -1,6 +1,7 @@
 import { LST_DEFAULTS } from '../models/lst-loop-v2.js';
 import { lstModelForInput } from '../models/lst-models.js';
 import { LST_VIEWS } from '../lib/lst-links.js';
+import { validateLSTComparison } from '../models/lst-comparison.js';
 
 export const LST_DRAFT_KEY = 'teren-lst-loop-draft-v1';
 export function readLSTDraft(getStorage = () => globalThis.localStorage) {
@@ -13,12 +14,17 @@ export function readLSTDraft(getStorage = () => globalThis.localStorage) {
     const saved = JSON.parse(raw);
     const { version, LST_KEYS, validateLST } = lstModelForInput(saved.input);
     if (saved.version !== version || Object.keys(validateLST(saved.input)).length || !LST_VIEWS.includes(saved.view)) return fallback('invalid');
-    return { input: Object.fromEntries(LST_KEYS.map(key => [key, saved.input[key]])), view: saved.view, status: 'ready' };
+    const input = Object.fromEntries(LST_KEYS.map(key => [key, saved.input[key]]));
+    const comparison = validateLSTComparison(input, saved.comparison);
+    return { input, view: saved.view, status: 'ready', ...(comparison ? { comparison } : {}) };
   } catch { return fallback('invalid'); }
 }
-export function saveLSTDraft(input, view, getStorage = () => globalThis.localStorage) {
+export function saveLSTDraft(input, view, getStorage = () => globalThis.localStorage, comparison = null) {
   const { version, validateLST } = lstModelForInput(input);
   if (Object.keys(validateLST(input)).length || !LST_VIEWS.includes(view)) return false;
-  try { getStorage().setItem(LST_DRAFT_KEY, JSON.stringify({ version, input, view })); return true; }
+  try {
+    const reference = validateLSTComparison(input, comparison);
+    getStorage().setItem(LST_DRAFT_KEY, JSON.stringify({ version, input, view, ...(reference ? { comparison: reference } : {}) })); return true;
+  }
   catch { return false; }
 }

@@ -784,8 +784,15 @@
         <section id="lst-hold" class="lst-panel card" aria-labelledby="lst-hold-title" hidden>
           <h2 id="lst-hold-title">What earns, what costs, what can break?</h2>
           <p class="body-copy">Staking changes the value of each wstETH. Borrowing adds WETH debt. Test both over the same period.</p>
+          <label class="loan-checkbox lst-compare-toggle"><input id="lst-compare-toggle" type="checkbox" aria-controls="lst-comparison-setup lst-comparison-results"> Compare exposure targets</label>
+          <p id="lst-comparison-unavailable" class="fine-print" hidden>Compare exact targets after choosing a target-based build. Your borrowing rounds stay as they are. <button id="lst-comparison-build" class="text-button" type="button">Review the build →</button></p>
           <div class="lst-two-column">
             <div class="lst-controls">
+              <section id="lst-comparison-setup" class="lst-comparison-setup" aria-label="Exposure targets" hidden>
+                <div class="lst-comparison-current"><strong id="lst-comparison-primary">Your setup · 3×</strong><button id="lst-comparison-edit" class="text-button" type="button">Edit in Build →</button></div>
+                <div class="scenario-field"><label for="lst-reference-target">Reference target <span>× original wstETH</span></label><input id="lst-reference-target" type="number" min="1" max="50" step="any" value="2" aria-describedby="lst-reference-target-error lst-comparison-input-note"><p id="lst-reference-target-error" class="field-error" hidden></p></div>
+                <p id="lst-comparison-input-note" class="fine-print">Both use the same starting tokens, rates, time, prices and exit assumptions. Only the target changes.</p>
+              </section>
               <div class="lst-slider-field">
   <div class="lst-exact-heading"><label for="lst-days">Time held</label><div class="lst-exact-value"><input id="lst-days-input" type="number" min="0" max="1825" step="any" value="365" aria-label="Time held in days" aria-describedby="lst-days-error"><span aria-hidden="true">days</span></div></div>
   <input id="lst-days" type="range" min="0" max="1825" step="any" value="365" aria-describedby="lst-days-error">
@@ -800,7 +807,16 @@
   <input id="lst-borrowAPR" type="number" min="0" max="100" step="any" value="2" aria-describedby="lst-borrowAPR-error">
   <p id="lst-borrowAPR-error" class="field-error" hidden></p>
 </div></div>
-              <div id="lst-carry-preview" class="lst-inline-result lst-mobile-result"><span>Loop minus holding</span><strong id="lst-carry-value"></strong><span>Health factor: <b id="lst-carry-health"></b></span><small>Before liquidation and exit</small></div>
+              <div id="lst-carry-threshold" class="lst-carry-threshold">
+                <p class="eyebrow">BEFORE EXIT COSTS</p>
+                <dl id="lst-break-even"><div><dt>Borrow APR to match holding</dt><dd id="lst-break-even-value"></dd></div><div><dt>Your average borrow APR</dt><dd id="lst-average-apr"></dd></div></dl>
+                <button id="lst-check-exit" class="text-button" type="button">Check the result after exit costs →</button>
+              </div>
+              <div id="lst-carry-preview" class="lst-inline-result lst-mobile-result">
+                <span id="lst-carry-label">Loop minus holding</span><strong id="lst-carry-value"></strong><span>Health factor: <b id="lst-carry-health"></b></span>
+                <div id="lst-reference-preview" class="lst-reference-preview" hidden><span id="lst-reference-carry-label">Reference vs holding</span><strong id="lst-reference-carry-value"></strong><span id="lst-reference-carry-health-row">Health factor: <b id="lst-reference-carry-health"></b></span></div>
+                <small>Before liquidation and exit</small>
+              </div>
               <p id="lst-rate-summary" class="fine-print"></p>
               <div class="lst-slider-field">
   <div class="lst-exact-heading"><label for="lst-discount">Market discount vs conversion value</label><div class="lst-exact-value"><input id="lst-discount-input" type="number" min="0" max="50" step="any" value="0" aria-label="Market discount as a percentage of conversion value" aria-describedby="lst-discount-error"><span aria-hidden="true">%</span></div></div>
@@ -808,6 +824,8 @@
   <p id="lst-discount-error" class="field-error" hidden></p>
 </div>
               <p id="lst-discount-result" class="lst-inline-result"></p>
+              <p id="lst-break-even-note" class="fine-print" hidden></p>
+              <p id="lst-preview-warning" class="lst-comparison-warning lst-mobile-warning" hidden></p>
               <details id="lst-rates"><summary>Change rates during the period</summary>
                 <label class="loan-checkbox"><input id="lst-rateChange" type="checkbox" aria-describedby="lst-rateChange-error"> Change the borrow rate once</label><p id="lst-rateChange-error" class="field-error" hidden></p>
                 <div id="lst-rate-change-fields" class="lst-fields" hidden><div class="scenario-field">
@@ -843,6 +861,9 @@
                 <p class="fine-print">A shared ETH dollar-price move changes the dollar values of collateral and WETH debt together. It does not change this model’s health factor.</p>
               </details>
             </div>
+            <div id="lst-hold-analysis" class="lst-hold-analysis">
+              <section id="lst-comparison-results" aria-label="Exposure target comparison" hidden></section>
+              <details id="lst-primary-details" class="lst-primary-details" open><summary id="lst-primary-details-summary" hidden>Your setup in detail</summary>
             <div id="lst-hold-results" class="lst-outcomes">
               <div class="lst-headline"><p>Assets minus debt · before liquidation and exit</p><strong id="lst-net"></strong><span id="lst-usd"></span></div>
               <div class="lst-balance-visual"><svg id="lst-balance-chart" viewBox="0 0 500 85" role="img" aria-label="Collateral value and WETH debt"><defs><pattern id="lst-debt-hatch" patternUnits="userSpaceOnUse" width="7" height="7"><path d="M-2 2L2-2M0 7L7 0M5 9L9 5" class="lst-debt-stripe"/></pattern></defs><rect id="lst-collateral-bar" x="0" y="4" width="500" height="22" rx="3" class="lst-collateral-bar"/><rect id="lst-debt-bar" x="0" y="52" width="0" height="22" rx="3" class="lst-debt-bar"/><rect id="lst-debt-pattern" x="0" y="52" width="0" height="22" rx="3" fill="url(#lst-debt-hatch)"/></svg><p id="lst-balance-label"></p></div>
@@ -852,9 +873,8 @@
               <dl class="lst-prices"><div><dt>Conversion rate</dt><dd id="lst-conversion"></dd></div><div><dt>Market sale price</dt><dd id="lst-market"></dd></div><div><dt>Oracle price</dt><dd id="lst-oracle"></dd></div></dl>
               <p class="fine-print">The discount is a stress applied at the selected endpoint. These balances assume no earlier liquidation. Unwrapping wstETH gives stETH; it does not guarantee an immediate ETH exit.</p>
             </div>
-          </div>
-          <details id="lst-accounting"><summary>Where the difference comes from</summary><dl id="lst-ledger" class="lst-facts"></dl><p id="lst-break-even" class="body-copy"></p><p class="fine-print">The holding reference keeps your original wstETH in a wallet, earning the same staking growth. It earns no extra collateral lending yield. Rates and prices are assumptions; the comparison excludes exit costs.</p></details>
-          <details id="lst-chart-details"><summary>See health factor across market discounts</summary><figure class="lst-health-chart"><svg id="lst-health-chart" viewBox="0 0 620 230" role="img" aria-label="Health factor under market and conversion-rate oracle assumptions"><path id="lst-chart-boundary" class="lst-boundary"/><path id="lst-chart-market" class="lst-market-line"/><path id="lst-chart-rate" class="lst-rate-line"/><circle id="lst-chart-dot" r="5" class="lst-chart-dot"/><text x="12" y="26" id="lst-chart-top" class="chart-label"/><text x="14" y="198" class="chart-label">0</text><text x="65" y="224" class="chart-label">0% discount</text><text x="480" y="224" class="chart-label">50% discount</text></svg><figcaption id="lst-chart-caption" class="fine-print"></figcaption><p class="fine-print">Solid: market oracle · dashed: conversion-rate oracle · dotted: health factor 1. All other conditions stay fixed; this is a sensitivity chart, not a price history.</p></figure></details>
+          <details id="lst-accounting"><summary>Where the difference comes from</summary><dl id="lst-ledger" class="lst-facts"></dl><p class="fine-print">The holding reference keeps your original wstETH in a wallet, earning the same staking growth. It earns no extra collateral lending yield. Rates and prices are assumptions; the comparison excludes exit costs.</p></details>
+          <details id="lst-chart-details"><summary>See health factor across market discounts</summary><figure class="lst-health-chart"><svg id="lst-health-chart" viewBox="0 0 620 230" role="img" aria-label="Health factor under market and conversion-rate oracle assumptions"><path id="lst-chart-boundary" class="lst-boundary"/><path id="lst-chart-market" class="lst-market-line"/><path id="lst-chart-rate" class="lst-rate-line"/><circle id="lst-chart-dot" r="5" class="lst-chart-dot"/><text x="12" y="26" id="lst-chart-top" class="chart-label"/><text x="14" y="198" class="chart-label">0</text><text x="65" y="224" class="chart-label">0% discount</text><text x="590" y="224" text-anchor="end" class="chart-label">50% discount</text></svg><figcaption id="lst-chart-caption" class="fine-print"></figcaption><p class="fine-print">Solid: market oracle · dashed: conversion-rate oracle · dotted: health factor 1. All other conditions stay fixed; this is a sensitivity chart, not a price history.</p></figure></details>
           <details id="lst-liquidation" hidden><summary>What could one liquidation take?</summary><p class="body-copy">A liquidator repays some WETH debt and takes wstETH worth that repayment plus a bonus at the assumed oracle price.</p><div class="lst-fields"><div class="scenario-field">
   <label for="lst-repayPercent">Debt repaid in this event <span>%</span></label>
   <input id="lst-repayPercent" type="number" min="1" max="100" step="any" value="50" aria-describedby="lst-repayPercent-error">
@@ -864,6 +884,9 @@
   <input id="lst-bonus" type="number" min="0" max="30" step="any" value="3" aria-describedby="lst-bonus-error">
   <p id="lst-bonus-error" class="field-error" hidden></p>
 </div></div><dl id="lst-liquidation-results" class="lst-facts"></dl><p class="fine-print">One hypothetical event at this endpoint. Remaining debt stays owed; this does not reproduce a protocol’s complete liquidation rules or an earlier event along the path.</p></details>
+              </details>
+            </div>
+          </div>
           <button id="lst-to-exit" class="button secondary" type="button">Explore the exit →</button>
         </section>
         <section id="lst-exit" class="lst-panel card" aria-labelledby="lst-exit-title" hidden>
@@ -921,7 +944,7 @@
       <p id="experiments-no-match" class="fine-print" hidden>No experiments match this search.</p>
       <ul id="experiments-list" class="experiment-library-list" aria-label="Saved experiments"></ul>
       <div id="experiments-comparison-controls" class="experiment-comparison-controls" hidden><p id="experiments-selection">Select two or three experiments to compare.</p><button id="experiments-compare" class="button secondary" type="button" disabled>Compare selected</button><button id="experiments-clear-selection" class="text-button" type="button" hidden>Clear selection</button></div>
-      <section id="experiments-comparison" class="experiment-comparison" aria-labelledby="experiments-comparison-title" tabindex="-1" hidden><div class="experiment-comparison-heading"><h3 id="experiments-comparison-title">Compare saved experiments</h3><button id="experiments-close-comparison" class="text-button" type="button">Close comparison</button></div><p id="experiments-comparison-context" class="experiment-comparison-context"></p><p id="experiments-comparison-scope" class="fine-print">Each holding benchmark keeps that experiment’s own starting tokens. Fees are assumed USD cash; gas, incentives and trading paths are excluded. Values use USDC = $1.</p><div id="experiments-comparison-cards" class="experiment-comparison-cards"></div></section>
+      <section id="experiments-comparison" class="experiment-comparison" aria-labelledby="experiments-comparison-title" tabindex="-1" hidden><div class="experiment-comparison-heading"><h3 id="experiments-comparison-title">Compare saved experiments</h3><button id="experiments-close-comparison" class="text-button" type="button">Close comparison</button></div><p id="experiments-comparison-context" class="experiment-comparison-context"></p><p id="experiments-comparison-scope" class="fine-print">Each holding benchmark keeps that experiment’s own starting tokens. Assumed fee income and any entered costs are included; fees remain separate USD cash. Incentives and trading paths are excluded. Values use USDC = $1.</p><div id="experiments-comparison-cards" class="experiment-comparison-cards"></div></section>
     </details>
       <section id="lending-learn" hidden aria-label="Lending lessons">
         <div class="learn-meta"><span id="lend-meta-label">Four steps · Open any lesson</span><span id="lend-storage" role="status">Progress saves in this browser.</span>

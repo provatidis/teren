@@ -1,6 +1,6 @@
 # Next discussion
 
-Updated for 1.46.0. These are discussion priorities, not commitments to build every item.
+Updated for 1.49.0. These are discussion priorities, not commitments to build every item.
 
 ## Next lab iteration
 
@@ -18,7 +18,7 @@ Later candidates are a liquidation lesson that separates debt repaid, collateral
 
 The first wstETH/WETH experiment shipped in 1.39.0: build the balances, separate staking and collateral lending growth from WETH borrow costs, stress sale/oracle prices, and inspect a hypothetical atomic exit. The existing ETH/USDC loop remains available.
 
-Next, use this experiment to identify which assumptions experienced users actually want to compare. Test whether a person can distinguish a shared ETH-dollar move, a market discount and an oracle change, and whether they understand why a positive yield spread need not pay for the exit.
+Release 1.49.0 adds two exact exposure targets under shared conditions, with the main setup’s break-even borrow APR beside its rate controls. Next, observe which shared assumptions experienced users change and whether the paired results help them explain the trade-off. Test whether a person can distinguish a shared ETH-dollar move, a market discount and an oracle change, and whether they understand why a positive yield spread need not pay for the exit.
 
 Candidates for a later release are an explicit utilization-to-rate experiment and a separately validated protocol adapter. Aave e-mode and Morpho Blue require their own market identity, oracle behavior, limits and liquidation rules. A captured rate is a point-in-time observation, not a future borrowing cost. Do not treat wrapping, redemption and a liquid market sale as equivalent exits.
 
