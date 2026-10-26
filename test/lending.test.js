@@ -192,7 +192,7 @@ test('the four lessons reproduce their independent numerical reference cases', (
 });
 
 test('all lending answer combinations check understanding independently of predictions', () => {
-  const expected = { supply: ['separate', 'enable'], borrow: ['liability', 'boundary'], conditions: ['interest', 'lower'], respond: ['debt', 'none'] };
+  const expected = { supply: ['separate', 'enable'], borrow: ['liability', 'boundary'], conditions: ['interest', 'backing-faster'], respond: ['debt', 'none'] };
   for (const lesson of LENDING_LESSONS) {
     for (const [reason] of [...lesson.reasons, ['']]) for (const [application] of [...lesson.applications, ['']]) {
       const result = checkLendingUnderstanding(lesson.id, reason, application);

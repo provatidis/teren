@@ -4,16 +4,14 @@ import { runLesson } from './lesson-experiments.js';
 export function lessonApplication(id, outcome) {
   const s = outcome.setup;
   if (id === 'swap-impact') {
-    const amount = s.amount < s.reserveEth / 2 ? Math.min(s.reserveEth / 2, s.amount * 2) : Math.max(1, Math.floor(s.amount / 2));
-    const next = runLesson(id, {amount}, outcome.variant);
-    return {kind: 'trade-size', amount, next, expected: next.impact > outcome.impact ? 'more' : 'less'};
+    const reserveEth = s.reserveEth * 2;
+    const impact = s.amount * .997 / (reserveEth + s.amount * .997) * 100;
+    return {kind: 'deeper-pool', reserveEth, impact, expected: impact < outcome.impact ? 'deeper-less' : 'deeper-more'};
   }
-  if (id === 'pool-share') return {kind: 'another-deposit', depositEth: s.depositEth, expected: 'smaller',
-    afterShare: s.depositEth / (s.reserveEth + 2 * s.depositEth) * 100};
+  if (id === 'pool-share') return {kind: 'later-swap', expected: 'share-same'};
   if (id === 'token-balances') {
-    const futurePrice = s.initialPrice * (s.futurePrice > s.initialPrice ? .5 : 2);
-    const next = runLesson(id, {futurePrice}, outcome.variant);
-    return {kind: 'opposite-price', futurePrice, next, expected: next.prediction};
+    const next = runLesson(id, {futurePrice: s.initialPrice}, outcome.variant);
+    return {kind: 'price-return', next, expected: 'original-mix'};
   }
   if (id === 'loss-vs-profit') {
     const futurePrice = s.futurePrice === s.initialPrice ? s.initialPrice / 2 : s.initialPrice;
@@ -26,9 +24,9 @@ export function lessonApplication(id, outcome) {
     return {kind: 'fee-assumption', fees, next, expected: 'same'};
   }
   if (id === 'range-boundaries') {
-    const futurePrice = s.initialPrice * (outcome.prediction === 'usdc' ? 1 - s.width : 1 + s.width);
+    const futurePrice = s.initialPrice * (1 + s.width * .9);
     const next = runLesson(id, {futurePrice, width: s.width}, outcome.variant);
-    return {kind: 'other-boundary', futurePrice, next, expected: next.prediction};
+    return {kind: 'just-inside', futurePrice, next, expected: 'both-inside'};
   }
   if (id === 'final-challenge') return {kind: 'other-benchmark', expected: 'different'};
   throw new Error('Choose a supported application exercise.');

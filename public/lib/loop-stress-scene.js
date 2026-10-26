@@ -90,6 +90,7 @@ export function createLoopStressScene(input, prediction) {
     valueText: value => usd(value) + ' per ETH; no interest',
     shortcuts: [
       { label: 'Start', value: input.start }, { label: 'Question · ' + usd(input.future), value: input.future },
+      { label: 'Price rises · ' + usd(input.start * 1.5), value: input.start * 1.5 },
       { label: 'Boundary', value: initial.result.end.boundaryPrice },
     ],
     scopeText: value => value === input.future ? 'Showing the question: ETH at ' + usd(input.future) + ', with no interest.'

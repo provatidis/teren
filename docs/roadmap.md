@@ -1,6 +1,10 @@
 # Next discussion
 
-Updated for 1.39.0. These are discussion priorities, not commitments to build every item.
+Updated for 1.41.0. These are discussion priorities, not commitments to build every item.
+
+## Learning depth
+
+The lesson clarity release improves feedback, changed situations and the connection between questions and visuals. Next candidates are a liquidation lesson that separates debt repaid, collateral removed and the bonus cost, and a correlated-asset looping chapter using the existing LST experiment. Keep the first lending lesson focused on supply before introducing existing-debt restrictions. Neither a new chapter nor an observed-learning claim follows from polishing the interface alone.
 
 ## Correlated-asset looping and LSTs
 

@@ -8,7 +8,7 @@ import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnd
 import { managementLessonFromHash } from '../lib/management-links.js';
 import { readManagementProgress, saveManagementProgress } from '../data/management-progress.js';
 import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
-import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback } from '../lib/learning-elements.js';
+import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback, renderUnderstandingFeedback, clearUnderstandingFeedback } from '../lib/learning-elements.js';
 import { rangeHash } from '../lib/range-links.js';
 
 export function initManagementLearning() {
@@ -34,13 +34,13 @@ export function initManagementLearning() {
     $('learn-storage').textContent=available?'Progress saved in this browser.':'Saving is unavailable. You can keep learning in this tab.';
     $('learn-resume').textContent=(draft.prediction||draft.revealed?'Continue: ':'Start: ')+lesson.short+' ↓';navigation();
   }
-  function clearFeedback() {$('manage-feedback').hidden=true;$('manage-continue').hidden=true;}
+  function clearFeedback() {clearUnderstandingFeedback('manage');$('manage-feedback').hidden=true;$('manage-continue').hidden=true;}
   function choices(id,name,values,selected,onChange) {
     learningChoices($(id),{name,values,selected,seed:draft.choiceSeed,group:lesson.id+name,onChange,shuffle:name!=='manage-prediction'});
   }
   function reveal() {
     draft.revealed=true;
-    renderPredictionFeedback(predictionFeedbackElement, presentation.predictions, draft.prediction, outcome.prediction);
+    renderPredictionFeedback(predictionFeedbackElement, presentation.predictions, draft.prediction, outcome.prediction, presentation.finding);
     $('manage-metrics').replaceChildren(...presentation.metrics.map(items=>learningMetric(...items)));
     $('manage-explanation').textContent=lesson.explanation;$('manage-takeaway').textContent=lesson.takeaway;$('manage-pitfall').textContent=lesson.pitfall;
     $('manage-handoffs').replaceChildren(...presentation.links.map(({label,scenario})=>{
@@ -56,7 +56,11 @@ export function initManagementLearning() {
     $('manage-feedback-title').textContent=result.passed?'Both answers are correct.':'Review your answers.';
     const reasonFeedback=lesson.reasonFeedback[draft.reason]||'Choose an explanation for the example. '+lesson.hint;
     const applicationFeedback=draft.application?application.feedback:'Choose an answer for the changed situation. '+application.hint;
-    $('manage-feedback-copy').textContent=result.passed?lesson.takeaway:!result.reasoning&&!result.application?reasonFeedback+' '+applicationFeedback:!result.reasoning?'Your application fits the changed situation. '+reasonFeedback:'Your explanation fits the example. '+applicationFeedback;
+    renderUnderstandingFeedback('manage', [
+      { container: 'manage-reasons', selected: draft.reason, correct: result.reasoning, explanation: result.reasoning ? lesson.takeaway : reasonFeedback },
+      { container: 'manage-applications', selected: draft.application, correct: result.application, explanation: applicationFeedback },
+    ]);
+    $('manage-feedback-copy').textContent=result.passed?lesson.takeaway:'Read the feedback beside each question, then try again. You can change either answer.';
     $('manage-continue').hidden=!result.passed;
     if(result.passed&&!progress.completed.includes(lesson.id))progress.completed.push(lesson.id);
     const next=MANAGEMENT_LESSONS[MANAGEMENT_IDS.indexOf(lesson.id)+1];

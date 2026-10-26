@@ -66,7 +66,7 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
   const cases = [
     ['supply', 'neither', 'separate', 'enable', '5.10 ETH'],
     ['borrow', 'more', 'liability', 'boundary', '$10,000.00'],
-    ['conditions', 'same', 'interest', 'lower', '$5,500.00'],
+    ['conditions', 'same', 'interest', 'backing-faster', '$5,500.00'],
     ['respond', 'same', 'debt', 'none', '1.36'],
   ];
   const oldLiquidity = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");

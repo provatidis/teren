@@ -1,5 +1,21 @@
 import { fmt, usd, signedUSD } from './format.js';
 
+export function lessonFinding(id, outcome) {
+  const { setup: s, result: r } = outcome;
+  if (id === 'swap-impact') return 'The trade receives ' + usd(outcome.out / s.amount) + ' per ETH on average, below the starting pool price of ' + usd(s.initialPrice) + '. The trade moves the price and pays a 0.3% fee.';
+  if (id === 'pool-share') return 'Your deposit buys ' + fmt(outcome.share, 2) + '% of the enlarged pool. Ownership includes your deposit in the total and gives you a claim on both tokens.';
+  if (id === 'token-balances') return tokenBalanceNarration(outcome).exchange;
+  if (id === 'range-boundaries') return outcome.prediction === 'usdc'
+    ? 'At or above the upper ETH-price boundary, the position’s principal is all USDC.'
+    : outcome.prediction === 'eth' ? 'At or below the lower ETH-price boundary, the position’s principal is all ETH.'
+      : 'Inside its price range, the position’s principal contains both ETH and USDC.';
+  if (id === 'loss-vs-profit') return r.lpBeforeFees === s.investment
+    ? 'At the unchanged price, LP principal matches the starting budget and holding.'
+    : 'LP principal ' + (r.lpBeforeFees > s.investment ? 'grew' : 'fell') + ' in dollar value. It still trails holding the same starting tokens by ' + usd(r.breakEvenFees) + ' before fees.';
+  if (id === 'fee-break-even') return 'Assumed fees of ' + usd(s.fees) + (outcome.prediction === 'enough' ? ' cover' : ' do not cover') + ' the ' + usd(r.breakEvenFees) + ' principal shortfall against holding.';
+  return 'LP principal plus assumed fees finishes ' + (r.difference >= 0 ? usd(r.difference) + ' ahead of' : usd(-r.difference) + ' behind') + ' holding the same starting tokens, before costs.';
+}
+
 export function tokenBalanceNarration(outcome) {
   const { setup: s, result: r } = outcome;
   const direction = s.futurePrice > s.initialPrice ? 'up' : s.futurePrice < s.initialPrice ? 'down' : 'same';

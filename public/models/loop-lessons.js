@@ -7,7 +7,7 @@ const cases = {
 };
 const answers = {
   build: ['same', 'debt', 'supplied'],
-  stress: ['loop', 'exposure', 'falls'],
+  stress: ['loop', 'exposure', 'loop-gain'],
   unwind: ['stages', 'backing', 'blocked'],
 };
 

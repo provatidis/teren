@@ -1,5 +1,5 @@
 import { sceneNode as node, createPriceExplorer } from './lesson-scene.js';
-import { tokenSceneState, rangeSceneState } from './liquidity-scene-state.js';
+import { tokenSceneState, rangeSceneState, rangePositionState } from './liquidity-scene-state.js';
 import { fmt, usd } from './format.js';
 
 export function createTokenBalanceScene(input, prediction) {
@@ -82,8 +82,10 @@ export function createRangeWidthScene(outcome, prediction) {
       button.addEventListener('click', () => explorer.show(value, true)); bounds.append(' ', button);
     }
     const tokens = node('p', undefined, 'scene-range-tokens');
-    row.append(heading, '\n', track, '\n', bounds, '\n', tokens); figure.append('\n', row);
-    return { row, status, marker, tokens };
+    const gap = node('p', undefined, 'scene-range-gap');
+    gap.id = 'range-scene-gap-' + (index === 0 ? 'narrow' : 'wide');
+    row.append(heading, '\n', track, '\n', bounds, '\n', tokens, '\n', gap); figure.append('\n', row);
+    return { row, status, marker, tokens, gap };
   });
   figure.append('\n', node('p', 'Vertical marker: selected price. Bands: the chosen ranges. Tap a boundary to explore it.', 'scene-key'));
   const consequence = node('p', undefined, 'scene-consequence'); consequence.id = 'range-scene-consequence';
@@ -93,17 +95,19 @@ export function createRangeWidthScene(outcome, prediction) {
     shortcuts: [
       { label: 'Start · ' + usd(narrow.initialPrice), value: narrow.initialPrice },
       { label: 'Question · ' + usd(outcome.price), value: outcome.price },
+      { label: 'Both inside · $2,090', value: 2090 },
       { label: 'Beyond both · ' + usd(max), value: max },
     ],
     onChange(price) {
       priceLabel.textContent = 'ETH at ' + usd(price);
       const frames = rangeSceneState(narrow, wide, price);
-      rows.forEach(({ row, status, marker, tokens }, index) => {
+      rows.forEach(({ row, status, marker, tokens, gap }, index) => {
         const frame = frames[index];
         row.dataset.state = frame.result.state;
         status.textContent = frame.status;
         marker.style.left = at(price) + '%';
         tokens.textContent = 'Principal: ' + frame.tokens;
+        gap.textContent = 'Shortfall against its own starting tokens: ' + usd(frame.result.breakEvenFees) + ' before fees.';
       });
       const inside = frames.filter(frame => frame.result.state === 'inside').length;
       const edge = frames.some(frame => frame.result.state.endsWith('edge'));
@@ -116,7 +120,61 @@ export function createRangeWidthScene(outcome, prediction) {
     },
   });
   element.append(prediction, '\n', figure, '\n', explorer.element, '\n', consequence, '\n',
-    node('p', 'Inside a range means eligible to earn from swaps. It does not tell us how much was earned.', 'scene-essential-note'));
+    node('p', 'Each range is compared with holding its own starting tokens. Being inside makes it eligible to earn from swaps, but it can still trail holding. No fee income is estimated.', 'scene-essential-note'));
   explorer.show(narrow.initialPrice);
   return { element, show: explorer.show };
+}
+
+export function createRangeBoundaryScene(input, prediction) {
+  const element = node('div', undefined, 'lesson-scene');
+  const lowerPrice = input.initialPrice * (1 - input.width), upperPrice = input.initialPrice * (1 + input.width);
+  const setup = { ...input, lowerPrice, upperPrice, fees: 0, fullRangeFees: 0 };
+  const min = input.initialPrice / 2, max = input.initialPrice * 2;
+  const at = price => (price - min) / (max - min) * 100;
+  const figure = node('figure', undefined, 'scene-range-figure scene-boundary-figure');
+  figure.append(node('figcaption', 'Where the price sits, and what you hold', 'scene-figure-title'));
+  const status = node('p', '', 'scene-range-price'); status.id = 'boundary-scene-status';
+  const track = node('div', undefined, 'scene-range-track'); track.setAttribute('aria-hidden', 'true');
+  const band = node('span', undefined, 'scene-range-band'), marker = node('span', undefined, 'scene-range-marker');
+  band.style.left = at(lowerPrice) + '%'; band.style.width = at(upperPrice) - at(lowerPrice) + '%';
+  track.append(band, marker);
+  const bounds = node('div', undefined, 'scene-range-bounds');
+  bounds.append(node('span', 'Lower ' + usd(lowerPrice)), node('span', 'Upper ' + usd(upperPrice)));
+  const mix = node('div', undefined, 'scene-boundary-mix'); mix.setAttribute('aria-hidden', 'true');
+  const eth = node('span', undefined, 'scene-boundary-eth'), usdc = node('span', undefined, 'scene-boundary-usdc');
+  mix.append(eth, usdc);
+  const amounts = node('p', '', 'scene-token-heading'); amounts.id = 'boundary-scene-tokens';
+  const labels = ['eth', 'usdc'].map(token => {
+    const label = node('span'); label.dataset.token = token;
+    const swatch = node('span', undefined, 'allocation-swatch allocation-swatch-' + token);
+    swatch.setAttribute('aria-hidden', 'true'); const text = node('span'); label.append(swatch, ' ', text); amounts.append(label);
+    return text;
+  });
+  figure.append(status, track, bounds, node('p', 'Marker = ETH price; band = your range.', 'scene-key'), mix, amounts,
+    node('p', 'The split bar shows each token’s share of principal value.', 'scene-key'));
+  const consequence = node('p', '', 'scene-consequence'); consequence.id = 'boundary-scene-copy';
+  const explorer = createPriceExplorer({
+    id: 'boundary-scene-price', min, max, step: input.initialPrice / 100, start: input.initialPrice, target: input.futurePrice, format: usd,
+    shortcuts: [
+      { label: 'Lower bound', value: lowerPrice },
+      { label: 'Just inside upper', value: input.initialPrice * (1 + input.width * .9) },
+      { label: 'Upper bound', value: upperPrice },
+      { label: 'Question · ' + usd(input.futurePrice), value: input.futurePrice },
+    ],
+    onChange(price) {
+      const frame = rangePositionState(setup, price), r = frame.result;
+      status.textContent = usd(price) + ' · ' + frame.status;
+      marker.style.left = at(price) + '%'; figure.dataset.state = r.state;
+      eth.style.width = r.finalEthPercent + '%'; usdc.style.width = 100 - r.finalEthPercent + '%';
+      labels[0].textContent = fmt(r.pooled.eth, 4) + ' ETH'; labels[1].textContent = fmt(r.pooled.usdc, 2) + ' USDC';
+      consequence.textContent = r.state === 'inside' ? 'Both tokens remain. Inside the range, swaps can use the position’s liquidity.'
+        : r.state.endsWith('edge') ? 'At this boundary, principal has reached a single-token endpoint. Move just inside to see both tokens again.'
+          : 'Outside the range, principal holds ' + frame.tokens + '. The position still owns those tokens; it has not been liquidated.';
+      return frame.status + '. ' + labels.map(label => label.textContent).join(' and ');
+    },
+  });
+  element.append(prediction, figure, explorer.element, consequence,
+    node('p', 'Each selection recalculates the same funded position at one price. It does not replay trades or estimate earned fees.', 'fine-print'));
+  explorer.show(input.initialPrice);
+  return { element, showQuestion: () => explorer.show(input.futurePrice) };
 }

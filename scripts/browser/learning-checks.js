@@ -21,12 +21,12 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"), true);
   const choose = (name, value) => evaluate("document.querySelector('input[name=\"" + name + "\"][value=\"" + value + "\"]').click()");
   const cases = [
-    ['swap-impact','less','18132','curve','more'],
-    ['pool-share','less','4.76','ownership','smaller'],
-    ['token-balances','less','0.884','rebalance','more'],
+    ['swap-impact','less','18132','curve','deeper-less'],
+    ['pool-share','less','4.76','ownership','share-same'],
+    ['token-balances','less','0.884','rebalance','original-mix'],
     ['loss-vs-profit','gain','428.93','benchmark','matches'],
     ['fee-break-even','short','428.93','assumption','same'],
-    ['range-boundaries','usdc','0','path','eth'],
+    ['range-boundaries','usdc','0','path','both-inside'],
     ['final-challenge','hold','328.93','total','different'],
   ];
   for (const [id, prediction, answer, reason, application] of cases) {
@@ -60,13 +60,13 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     await choose('learn-reason', reason);
     await choose('learn-application', application);
     if (id === 'swap-impact') {
-      await choose('learn-application','same');
+      await choose('learn-application','deeper-same');
       await click('learn-check');
-      assert.match(await text('learn-feedback-copy'), /larger trade/);
+      assert.match(await text('learn-applications-feedback'), /smaller fraction of the deeper pool/);
       assert.equal(await text('learn-progress-count'), '0 of 7 checked');
       await choose('learn-application', application);
       await choose('learn-reason', 'fixed'); await click('learn-check');
-      assert.match(await text('learn-feedback-copy'), /A finite swap changes the reserves/);
+      assert.match(await text('learn-reasons-feedback'), /A finite swap changes the reserves/);
       assert.equal(await text('learn-progress-count'), '0 of 7 checked');
       await choose('learn-reason', reason);
     }
@@ -165,7 +165,7 @@ export async function checkMobileLearning({ evaluate, click, fill, text, navigat
   await evaluate("document.querySelector('#learn-math > summary').click()");
   assert.equal(await evaluate("document.getElementById('learn-deeper').open && document.getElementById('learn-math').open"),true);
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'),true);
-  await evaluate("document.querySelector('input[name=learn-application][value=eth]').click()");
+  await evaluate("document.querySelector('input[name=learn-application][value=both-inside]').click()");
   await evaluate("document.querySelector('input[name=learn-reason][value=path]').click()");
   await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');

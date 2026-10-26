@@ -128,7 +128,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' });
     await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
   };
-  const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'falls'], ['unwind', 'all', 'backing', 'blocked']];
+  const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'loop-gain'], ['unwind', 'all', 'backing', 'blocked']];
   for (const [index, [id, prediction, reason, application]] of lessons.entries()) {
     await navigate(base + 'lending.html#loop-lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#lending-learn input[type=number]').length"), 0);

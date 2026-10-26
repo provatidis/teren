@@ -15,7 +15,7 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
     }; check();
   })`);
   const nonvisual = {
-    'range-boundaries': ['path', 'eth'], 'fee-tiers': ['trades', 'no'],
+    'range-boundaries': ['path', 'both-inside'], 'fee-tiers': ['trades', 'no'],
     'range-management': ['asset', 'automatic'], 'fees-over-time': ['growth', 'same'],
     'between-samples': ['counters', 'not-proof'], 'period-vs-holding': ['basket', 'hold'],
   };
@@ -51,6 +51,7 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         assert.equal(await evaluate(`document.querySelector('${selector} input:checked') === null`), true, 'Skipping must not invent a prediction');
         assert.doesNotMatch(await text(prefix + '-prediction-feedback'), /Your prediction matches|You expected:/);
         assert.equal(await evaluate(`document.querySelector('#${prefix}-prediction-feedback > strong').textContent`), 'What happens');
+        assert.equal(await evaluate(`document.getElementById('${prefix}-prediction-feedback').dataset.state`), 'skipped');
         assert.equal(await evaluate(`document.getElementById('${prefix}-continue').hidden`), true, 'Viewing alone does not complete a lesson');
         if (nonvisual[id]) {
           for (const [group, value] of [['reason', nonvisual[id][0]], ['application', nonvisual[id][1]]]) {

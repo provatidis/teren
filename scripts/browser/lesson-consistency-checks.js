@@ -4,7 +4,7 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   const choose = (name, value) => evaluate(`document.querySelector('input[name="${name}"][value="${value}"]').click()`);
   await navigate(base + 'learn.html#lesson=token-balances');
   await choose('learn-prediction','less'); await click('learn-run');
-  await choose('learn-reason','rebalance'); await choose('learn-application','more'); await click('learn-check');
+  await choose('learn-reason','rebalance'); await choose('learn-application','original-mix'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   const entries = await evaluate("performance.getEntriesByType('resource').map(entry=>entry.name)");
   const buildResponse = await fetch(base + 'build-manifest.json');
@@ -18,10 +18,10 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
     await navigate(base + 'learn.html#lesson=token-balances');
     await fill('learn-input-futurePrice',price); await choose('learn-prediction',prediction); await click('learn-run');
     assert.ok((await text('learn-explanation')).includes(direction));
-    await choose('learn-application',price === '4000' ? 'more' : 'less'); await choose('learn-reason','mint'); await click('learn-check');
+    await choose('learn-application','original-mix'); await choose('learn-reason','mint'); await click('learn-check');
     assert.equal(await text('learn-feedback-title'),'Review your answers.');
-    assert.match(await text('learn-feedback-copy'),/does not create ETH or USDC/);
-    assert.ok((await text('learn-feedback-copy')).includes(direction));
+    assert.match(await text('learn-reasons-feedback'),/does not create ETH or USDC/);
+    assert.ok((await text('learn-reasons-feedback')).includes(direction));
     assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),true);
     if (price === '2000') {
       assert.match(await text('learn-reason-question'),/stay the same/);
@@ -41,16 +41,16 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),false);
   await fill('learn-answer','428.93'); await click('learn-calculation-check'); assert.match(await text('learn-calculation-feedback'),/Calculation matches/);
   await navigate(base + 'learn.html#lesson=range-boundaries');
-  await choose('learn-prediction','usdc'); await click('learn-run'); await choose('learn-reason','path'); await choose('learn-application','eth'); await click('learn-check');
+  await choose('learn-prediction','usdc'); await click('learn-run'); await choose('learn-reason','path'); await choose('learn-application','both-inside'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   await navigate(base + 'learn.html#applied=period-vs-holding');
   await evaluate("new Promise(resolve=>{const check=()=>document.getElementById('learn-applied').getAttribute('aria-busy')==='false'?resolve():setTimeout(check,25);check()})");
   await choose('applied-prediction','can-trail'); await click('applied-reveal'); await fill('applied-checkpoint','8');
   assert.match(await text('applied-metrics'),/−\$0.01/);
   assert.match(await text('applied-explanation'),/At the final question checkpoint[\s\S]*Other checkpoints can have a different result/);
-  assert.match(await text('applied-prediction-feedback'),/Fees can leave the LP behind.*fees narrowly put the LP ahead at the final checkpoint, before costs/);
+  assert.match(await text('applied-prediction-feedback'),/checkpoint 7.*\$0.23.*trails holding by \$0.51.*\$0.17 ahead, before costs/);
   await choose('applied-application','hold'); await choose('applied-reason','income'); await click('applied-check');
-  assert.match(await text('applied-feedback-copy'),/Fees can be smaller/);
+  assert.match(await text('applied-reasons-feedback'),/Fees can be smaller/);
   assert.equal(await text('applied-feedback-title'),'Review your answers.');
   await navigate(base + 'liquidity.html');
   console.log('PASS: lesson direction, unchanged-price reasoning, misconception feedback, optional calculation isolation, historical question scope and versioned teaching compatibility');
@@ -62,8 +62,8 @@ export async function checkMobileLessonConsistency({ evaluate, click, fill, text
     await navigate(base + 'learn.html#lesson=token-balances');
     await fill('learn-input-futurePrice','4000');
     await evaluate("document.querySelector('input[name=learn-prediction][value=less]').click()"); await click('learn-run');
-    await evaluate("document.querySelector('input[name=learn-application][value=more]').click()"); await evaluate("document.querySelector('input[name=learn-reason][value=mint]').click()"); await click('learn-check');
-    assert.match(await text('learn-feedback-copy'),/less ETH and more USDC/);
+    await evaluate("document.querySelector('input[name=learn-application][value=original-mix]').click()"); await evaluate("document.querySelector('input[name=learn-reason][value=mint]').click()"); await click('learn-check');
+    assert.match(await text('learn-reasons-feedback'),/less ETH and more USDC/);
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
   }
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});

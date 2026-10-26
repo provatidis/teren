@@ -22,11 +22,12 @@ function poolFigure(original, deposit) {
     return { row, value, fill, owned, token };
   });
   const price = node('p', '', 'foundation-pool-price'); price.id = 'foundation-pool-price';
+  const execution = node('p', '', 'foundation-execution'); execution.id = 'foundation-average'; execution.hidden = true;
   const share = node('p', '', 'foundation-pool-share'); share.id = 'foundation-pool-share'; share.hidden = !deposit;
-  element.append(caption, '\n', flow, ...rows.flatMap(({ row }) => ['\n', row]), '\n', price, '\n',
+  element.append(caption, '\n', flow, '\n', execution, ...rows.flatMap(({ row }) => ['\n', row]), '\n', price, '\n',
     share, '\n',
     node('p', 'Dashed = starting balances. Bars use different token units.', 'scene-key'));
-  return { element, show({ pool, title, transfer, fraction = 0 }, animate = false) {
+  return { element, show({ pool, title, transfer, fraction = 0, average }, animate = false) {
     element.dataset.motion = 'false';
     for (const animation of element.getAnimations({ subtree: true })) animation.cancel();
     caption.textContent = title; flow.textContent = transfer;
@@ -35,7 +36,9 @@ function poolFigure(original, deposit) {
       fill.style.width = pool[token] / (original[token] * 1.6) * 100 + '%';
       owned.style.width = fraction * 100 + '%'; owned.hidden = !deposit || !fraction;
     }
-    price.textContent = 'Pool price: ' + usd(pool.usdc / pool.eth) + ' per ETH';
+    execution.hidden = average === undefined;
+    execution.textContent = average === undefined ? '' : 'Your average execution: ' + usd(average) + ' per ETH, including the fee.';
+    price.textContent = (average === undefined ? 'Pool price: ' : 'Pool price after this trade: ') + usd(pool.usdc / pool.eth) + ' per ETH';
     share.textContent = fraction ? 'Your share: ' + fmt(fraction * 100, 2) + '% · striped'
       : 'Your share: 0% · before deposit';
     element.dataset.motion = String(animate);
@@ -150,7 +153,7 @@ export function createFoundationScene(id, input, variant, prediction) {
         : fmt(frame.amount, 0) + ' ETH in → pool → ' + fmt(frame.out, 2) + ' USDC out';
       outcome.show(frame, index > 0);
     }
-    figure.show({ pool, title: stage.label, transfer, fraction }, animate);
+    figure.show({ pool, title: stage.label, transfer, fraction, average: !deposit && index > 0 ? frame.average : undefined }, animate);
     copy.textContent = stage.copy;
   } });
   element.append(prediction, '\n', figure.element, '\n', player.element, '\n', copy, '\n', explorer.element, '\n', outcome.element, '\n',
