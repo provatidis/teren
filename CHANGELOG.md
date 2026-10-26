@@ -1,5 +1,13 @@
 # Release history
 
+## 1.41.0 · 2026-10-26
+
+- Give matching, differing and skipped predictions green, amber and neutral states respectively, with explicit findings. Keep selected answers neutral until checked. Explain each understanding-check answer beside its question and focus the first answer needing attention; explanations are available on the first check.
+- Strengthen follow-ups with the same trade in deeper liquidity, ownership through a swap, a price returning to its start, composition just inside a range, collateral growing faster than debt, and the upside of leverage. Replace implausible distractors. Preserve optional predictions and earlier completion; retired choices cannot answer revised questions.
+- Put average swap execution beside the outcome. Add a price-band and token-mix scene to the concentrated-liquidity lesson, show each width’s shortfall against its own original basket, and reveal supplied fictional fee totals after the fee-tier prediction.
+- Compare an explicitly named earlier checkpoint with the final historical result: earned fees can coexist with trailing holding. Keep the full record, final assessed endpoint, exact accounting and Experiment handoffs unchanged; shorten token amounts in the main reading view.
+- Clarify collateral defaults, leverage, opening/closing swap costs and the distinction between sequential and atomic unwinding. Update teaching documentation and desktop/mobile regression coverage. Financial models and recorded chain evidence are unchanged.
+
 ## 1.40.0 · 2026-10-26
 
 - Introduce each lesson with a readable starting setup, the action or condition being tested and its decisive assumptions. Keep the required facts before prediction choices, including the complete borrow → buy → supply loop.

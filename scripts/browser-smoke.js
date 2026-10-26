@@ -6,6 +6,7 @@ import { checkWidthComparison } from './browser/width-comparison-checks.js';
 import { checkExperiencedExperiments } from './browser/experienced-experiment-checks.js';
 import { checkFeeContext } from './browser/fee-context-checks.js';
 import { checkPredictions } from './browser/prediction-checks.js';
+import { checkLessonFeedback } from './browser/lesson-feedback-checks.js';
 import { checkVisualLessonPilots } from './browser/visual-lesson-checks.js';
 import { checkFoundationLessons } from './browser/foundation-lesson-checks.js';
 import { checkLendingScenes } from './browser/lending-scene-checks.js';
@@ -183,6 +184,7 @@ try {
   if (process.env.BROWSER_CHECKS === 'predictions') {
     await navigate(base + 'learn.html');
     await checkPredictions({ evaluate, click, text, navigate, reload, base, call });
+    await checkLessonFeedback({ evaluate, click, fill, text, navigate, reload, base, call });
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     return;
   }
@@ -652,6 +654,7 @@ try {
   await checkComparisonLessons({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   await checkPredictions({ evaluate, click, text, navigate, reload, base, call });
+  await checkLessonFeedback({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkExperiencedExperiments({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkMatchedComparison({ evaluate, click, fill, text, navigate, base, call, nextEvent, downloadFile });
   await checkWidthComparison({ evaluate, click, fill, text, navigate, reload, base, call });

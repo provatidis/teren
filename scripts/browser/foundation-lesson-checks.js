@@ -20,7 +20,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
   };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
   const sandbox = await evaluate("localStorage.getItem('defi-sandbox-v1')");
-  for (const [id, reason, application, amount] of [['swap-impact', 'curve', 'more', '10'], ['pool-share', 'ownership', 'smaller', '5']]) {
+  for (const [id, reason, application, amount] of [['swap-impact', 'curve', 'deeper-less', '10'], ['pool-share', 'ownership', 'share-same', '5']]) {
     await navigate(base + 'learn.html#lesson=' + id);
     await reset();
     assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false);
@@ -73,7 +73,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     assert.equal(await evaluate("document.getElementById('learn-predictions').checkVisibility()"), true);
     await choose('learn-prediction', 'less');
     await click('learn-run');
-    assert.match(await text('learn-prediction-feedback'), /^Your prediction matches\. In this setup:/);
+    assert.match(await text('learn-prediction-feedback'), /^Your prediction matches\./);
     await evaluate("document.querySelector('.scene-question-settings > summary').click()");
     const control = id === 'swap-impact' ? 'amount' : 'depositEth';
     await fill('learn-input-' + control, '1');

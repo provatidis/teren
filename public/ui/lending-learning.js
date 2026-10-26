@@ -17,7 +17,7 @@ import { createLoanResponseScene } from '../lib/loan-response-scene.js';
 import { createLoopStressScene } from '../lib/loop-stress-scene.js';
 import { focusSceneOutcome, createPredictionPrompt } from '../lib/lesson-scene.js';
 import { newChoiceSeed } from '../lib/learning-choices.js';
-import { learningChoices, learningMetric, learningSources, focusLearningFeedback, renderPredictionFeedback } from '../lib/learning-elements.js';
+import { learningChoices, learningMetric, learningSources, focusLearningFeedback, renderPredictionFeedback, renderUnderstandingFeedback, clearUnderstandingFeedback } from '../lib/learning-elements.js';
 
 export function initLendingLearning() {
   const $ = id => document.getElementById(id);
@@ -56,10 +56,10 @@ export function initLendingLearning() {
       ? 'Lesson progress saved in this browser.' : 'Saving is unavailable. You can keep learning in this tab.';
     navigation();
   }
-  function clearFeedback() { $('lend-feedback').hidden = true; $('lend-continue').hidden = true; }
+  function clearFeedback() { clearUnderstandingFeedback('lend'); $('lend-feedback').hidden = true; $('lend-continue').hidden = true; }
   function reveal() {
     draft.revealed = true;
-    renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, example.prediction);
+    renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, example.prediction, lesson.finding);
     $('lend-metrics').replaceChildren(...course.metrics(lesson.id, example.result).map(items => learningMetric(...items)));
     $('lend-metrics').hidden = visualLesson();
     $('lend-observe').hidden = false;
@@ -74,8 +74,11 @@ export function initLendingLearning() {
     $('lend-feedback-title').textContent = result.passed ? 'Both answers are correct.' : 'Review your answers.';
     const reasoning = draft.reason ? lesson.reasonFeedback[draft.reason] : 'Choose an explanation. ' + lesson.hint;
     const application = draft.application ? lesson.applicationFeedback : 'Choose an answer for the new situation. ' + lesson.hint;
-    $('lend-feedback-copy').textContent = result.passed ? lesson.takeaway
-      : [!result.reasoning ? reasoning : '', !result.application ? application : ''].filter(Boolean).join(' ');
+    renderUnderstandingFeedback('lend', [
+      { container: 'lend-reason-choices', selected: draft.reason, correct: result.reasoning, explanation: reasoning },
+      { container: 'lend-application-choices', selected: draft.application, correct: result.application, explanation: application },
+    ]);
+    $('lend-feedback-copy').textContent = result.passed ? lesson.takeaway : 'Read the feedback beside each question, then try again. You can change either answer.';
     $('lend-continue').hidden = !result.passed;
     if (result.passed && !progress.completed.includes(lesson.id)) progress.completed.push(lesson.id);
     if (save) { persist(); focusLearningFeedback('lend'); }

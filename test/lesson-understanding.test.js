@@ -46,17 +46,18 @@ test('transfer changes the actual selected setup, including extremes and falling
     const start = lessonSetup('swap-impact',variant);
     for (const amount of [1,start.reserveEth/2]) {
       const result=runLesson('swap-impact',{amount},variant), app=lessonApplication('swap-impact',result);
-      assert.notEqual(app.amount,amount); assert.equal(app.next.setup.reserveEth,start.reserveEth);
-      assert.equal(app.expected,app.amount>amount?'more':'less');
+      assert.equal(app.reserveEth,start.reserveEth*2);
+      assert.ok(app.impact<result.impact);
+      assert.equal(app.expected,'deeper-less');
     }
     const share=runLesson('pool-share',lessonSetup('pool-share',variant),variant), app=lessonApplication('pool-share',share);
-    assert.ok(app.afterShare<share.share);
-    assert.ok(Math.abs(app.afterShare/100*(share.setup.reserveEth+2*share.setup.depositEth)-share.setup.depositEth)<1e-12);
+    assert.equal(app.expected,'share-same');
     for (const multiplier of [.5,1,1.5,2]) {
       const futurePrice=start.initialPrice*multiplier;
       const balances=lessonApplication('token-balances',runLesson('token-balances',{futurePrice},variant));
-      assert.equal(balances.expected,multiplier>1?'more':'less');
+      assert.equal(balances.expected,'original-mix');
       assert.equal(balances.next.setup.initialPrice,start.initialPrice);
+      assert.deepEqual(balances.next.result.pooled,balances.next.result.held);
       const loss=lessonApplication('loss-vs-profit',runLesson('loss-vs-profit',{futurePrice},variant));
       assert.equal(loss.expected,multiplier===1?'trails':'matches');
       for (const fees of [0,100,start.investment/2]) {
@@ -66,8 +67,10 @@ test('transfer changes the actual selected setup, including extremes and falling
       }
       for (const width of [.05,.1,.5]) {
         const original=runLesson('range-boundaries',{futurePrice,width},variant), changed=lessonApplication('range-boundaries',original);
-        assert.equal(changed.expected,original.prediction==='usdc'?'eth':'usdc');
-        assert.equal(changed.next.result.pooled[changed.expected==='eth'?'usdc':'eth'],0);
+        assert.equal(changed.expected,'both-inside');
+        assert.equal(changed.next.result.state,'inside');
+        assert.ok(changed.next.result.pooled.eth>0 && changed.next.result.pooled.usdc>0);
+        assert.ok(changed.next.result.finalEthPercent<50);
       }
     }
   }

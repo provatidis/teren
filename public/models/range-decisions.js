@@ -29,7 +29,7 @@ export function managementCase(id, variant = 0) {
   if (id === 'fee-tiers') {
     // Supplied teaching facts, not an earnings estimate or observations from a real pool.
     const rates = variant === 2 ? [.3,.05] : [.05,.3];
-    const fees = [null, [12, 4], [12, 4]][variant];
+    const fees = [12, 4];
     const principal = variant === 2 ? [5010, 5040] : null;
     const costs = variant === 2 ? [5, 5] : null;
     const totals = principal?.map((value, index) => value + fees[index] - costs[index]);

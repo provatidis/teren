@@ -14,12 +14,12 @@ The normal lesson flow includes short, sourced pitfalls alongside the mechanisms
 
 | Topic | Misconception to challenge | Understanding check |
 | --- | --- | --- |
-| Trade size | Every unit receives the starting spot price; a slippage limit removes impact. | Explain changing reserves; apply a changed trade size. |
-| Ownership | Withdrawal guarantees the original dollar deposit or original ETH. | Identify a share of both current reserves; apply another matching deposit. |
-| Token balances | Rebalancing creates tokens, pays interest or protects a falling asset. | Explain swaps in the selected direction; apply another final price. |
+| Trade size | Every unit receives the starting spot price; a slippage limit removes impact. | Explain changing reserves; put the same trade through a deeper pool. |
+| Ownership | Withdrawal guarantees the original dollar deposit or original ETH. | Identify a share of both current reserves; follow the unchanged fraction through a swap. |
+| Token balances | Rebalancing creates tokens, pays interest or protects a falling asset. | Explain swaps in the selected direction; return to the starting price without fees. |
 | Loss versus profit | Dollar profit means beating holding; “impermanent” promises recovery. | Identify the same-token benchmark; apply a changed price. |
 | Break-even fees | A required fee target or an assumed amount predicts earnings. | Explain what the target establishes; change only the assumed fees. |
-| Range boundaries | Outside means liquidation, no earlier fees, or no price exposure. | Identify composition at a boundary; separate the final state from earnings history. |
+| Range boundaries | Outside means liquidation, no earlier fees, or no price exposure. | Identify composition near a boundary; distinguish eligibility for swaps from earned fees. |
 | Final challenge | Earning any fees makes LP the winner; a correct simulation proves safety. | Interpret total values under assumptions; identify a changed benchmark. |
 | Narrow and wide ranges | Tighter capital concentration always means greater profit. | Compare eligibility at shown prices; explain why an earlier fee advantage is incomplete. |
 | Fee tiers and APR | The highest charge earns most; a past fee APR fixes future profit. | Identify trades and active share; interpret a short-period APR claim. |
@@ -38,7 +38,7 @@ Direct lesson links open at the requested heading, below the primary navigation.
 
 The width and outside-value cases are calculated hypothetical endpoints from `cl-range-v1`. They do not reconstruct a trading path, predict fees or model native ticks. Equal budgets across widths use different initial token mixes, so each position has its own holding benchmark. Price inputs and bounds are visible before predicting.
 
-Fee-tier variants provide either no earnings data or fictional fee totals after any protocol share. These figures are not derived from the rate alone. They are labelled teaching facts and never presented as a forecast or independently checked history.
+Fee-tier predictions start without earnings data, then reveal supplied fictional fee totals after any protocol share. These figures are not derived from the rate alone. They are labelled teaching facts and never presented as a forecast or independently checked history.
 
 The three historical exercises continue to use the original two independently checked records. Their fixed question checkpoint or interval remains separate from exploration. Any changed setup is labelled a thought experiment.
 
@@ -50,7 +50,7 @@ The second topic introduces one collateral asset and one debt asset before any l
 | --- | --- | --- |
 | Supply and collateral | Supplying requires borrowing; earning supply interest and enabling collateral are the same action. | Enable collateral without opening a loan; identify capacity versus actual debt. |
 | Borrowing and debt | Borrowed cash increases wealth; maximum LTV is the liquidation threshold. | A price decline passes the new-loan limit while remaining above the liquidation boundary. |
-| Prices, interest and time | An unchanged ETH price means an unchanged loan. | Lower ETH’s price after interest accrues; interpret collateral value against the same debt. |
+| Prices, interest and time | An unchanged ETH price means an unchanged loan. | Change the supplied growth rates; distinguish faster collateral growth from growing debt. |
 | Repay or add collateral | Adding collateral repays debt; both responses have the same effect for the same budget. | Repay all debt; distinguish absence of loan liquidation from absence of investment risk. |
 
 The interest lesson deliberately uses zero supply APR so only debt grows. It does not claim time always lowers health factor: different rates on both sides can change that conclusion. The response lesson displays the already-calculated outcomes. Optional reading explains collateral rules, both balance-sheet sides, variable real rates and execution limits using [Aave supply guidance](https://aave.com/help/supplying/supply-tokens), [collateral guidance](https://aave.com/help/supplying/toggle-collateral-status) and [the protocol FAQ](https://aave.com/faq).
@@ -79,24 +79,24 @@ Three directly accessible lessons follow lending essentials. They use `borrowing
 | Step | Misconception | Changed situation |
 | --- | --- | --- |
 | Build one loop | Extra borrowed ETH is new wealth; spent USDC remains in the wallet. | Pause before supplying purchased ETH; distinguish wallet assets from collateral. |
-| Repeat and change conditions | More collateral means less price risk; unchanged prices mean an unchanged loan. | Hold prices fixed while debt accrues interest and supply interest is zero. |
+| Repeat and change conditions | More collateral means less price risk; unchanged prices mean an unchanged loan. | Raise ETH’s price instead; interpret the upside of leverage as well as the downside. |
 | Explore unwinding | All collateral can be withdrawn first; withdrawing cancels debt. | Start below the liquidation boundary; the withdrawal-first preview stops. |
 
 The first lesson removes costs and interest to isolate matching debt. The second compares the same original capital with more ETH exposure; no arithmetic is required from the learner. The last explains intermediate collateral constraints and labels the unwind as an assumed sequence, not guaranteed execution. Automated checks cover every answer combination and numerical references.
 
 ## Visual lesson patterns
 
-Fourteen lessons use the visual patterns: swaps, providing liquidity, changing token balances, loss versus profit, break-even fees, the final challenge, narrow versus wide ranges, supplying, borrowing, prices/interest/time, repayment versus collateral, and building, stressing and unwinding a loop. All twenty lessons put a readable starting setup before the prediction choices: balances or supplied facts, the action being tested, and decisive assumptions. **See what happens** follows a selected expectation; **Not sure — show me** opens the same outcome without inventing an answer. Feedback explicitly names a match or a different result, with the finding beside it. The interface does not repeat scoring disclaimers.
+Fifteen lessons use the visual patterns: swaps, providing liquidity, changing token balances, loss versus profit, break-even fees, the final challenge, range-boundary token composition, narrow versus wide ranges, supplying, borrowing, prices/interest/time, repayment versus collateral, and building, stressing and unwinding a loop. All twenty lessons put a readable starting setup before the prediction choices: balances or supplied facts, the action being tested, and decisive assumptions. **See what happens** follows a selected expectation; **Not sure — show me** opens the same outcome without inventing an answer. Feedback explicitly names a match or a different result, with a self-contained finding beside it. Matching predictions are green, differing predictions amber and skipped predictions neutral. A selected option is neutral until checked. Each explanation/application answer receives local feedback on the first check; focus goes to the first answer needing attention. There is no mandatory failed retry or first-attempt score. The interface does not repeat scoring disclaimers.
 
 In visual lessons, the setup and prediction come before the interactive diagram, keeping the diagram beside its controls on phones. The action restores the question’s diagram and brings it into view. Exploration remains available before choosing, and watching every step is never required. The sequence is **starting setup → prediction invitation → exploration → explanation → changed situation**. The conceptual checks still determine completion, with no arithmetic or rounding task. The build-loop setup defines one loop as borrowing USDC, spending it on ETH and supplying that ETH; the question refers to all three actions.
 
-Recorded lessons first show the validated starting principal, price and range. The outside-sample exercise also introduces its two specific observations without reconstructing the unknown interval. The comparison prediction asks whether fees can coexist with trailing holding, rather than asking the learner to guess an unseen historical winner. Revealing restores the question checkpoint and brings the recorded price chart forward, before the detailed metrics. Subsequent exploration stays separate from the fixed assessment. A saved choice for the retired winner question is cleared without changing earlier completion or valid explanation/application answers.
+Recorded lessons first show the validated starting principal, price and range. The outside-sample exercise also introduces its two specific observations without reconstructing the unknown interval. The comparison prediction asks whether fees can coexist with trailing holding, rather than asking the learner to guess an unseen historical winner. Revealing restores the question checkpoint and brings the recorded price chart forward, before the detailed metrics. The holding comparison additionally pairs checkpoint 7 (block 26083750, fees with a negative holding gap) with the final checkpoint (block 26090000, a small positive gap). Both use the original starting tokens and exclude costs. This named teaching contrast neither changes the record nor claims typical returns. Subsequent exploration stays separate from the fixed assessment. A saved choice for the retired winner question is cleared without changing earlier completion or valid explanation/application answers.
 
 - **Actions:** one named action per activation, a short visual cue, then a readable resting frame. Back revisits an earlier state without animating an undo. Replay repeats the current cue without changing balances. Direct step access groups the ETH/USDC unwind actions into withdrawal/sale/repayment passes. There is no autoplay or animation queue.
 - **Continuous conditions:** the token lesson changes the selected price while keeping both token quantities and their starting markers together. Arrows describe the net trades relative to the same start. The price slider is an endpoint comparison, not a recorded trading path.
 - **Comparison:** narrow and wider bands share one price scale and marker position. Bounds are directly selectable; exact boundaries are labelled separately from inside/outside states. Single-token principal remains visible outside the range. Inside means eligible to earn from swaps, not a claim about earnings.
 
-The swap scene tracks both reserves and the changed pool price. Its three comparison rows show the starting price, a 1 ETH trade’s average, and the selected trade’s average on the same scale. Both trades start from the same original pool and include a 0.3% fee. The deposit scene adds both tokens proportionally, shows the unchanged price and share of the enlarged pool, then shows a different trader selling ETH into it. The hatched fraction stays constant through that swap while the claim becomes more ETH and less USDC. Claims use proportional ownership before withdrawal rounding; this is a hypothetical lesson, not on-chain LP-token accounting or a fee forecast.
+The swap scene tracks both reserves and the changed pool price, with average execution immediately beside the trade outcome. Its three comparison rows show the starting price, a 1 ETH trade’s average, and the selected trade’s average on the same scale. Both trades start from the same original pool and include a 0.3% fee. The deposit scene adds both tokens proportionally, shows the unchanged price and share of the enlarged pool, then shows a different trader selling ETH into it. The hatched fraction stays constant through that swap while the claim becomes more ETH and less USDC. Claims use proportional ownership before withdrawal rounding; this is a hypothetical lesson, not on-chain LP-token accounting or a fee forecast.
 
 The lending supply scene shows ETH leaving the wallet for a claim on the pool, then interest accruing to that supply with collateral off. Enabling the already-accrued supply changes borrowing capacity without moving tokens or creating debt. The separate borrowing scene adds equal wallet cash and debt; the remaining capacity falls and assets minus debt stay unchanged before costs. The source of borrowed tokens is the lending pool. Supplied balances represent a claim, explained further with [Aave's receipt-token accounting](https://aave.com/docs/aave-v3/smart-contracts/tokenization); they are not additional spendable ETH in the wallet.
 
@@ -114,12 +114,12 @@ The three essentials comparison lessons share one fixed dollar scale for startin
 
 ## Extending the patterns
 
-Choose a form that explains the mechanism: named actions, continuous conditions, comparisons or recorded timelines. Dedicated scenes already cover the subjects listed above. The remaining range-composition, management, fee-tier and historical lessons use metrics or recorded timelines; any further treatment should address an observed interpretation problem.
+Choose a form that explains the mechanism: named actions, continuous conditions, comparisons or recorded timelines. Dedicated scenes already cover the subjects listed above. Range composition now has its own price-band and token-mix scene; the width scene also shows each range’s gap to its own holding basket. Management, fee-tier and historical lessons use metrics, supplied comparisons or recorded timelines; further treatment should address an observed interpretation problem.
 
 | Subject | Candidate treatment |
 | --- | --- |
-| Range composition and exits/returns | Connect token composition and outside price exposure to the range; keep changing bounds distinct from recovering losses. |
-| Fee tiers and APR | Reveal supplied facts and visibly missing information; never derive earnings from the tier alone. |
+| Exits and returns | Extend the existing composition scene to outside price exposure; keep changing bounds distinct from recovering losses. |
+| Fee tiers and APR | Extend the supplied-facts reveal if needed; never derive earnings from the tier alone. |
 | Recorded history | Separate principal, new fees and collections at recorded checkpoints. Keep unknown intervals unknown; active-time totals do not locate every crossing. |
 
 Each visual should replace repeated setup/result prose, retain essential assumptions nearby, and offer a changed-situation check. Preserve the same starting basket within each comparison. Equal budgets across ranges do not imply identical token mixes. These are design candidates, not a commitment to animate every lesson or a second feature roadmap.

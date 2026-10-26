@@ -18,7 +18,11 @@ export function appliedQuestion(period, id) {
   const view = periodPointView(period, index), interval = periodIntervalView(period, index);
   if (id === 'fees-over-time') return { index, view, interval, answer: view.feesUSD, answerDigits: 2, prediction: 'earned', reason: 'growth' };
   if (id === 'between-samples') return { index, view, interval, answer: interval.secondsInRange, answerDigits: 0, wholeAnswer: true, prediction: 'possible', reason: 'counters' };
-  return { index, view, interval, answer: view.gapUSD, answerDigits: 2, prediction: 'can-trail', reason: 'basket' };
+  // A named teaching checkpoint in this fixed record, not a search for its worst
+  // return. Keep the final period endpoint as the assessed result and handoff.
+  const contrastIndex = 6, contrast = periodPointView(period, contrastIndex);
+  if (!(contrast.feesUSD > 0 && contrast.gapUSD < 0 && view.gapUSD > 0)) throw new Error('The recorded comparison checkpoints no longer match this lesson.');
+  return { index, view, interval, contrastIndex, contrast, answer: view.gapUSD, answerDigits: 2, prediction: 'can-trail', reason: 'basket' };
 }
 export function checkAppliedAnswer(question, answer, reason) {
   const numeric = learningAnswerMatches(answer, question.answer, question.answerDigits, question.wholeAnswer);

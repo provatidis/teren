@@ -31,7 +31,7 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), saved, 'Exploration must not edit the question or progress.');
   await click('learn-run');
   assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked')===null"), true);
-  await choose('learn-reason', 'rebalance'); await choose('learn-application', 'more'); await click('learn-check');
+  await choose('learn-reason', 'rebalance'); await choose('learn-application', 'original-mix'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
   const link = await evaluate("document.getElementById('learn-explore').href");
   await fill('token-scene-price', '1000');

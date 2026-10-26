@@ -9,7 +9,7 @@ const cases = {
 const answers = {
   supply: ['earn', 'separate', 'enable'],
   borrow: ['same', 'liability', 'boundary'],
-  conditions: ['lower', 'interest', 'lower'],
+  conditions: ['lower', 'interest', 'backing-faster'],
   respond: ['repay', 'debt', 'none'],
 };
 

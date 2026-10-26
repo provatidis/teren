@@ -64,7 +64,7 @@ export async function checkLoanConditionLesson({ evaluate, click, fill, text, na
   assert.equal(await evaluate("document.getElementById('condition-time').value"), '365');
   assert.equal(await text('condition-health'), '1.45');
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
-  await choose('reason', 'interest'); await choose('application', 'lower'); await click('lend-check');
+  await choose('reason', 'interest'); await choose('application', 'backing-faster'); await click('lend-check');
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   await click('condition-mode-price'); await fill('condition-price', '1000');
   await reload();
@@ -74,7 +74,7 @@ export async function checkLoanConditionLesson({ evaluate, click, fill, text, na
   assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
   await choose('prediction', 'higher'); await click('lend-reveal');
   assert.match(await text('lend-prediction-feedback'), /^The result differs from your prediction\./);
-  await choose('reason', 'interest'); await choose('application', 'lower'); await click('lend-check');
+  await choose('reason', 'interest'); await choose('application', 'backing-faster'); await click('lend-check');
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   assert.deepEqual(await working(), drafts);
   await navigate(base + 'lending.html#loop-lesson=stress');

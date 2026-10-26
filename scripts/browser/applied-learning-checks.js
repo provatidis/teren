@@ -57,7 +57,8 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     assert.match(await text('applied-calculation-feedback'), /Calculation matches/);
     // Explanation and transfer are independently required, regardless of optional math.
     await choose('applied-reason', id === 'fees-over-time' ? 'owed' : id === 'between-samples' ? 'line' : 'forecast'); await click('applied-check');
-    assert.match(await text('applied-feedback-copy'), /application matches/);
+    assert.equal(await evaluate("document.getElementById('applied-applications-feedback').dataset.state"), 'match');
+    assert.equal(await evaluate("document.getElementById('applied-reasons-feedback').dataset.state"), 'different');
     await choose('applied-reason', reason);
     await choose('applied-application',id === 'fees-over-time' ? 'less' : id === 'between-samples' ? 'whole' : 'lp'); await click('applied-check');
     assert.equal(await text('applied-feedback-title'),'Review your answers.');

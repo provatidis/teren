@@ -35,7 +35,7 @@ test('range widths use the same budget and price but each range’s own funding 
   }
 });
 test('fee tiers alone never establish earnings, including supplied totals that reverse the tier ranking',()=>{
-  assert.equal(managementCase('fee-tiers',0).fees,null);
+  assert.deepEqual(managementCase('fee-tiers',0).fees,[12,4]);
   for(let variant=0;variant<3;variant++){
     const result=managementCase('fee-tiers',variant),presentation=managementPresentation(result);
     assert.equal(result.prediction,'unknown');assert.equal(result.application,['no','a','b'][variant]);

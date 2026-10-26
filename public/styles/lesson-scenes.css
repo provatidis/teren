@@ -10,7 +10,11 @@
 .learn-setup .allocation-swatch-usdc { border-radius: 50%; }
 .learn-setup .learn-setup-action { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid var(--border); }
 .learn-setup .learn-setup-assumptions { margin: 10px 0 0; font-size: 14px; line-height: 1.7; }
-.learn-prediction-feedback { font-size: 15px; line-height: 1.7; color: var(--text); margin: 14px 0 22px; padding: 14px 16px; background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; }
+.learn-prediction-feedback { font-size: 15px; line-height: 1.7; color: var(--text); margin: 14px 0 22px; padding: 14px 16px; background: var(--surface); border-left: 3px solid var(--border-strong); border-radius: 0 8px 8px 0; }
+.learn-prediction-feedback[data-state=match] { border-left-color: var(--accent); }
+.learn-prediction-feedback[data-state=match] > strong { color: var(--accent); }
+.learn-prediction-feedback[data-state=different] { border-left-color: #e5bd85; }
+.learn-prediction-feedback[data-state=different] > strong { color: #e5bd85; }
 .learn-prediction-feedback:empty { display: none; }
 .learn-prediction-feedback > strong { display: block; margin-bottom: 4px; }
 .learn-prediction-feedback > span { display: block; }
@@ -66,7 +70,7 @@
 [data-token=usdc] .scene-token-fill { background: var(--allocation-usdc-background); }
 .scene-token-start { position: absolute; top: -5px; bottom: -5px; width: 0; border-left: 2px dashed var(--text); }
 .scene-token-detail { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; min-height: 1.7em; }
-.scene-range-price { margin: 0 0 18px; font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.scene-range-price { margin: 0 0 18px; font-size: 20px; line-height: 1.6; font-weight: 600; font-variant-numeric: tabular-nums; }
 .scene-range-row { margin: 0 0 22px; }
 .scene-range-heading { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; line-height: 1.7; }
 .scene-range-heading > span { color: var(--muted); }
@@ -78,6 +82,20 @@
 .scene-range-bounds { display: flex; justify-content: space-between; gap: 8px; }
 .scene-range-bounds button { min-height: 44px; font-size: 13px; line-height: 1.6; text-decoration: underline; text-underline-offset: 3px; }
 .scene-range-tokens { margin: 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
+.scene-range-gap { margin: 10px 0 0; font-size: 14px; line-height: 1.7; }
+.scene-boundary-mix { display: flex; height: 22px; border-radius: 5px; overflow: hidden; margin: 22px 0 14px; }
+.scene-boundary-eth { background: var(--allocation-eth); }
+.scene-boundary-usdc { background: var(--allocation-usdc-background); }
+#boundary-scene-tokens .allocation-swatch-eth { transform: rotate(45deg); border-radius: 1px; }
+#boundary-scene-tokens .allocation-swatch-usdc { border-radius: 50%; }
+.recorded-comparison { margin: 24px 0; }
+.recorded-comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.recorded-comparison-card { padding: 16px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); font-size: 14px; line-height: 1.7; }
+.recorded-comparison-card h4 { margin: 0; font-size: 15px; }
+.recorded-comparison-track { position: relative; height: 16px; margin: 16px 0; background: var(--border); }
+.recorded-comparison-track::after { content: ''; position: absolute; top: -4px; bottom: -4px; left: 50%; border-left: 2px solid var(--text); }
+.recorded-comparison-track span { position: absolute; height: 100%; background: var(--accent); }
+.recorded-comparison-track [data-sign=negative] { background: #e5bd85; }
 #learn-scene + .button, #lend-visual > .button { margin-top: 16px; }
 #lend-visual .loop-flow-balances { margin-top: 20px; }
 #lend-visual .loop-flow-health { padding-left: 12px; border-left: 3px solid var(--accent); }
@@ -95,4 +113,5 @@
   .scene-range-bounds button { font-size: 12px; }
   .scene-range-row { margin-bottom: 12px; }
   .scene-range-figure > figcaption, .scene-range-price { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+  .scene-boundary-figure .scene-range-price { position: static; width: auto; height: auto; margin: 0 0 16px; overflow: visible; clip-path: none; white-space: normal; font-size: 16px; }
 }

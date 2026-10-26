@@ -1,11 +1,12 @@
 import { createPredictionPrompt } from '../lib/lesson-scene.js';
 import { renderRecordedLessonSetup } from '../lib/recorded-lesson-setup.js';
+import { renderRecordedComparison } from '../lib/recorded-comparison-scene.js';
 import { saveLearningLocation } from '../data/learning-location.js';
 import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js';
 import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js';
 import { appliedApplication, checkAppliedUnderstanding } from '../lib/applied-applications.js';
 import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
-import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback } from '../lib/learning-elements.js';
+import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback, renderUnderstandingFeedback, clearUnderstandingFeedback } from '../lib/learning-elements.js';
 import { POOL_PITFALLS } from '../learning/pool-pitfalls.js';
 import { readAppliedProgress, saveAppliedProgress } from '../data/applied-progress.js';
 import { createAppliedRecordLoader } from '../data/applied-records.js';
@@ -13,7 +14,7 @@ import { REPLAY_CASES } from '../data/replay-cases.js';
 import { periodPointView, periodIntervalView, periodMilestones, periodChartRange, periodDuration } from '../lib/period-presentation.js';
 import { positionScenario } from '../data/position-snapshot.js';
 import { rangeHash } from '../lib/range-links.js';
-import { fmt, usd, signedUSD } from '../lib/format.js';
+import { fmt, usd, signedUSD, formatTokenQuantity } from '../lib/format.js';
 import { formatUnits } from '../models/units.js';
 import { feeUSD } from '../lib/position-fees.js';
 
@@ -26,6 +27,7 @@ export function initAppliedLearning() {
   const utc = timestamp => new Date(timestamp * 1000).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
   const states = { inside: 'In range · both tokens', above: 'Above range · all USDC', below: 'Below range · all WETH' };
   const tokens = (zero, one) => formatUnits(zero, 6) + ' USDC + ' + formatUnits(one, 18) + ' WETH';
+  const readableTokens = (zero, one) => formatTokenQuantity(Number(formatUnits(zero, 6)), 4) + ' USDC + ' + formatTokenQuantity(Number(formatUnits(one, 18)), 6) + ' WETH (rounded)';
   const fresh = () => ({ prediction: '', answer: '', reason: '', application: '', choiceSeed: newChoiceSeed(), revealed: false, checkpoint: null });
   function focusTitle(id) { $(id).focus({ preventScroll: true }); $(id).scrollIntoView({ block: 'start', behavior: 'instant' }); }
   function updateNavigation() {
@@ -47,6 +49,7 @@ export function initAppliedLearning() {
     updateNavigation();
   }
   function clearFeedback() {
+    clearUnderstandingFeedback('applied');
     $('applied-feedback').hidden = true; $('applied-continue').hidden = true; $('applied-reflection').hidden = true;
   }
   function choices(id, name, values, selected, onChange) {
@@ -98,12 +101,12 @@ export function initAppliedLearning() {
     const metrics = lesson.id === 'fees-over-time'
       ? [metric('Principal value', usd(view.principalUSD), 'Excludes fees'), metric('Period fees', feeUSD(view.feesUSD), 'New tokens, valued at this checkpoint'), metric('Time in range', periodDuration(view.secondsInRange), 'Of ' + periodDuration(view.durationSeconds) + ' elapsed')]
       : lesson.id === 'between-samples'
-        ? [metric('Interval in-range time', fmt(interval.secondsInRange, 0) + ' seconds', 'Of ' + fmt(interval.durationSeconds, 0) + ' since the previous checkpoint'), metric('New interval fees', feeUSD(interval.feesUSD), tokens(interval.earned0, interval.earned1)), metric('Cumulative period fees', feeUSD(view.feesUSD), 'From the first checkpoint to this one')]
+        ? [metric('Interval in-range time', fmt(interval.secondsInRange, 0) + ' seconds', 'Of ' + fmt(interval.durationSeconds, 0) + ' since the previous checkpoint'), metric('New interval fees', feeUSD(interval.feesUSD), readableTokens(interval.earned0, interval.earned1)), metric('Cumulative period fees', feeUSD(view.feesUSD), 'From the first checkpoint to this one')]
         : [metric('Holding starting tokens', usd(view.holdingUSD), 'The original principal basket'), metric('LP + period fees', usd(view.lpUSD), 'Principal ' + usd(view.principalUSD) + ' + fees ' + usd(view.feesUSD)), metric('LP minus holding', signedUSD(view.gapUSD), 'Calculated before rounding individual totals')];
     $('applied-metrics').replaceChildren(...metrics);
     $('applied-interval').hidden = lesson.id !== 'between-samples';
     $('applied-interval-summary').textContent = !index ? 'The period starts here: no interval has elapsed.'
-      : 'Blocks ' + interval.start.number + ' → ' + interval.end.number + ': ' + fmt(interval.secondsInRange, 0) + ' seconds in range and ' + fmt(interval.secondsOutOfRange, 0) + ' outside. New fees: ' + tokens(interval.earned0, interval.earned1) + '.';
+      : 'Blocks ' + interval.start.number + ' → ' + interval.end.number + ': ' + fmt(interval.secondsInRange, 0) + ' seconds in range and ' + fmt(interval.secondsOutOfRange, 0) + ' outside. New fees: ' + readableTokens(interval.earned0, interval.earned1) + '. Exact token amounts are in Go deeper.';
     $('applied-observation').textContent = lesson.id === 'between-samples'
       ? !index ? 'Move forward to compare interval counters with the sampled status.'
         : view.state !== 'inside' && interval.startState !== 'inside' && interval.secondsInRange > 0
@@ -129,8 +132,13 @@ export function initAppliedLearning() {
     draft.revealed = true;
     const finding = lesson.id === 'fees-over-time' ? 'Fees accrued during this period without being collected.'
       : lesson.id === 'between-samples' ? 'The position was active between the two outside-range samples in the question.'
-      : 'Fees can leave the LP behind if they do not cover its principal shortfall. In this record, fees narrowly put the LP ahead at the final checkpoint, before costs.';
+      : 'At checkpoint ' + (question.contrastIndex + 1) + ', the position has earned ' + usd(question.contrast.feesUSD) + ' in fees but still trails holding by ' + usd(-question.contrast.gapUSD) + '. At the final checkpoint it is ' + usd(question.view.gapUSD) + ' ahead, before costs.';
     renderPredictionFeedback($('applied-prediction-feedback'), lesson.predictions, draft.prediction, question.prediction, finding);
+    renderRecordedComparison($('applied-comparison'), question, index => {
+      draft.checkpoint = index; renderCheckpoint(); persist();
+      $('applied-checkpoint').focus({ preventScroll: true });
+      $('applied-current').scrollIntoView({ block: 'center', behavior: 'instant' });
+    });
     $('applied-observe').hidden = false; $('applied-assessment').hidden = false;
     $('applied-reveal').textContent = 'Revisit the recorded result ↓';
     renderCheckpoint(); persist();
@@ -141,10 +149,11 @@ export function initAppliedLearning() {
     $('applied-feedback-title').textContent = result.passed ? 'Both answers are correct.' : 'Review your answers.';
     const reasoningFeedback = appliedReasonFeedback(lesson.id, draft.reason);
     const applicationFeedback = draft.application ? application.feedback : 'Choose an answer for the thought experiment. ' + application.hint;
-    $('applied-feedback-copy').textContent = result.passed ? lesson.takeaway
-      : !result.reasoning && !result.application ? reasoningFeedback + ' ' + applicationFeedback
-      : !result.reasoning ? 'Your application matches the thought experiment. ' + reasoningFeedback
-      : 'Your explanation fits the record. ' + applicationFeedback;
+    renderUnderstandingFeedback('applied', [
+      { container: 'applied-reasons', selected: draft.reason, correct: result.reasoning, explanation: result.reasoning ? lesson.takeaway : reasoningFeedback },
+      { container: 'applied-applications', selected: draft.application, correct: result.application, explanation: applicationFeedback },
+    ]);
+    $('applied-feedback-copy').textContent = result.passed ? lesson.takeaway : 'Read the feedback beside each question, then try again. You can change either answer.';
     $('applied-continue').hidden = !result.passed;
     const next = APPLIED_LESSONS[APPLIED_LESSONS.indexOf(lesson) + 1];
     $('applied-next').href = next ? '#applied=' + next.id : 'liquidity.html#historical-case=range-return';

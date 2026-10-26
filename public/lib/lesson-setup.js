@@ -103,6 +103,6 @@ export function lendingLessonSetup(id, { input: s, result: r }) {
     facts: [['Collateral after ' + s.rounds + ' rounds', fmt(r.end.collateralTokens, 4) + ' ETH', 'eth'],
       ['Debt still owed', fmt(r.end.debt, 2) + ' USDC'], ['ETH price', usd(s.future)]],
     action: 'Withdraw part of the collateral → sell it for USDC → repay debt. Repeat, then withdraw the remaining ETH.',
-    assumptions: 'Keep the price fixed. Each sale costs ' + s.swapCost + '%. No outside money or flash loan; USDC = $1.',
+    assumptions: 'Unlike the previous zero-cost example, this loop includes ' + s.swapCost + '% swap costs when building and closing it. That is why its starting collateral and debt differ slightly. Keep prices fixed; no outside money or flash loan. USDC = $1.',
   };
 }

@@ -5,22 +5,22 @@ export function lessonApplicationCopy(id, outcome) {
   const application = lessonApplication(id, outcome), s = outcome.setup;
   const base = {application, expected: application.expected};
   if (id === 'swap-impact') return {...base,
-    context: 'Same starting reserves and fee. Change only the trade from ' + s.amount + ' ETH to ' + application.amount + ' ETH.',
-    question: 'What happens to price impact?', choices: [['more','It increases.'],['less','It decreases.'],['same','It stays the same.']],
-    hint: 'Compare trade size with the same finite reserves. You do not need to calculate the output.',
-    feedback: 'Against the same starting reserves, a larger trade moves the price more; a smaller trade moves it less. The fee rate stays unchanged.'};
+    context: 'Swap the same ' + s.amount + ' ETH in a pool with twice as much ETH and twice as much USDC. Its starting price and 0.3% fee stay the same.',
+    question: 'How does the trade’s price impact compare?', choices: [['deeper-more','It is larger.'],['deeper-less','It is smaller.'],['deeper-same','It is the same.']],
+    hint: 'Compare the same trade with the amount of liquidity available to it.',
+    feedback: 'The trade uses a smaller fraction of the deeper pool, so it moves the price less. Doubling both reserves keeps the starting price unchanged.'};
   if (id === 'pool-share') return {...base,
-    context: 'After your deposit, another person adds a matching ' + application.depositEth + ' ETH deposit and its USDC counterpart. No trades or withdrawals occur.',
-    question: 'What happens to your percentage ownership?', choices: [['smaller','It becomes smaller.'],['same','It stays the same.'],['larger','It becomes larger.']],
-    hint: 'Your LP-token balance stays fixed, while the new deposit enlarges the pool and total LP-token supply.',
-    feedback: 'The matching deposit gives the new provider LP tokens. Your percentage of the enlarged pool decreases; your immediate claim on token amounts stays the same in this ideal proportional model.'};
+    context: 'After your deposit, a trader swaps ETH for USDC. Nobody adds or removes liquidity.',
+    question: 'What changes for your share of the pool?',
+    choices: [['share-same','The ownership percentage stays the same, but it represents more ETH and less USDC.'],['share-smaller','The ownership percentage falls because the trader removes USDC.'],['claim-fixed','The ownership percentage and the token amounts it represents stay the same.']],
+    hint: 'A trade changes the reserves without minting or burning LP tokens in this example.',
+    feedback: 'Your LP tokens still represent the same fraction of the pool. ETH enters and USDC leaves, so the token amounts behind that fraction change.'};
   if (id === 'token-balances') return {...base,
-    context: 'Start again with the same basket at ' + usd(s.initialPrice) + '/ETH. Change only the final price to ' + usd(application.futurePrice) + '/ETH.',
-    question: 'Compared with the starting basket, how much ETH does the LP hold?',
-    choices: [['more','More ETH than at the start.'],['less','Less ETH than at the start.'],['same','The same ETH as at the start.']],
-    hint: 'Use the starting price as the reference, rather than the outcome of the previous experiment.',
-    feedback: application.expected === 'more' ? 'The final price is below this experiment’s starting price. Traders add ETH and remove USDC, leaving the LP with more ETH than it started with.'
-      : 'The final price is above this experiment’s starting price. Traders add USDC and remove ETH, leaving the LP with less ETH than it started with.'};
+    context: 'ETH moves away from its starting price, then returns to ' + usd(s.initialPrice) + '. Keep the same liquidity, with no fees, deposits or withdrawals, and let swaps align the pool price again.',
+    question: 'What happens to the position’s token amounts?',
+    choices: [['original-mix','They return to the original ETH and USDC amounts.'],['last-mix','They keep the mix reached before the price returned.'],['extra-tokens','They end with more of both tokens because the price moved twice.']],
+    hint: 'The token mix follows the price in this fee-free model, in both directions.',
+    feedback: 'At the original price, the same liquidity holds its original token amounts in this model. Swaps reverse the earlier change in mix. This does not promise that a real price will return.'};
   if (id === 'loss-vs-profit') return {...base,
     context: 'Same starting basket at ' + usd(s.initialPrice) + '/ETH and zero fees. Change only the final price to ' + usd(application.futurePrice) + '/ETH.',
     question: 'How does LP principal compare with holding the starting tokens?',
@@ -35,12 +35,11 @@ export function lessonApplicationCopy(id, outcome) {
     hint: 'Separate the before-fee gap from the additional fees still needed after your assumption.',
     feedback: 'The total target comes from holding minus LP principal before fees. Changing assumed fee income changes total LP value and the remaining additional hurdle, while the total target stays the same.'};
   if (id === 'range-boundaries') return {...base,
-    context: 'Same funded range, ' + usd(outcome.result.lowerPrice) + '–' + usd(outcome.result.upperPrice) + '. Change only the final price to the ' + (application.expected === 'eth' ? 'lower' : 'upper') + ' boundary, ' + usd(application.futurePrice) + '.',
-    question: 'Which token does the position’s principal hold at this boundary?',
-    choices: [['eth','Only ETH.'],['both','ETH and USDC.'],['usdc','Only USDC.']],
-    hint: 'A lower ETH price exchanges USDC for ETH. A higher ETH price exchanges ETH for USDC.',
-    feedback: application.expected === 'eth' ? 'At the lower boundary, principal is all ETH. This identifies token composition; it does not reconstruct historical earnings.'
-      : 'At the upper boundary, principal is all USDC. This identifies token composition; it does not reconstruct historical earnings.'};
+    context: 'Keep the ' + usd(outcome.result.lowerPrice) + '–' + usd(outcome.result.upperPrice) + ' range. ETH is now ' + usd(application.futurePrice) + ', just inside the upper bound.',
+    question: 'What does the position hold, and can it take part in swaps here?',
+    choices: [['both-inside','Both tokens, mostly USDC by value; it is eligible to earn from swaps.'],['usdc-wait','Only USDC; it waits for price to reach the middle of the range.'],['both-paid','Both tokens; it earns fees simply by staying inside the range.']],
+    hint: 'The last ETH is exchanged at the boundary. Inside it, swaps can still use the position.',
+    feedback: 'Just inside the upper bound, a small amount of ETH remains beside the USDC. The position can earn when swaps use its liquidity; being inside does not itself create fees.'};
   return {...base,
     context: 'Someone changes the benchmark to investing the entire ' + usd(s.investment) + ' starting budget in ETH, instead of holding the original ETH and USDC basket.',
     question: 'How should that new comparison be described?',
