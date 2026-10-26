@@ -4,6 +4,14 @@
 
 Jump to [single loans](#lending-supply-borrow-change-conditions-respond), [ETH/USDC loops](#borrowing-loops-build-change-conditions-unwind), [LST loops](#correlated-asset-loops), [controlled widths](#compare-widths-with-a-common-starting-mix), [fee flow](#follow-the-fees), [recorded cases](#historical-cases-fees-through-a-recorded-period), [lessons](#learn-liquidity-essentials) or [saved experiments](#saved-experiments). Each tool is available directly.
 
+## Fees, time and costs in liquidity labs
+
+In either endpoint lab, choose **A total cash amount** or **An average fee APR**. APR applies to your starting capital over the duration you enter. Use an average for the whole period, including time outside a range; changing the width does not automatically increase it. Cash mode can leave duration blank.
+
+Open **LP costs** to include opening, total fee-collection and closing expenses. Enter only the additional costs relative to holding, paid separately from the starting tokens. **Where the result comes from** follows the tokens’ final value, adds assumed fees, subtracts costs and compares the net result with holding your original basket. The fee target includes costs; a duration also shows the required average APR. A target is not a forecast of attainable earnings.
+
+The optional V2-style reference in the range lab keeps its own cash fees and uses the same cost budget. Copying, saving or exporting includes these assumptions. Older links and saved experiments retain their cash amounts and open with zero added costs; lessons and recorded cases keep their original accounting.
+
 ## Start from Home
 
 Home introduces Liquidity and Lending. **Open the lab** and **Learn step by step** have equal prominence; every lesson and tool stays directly accessible. **Continue experimenting** restores the last valid assumptions edited or saved in this browser, independently of lesson progress. Its local bookmark contains inputs, not recorded provenance; use named saves to retain a source snapshot. **Your saved experiments** opens the shared library. Phones have a shortcut to each topic above the cards. The Teren logo returns Home, and **Continue learning** reopens the most recently visited lesson in this browser after it has been opened in this release. It is a navigation bookmark, not a completion mark.

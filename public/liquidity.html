@@ -74,7 +74,55 @@
             <div class="scenario-field"><label for="scenario-start">Starting ETH price <span>USD</span></label><input id="scenario-start" type="number" min="0.01" max="10000000" step="any" value="2000" required aria-describedby="scenario-start-error"><p id="scenario-start-error" class="field-error" hidden></p></div>
             <div class="scenario-field"><label for="scenario-future">Future ETH price <span>USD</span></label><input id="scenario-future" type="number" min="0.01" max="10000000" step="any" value="4000" required aria-describedby="scenario-future-error"><p id="scenario-future-error" class="field-error" hidden></p></div>
             <div class="scenario-presets" aria-label="Future price presets"><button type="button" data-price-multiple="0.5" aria-pressed="false">−50%</button><button type="button" data-price-multiple="1" aria-pressed="false">Unchanged</button><button type="button" data-price-multiple="2" aria-pressed="true">+100%</button></div>
-            <div class="scenario-field"><label for="scenario-fees">Assumed fee income <span>USD · optional</span></label><input id="scenario-fees" type="number" min="0" max="1000000000" step="any" value="100" aria-describedby="scenario-fee-help scenario-fees-error"><p id="scenario-fees-error" class="field-error" hidden></p><p id="scenario-fee-help" class="fine-print">Total fees accruing to your position after any protocol share, treated as separate USD cash. This is an assumption, not a yield forecast.</p></div>
+            <div class="lp-fee-mode scenario-field">
+              <label for="scenario-fee-mode">Assume fee income as</label>
+              <select id="scenario-fee-mode">
+              <option value="cash">A total cash amount</option>
+              <option value="apr">An average fee APR</option>
+              </select>
+              </div>
+<div class="scenario-field" id="scenario-fee-apr-field">
+              <label for="scenario-fee-apr">Average position fee APR <span>% per year</span>
+              </label>
+              <input id="scenario-fee-apr" type="number" min="0" max="10000" step="any" value="0" aria-describedby="scenario-fee-apr-error scenario-fee-apr-help">
+              <p id="scenario-fee-apr-error" class="field-error" hidden>
+              </p>
+              <p id="scenario-fee-apr-help" class="fine-print">Assumed average over the whole period, including time out of range. Applied to starting capital; no compounding. This is not the pool’s fee tier.</p>
+              </div>
+              <div class="scenario-field" id="scenario-fee-days-field">
+              <label for="scenario-fee-days">Duration <span>days · optional for cash fees</span>
+              </label>
+              <input id="scenario-fee-days" type="number" min="0" max="3650" step="any" value="0" aria-describedby="scenario-fee-days-error">
+              <p id="scenario-fee-days-error" class="field-error" hidden>
+              </p>
+              </div>
+              <details id="scenario-cost-details" class="lp-cost-details">
+              <summary>LP costs <span>Optional · USD</span>
+              </summary>
+              <p class="fine-print">Extra costs of providing liquidity compared with holding. Paid separately; they do not reduce the starting token amounts.</p>
+              <div class="scenario-field" id="scenario-opening-cost-field">
+              <label for="scenario-opening-cost">Opening <span>USD</span>
+              </label>
+              <input id="scenario-opening-cost" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="scenario-opening-cost-error">
+              <p id="scenario-opening-cost-error" class="field-error" hidden>
+              </p>
+              </div>
+              <div class="scenario-field" id="scenario-collection-cost-field">
+              <label for="scenario-collection-cost">Collecting fees <span>USD · total for the period</span>
+              </label>
+              <input id="scenario-collection-cost" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="scenario-collection-cost-error">
+              <p id="scenario-collection-cost-error" class="field-error" hidden>
+              </p>
+              </div>
+              <div class="scenario-field" id="scenario-closing-cost-field">
+              <label for="scenario-closing-cost">Closing <span>USD</span>
+              </label>
+              <input id="scenario-closing-cost" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="scenario-closing-cost-error">
+              <p id="scenario-closing-cost-error" class="field-error" hidden>
+              </p>
+              </div>
+              </details>
+<div class="scenario-field" id="scenario-cash-field"><label for="scenario-fees">Assumed fee income <span>USD · optional</span></label><input id="scenario-fees" type="number" min="0" max="1000000000" step="any" value="100" aria-describedby="scenario-fee-help scenario-fees-error"><p id="scenario-fees-error" class="field-error" hidden></p><p id="scenario-fee-help" class="fine-print">Total fees accruing to your position after any protocol share, treated as separate USD cash. This is an assumption, not a yield forecast.</p></div>
             <p id="scenario-error" class="form-error" role="status"></p>
           </form>
           <button id="scenario-reset" class="text-button" type="button">Reset scenario</button>
@@ -83,10 +131,11 @@
         <div class="card scenario-output">
           <div id="scenario-invalid" class="scenario-invalid" hidden><h3>Enter a valid scenario to compare outcomes.</h3><p class="body-copy">Check the highlighted input message. Results and sharing will return when all inputs are valid.</p></div>
           <div id="scenario-results" role="region" aria-label="Full-range outcomes" tabindex="-1">
-            <div class="scenario-totals"><div><span class="label">Keep the original tokens</span><strong id="scenario-hold-value">—</strong><span id="scenario-hold-return" class="stat-note"></span></div><div><span class="label">Provide liquidity + assumed fees</span><strong id="scenario-lp-value">—</strong><span id="scenario-lp-return" class="stat-note"></span></div></div>
+            <div class="scenario-totals"><div><span class="label">Keep the original tokens</span><strong id="scenario-hold-value">—</strong><span id="scenario-hold-return" class="stat-note"></span></div><div><span class="label">LP after fees &amp; costs</span><strong id="scenario-lp-value">—</strong><span id="scenario-lp-return" class="stat-note"></span></div></div>
+            <div id="scenario-economics" class="lp-economics"></div>
             <p id="scenario-verdict" class="scenario-verdict" aria-live="polite"></p>
-            <div class="scenario-metrics"><div><span class="label">ETH price change</span><strong id="scenario-price-change">—</strong></div><div><span class="label">Impermanent loss · before fees</span><strong id="scenario-il">—</strong></div><div><span class="label">Fees needed to match holding</span><strong id="scenario-break-even">—</strong><span class="fine-print">A target under your prices; whether it can be earned needs trading history.</span></div></div>
-            <figure class="scenario-figure"><div class="scenario-chart-heading"><h3>Explore the price range</h3><div class="chart-legend"><span><i class="legend-hold"></i>Holding</span><span><i class="legend-lp"></i>LP + fees</span></div></div><svg id="scenario-chart" viewBox="0 0 620 260" role="img" aria-labelledby="scenario-chart-title"><title id="scenario-chart-title">Holding compared with liquidity as ETH market price changes</title><g class="grid"><path d="M60 28H590 M60 118H590 M60 208H590"/></g><text id="scenario-y-high" x="52" text-anchor="end" class="chart-label"></text><text id="scenario-y-mid" x="52" text-anchor="end" class="chart-label"></text><text id="scenario-y-zero" x="52" text-anchor="end" class="chart-label"></text><path id="scenario-chart-marker" class="scenario-marker"/><path id="scenario-hold-path" class="scenario-hold-line"/><path id="scenario-lp-path" class="curve-line"/><circle id="scenario-hold-dot" r="5" class="scenario-hold-dot"/><circle id="scenario-lp-dot" r="5" class="curve-dot"/><text id="scenario-x-low" x="60" y="233" class="chart-label"></text><text id="scenario-x-high" x="590" y="233" text-anchor="end" class="chart-label"></text><text x="325" y="251" text-anchor="middle" class="chart-label chart-axis-title">Future ETH market price →</text></svg><figcaption id="scenario-chart-note" class="fine-print"></figcaption></figure>
+            <div class="scenario-metrics"><div><span class="label">ETH price change</span><strong id="scenario-price-change">—</strong></div><div><span class="label">Impermanent loss · before fees</span><strong id="scenario-il">—</strong></div><div><span class="label">Fees needed to match holding</span><strong id="scenario-break-even">—</strong><span id="scenario-break-even-apr" class="lp-target-apr"></span><span class="fine-print">A target under your prices; whether it can be earned needs trading history.</span></div></div>
+            <figure class="scenario-figure"><div class="scenario-chart-heading"><h3>Explore the price range</h3><div class="chart-legend"><span><i class="legend-hold"></i>Holding</span><span><i class="legend-lp"></i>LP after costs</span></div></div><svg id="scenario-chart" viewBox="0 0 620 260" role="img" aria-labelledby="scenario-chart-title"><title id="scenario-chart-title">Holding compared with liquidity as ETH market price changes</title><g class="grid"><path d="M60 28H590 M60 118H590 M60 208H590"/></g><text id="scenario-y-high" x="52" text-anchor="end" class="chart-label"></text><text id="scenario-y-mid" x="52" text-anchor="end" class="chart-label"></text><text id="scenario-y-zero" x="52" text-anchor="end" class="chart-label"></text><path id="scenario-chart-marker" class="scenario-marker"/><path id="scenario-hold-path" class="scenario-hold-line"/><path id="scenario-lp-path" class="curve-line"/><circle id="scenario-hold-dot" r="5" class="scenario-hold-dot"/><circle id="scenario-lp-dot" r="5" class="curve-dot"/><text id="scenario-x-low" x="60" y="233" class="chart-label"></text><text id="scenario-x-high" x="590" y="233" text-anchor="end" class="chart-label"></text><text x="325" y="251" text-anchor="middle" class="chart-label chart-axis-title">Future ETH market price →</text></svg><figcaption id="scenario-chart-note" class="fine-print"></figcaption></figure>
             <div class="scenario-assets"><div><h3>Assets if you hold</h3><p id="scenario-hold-eth"></p><p id="scenario-hold-usdc"></p></div><div><h3>Assets from liquidity</h3><p id="scenario-lp-eth"></p><p id="scenario-lp-usdc"></p><p id="scenario-cash-fees" class="muted"></p></div></div>
             <p class="fine-print">LP assets before assumed fee income: <strong id="scenario-lp-before-fees"></strong>. Arbitrage trades rebalance the pool to your future ETH price, changing the token amounts you can withdraw.</p>
           </div>
@@ -97,12 +146,12 @@
           <div class="scenario-actions"><button id="scenario-share" class="button secondary" type="button">Copy scenario link</button><button id="scenario-export" class="button secondary" type="button">Export CSV</button><button id="scenario-image" class="button secondary" type="button">Create result card</button></div>
           <div class="experiment-lab-footer"><a href="#saved-experiments">Saved experiments →</a></div>
           <p id="scenario-image-status" class="fine-print" role="status"></p>
-          <details id="scenario-card-preview" class="result-card-preview" hidden><summary>Your result card</summary><img id="scenario-card-image" alt="Scenario card with investment, ETH prices, assumed fees and holding versus liquidity outcomes."><a id="scenario-image-download" class="button secondary" download="teren-scenario-cp50-v1.png">Download PNG</a></details>
+          <details id="scenario-card-preview" class="result-card-preview" hidden><summary>Your result card</summary><img id="scenario-card-image" alt="Scenario card with investment, ETH prices, assumed fees and holding versus liquidity outcomes."><a id="scenario-image-download" class="button secondary" download="teren-scenario-cp50-v2.png">Download PNG</a></details>
           <div id="scenario-share-wrap" class="share-wrap" hidden><p id="scenario-share-status" role="status"></p><label class="sr-only" for="scenario-share-url">Scenario link</label><input id="scenario-share-url" type="text" readonly></div>
           <p id="scenario-link-status" class="fine-print" role="status"></p>
       </section>
-      <div id="scenario-comparison-card" class="card comparison-card"><div class="card-heading"><div><h3>Compare outcomes</h3><p class="body-copy">Select a price to explore it. Investment and assumed fee income stay the same in every row.</p></div></div><p class="fine-print table-scroll-hint">Swipe or scroll sideways to see every column.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Scenario comparison table"><table role="table" class="scenario-table"><caption class="sr-only">Holding and liquidity outcomes under different future ETH prices, with the same assumed fees</caption><thead><tr role="row"><th scope="col">Future ETH price</th><th scope="col">Holding</th><th scope="col">LP + fees</th><th scope="col">LP minus holding</th><th scope="col">IL before fees</th></tr></thead><tbody id="scenario-comparisons"></tbody></table></div><p class="fine-print">Values are hypothetical outcomes, not probabilities or recommendations.</p></div>
-      <details class="model-details"><summary>How this model works</summary><div><p>This Uniswap v2-style full-range model starts with 50% ETH and 50% USDC by dollar value. USDC stays at $1. Ideal, frictionless arbitrage brings the pool price to the future market price.</p><p>For an initial investment V and price ratio r = future price / starting price, holding is worth V × (1 + r) / 2. The LP assets are worth V × √r before fee income. Initial ETH = V / (2 × starting price); after rebalancing, LP ETH = initial ETH / √r and LP USDC = initial USDC × √r.</p><p>Fee income is your assumed total for this position, added as separate USD cash at the end. It is held fixed across the comparison, does not compound, and is not inferred from market prices or trading volume. The model excludes gas, incentives, depegging, and concentrated liquidity. It shows endpoints, not a trading path.</p><p>Teren calculation revision: cp50-v1. The v1 identifies this model revision, not Uniswap v1. Shared links and CSV exports include the assumptions and model version so another person can reproduce the calculation.</p></div></details>
+      <div id="scenario-comparison-card" class="card comparison-card"><div class="card-heading"><div><h3>Compare outcomes</h3><p class="body-copy">Select a price to explore it. Investment, duration, assumed fees and costs stay the same in every row.</p></div></div><p class="fine-print table-scroll-hint">Swipe or scroll sideways to see every column.</p><div class="table-scroll" tabindex="0" role="region" aria-label="Scenario comparison table"><table role="table" class="scenario-table"><caption class="sr-only">Holding and liquidity outcomes under different future ETH prices, with the same assumed fees and costs</caption><thead><tr role="row"><th scope="col">Future ETH price</th><th scope="col">Holding</th><th scope="col">LP after costs</th><th scope="col">LP minus holding</th><th scope="col">IL before fees</th></tr></thead><tbody id="scenario-comparisons"></tbody></table></div><p class="fine-print">Values are hypothetical outcomes, not probabilities or recommendations.</p></div>
+      <details class="model-details"><summary>How this model works</summary><div><p>This Uniswap v2-style full-range model starts with 50% ETH and 50% USDC by dollar value. USDC stays at $1. Ideal, frictionless arbitrage brings the pool price to the future market price.</p><p>For an initial investment V and price ratio r = future price / starting price, holding is worth V × (1 + r) / 2. The LP assets are worth V × √r before fee income. Initial ETH = V / (2 × starting price); after rebalancing, LP ETH = initial ETH / √r and LP USDC = initial USDC × √r.</p><p>Fee income is either a total cash assumption or starting capital × assumed average fee APR × days / 365. It is added as separate USD cash at the end. Fee income and costs are held fixed across the comparison; fee income does not compound, and is not inferred from market prices or trading volume. Assumed LP costs are subtracted as separate USD expenses. Incentives, depegging and concentrated liquidity are excluded. It shows endpoints, not a trading path.</p><p>Teren calculation revision: cp50-v2. This identifies the calculation revision, not the Uniswap protocol version. Shared links and CSV exports include the assumptions and model version so another person can reproduce the calculation.</p></div></details>
     </section>
     <section id="range-lab" class="scenario-section" role="tabpanel" aria-labelledby="lab-range-tab" hidden>
       <div class="lab-heading">
@@ -113,7 +162,7 @@
       <p id="cl-origin" class="fine-print cl-origin" hidden></p>
       <div class="cl-layout">
         <details id="cl-setup-details" class="card cl-controls" open>
-          <summary id="cl-setup-summary" class="cl-setup-summary"><span>Edit budget &amp; range</span><span id="cl-setup-overview"></span></summary>
+          <summary id="cl-setup-summary" class="cl-setup-summary"><span>Edit range, fees &amp; costs</span><span id="cl-setup-overview"></span></summary>
           <div class="cl-setup-body">
           <h3>Your setup</h3><p class="body-copy">The starting price and range determine the tokens required for your budget.</p>
           <section id="cl-quick-result" class="lab-quick-result" aria-label="Live LP comparison"><div class="quick-result-heading"><strong id="cl-quick-gap">—</strong><button id="cl-show-results" class="text-button" type="button">Full results ↓</button></div><p id="cl-quick-values"></p><p id="cl-quick-note"></p></section>
@@ -144,9 +193,57 @@
               <p id="cl-initial-note" class="fine-print"></p>
             </div>
             <div class="scenario-field"><label for="cl-future">Future ETH price <span>USD</span></label><input id="cl-future" type="number" min="0.01" max="10000000" step="any" value="2100" required aria-describedby="cl-future-error"><p id="cl-future-error" class="field-error" hidden></p></div>
-            <details id="cl-fee-details" class="cl-fee-details"><summary>Assumed fee income <span>Optional</span></summary>
+            <details id="cl-fee-details" class="cl-fee-details"><summary>Fees &amp; costs <span>Optional</span></summary>
               <p class="fine-print">Total fees accruing to each LP strategy after any protocol share, treated as USD cash. This lab does not forecast fees.</p>
-              <div class="scenario-field"><label for="cl-fees">For your range <span>USD</span></label><input id="cl-fees" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="cl-fees-error cl-fee-help"><p id="cl-fees-error" class="field-error" hidden></p></div>
+              <div class="lp-fee-mode scenario-field">
+              <label for="cl-fee-mode">Assume fee income as</label>
+              <select id="cl-fee-mode">
+              <option value="cash">A total cash amount</option>
+              <option value="apr">An average fee APR</option>
+              </select>
+              </div>
+<div class="scenario-field" id="cl-fee-apr-field">
+              <label for="cl-fee-apr">Average position fee APR <span>% per year</span>
+              </label>
+              <input id="cl-fee-apr" type="number" min="0" max="10000" step="any" value="0" aria-describedby="cl-fee-apr-error cl-fee-apr-help">
+              <p id="cl-fee-apr-error" class="field-error" hidden>
+              </p>
+              <p id="cl-fee-apr-help" class="fine-print">Assumed average over the whole period, including time out of range. Applied to starting capital; no compounding. This is not the pool’s fee tier.</p>
+              </div>
+              <div class="scenario-field" id="cl-fee-days-field">
+              <label for="cl-fee-days">Duration <span>days · optional for cash fees</span>
+              </label>
+              <input id="cl-fee-days" type="number" min="0" max="3650" step="any" value="0" aria-describedby="cl-fee-days-error">
+              <p id="cl-fee-days-error" class="field-error" hidden>
+              </p>
+              </div>
+              <details id="cl-cost-details" class="lp-cost-details">
+              <summary>LP costs <span>Optional · USD</span>
+              </summary>
+              <p class="fine-print">Extra costs of providing liquidity compared with holding. Paid separately; they do not reduce the starting token amounts.</p>
+              <div class="scenario-field" id="cl-opening-cost-field">
+              <label for="cl-opening-cost">Opening <span>USD</span>
+              </label>
+              <input id="cl-opening-cost" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="cl-opening-cost-error">
+              <p id="cl-opening-cost-error" class="field-error" hidden>
+              </p>
+              </div>
+              <div class="scenario-field" id="cl-collection-cost-field">
+              <label for="cl-collection-cost">Collecting fees <span>USD · total for the period</span>
+              </label>
+              <input id="cl-collection-cost" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="cl-collection-cost-error">
+              <p id="cl-collection-cost-error" class="field-error" hidden>
+              </p>
+              </div>
+              <div class="scenario-field" id="cl-closing-cost-field">
+              <label for="cl-closing-cost">Closing <span>USD</span>
+              </label>
+              <input id="cl-closing-cost" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="cl-closing-cost-error">
+              <p id="cl-closing-cost-error" class="field-error" hidden>
+              </p>
+              </div>
+              </details>
+<div class="scenario-field" id="cl-cash-field"><label for="cl-fees">For your range <span>USD</span></label><input id="cl-fees" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="cl-fees-error cl-fee-help"><p id="cl-fees-error" class="field-error" hidden></p></div>
               <div class="scenario-field"><label for="cl-full-fees">For the optional V2-style comparison <span>USD</span></label><input id="cl-full-fees" type="number" min="0" max="1000000000" step="any" value="0" aria-describedby="cl-full-fees-error cl-fee-help"><p id="cl-full-fees-error" class="field-error" hidden></p></div>
               <p id="cl-fee-help" class="fine-print">Fees remain separate cash. They do not compound or change the position's token amounts.</p>
             </details>
@@ -162,7 +259,7 @@
             <p id="cl-state-note" class="cl-state-note"></p>
             <div class="cl-totals">
               <div class="cl-total"><span class="label">Hold your starting mix</span><strong id="cl-hold-value">—</strong><span id="cl-hold-return" class="stat-note"></span><p id="cl-held-note"></p></div>
-              <div class="cl-total cl-total-range"><span class="label">Your range LP</span><strong id="cl-value">—</strong><span id="cl-return" class="stat-note"></span><p id="cl-fees-note"></p></div>
+              <div class="cl-total cl-total-range"><span class="label">Range after fees &amp; costs</span><strong id="cl-value">—</strong><span id="cl-return" class="stat-note"></span><p id="cl-fees-note"></p></div>
             </div>
             <details id="cl-reference" class="cl-reference">
               <summary>Compare with a V2-style 50/50 position</summary>
@@ -179,6 +276,7 @@
               </div>
               <p id="cl-explorer-help" class="sr-only">Use the price slider, the price checkpoints, or the future price input. You can also select a price on the chart.</p>
             </div>
+            <div id="cl-economics" class="lp-economics"></div>
             <p id="cl-verdict" class="scenario-verdict" aria-live="polite"></p>
             <p class="cl-benchmark-note">Holding keeps the exact ETH and USDC your range started with.</p>
             <div class="cl-position">
@@ -203,21 +301,21 @@
                 <path id="cl-chart-lower" class="cl-boundary-line"/><path id="cl-chart-upper" class="cl-boundary-line"/><path id="cl-chart-marker" class="scenario-marker"/>
                 <path id="cl-chart-hold" class="cl-hold-line"/><path id="cl-chart-full" class="cl-full-line" hidden/><path id="cl-chart-range" class="cl-range-line"/>
                 <circle id="cl-dot-hold" r="4" class="cl-hold-dot"/><circle id="cl-dot-full" hidden r="4" class="cl-full-dot"/><circle id="cl-dot-range" r="5" class="cl-range-dot"/>
-                <text id="cl-y-high" x="62" y="30" text-anchor="end" class="chart-label"></text><text id="cl-y-mid" x="62" y="140" text-anchor="end" class="chart-label"></text><text x="62" y="250" text-anchor="end" class="chart-label">$0</text>
+                <text id="cl-y-high" x="62" y="30" text-anchor="end" class="chart-label"></text><text id="cl-y-mid" x="62" y="140" text-anchor="end" class="chart-label"></text><text id="cl-y-zero" x="62" y="250" text-anchor="end" class="chart-label">$0</text>
                 <text id="cl-x-low" x="70" y="273" class="chart-label"></text><text id="cl-x-mid" x="380" y="273" text-anchor="middle" class="chart-label"></text><text id="cl-x-high" x="690" y="273" text-anchor="end" class="chart-label"></text><text x="380" y="296" text-anchor="middle" class="chart-label chart-axis-title">Future ETH price →</text>
               </svg>
               <figcaption id="cl-chart-note" class="fine-print"></figcaption>
             </figure>
-            <div class="cl-metrics"><div><span class="label">Range IL · before fees</span><strong id="cl-il">—</strong><span class="fine-print">vs. holding its starting mix</span></div><div><span class="label">Range fees needed to match holding</span><strong id="cl-break-even">—</strong><span class="fine-print">A target for this range; earning it depends on swaps and competing liquidity.</span><button id="cl-match-fees" class="text-button" type="button">Use break-even fees</button></div></div>
+            <div class="cl-metrics"><div><span class="label">Range IL · before fees</span><strong id="cl-il">—</strong><span class="fine-print">vs. holding its starting mix</span></div><div><span class="label">Range fees needed to match holding</span><strong id="cl-break-even">—</strong><span id="cl-break-even-apr" class="lp-target-apr"></span><span class="fine-print">A target for this range; earning it depends on swaps and competing liquidity.</span><button id="cl-match-fees" class="text-button" type="button">Use break-even fees</button></div></div>
             <p class="fine-print">Range status describes the endpoint. Assumed fees may include earlier time inside the range; they are held fixed across this comparison.</p>
           </div>
-          <div class="card cl-share-card"><h3>Save or share the range scenario</h3><p class="body-copy">Name this setup and add notes, or share its range and both fee assumptions in a link.</p>
+          <div class="card cl-share-card"><h3>Save or share the range scenario</h3><p class="body-copy">Name this setup and add notes, or share its range, fees, duration and costs in a link.</p>
           <button id="cl-save" class="button primary" type="button">Save experiment <span>+</span></button><p id="cl-save-status" class="fine-print" role="status"></p>
           <div class="scenario-actions"><button id="cl-share" class="button secondary" type="button">Copy range scenario</button><button id="cl-export" class="button secondary" type="button">Export CSV</button><button id="cl-image" class="button secondary" type="button">Create result card</button></div>
           <div class="experiment-lab-footer"><a href="#saved-experiments">Saved experiments →</a><button id="cl-reset" class="text-button" type="button">Reset range scenario</button></div>
           <div id="cl-share-wrap" class="share-wrap" hidden><p id="cl-share-status" role="status"></p><label class="sr-only" for="cl-share-url">Range scenario link</label><input id="cl-share-url" type="text" readonly></div>
           <p id="cl-image-status" class="fine-print" role="status"></p></div>
-          <details id="cl-card-preview" class="card result-card-preview cl-card-preview" hidden><summary>Your range result card</summary><img id="cl-card-image" alt="Range result card with price boundaries, starting allocation, assumptions and the three strategy outcomes."><a id="cl-image-download" class="button secondary" download="teren-range-cl-range-v1.png">Download PNG</a></details>
+          <details id="cl-card-preview" class="card result-card-preview cl-card-preview" hidden><summary>Your range result card</summary><img id="cl-card-image" alt="Range result card with price boundaries, starting allocation, assumptions and the three strategy outcomes."><a id="cl-image-download" class="button secondary" download="teren-range-cl-range-v2.png">Download PNG</a></details>
         </div>
       </div>
       <p class="period-reading"><a href="#compare-widths">Compare widths with the same starting mix →</a></p>
@@ -225,8 +323,8 @@
       <details class="model-details"><summary>How this range model works</summary><div>
         <p>Prices are USD per ETH, with USDC fixed at $1. The starting range determines your token mix; concentrated positions do not always begin 50/50. Holding keeps those exact starting tokens. The full-range LP invests the same amount in a separate 50/50 position.</p>
         <p>For liquidity L and lower/upper prices a and b, clamp the current price p to the range. The position holds ETH = L × (1/√p − 1/√b) and USDC = L × (√p − √a). L is sized so those assets equal your investment at the starting price. Below a the position is all ETH; above b it is all USDC.</p>
-        <p>This simplified Uniswap v3-style model allows any valid price bounds; real v3 positions use tick-aligned bounds. It does not apply Uniswap tick spacing or on-chain rounding, and does not estimate fees, gas, incentives or trading paths. Each fee input is assumed total USD cash, added separately without compounding.</p>
-        <p>Teren calculation revision: cl-range-v1. The v1 identifies this model revision, not Uniswap v1. Shared links, CSV exports and result cards include the range and assumptions. <a href="https://blog.uniswap.org/uniswap-v3-math-primer-2" target="_blank" rel="noopener noreferrer">Read the Uniswap liquidity math →</a></p>
+        <p>This simplified Uniswap v3-style model allows any valid price bounds; real v3 positions use tick-aligned bounds. It does not apply Uniswap tick spacing or on-chain rounding, and does not forecast fees or trading paths. Range fee income is either a cash amount or starting capital × assumed average fee APR × days / 365, including any time out of range. Fees remain separate USD cash without compounding. Opening, collection and closing costs are extra USD expenses compared with holding. The optional 50/50 reference uses its own cash fees and the same cost budget. Incentives are excluded.</p>
+        <p>Teren calculation revision: cl-range-v2. This identifies the calculation revision, not the Uniswap protocol version. Shared links, CSV exports and result cards include the range and assumptions. <a href="https://blog.uniswap.org/uniswap-v3-math-primer-2" target="_blank" rel="noopener noreferrer">Read the Uniswap liquidity math →</a></p>
       </div></details>
     </section>
     </div>

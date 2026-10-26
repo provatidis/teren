@@ -1,3 +1,4 @@
+import { liquidityModel, isRangeModel } from '../models/liquidity-models.js';
 import { bindTablist } from '../lib/tablist.js';
 
 export function initLabNavigation({ activate = () => {} } = {}) {
@@ -24,7 +25,7 @@ export function initLabNavigation({ activate = () => {} } = {}) {
     tabs.select(mode);
     if (updateURL) {
       const model = new URLSearchParams(location.hash.replace(/^#/, '')).get('scenario');
-      if (model !== labs[mode].model) history.replaceState(null, '', location.pathname + location.search + '#' + labs[mode].panel.id);
+      if (liquidityModel(model)?.family !== mode) history.replaceState(null, '', location.pathname + location.search + '#' + labs[mode].panel.id);
     }
     if (scroll) {
       const performScroll = () => labs[mode].panel.scrollIntoView({
@@ -42,7 +43,7 @@ export function initLabNavigation({ activate = () => {} } = {}) {
   function fromLocation(initial = false) {
     const params = new URLSearchParams(location.hash.replace(/^#/, ''));
     if (params.has('scenario')) {
-      selectLab(params.get('scenario') === labs.range.model ? 'range' : 'full', { updateURL: false, scroll: true, immediate: true });
+      selectLab(isRangeModel(params.get('scenario')) ? 'range' : 'full', { updateURL: false, scroll: true, immediate: true });
     } else if (location.hash === '#range-lab' || location.hash === '#lp-lab') {
       selectLab(location.hash === '#range-lab' ? 'range' : 'full', { updateURL: false, scroll: true, immediate: true });
     } else if (initial) selectLab(selectedLab, { updateURL: false, reveal: false });

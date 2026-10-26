@@ -1,5 +1,4 @@
-import { MODEL as FULL_MODEL, calculateScenario } from '../models/cp50-v1.js';
-import { calculateRange } from '../models/cl-range-v1.js';
+import { liquidityModel, isFullModel, isRangeModel } from '../models/liquidity-models.js';
 import { scenarioHash } from './scenario-links.js';
 import { rangeHash } from './range-links.js';
 import { loanModel } from '../models/loan-models.js';
@@ -13,7 +12,7 @@ import { healthLabel, loanStatus } from './lending-presentation.js';
 import { fmt, usd, signedUSD, percent, formatTokenQuantity } from './format.js';
 import { STATE_COPY } from './range-presentation.js';
 
-const names = { 'cp50-v1': 'V2-style full range', 'cl-range-v1': 'V3-style price range', 'collateral-loan-v1': 'Single loan', 'collateral-loan-v2': 'Single loan', 'borrowing-loop-v1': 'Borrowing loop', 'lst-loop-v1': 'Correlated-asset loop', 'lst-loop-v2': 'Correlated-asset loop' };
+const names = { 'cp50-v2': 'V2-style full range', 'cl-range-v2': 'V3-style price range', 'cp50-v1': 'V2-style full range', 'cl-range-v1': 'V3-style price range', 'collateral-loan-v1': 'Single loan', 'collateral-loan-v2': 'Single loan', 'borrowing-loop-v1': 'Borrowing loop', 'lst-loop-v1': 'Correlated-asset loop', 'lst-loop-v2': 'Correlated-asset loop' };
 export const experimentModelName = model => names[model];
 export const experimentFamily = model => lstModel(model) ? 'correlated' : loanModel(model) || model === 'borrowing-loop-v1' ? 'lending' : 'liquidity';
 export function experimentView(entry) {
@@ -29,9 +28,9 @@ export function experimentView(entry) {
       : loanHash(entry.inputs, entry.liquidation);
     return { result, family, modelName, hash, page: 'lending.html', net: loop ? result.end.netAssets : result.netAssets };
   }
-  const result = entry.model === FULL_MODEL ? calculateScenario(entry.inputs) : calculateRange(entry.inputs);
+  const result = liquidityModel(entry.model).calculate(entry.inputs);
   return { result, family, page: 'liquidity.html', initial: result.held ?? result.initial,
-    hash: entry.model === FULL_MODEL ? scenarioHash(entry.inputs) : rangeHash(entry.inputs),
+    hash: isFullModel(entry.model) ? scenarioHash(entry.inputs) : rangeHash(entry.inputs),
     modelName };
 }
 export function defaultExperimentName(draft) {
@@ -46,14 +45,14 @@ export function defaultExperimentName(draft) {
     const id = draft.origin.snapshot.tokenId;
     return 'Position #' + (id.length > 24 ? id.slice(0,18) + '…' + id.slice(-6) : id) + ' · range experiment';
   }
-  if (draft.model === FULL_MODEL) return 'ETH ' + usd(result.initialPrice) + ' → ' + usd(result.futurePrice) + ' · fees ' + usd(result.fees);
+  if (isFullModel(draft.model)) return 'ETH ' + usd(result.initialPrice) + ' → ' + usd(result.futurePrice) + ' · fees ' + usd(result.feeIncome ?? result.fees);
   return 'Range ' + usd(result.lowerPrice) + '–' + usd(result.upperPrice) + ' · ETH → ' + usd(result.futurePrice);
 }
 export function experimentOriginLabel(origin, model) {
   if (!origin) return '';
   const snapshot = origin.snapshot;
   if (origin.kind === 'position') return 'Starting principal and range from Uniswap v3 position #' + snapshot.tokenId + ' at Ethereum block ' + snapshot.block.number + '. Already collectable tokens stay outside both strategies; future prices use the continuous range model. This saved source has not been refreshed.';
-  return 'Starting price from a saved Uniswap v2 WETH/USDC snapshot at Ethereum block ' + snapshot.block.number + '. USDC = $1; this pool ratio seeds ' + (model === FULL_MODEL ? 'a hypothetical full-range position' : 'a hypothetical range position') + '. This saved source has not been refreshed.';
+  return 'Starting price from a saved Uniswap v2 WETH/USDC snapshot at Ethereum block ' + snapshot.block.number + '. USDC = $1; this pool ratio seeds ' + (isFullModel(model) ? 'a hypothetical full-range position' : 'a hypothetical range position') + '. This saved source has not been refreshed.';
 }
 export const startingAssets = initial => fmt(initial.eth, 6) + ' ETH + ' + fmt(initial.usdc) + ' USDC';
 export function comparisonContext(entries) {
@@ -78,7 +77,7 @@ export function comparisonContext(entries) {
   const sameFuture = views.every(view => view.result.futurePrice === first.result.futurePrice);
   if (!sameStart) return 'These experiments start with different budgets, prices or token mixes. Each LP outcome is compared with holding its own starting tokens; this is not a ranking of equivalent investments.';
   if (!sameFuture) return 'These experiments start with the same token basket but assume different future prices. Read them as different price scenarios, rather than a ranking at one market price.';
-  return 'These experiments share the same starting token basket and future ETH price (' + usd(first.result.futurePrice) + '). Differences in LP outcomes follow from the saved models, ranges and assumed cash fees.';
+  return 'These experiments share the same starting token basket and future ETH price (' + usd(first.result.futurePrice) + '). Differences in LP outcomes follow from the saved models, ranges, durations, assumed fees and costs. These assumptions have not been synchronized.';
 }
 
 export function experimentSummary(entry) {
@@ -118,13 +117,20 @@ export function experimentFacts(entry, detailed = false) {
           ['Response budget', usd(p.budget)], ['Liquidation illustration', (entry.liquidation?.repayPercent ?? 50) + '% repayment · ' + (entry.liquidation?.bonusPercent ?? 5) + '% bonus']]),
     ];
   }
-  const rows = [['LP + assumed cash fees', usd(r.lpValue)], ['Hold starting tokens', usd(r.holdValue)], ['LP minus holding', signedUSD(r.difference)]];
+  const rows = [[r.costs === undefined ? 'LP + assumed cash fees' : 'LP after fees and costs', usd(r.lpValue)], ['Hold starting tokens', usd(r.holdValue)], ['LP minus holding', signedUSD(r.difference)]];
   if (!detailed) return rows;
   return [...rows, ['Starting investment', usd(r.investment)], ['Starting ETH price', usd(r.initialPrice)],
     ['Future ETH price', usd(r.futurePrice)], ['Starting tokens', startingAssets(initial)],
-    ...(entry.model === 'cl-range-v1' ? [['Price range', usd(r.lowerPrice) + ' – ' + usd(r.upperPrice)]] : []),
-    ['Assumed LP cash fees', usd(r.fees)], ['LP before fees', usd(r.lpBeforeFees)],
+    ...(isRangeModel(entry.model) ? [['Price range', usd(r.lowerPrice) + ' – ' + usd(r.upperPrice)]] : []),
+    ['Assumed LP cash fees', usd(r.feeIncome ?? r.fees)],
+    ...(r.costs !== undefined ? [
+      ['Fee assumption', r.feeMode === 'apr' ? fmt(r.feeAPR, 4) + '% average APR' : 'Total cash amount'],
+      ['Duration', r.feeDays ? fmt(r.feeDays, 2) + ' days' : 'Not set'],
+      ['Opening / collecting / closing', [r.openingCost, r.collectionCost, r.closingCost].map(usd).join(' / ')],
+      ['LP costs total', usd(r.costs)], ['LP before costs', usd(r.lpGrossValue)],
+      ['Required average fee APR', r.breakEvenAPR === null ? 'No duration set' : fmt(r.breakEvenAPR, 4) + '%'],
+    ] : []), ['LP before fees', usd(r.lpBeforeFees)],
     ['IL before fees vs. holding', percent(r.impermanentLoss)], ['Total fees needed to match holding', usd(r.breakEvenFees)],
-    ...(entry.model === 'cl-range-v1' ? [['Endpoint range status', STATE_COPY[r.state].title], ['Separate 50/50 LP reference', usd(r.fullRange.lpValue)], ['Assumed 50/50 reference fees', usd(r.fullRangeFees)]] : []),
+    ...(isRangeModel(entry.model) ? [['Endpoint range status', STATE_COPY[r.state].title], ['Separate 50/50 LP reference', usd(r.fullRange.lpValue)], ['Assumed 50/50 reference fees', usd(r.fullRangeFees)]] : []),
   ];
 }

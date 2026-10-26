@@ -1,11 +1,12 @@
+import { initEconomics, economicsFields, optionalEconomics } from '../lib/lp-economics.js';
+import { isFullModel, isRangeModel } from '../models/liquidity-models.js';
 import { saveExperimentLocation } from '../data/experiment-location.js';
 import { createFeeContext } from '../lib/fee-context.js';
 import { labFeedback } from '../lib/lab-feedback.js';
-import { MODEL, DEFAULT_SCENARIO, LIMITS, validateScenario, calculateScenario, comparisonScenarios } from '../models/cp50-v1.js';
+import { MODEL, DEFAULT_SCENARIO, LIMITS, validateScenario, calculateScenario, comparisonScenarios, upgradeScenario, experimentScenario } from '../models/cp50-v2.js';
 import { scenarioHash } from '../lib/scenario-links.js';
-import { readSharedScenario, RANGE_MODEL } from '../lib/link-router.js';
+import { readSharedScenario } from '../lib/link-router.js';
 import { scenarioCSV } from '../lib/scenario-csv.js';
-import { experimentScenario } from '../models/experiments.js';
 import { fmt, usd, signedUSD, percent, compactUSD } from '../lib/format.js';
 import { moneyMetric } from '../lib/money-metric.js';
 import { downloadBlob } from '../lib/download.js';
@@ -16,8 +17,9 @@ import { experimentOriginLabel } from '../lib/saved-experiments.js';
 export function initFullRangeLab({ navigation }) {
   const { selectLab } = navigation;
   const $ = (id) => document.getElementById(id);
-  const fields = { investment: 'scenario-investment', initialPrice: 'scenario-start', futurePrice: 'scenario-future', fees: 'scenario-fees' };
-  const feedback = labFeedback({ prefix: 'scenario', fields, limits: LIMITS, optional: ['fees'] });
+  const fields = { investment: 'scenario-investment', initialPrice: 'scenario-start', futurePrice: 'scenario-future', fees: 'scenario-fees', ...economicsFields('scenario') };
+  const economics = initEconomics('scenario');
+  const feedback = labFeedback({ prefix: 'scenario', fields, limits: LIMITS, optional: ['fees', ...optionalEconomics] });
   const feeContext = createFeeContext('scenario');
   $('scenario-results').append(feeContext.element);
   let current = null;
@@ -26,37 +28,41 @@ export function initFullRangeLab({ navigation }) {
   let cardGeneration = 0;
 
   function readInputs() {
-    return Object.fromEntries(Object.entries(fields).map(([key, id]) => [key, key === 'fees' && !$(id).value.trim() ? 0 : $(id).value.trim() ? Number($(id).value) : NaN]));
+    return { feeMode: economics.mode.value, ...Object.fromEntries(Object.entries(fields).map(([key, id]) => [key, ['fees', ...optionalEconomics].includes(key) && !$(id).value.trim() ? 0 : $(id).value.trim() ? Number($(id).value) : NaN])) };
   }
 
-  function fillInputs(scenario) {
-    for (const [key, id] of Object.entries(fields)) $(id).value = scenario[key];
+  function fillInputs(input) {
+    const scenario = upgradeScenario(input);
+    economics.mode.value = scenario.feeMode;
+    economics.sync();
+    for (const [key, id] of Object.entries(fields)) $(id).value = key === 'feeDays' && !scenario[key] ? '' : scenario[key];
   }
 
   function renderChart(result) {
-    const { ratio, investment, initialPrice, fees } = result;
+    const { ratio, investment, initialPrice, feeIncome, costs } = result;
     const lo = Math.max(LIMITS.futurePrice.min / initialPrice, Math.min(0.25, ratio * 0.8));
     const hi = Math.min(LIMITS.futurePrice.max / initialPrice, Math.max(4, ratio * 1.2));
-    const ymax = Math.max(investment * (1 + hi) / 2, investment * Math.sqrt(hi) + fees) * 1.12;
+    const ymax = Math.max(investment * (1 + hi) / 2, investment * Math.sqrt(hi) + feeIncome - costs) * 1.12;
+    const ymin = Math.min(0, investment * Math.sqrt(lo) + feeIncome - costs) * 1.12;
     const x = (r) => 60 + (r - lo) / (hi - lo) * 530;
-    const y = (value) => 208 - value / ymax * 180;
+    const y = (value) => 208 - (value - ymin) / (ymax - ymin) * 180;
     const ratios = Array.from({ length: 100 }, (_, i) => lo + (hi - lo) * i / 99);
     const path = (getValue) => ratios.map((r, i) => `${i ? 'L' : 'M'}${x(r)},${y(getValue(r))}`).join(' ');
     $('scenario-hold-path').setAttribute('d', path((r) => investment * (1 + r) / 2));
-    $('scenario-lp-path').setAttribute('d', path((r) => investment * Math.sqrt(r) + fees));
+    $('scenario-lp-path').setAttribute('d', path((r) => investment * Math.sqrt(r) + feeIncome - costs));
     $('scenario-chart-marker').setAttribute('d', `M${x(ratio)} 26V208`);
     for (const [id, value] of [['scenario-hold-dot', result.holdValue], ['scenario-lp-dot', result.lpValue]]) {
       $(id).setAttribute('cx', x(ratio));
       $(id).setAttribute('cy', y(value));
     }
-    for (const [id, value, yy] of [['scenario-y-high', ymax, 32], ['scenario-y-mid', ymax / 2, 122], ['scenario-y-zero', 0, 212]]) {
+    for (const [id, value, yy] of [['scenario-y-high', ymax, 32], ['scenario-y-mid', (ymax + ymin) / 2, 122], ['scenario-y-zero', ymin, 212]]) {
       $(id).textContent = compactUSD(value);
       $(id).setAttribute('y', yy);
     }
     $('scenario-x-low').textContent = compactUSD(lo * initialPrice);
     $('scenario-x-high').textContent = compactUSD(hi * initialPrice);
-    $('scenario-chart-title').textContent = `Holding and liquidity values as ETH price changes. At ${usd(result.futurePrice)}, holding is ${usd(result.holdValue)}, LP plus assumed fees is ${usd(result.lpValue)}.`;
-    $('scenario-chart-note').textContent = `${usd(fees)} assumed fee income is held fixed across this chart.`;
+    $('scenario-chart-title').textContent = `Holding and liquidity values as ETH price changes. At ${usd(result.futurePrice)}, holding is ${usd(result.holdValue)}, LP after fees and costs is ${usd(result.lpValue)}.`;
+    $('scenario-chart-note').textContent = `${usd(feeIncome)} assumed fees and ${usd(costs)} costs stay fixed across this chart. Each price is a separate endpoint, not a simulated path.`;
   }
 
   function renderTable(result) {
@@ -79,7 +85,7 @@ export function initFullRangeLab({ navigation }) {
       priceCell.append(button);
       row.append(priceCell);
       for (const [label, value, className] of [
-        ['Holding', usd(comparison.holdValue), ''], ['LP + assumed fees', usd(comparison.lpValue), ''],
+        ['Holding', usd(comparison.holdValue), ''], ['LP after costs', usd(comparison.lpValue), ''],
         ['LP minus holding', signedUSD(comparison.difference), comparison.difference >= 0 ? 'gain' : 'loss'],
         ['IL before fees', percent(comparison.impermanentLoss), 'muted'],
       ]) {
@@ -133,13 +139,14 @@ export function initFullRangeLab({ navigation }) {
       $('scenario-il').textContent = percent(result.impermanentLoss);
       moneyMetric($('scenario-break-even'), result.breakEvenFees);
       feeContext.update(result);
+      economics.update(result);
       $('scenario-price-change').textContent = percent((result.ratio - 1) * 100);
       $('scenario-hold-eth').textContent = `${fmt(result.held.eth, 6)} ETH`;
       $('scenario-hold-usdc').textContent = `${fmt(result.held.usdc)} USDC`;
       $('scenario-lp-eth').textContent = `${fmt(result.pooled.eth, 6)} ETH`;
       $('scenario-lp-usdc').textContent = `${fmt(result.pooled.usdc)} USDC`;
       $('scenario-lp-before-fees').textContent = usd(result.lpBeforeFees);
-      $('scenario-cash-fees').textContent = `${usd(result.fees)} assumed USD cash`;
+      $('scenario-cash-fees').textContent = `${usd(result.feeIncome)} assumed USD cash`;
       for (const button of document.querySelectorAll('[data-price-multiple]')) {
         const price = result.initialPrice * Number(button.dataset.priceMultiple);
         button.disabled = price < LIMITS.futurePrice.min || price > LIMITS.futurePrice.max;
@@ -149,6 +156,9 @@ export function initFullRangeLab({ navigation }) {
       renderTable(result);
     } catch (error) {
       current = null;
+      if (Object.keys(economicsFields('scenario')).some(key => $(fields[key]).getAttribute('aria-invalid') === 'true')) {
+        $('scenario-cost-details').open = true;
+      }
       feedback.invalid(error.message);
       $('scenario-results').hidden = true;
       $('scenario-comparison-card').hidden = true;
@@ -162,6 +172,7 @@ export function initFullRangeLab({ navigation }) {
   }
 
   for (const id of Object.values(fields)) $(id).addEventListener('input', render);
+  economics.mode.addEventListener('change', render);
   $('scenario-form').addEventListener('submit', (event) => { event.preventDefault(); render(); });
   for (const button of document.querySelectorAll('[data-price-multiple]')) button.addEventListener('click', () => {
     const price = Number($('scenario-start').value) * Number(button.dataset.priceMultiple);
@@ -191,7 +202,7 @@ export function initFullRangeLab({ navigation }) {
     }
   });
   $('scenario-export').addEventListener('click', () => {
-    if (current) downloadBlob(new Blob([scenarioCSV(current)], { type: 'text/csv;charset=utf-8' }), 'teren-liquidity-scenarios-cp50-v1.csv');
+    if (current) downloadBlob(new Blob([scenarioCSV(current)], { type: 'text/csv;charset=utf-8' }), 'teren-liquidity-scenarios-cp50-v2.csv');
   });
 
   $('scenario-image').addEventListener('click', async () => {
@@ -225,7 +236,7 @@ export function initFullRangeLab({ navigation }) {
     const input = readInputs();
     const investment = Number.isFinite(input.investment) && input.investment >= LIMITS.investment.min && input.investment <= LIMITS.investment.max
       ? input.investment : DEFAULT_SCENARIO.investment;
-    const scenario = validateScenario({ investment, initialPrice: price, futurePrice: price * 2, fees: 0 });
+    const scenario = validateScenario(upgradeScenario({ investment, initialPrice: price, futurePrice: price * 2, fees: 0 }));
     startingSource = { price, label, origin };
     fillInputs(scenario);
     render();
@@ -235,9 +246,9 @@ export function initFullRangeLab({ navigation }) {
   function loadShared() {
     try {
       const linkedModel = new URLSearchParams(location.hash.replace(/^#/, '')).get('scenario');
-      if (linkedModel === RANGE_MODEL) { render(); return; }
+      if (isRangeModel(linkedModel)) { render(); return; }
       const decoded = readSharedScenario(location.hash);
-      const shared = decoded?.model === MODEL ? decoded.scenario : null;
+      const shared = isFullModel(decoded?.model) ? decoded.scenario : null;
       if (shared) { startingSource = null; fillInputs(shared); }
       render();
       if (shared) $('scenario-link-status').textContent = 'Shared scenario loaded. Your saved swap sandbox is unchanged.';
@@ -259,7 +270,7 @@ export function initFullRangeLab({ navigation }) {
   }
   function restoreExperimentDraft(entry) {
     const draft = validateExperimentDraft(entry);
-    if (draft.model !== MODEL) throw new Error('Choose a full-range experiment for this lab.');
+    if (!isFullModel(draft.model)) throw new Error('Choose a full-range experiment for this lab.');
     startingSource = draft.origin ? { price: draft.inputs.initialPrice, origin: draft.origin, label: experimentOriginLabel(draft.origin, MODEL) } : null;
     fillInputs(draft.inputs); render();
   }

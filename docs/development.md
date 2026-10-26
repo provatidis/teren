@@ -78,7 +78,7 @@ Release 1.8.0 shipped the first verified fixed-position period: nine checkpoints
 
 A backend becomes useful for private provider credentials, shared caching, scheduled snapshots or account synchronization. Each can be added behind the data layer without rewriting the calculation models or existing labs. No scheduled collector or backend is part of the shipped replay.
 
-The cl-range-v1 model, links, CSV, presentation helpers and result cards are separate modules. A shared link router and accessible lab navigation coordinate the two calculators while preserving cp50-v1 links. Reference tests cover asymmetric funding, outside starts, exact boundaries, continuity, virtual-reserve conservation, wide-range limits, separate fees, numerical bounds and reproducible exports.
+The retained cl-range-v1 principal model, links, CSV, presentation helpers and result cards are separate modules. The cp50-v2 / cl-range-v2 endpoint labs share pure fee/cost accounting in models/lp-economics.js, version dispatch in liquidity-models.js, strict link serialization and a common DOM breakdown. Preserve inactive cash/APR inputs when deriving fee income; do not overwrite a saved input with a calculated fee total. A shared link router and accessible lab navigation coordinate the two calculators while preserving v1 links and named records. Reference tests cover asymmetric funding, outside starts, exact boundaries, continuity, virtual-reserve conservation, wide-range limits, separate fees, numerical bounds and reproducible exports.
 
 ## Reviewing a mechanism change
 

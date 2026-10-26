@@ -1,5 +1,12 @@
 # Release history
 
+## 1.45.0 · 2026-10-26
+
+- Add an assumed average position fee APR and duration alongside cash fees in both liquidity endpoint labs. Apply APR to starting deployed capital over the entire period, without compounding or multiplying by concentration.
+- Add optional opening, collection and closing costs, measured as extra LP expenses relative to holding. Show principal, fees, costs, net value and the exact starting-token holding benchmark on one dollar scale. Include costs in break-even fees and show a required average APR when duration is set; retain negative net outcomes.
+- Introduce `cp50-v2` and `cl-range-v2`. Preserve original links, saved records, lesson assumptions and recorded accounting. Carry new assumptions through price presets, charts, shares, Home resumption, Learn-return drafts, saved comparisons, CSV and result cards. The optional 50/50 reference keeps its separate cash fees and uses the same LP cost budget.
+- Use the saved lab duration for fee context while preserving lesson-only time experiments. Extend independent accounting and compatibility checks plus desktop, 390px and 320px browser coverage.
+
 ## 1.44.0 · 2026-10-26
 
 - Apply a single-loan choice of simple interest or continuous compounding to supplied ETH, USDC debt, health factor, boundaries, responses and the separate liquidation illustration. New/reset experiments default to compounding at the entered constant APRs; show equivalent one-year growth beside the rates.

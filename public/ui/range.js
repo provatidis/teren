@@ -1,7 +1,9 @@
+import { initEconomics, economicsFields, optionalEconomics } from '../lib/lp-economics.js';
+import { isFullModel, isRangeModel } from '../models/liquidity-models.js';
 import { saveExperimentLocation } from '../data/experiment-location.js';
 import { createFeeContext } from '../lib/fee-context.js';
 import { labFeedback } from '../lib/lab-feedback.js';
-import { MODEL, DEFAULT_RANGE, LIMITS, calculateRange, comparisonRanges, explorerDomain, rangePreset, futurePricePreset, matchHoldingFees } from '../models/cl-range-v1.js';
+import { MODEL, DEFAULT_RANGE, LIMITS, calculateRange, comparisonRanges, explorerDomain, rangePreset, futurePricePreset, matchHoldingFees, upgradeRange } from '../models/cl-range-v2.js';
 import { rangeHash } from '../lib/range-links.js';
 import { centeredBounds } from '../models/range-width.js';
 import { readSharedScenario } from '../lib/link-router.js';
@@ -19,9 +21,10 @@ export function initRangeLab({ navigation }) {
   const $ = (id) => document.getElementById(id);
   const fields = {
     investment: 'cl-investment', initialPrice: 'cl-start', futurePrice: 'cl-future',
-    lowerPrice: 'cl-lower', upperPrice: 'cl-upper', fees: 'cl-fees', fullRangeFees: 'cl-full-fees',
+    lowerPrice: 'cl-lower', upperPrice: 'cl-upper', fees: 'cl-fees', fullRangeFees: 'cl-full-fees', ...economicsFields('cl'),
   };
-  const feedback = labFeedback({ prefix: 'cl', fields, limits: LIMITS, optional: ['fees', 'fullRangeFees'], range: true });
+  const economics = initEconomics('cl');
+  const feedback = labFeedback({ prefix: 'cl', fields, limits: LIMITS, optional: ['fees', 'fullRangeFees', ...optionalEconomics], range: true });
   const feeContext = createFeeContext('cl');
   $('cl-results').append(feeContext.element);
   let current = null;
@@ -38,12 +41,16 @@ export function initRangeLab({ navigation }) {
   syncSetup();
 
   function readInputs() {
-    return Object.fromEntries(Object.entries(fields).map(([key, id]) => {
+    return { feeMode: economics.mode.value, ...Object.fromEntries(Object.entries(fields).map(([key, id]) => {
       const text = $(id).value.trim();
-      return [key, !text && ['fees', 'fullRangeFees'].includes(key) ? 0 : text ? Number(text) : NaN];
-    }));
+      return [key, !text && ['fees', 'fullRangeFees', ...optionalEconomics].includes(key) ? 0 : text ? Number(text) : NaN];
+    })) };
   }
-  function fillInputs(input) { for (const [key, id] of Object.entries(fields)) $(id).value = input[key]; }
+  function fillInputs(raw) {
+    const input = upgradeRange(raw);
+    economics.mode.value = input.feeMode; economics.sync();
+    for (const [key, id] of Object.entries(fields)) $(id).value = key === 'feeDays' && !input[key] ? '' : input[key];
+  }
   const sourceApplies = result => source && result.initialPrice === source.price && (!source.range || ['investment', 'lowerPrice', 'upperPrice'].every(key => result[key] === source.range[key]));
   function setText(id, text) { if ($(id).textContent !== text) $(id).textContent = text; }
   function updateAllocation(prefix, share) {
@@ -97,8 +104,10 @@ export function initRangeLab({ navigation }) {
     const rows = prices.map((futurePrice) => calculateRange({ ...result, futurePrice }));
     const top = rows.at(-1);
     const yMax = Math.max(top.holdValue, includeReference ? top.fullRange.lpValue : 0, top.lpValue) * 1.12;
+    const bottom = rows[0];
+    const yMin = Math.min(0, bottom.lpValue, includeReference ? bottom.fullRange.lpValue : 0) * 1.12;
     const x = (price) => 70 + (price - low) / (high - low) * 620;
-    const y = (value) => 246 - value / yMax * 220;
+    const y = (value) => 246 - (value - yMin) / (yMax - yMin) * 220;
     const path = (read) => rows.map((row, i) => (i ? 'L' : 'M') + x(row.futurePrice) + ',' + y(read(row))).join(' ');
     $('cl-chart-hold').setAttribute('d', path((row) => row.holdValue));
     $('cl-chart-full').setAttribute('d', path((row) => row.fullRange.lpValue));
@@ -115,12 +124,13 @@ export function initRangeLab({ navigation }) {
       $('cl-dot-' + name).setAttribute('cy', y(value));
     }
     $('cl-y-high').textContent = compactUSD(yMax);
-    $('cl-y-mid').textContent = compactUSD(yMax / 2);
+    $('cl-y-zero').textContent = compactUSD(yMin);
+    $('cl-y-mid').textContent = compactUSD((yMax + yMin) / 2);
     $('cl-x-low').textContent = compactUSD(low);
     $('cl-x-mid').textContent = compactUSD((low + high) / 2);
     $('cl-x-high').textContent = compactUSD(high);
     $('cl-chart-title').textContent = 'At ' + usd(result.futurePrice) + ', holding the range’s starting tokens is ' + usd(result.holdValue) + ' and range LP is ' + usd(result.lpValue) + (includeReference ? '. The V2-style 50/50 LP is ' + usd(result.fullRange.lpValue) : '') + '.';
-    $('cl-chart-note').textContent = 'Shaded band = your chosen range. Assumed cash fees stay fixed: range ' + usd(result.fees) + (includeReference ? '; V2-style reference ' + usd(result.fullRangeFees) : '') + '.';
+    $('cl-chart-note').textContent = 'Shaded band = your chosen range. Assumed cash fees stay fixed: range ' + usd(result.feeIncome) + (includeReference ? '; V2-style reference ' + usd(result.fullRangeFees) : '') + '. ' + (includeReference ? 'Both LP strategies subtract ' : 'The range subtracts ') + usd(result.costs) + ' assumed costs.';
   }
   function renderComparisons(result) {
     $('cl-comparisons').replaceChildren();
@@ -180,10 +190,10 @@ export function initRangeLab({ navigation }) {
       $('cl-held-note').textContent = assetAmounts(result.initial);
       moneyMetric($('cl-full-value'), result.fullRange.lpValue);
       $('cl-full-return').textContent = percent(result.fullRange.lpReturn) + ' vs. investment';
-      $('cl-full-note').textContent = 'Starts 50/50 · ' + usd(result.fullRangeFees) + ' assumed cash fees';
+      $('cl-full-note').textContent = 'Starts 50/50 · ' + usd(result.fullRangeFees) + ' assumed fees · ' + usd(result.costs) + ' costs';
       moneyMetric($('cl-value'), result.lpValue);
       $('cl-return').textContent = percent(result.lpReturn) + ' vs. investment';
-      $('cl-fees-note').textContent = 'Includes ' + usd(result.fees) + ' assumed cash fees';
+      $('cl-fees-note').textContent = 'Includes ' + usd(result.feeIncome) + ' assumed fees · ' + usd(result.costs) + ' costs';
       const magnitude = Math.abs(result.difference);
       $('cl-verdict').textContent = magnitude < 0.005
         ? 'Your range and holding its starting tokens differ by less than half a cent under these assumptions.'
@@ -200,14 +210,19 @@ export function initRangeLab({ navigation }) {
       $('cl-il').textContent = percent(result.impermanentLoss);
       moneyMetric($('cl-break-even'), result.breakEvenFees);
       feeContext.update(result);
+      economics.update(result);
       $('cl-full-hold').textContent = usd(result.fullRange.holdValue);
-      $('cl-match-fees').disabled = result.breakEvenFees > LIMITS.fees.max;
-      $('cl-match-fees').textContent = result.breakEvenFees > LIMITS.fees.max ? 'Above the supported fee input limit' : 'Use break-even fees';
+      const targetTooHigh = result.feeMode === 'apr' ? result.breakEvenAPR > LIMITS.feeAPR.max : result.breakEvenFees > LIMITS.fees.max;
+      $('cl-match-fees').disabled = targetTooHigh;
+      $('cl-match-fees').textContent = targetTooHigh ? 'Above the supported fee input limit' : 'Use break-even fees';
       $('cl-origin').textContent = sourceApplies(result) ? source.label : '';
       $('cl-origin').hidden = !$('cl-origin').textContent;
       renderPresets(result); renderExplorer(result, updateDomain); renderChart(result); renderComparisons(result);
     } catch (error) {
       current = null;
+      if (Object.keys(economicsFields('cl')).some(key => $(fields[key]).getAttribute('aria-invalid') === 'true')) {
+        $('cl-cost-details').open = true; $('cl-fee-details').open = true;
+      }
       feedback.invalid(error.message);
       $('cl-setup-details').open = true;
       $('cl-close-setup').disabled = true;
@@ -219,6 +234,7 @@ export function initRangeLab({ navigation }) {
   }
   function setFuturePrice(price, updateDomain = true) { $('cl-future').value = price; render({ updateDomain }); }
   for (const id of Object.values(fields)) $(id).addEventListener('input', () => render());
+  economics.mode.addEventListener('change', () => render());
   $('cl-form').addEventListener('submit', (event) => { event.preventDefault(); render(); });
   $('cl-close-setup').addEventListener('click', () => {
     if (!current) return;
@@ -249,7 +265,7 @@ export function initRangeLab({ navigation }) {
   });
   $('cl-reset').addEventListener('click', () => {
     source = null; fillInputs(DEFAULT_RANGE); render();
-    if (new URLSearchParams(location.hash.replace(/^#/, '')).get('scenario') === MODEL) history.replaceState(null, '', location.pathname + location.search + '#range-lab');
+    if (isRangeModel(new URLSearchParams(location.hash.replace(/^#/, '')).get('scenario'))) history.replaceState(null, '', location.pathname + location.search + '#range-lab');
   });
   $('cl-share').addEventListener('click', async () => {
     if (!current) return;
@@ -257,14 +273,14 @@ export function initRangeLab({ navigation }) {
     $('cl-share-url').value = url.href; $('cl-share-wrap').hidden = false;
     try {
       await navigator.clipboard.writeText(url.href);
-      $('cl-share-status').textContent = 'Link copied. It includes the range, both fee assumptions and the model version.';
+      $('cl-share-status').textContent = 'Link copied. It includes the range, fee mode, duration, costs and model version.';
     } catch {
       $('cl-share-status').textContent = 'Copy the link below to share this range scenario.';
       $('cl-share-url').focus(); $('cl-share-url').select();
     }
   });
   $('cl-export').addEventListener('click', () => {
-    if (current) downloadBlob(new Blob([rangeCSV(current)], { type: 'text/csv;charset=utf-8' }), 'teren-range-scenarios-cl-range-v1.csv');
+    if (current) downloadBlob(new Blob([rangeCSV(current)], { type: 'text/csv;charset=utf-8' }), 'teren-range-scenarios-cl-range-v2.csv');
   });
   $('cl-image').addEventListener('click', async () => {
     if (!current) return;
@@ -282,21 +298,21 @@ export function initRangeLab({ navigation }) {
   });
   function setRangeStartingPrice(price, label, origin = null) {
     const investment = current?.investment ?? DEFAULT_RANGE.investment;
-    const input = {
+    const input = upgradeRange({
       investment, initialPrice: price, futurePrice: Math.min(LIMITS.futurePrice.max, price * 1.05),
       lowerPrice: Math.max(LIMITS.lowerPrice.min, price * 0.9), upperPrice: Math.min(LIMITS.upperPrice.max, price * 1.1),
       fees: 0, fullRangeFees: 0,
-    };
+    });
     calculateRange(input);
     source = { price, label, origin }; fillInputs(input); render();
     selectLab('range', { scroll: true });
   }
   function loadShared() {
     const model = new URLSearchParams(location.hash.replace(/^#/, '')).get('scenario');
-    if (model && model !== MODEL) { render(); return; }
+    if (model && !isRangeModel(model)) { render(); return; }
     try {
       const shared = readSharedScenario(location.hash);
-      if (shared?.model === MODEL) { source = null; fillInputs(shared.scenario); }
+      if (isRangeModel(shared?.model)) { source = null; fillInputs(shared.scenario); }
       render();
       if (shared) { $('cl-link-status').textContent = 'Shared range scenario loaded. Your saved swap sandbox is unchanged.'; $('cl-link-status').hidden = false; }
     } catch (error) {
@@ -309,7 +325,7 @@ export function initRangeLab({ navigation }) {
   window.addEventListener('hashchange', loadShared);
 
   function setScenario(input, label, origin = null, { navigate = true } = {}) {
-    const result = calculateRange(input);
+    const result = calculateRange(upgradeRange(input));
     source = { price: result.initialPrice, label, origin, range: { investment: result.investment, lowerPrice: result.lowerPrice, upperPrice: result.upperPrice } };
     fillInputs(result); render();
     if (navigate) selectLab('range', { scroll: true });
@@ -321,7 +337,7 @@ export function initRangeLab({ navigation }) {
   }
   function restoreExperimentDraft(entry) {
     const draft = validateExperimentDraft(entry);
-    if (draft.model !== MODEL) throw new Error('Choose a range experiment for this lab.');
+    if (!isRangeModel(draft.model)) throw new Error('Choose a range experiment for this lab.');
     setScenario(draft.inputs, experimentOriginLabel(draft.origin, MODEL), draft.origin, { navigate: false });
   }
   function setExperiment(entry) {

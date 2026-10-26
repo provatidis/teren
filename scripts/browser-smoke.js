@@ -1,3 +1,4 @@
+import { checkLPEconomics } from './browser/lp-economics-checks.js';
 import { checkLoanInterest } from './browser/loan-interest-checks.js';
 import { checkFeeFlow } from './browser/fee-flow-checks.js';
 import { checkLSTLoops } from './browser/lst-loop-checks.js';
@@ -184,6 +185,12 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (process.env.BROWSER_CHECKS === 'lp-costs') {
+    await call('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: profile, eventsEnabled: true });
+    await checkLPEconomics({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
+    assert.deepEqual(errors, [], 'No uncaught browser errors');
+    return;
+  }
   if (process.env.BROWSER_CHECKS === 'loan-interest') {
     await call('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: profile, eventsEnabled: true });
     await checkLoanInterest({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
@@ -276,7 +283,7 @@ try {
   await click('scenario-share');
   const sharedURL = await evaluate("document.getElementById('scenario-share-url').value");
   assert.equal(await evaluate('window.copiedScenarioLink'), sharedURL);
-  assert.ok(sharedURL.includes('scenario=cp50-v1'));
+  assert.ok(sharedURL.includes('scenario=cp50-v2'));
   assert.ok(!sharedURL.includes('wallet'));
   assert.match(await text('scenario-share-status'), /copied/);
 
@@ -296,10 +303,10 @@ try {
   await click('scenario-export');
   const download = await exported;
   await completed;
-  assert.equal(download.suggestedFilename, 'teren-liquidity-scenarios-cp50-v1.csv');
+  assert.equal(download.suggestedFilename, 'teren-liquidity-scenarios-cp50-v2.csv');
   const csv = await readFile(join(profile, download.suggestedFilename), 'utf8');
   assert.ok(csv.startsWith('model,investment_usd,'));
-  assert.ok(csv.includes('cp50-v1,5000,2000,3000,250,'));
+  assert.ok(csv.includes('cp50-v2,5000,2000,3000,250,'));
   console.log('PASS: scenario reference values, presets, comparisons, validation, chart updates, share copy, and CSV download');
   await evaluate("document.querySelector('[data-experiment=double]').click()");
   assert.equal(await evaluate("document.getElementById('scenario-fees').value"), '0');
@@ -341,7 +348,7 @@ try {
   const card = await readFile(await downloadFile('scenario-image-download'));
   assert.equal(card.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
   assert.equal(card.readUInt32BE(16), 1200);
-  assert.equal(card.readUInt32BE(20), 720);
+  assert.equal(card.readUInt32BE(20), 820);
   await fill('scenario-fees', '5');
   assert.equal(await evaluate("document.getElementById('scenario-card-preview').hidden"), true);
   await reload();
@@ -463,21 +470,21 @@ try {
   await click('cl-share');
   const rangeSharedURL = await evaluate("document.getElementById('cl-share-url').value");
   assert.equal(await evaluate("window.copiedRangeLink"), rangeSharedURL);
-  assert.ok(rangeSharedURL.includes('scenario=cl-range-v1') && rangeSharedURL.includes('lower=1') && rangeSharedURL.includes('upper=9') && rangeSharedURL.includes('fullfees=300'));
+  assert.ok(rangeSharedURL.includes('scenario=cl-range-v2') && rangeSharedURL.includes('lower=1') && rangeSharedURL.includes('upper=9') && rangeSharedURL.includes('fullfees=300'));
   const rangeCSVPath = await downloadFile('cl-export');
   const [rangeHeaders, ...rangeRows] = (await readFile(rangeCSVPath, 'utf8')).trim().split('\r\n').map((row) => row.split(','));
   const exportedRow = rangeRows.find((row) => row[rangeHeaders.indexOf('future_eth_price_usd')] === '6.25');
   const rangeData = Object.fromEntries(rangeHeaders.map((key, i) => [key, exportedRow[i]]));
-  assert.equal(rangeData.model, 'cl-range-v1');
+  assert.equal(rangeData.model, 'cl-range-v2');
   assert.ok(Math.abs(Number(rangeData.hold_range_initial_tokens_usd) - 6125) < 1e-8);
-  assert.ok(Math.abs(Number(rangeData.range_lp_with_fees_usd) - 5850) < 1e-8);
+  assert.ok(Math.abs(Number(rangeData.range_lp_after_fees_and_costs_usd) - 5850) < 1e-8);
   assert.ok(Math.abs(Number(rangeData.full_range_own_50_50_hold_usd) - 6406.25) < 1e-8);
   await click('cl-image');
   await evaluate("new Promise((resolve, reject) => { const deadline = Date.now() + 10000; const check = () => { if (!document.getElementById('cl-card-preview').hidden) resolve(); else if (Date.now() > deadline) reject(new Error('Range card did not render')); else setTimeout(check, 50); }; check(); })");
   const rangePNG = await readFile(await downloadFile('cl-image-download'));
   assert.equal(rangePNG.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
   assert.equal(rangePNG.readUInt32BE(16), 1200);
-  assert.equal(rangePNG.readUInt32BE(20), 900);
+  assert.equal(rangePNG.readUInt32BE(20), 1000);
   await fill('cl-future', '6');
   assert.equal(await evaluate("document.getElementById('cl-card-preview').hidden"), true);
   await click('pool-apply-range');
@@ -667,6 +674,7 @@ try {
   await checkLending({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   await checkLoanConsequences({ evaluate, click, fill, text, navigate, base, call });
   await checkLoanInterest({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
+  await checkLPEconomics({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
   await checkLabRisk({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call });
   await checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call });

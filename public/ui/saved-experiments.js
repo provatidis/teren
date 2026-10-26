@@ -1,3 +1,4 @@
+import { isFullModel, isRangeModel } from '../models/liquidity-models.js';
 import { EXPERIMENTS_KEY, MAX_LIBRARY_BYTES, emptyLibrary, readLibrary, writeLibrary, libraryJSON, parseLibrary, createExperiment, addExperiment, editExperiment, removeExperiment, mergeLibraries } from '../data/saved-experiments.js';
 import { experimentView, defaultExperimentName, comparisonContext, experimentFamily, experimentSummary, experimentFacts } from '../lib/saved-experiments.js';
 import { usd } from '../lib/format.js';
@@ -6,7 +7,7 @@ import { downloadBlob } from '../lib/download.js';
 
 export function initSavedExperiments({ labs, onOpen = () => {} }) {
   const $ = id => document.getElementById(id);
-  const saveButtons = { 'cp50-v1': 'scenario', 'cl-range-v1': 'cl', 'collateral-loan-v1': 'loan', 'collateral-loan-v2': 'loan', 'borrowing-loop-v1': 'loop', 'lst-loop-v1': 'lst', 'lst-loop-v2': 'lst' };
+  const saveButtons = { 'cp50-v2': 'scenario', 'cl-range-v2': 'cl', 'cp50-v1': 'scenario', 'cl-range-v1': 'cl', 'collateral-loan-v1': 'loan', 'collateral-loan-v2': 'loan', 'borrowing-loop-v1': 'loop', 'lst-loop-v1': 'lst', 'lst-loop-v2': 'lst' };
   let saved = readLibrary(), library = saved.library, temporary = saved.status === 'unavailable';
   let recovery = ['invalid','incompatible'].includes(saved.status), removed = null, editor = null, returnFocus = null;
   const selected = new Set();
@@ -120,6 +121,7 @@ export function initSavedExperiments({ labs, onOpen = () => {} }) {
   function renderList() {
     const query = $('experiments-search').value.trim().toLocaleLowerCase(), model = $('experiments-model').value;
     const matches = library.experiments.filter(entry => (model === 'all' || entry.model === model
+      || isFullModel(model) && isFullModel(entry.model) || isRangeModel(model) && isRangeModel(entry.model)
       || model === 'collateral-loan-v1' && entry.model === 'collateral-loan-v2'
       || model === 'lst-loop-v1' && experimentFamily(entry.model) === 'correlated')
       && (entry.name + '\n' + entry.notes).toLocaleLowerCase().includes(query));
@@ -130,7 +132,7 @@ export function initSavedExperiments({ labs, onOpen = () => {} }) {
       const header = element('div', 'experiment-entry-header'); header.append(element('p', 'experiment-model', modelName));
       const label = element('label', 'experiment-compare-toggle');
       const checkbox = element('input'); checkbox.type = 'checkbox'; checkbox.dataset.compareId = entry.id; checkbox.checked = selected.has(entry.id);
-      checkbox.setAttribute('aria-label', 'Compare ' + entry.name + ' · ' + modelName + (family === 'liquidity' ? ' · LP cash fees ' + usd(result.fees) : ''));
+      checkbox.setAttribute('aria-label', 'Compare ' + entry.name + ' · ' + modelName + (family === 'liquidity' ? ' · LP cash fees ' + usd(result.feeIncome ?? result.fees) : ''));
       checkbox.addEventListener('change', () => {
         const other = library.experiments.find(item => selected.has(item.id));
         if (checkbox.checked && other && experimentFamily(other.model) !== family) {
@@ -141,8 +143,8 @@ export function initSavedExperiments({ labs, onOpen = () => {} }) {
       });
       label.append(checkbox, ' Compare'); header.append(label);
       item.append(header, element('h3', '', entry.name), element('p', 'experiment-assumptions', experimentSummary(entry)));
-      if (entry.model === 'cl-range-v1') item.append(element('p', 'experiment-assumptions', 'Range ' + usd(result.lowerPrice) + ' – ' + usd(result.upperPrice)));
-      if (family === 'liquidity') item.append(element('p', 'experiment-assumptions', 'Assumed LP cash fees: ' + usd(result.fees) + (entry.model === 'cl-range-v1' ? ' · 50/50 reference fees: ' + usd(result.fullRangeFees) : '')));
+      if (isRangeModel(entry.model)) item.append(element('p', 'experiment-assumptions', 'Range ' + usd(result.lowerPrice) + ' – ' + usd(result.upperPrice)));
+      if (family === 'liquidity') item.append(element('p', 'experiment-assumptions', 'Assumed fees: ' + usd(result.feeIncome ?? result.fees) + (result.costs !== undefined ? ' · costs: ' + usd(result.costs) : '') + (isRangeModel(entry.model) ? ' · 50/50 reference fees: ' + usd(result.fullRangeFees) : '')));
       const numbers = element('dl', 'experiment-entry-numbers');
       const metrics = experimentFacts(entry);
       for (const [label, value] of family === 'liquidity' ? [metrics[0], metrics[2]] : metrics) pair(numbers, label, value);

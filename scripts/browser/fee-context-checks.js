@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 export async function checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent }) {
   const open = prefix => evaluate(`document.querySelector('#${prefix}-fee-context > summary').click()`);
   const records = prefix => evaluate(`document.querySelector('#${prefix}-fee-context .fee-context-records > summary').click()`);
-  const window = (prefix, days) => evaluate(`{const select=document.getElementById('${prefix}-fee-window');select.value='${days}';select.dispatchEvent(new Event('change',{bubbles:true}));}`);
+  const window = (prefix, days) => prefix !== 'comparison' ? fill(prefix + '-fee-days', String(days)) : evaluate(`{const select=document.getElementById('${prefix}-fee-window');select.value='${days}';select.dispatchEvent(new Event('change',{bubbles:true}));}`);
   const wait = condition => evaluate(`new Promise((resolve,reject)=>{const until=Date.now()+10000;const check=()=>{if(${condition})resolve();else if(Date.now()>until)reject(new Error('Fee context did not settle'));else setTimeout(check,20)};check()})`);
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
   await navigate(base + 'liquidity.html#lp-lab');
@@ -45,8 +45,9 @@ export async function checkFeeContext({ evaluate, click, fill, text, navigate, b
   assert.equal(await text('scenario-fee-target'), target);
   assert.equal(await evaluate("document.querySelector('#scenario-fee-context .fee-record-flow dd').textContent"), '$47,793.97');
   assert.match(await text('scenario-fee-context'), /More time lowers the daily hurdle/);
-  assert.equal(await evaluate("document.getElementById('scenario-share-url').value"), share);
-  console.log('PASS: fee hurdle, assumed gap, view-only duration, lazy records, recoverable fetch failure and exact recorded context');
+  assert.notEqual(await evaluate("document.getElementById('scenario-share-url').value"), share);
+  assert.match(await evaluate("document.getElementById('scenario-share-url').value"), /days=90/);
+  console.log('PASS: fee hurdle, assumed gap, saved lab duration, lazy records, recoverable fetch failure and exact recorded context');
 
   await click('lab-range-tab'); await click('cl-reset'); await open('cl');
   await window('cl', 1);
