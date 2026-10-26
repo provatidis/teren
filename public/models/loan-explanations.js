@@ -1,4 +1,4 @@
-import { calculateLoan } from './collateral-loan-v1.js';
+import { calculateLoanForInput as calculateLoan } from './loan-models.js';
 import { LIQUIDATION_DEFAULTS, liquidateBalances } from './single-liquidation-v1.js';
 export { LIQUIDATION_MODEL, LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation } from './single-liquidation-v1.js';
 
@@ -10,9 +10,10 @@ export function singleLiquidation(input, assumptions = LIQUIDATION_DEFAULTS) {
 }
 
 export function interestReference(input) {
-  const loan = calculateLoan(input);
+  calculateLoan(input); // Validate both model versions before making the reference.
+  const simpleDebt = input.borrow + input.borrow * input.borrowAPR / 100 * input.days / 365;
   const compoundedDebt = input.borrow * Math.exp(input.borrowAPR / 100 * input.days / 365);
-  return { simpleDebt: loan.end.debt, compoundedDebt, difference: Math.max(0, compoundedDebt - loan.end.debt) };
+  return { simpleDebt, compoundedDebt, difference: Math.max(0, compoundedDebt - simpleDebt) };
 }
 
 export function healthPriceCurve(input) {

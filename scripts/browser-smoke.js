@@ -1,3 +1,4 @@
+import { checkLoanInterest } from './browser/loan-interest-checks.js';
 import { checkFeeFlow } from './browser/fee-flow-checks.js';
 import { checkLSTLoops } from './browser/lst-loop-checks.js';
 import { checkLSTTargets } from './browser/lst-target-checks.js';
@@ -183,6 +184,12 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (process.env.BROWSER_CHECKS === 'loan-interest') {
+    await call('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: profile, eventsEnabled: true });
+    await checkLoanInterest({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
+    assert.deepEqual(errors, [], 'No uncaught browser errors');
+    return;
+  }
   if (process.env.BROWSER_CHECKS === 'risk') {
     await checkLabRisk({ evaluate, click, fill, text, navigate, reload, base, call });
     assert.deepEqual(errors, [], 'No uncaught browser errors');
@@ -659,6 +666,7 @@ try {
   await checkMobileInspect({ evaluate, call, click, fill, navigate, nextEvent, base });
   await checkLending({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   await checkLoanConsequences({ evaluate, click, fill, text, navigate, base, call });
+  await checkLoanInterest({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
   await checkLabRisk({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call });
   await checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call });
