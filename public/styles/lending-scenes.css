@@ -21,6 +21,15 @@
 .loan-scene-totals > div:last-child { border-top: 1px solid var(--border); padding-top: 8px; }
 .loan-scene-totals [data-changed=true] dd { color: var(--accent); }
 .loan-scene-figure[data-motion=true] [data-changed=true] { animation: loan-balance-cue .5s ease-out; }
+.unwind-application { margin: 16px 0 24px; padding: 16px; border: 1px solid var(--border-strong); border-radius: 12px; background: var(--surface); }
+.unwind-application .scene-figure-title { margin-bottom: 6px; }
+.unwind-application > .button { margin-top: 16px; }
+.unwind-application-contrast { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-strong); font-size: 14px; line-height: 1.65; }
+.unwind-application-contrast > p:last-child { margin-bottom: 0; }
+.unwind-application-changes { display: grid; gap: 10px; margin: 12px 0; }
+.unwind-application-changes > div { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; }
+.unwind-application-changes dt { font-weight: 600; }
+.unwind-application-changes dd { margin: 0; font-variant-numeric: tabular-nums; }
 @keyframes loan-balance-cue { from { background-color: var(--highlight); } to { background-color: var(--surface); } }
 @media (prefers-reduced-motion: reduce) {
   .loan-scene-figure[data-motion=true] [data-changed=true] { animation: none; }
@@ -28,4 +37,5 @@
 @media (max-width: 750px) {
   .loan-scene-balances > div { padding: 8px 10px; }
   .loan-scene-balances dd { font-size: 16px; }
+  .unwind-application { padding: 12px; }
 }

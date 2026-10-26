@@ -4,11 +4,11 @@ import { renderRecordedComparison } from '../lib/recorded-comparison-scene.js';
 import { saveLearningLocation } from '../data/learning-location.js';
 import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js';
 import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js';
-import { appliedApplication, checkAppliedUnderstanding } from '../lib/applied-applications.js';
+import { appliedApplication, appliedCostExample, checkAppliedUnderstanding } from '../lib/applied-applications.js';
 import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback, renderUnderstandingFeedback, clearUnderstandingFeedback } from '../lib/learning-elements.js';
 import { POOL_PITFALLS } from '../learning/pool-pitfalls.js';
-import { readAppliedProgress, saveAppliedProgress } from '../data/applied-progress.js';
+import { readAppliedProgress, saveAppliedProgress, APPLIED_QUESTION_REVISIONS } from '../data/applied-progress.js';
 import { createAppliedRecordLoader } from '../data/applied-records.js';
 import { REPLAY_CASES } from '../data/replay-cases.js';
 import { periodPointView, periodIntervalView, periodMilestones, periodChartRange, periodDuration } from '../lib/period-presentation.js';
@@ -22,13 +22,16 @@ export function initAppliedLearning() {
   const $ = id => document.getElementById(id);
   const { progress } = readAppliedProgress(), loadRecord = createAppliedRecordLoader();
   const predictionField = $('applied-prediction-field');
+  const costExample = document.createElement('p');
+  costExample.id = 'applied-cost-example'; costExample.className = 'learn-reading'; costExample.hidden = true;
+  $('applied-comparison').after(costExample);
   let predictionPrompt;
   let lesson, draft, period = null, question = null, application = null, revision = 0;
   const utc = timestamp => new Date(timestamp * 1000).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
   const states = { inside: 'In range · both tokens', above: 'Above range · all USDC', below: 'Below range · all WETH' };
   const tokens = (zero, one) => formatUnits(zero, 6) + ' USDC + ' + formatUnits(one, 18) + ' WETH';
   const readableTokens = (zero, one) => formatTokenQuantity(Number(formatUnits(zero, 6)), 4) + ' USDC + ' + formatTokenQuantity(Number(formatUnits(one, 18)), 6) + ' WETH (rounded)';
-  const fresh = () => ({ prediction: '', answer: '', reason: '', application: '', choiceSeed: newChoiceSeed(), revealed: false, checkpoint: null });
+  const fresh = () => ({ prediction: '', answer: '', reason: '', application: '', choiceSeed: newChoiceSeed(), revealed: false, checkpoint: null, questionRevisions: {...APPLIED_QUESTION_REVISIONS[lesson.id]} });
   function focusTitle(id) { $(id).focus({ preventScroll: true }); $(id).scrollIntoView({ block: 'start', behavior: 'instant' }); }
   function updateNavigation() {
     $('applied-progress-count').textContent = progress.completed.length + ' of 3 checked';
@@ -89,14 +92,19 @@ export function initAppliedLearning() {
     const index = draft.checkpoint, view = periodPointView(period, index), interval = periodIntervalView(period, index);
     const snapshot = view.point.snapshot;
     const questionBlock = question.view.point.snapshot.block.number;
+    const comparison = lesson.id === 'period-vs-holding';
+    const checkpointLabel = index === question.index ? (comparison ? 'Final comparison checkpoint' : 'Question checkpoint')
+      : comparison && index === question.contrastIndex ? 'Earlier comparison checkpoint' : '';
     $('applied-checkpoint').max = String(period.points.length - 1); $('applied-checkpoint').value = String(index);
     $('applied-checkpoint').setAttribute('aria-valuetext', 'Checkpoint ' + (index + 1) + ' of ' + period.points.length + ', ' + states[view.state] + ', block ' + snapshot.block.number);
-    $('applied-current').textContent = 'Checkpoint ' + (index + 1) + ' of ' + period.points.length + ' · Block ' + snapshot.block.number + ' · ETH ' + usd(view.price) + (index === question.index ? ' · Question checkpoint' : '');
+    $('applied-current').textContent = 'Checkpoint ' + (index + 1) + ' of ' + period.points.length + ' · Block ' + snapshot.block.number + ' · ETH ' + usd(view.price) + (checkpointLabel ? ' · ' + checkpointLabel : '');
     $('applied-state').textContent = states[view.state]; $('applied-state').dataset.state = view.state;
     $('applied-return-question').hidden = index === question.index;
+    $('applied-return-question').textContent = comparison ? 'Return to the final comparison checkpoint →' : 'Return to the question checkpoint →';
     $('applied-question-window').textContent = lesson.id === 'between-samples'
       ? 'Question interval: blocks ' + question.interval.start.number + ' → ' + questionBlock + '. Both sampled endpoints are outside.'
-      : 'Question checkpoint: final block ' + questionBlock + '. Compare with the first checkpoint.';
+      : comparison ? 'Final comparison checkpoint: block ' + questionBlock + '. Both comparisons use the original starting tokens.'
+        : 'Question checkpoint: final block ' + questionBlock + '. Compare with the first checkpoint.';
     for (const button of $('applied-milestones').children) button.setAttribute('aria-pressed', String(Number(button.dataset.index) === index));
     const metrics = lesson.id === 'fees-over-time'
       ? [metric('Principal value', usd(view.principalUSD), 'Excludes fees'), metric('Period fees', feeUSD(view.feesUSD), 'New tokens, valued at this checkpoint'), metric('Time in range', periodDuration(view.secondsInRange), 'Of ' + periodDuration(view.durationSeconds) + ' elapsed')]
@@ -139,6 +147,8 @@ export function initAppliedLearning() {
       $('applied-checkpoint').focus({ preventScroll: true });
       $('applied-current').scrollIntoView({ block: 'center', behavior: 'instant' });
     });
+    costExample.hidden = !question.contrast;
+    costExample.textContent = question.contrast ? appliedCostExample(question).text : '';
     $('applied-observe').hidden = false; $('applied-assessment').hidden = false;
     markPredictionRevealed(predictionField);
     renderCheckpoint(); persist();
@@ -150,10 +160,10 @@ export function initAppliedLearning() {
     const reasoningFeedback = appliedReasonFeedback(lesson.id, draft.reason);
     const applicationFeedback = draft.application ? application.feedback : 'Choose an answer for the thought experiment. ' + application.hint;
     renderUnderstandingFeedback('applied', [
-      { container: 'applied-reasons', selected: draft.reason, correct: result.reasoning, explanation: result.reasoning ? lesson.takeaway : reasoningFeedback },
+      { container: 'applied-reasons', selected: draft.reason, correct: result.reasoning, explanation: result.reasoning ? (lesson.reasonFinding || lesson.takeaway) : reasoningFeedback },
       { container: 'applied-applications', selected: draft.application, correct: result.application, explanation: applicationFeedback },
     ]);
-    $('applied-feedback-copy').textContent = result.passed ? lesson.takeaway : 'Read the feedback beside each question, then try again. You can change either answer.';
+    $('applied-feedback-copy').textContent = result.passed ? lesson.accomplishment : 'Read the feedback beside each question, then try again. You can change either answer.';
     $('applied-continue').hidden = !result.passed;
     const next = APPLIED_LESSONS[APPLIED_LESSONS.indexOf(lesson) + 1];
     $('applied-next').href = next ? '#applied=' + next.id : 'liquidity.html#historical-case=range-return';
@@ -168,6 +178,7 @@ export function initAppliedLearning() {
     if (!id) return;
     saveLearningLocation('learn.html#applied=' + id);
     lesson = APPLIED_LESSONS.find(item => item.id === id); period = null; question = null; application = null;
+    costExample.hidden = true; costExample.textContent = '';
     $('applied-setup').hidden = true; $('applied-setup').replaceChildren();
     if (!matchMedia('(max-width: 750px)').matches) {
       const sidebar = document.querySelector('.learn-sidebar'), selected = document.querySelector('[data-applied-id="' + id + '"]');
@@ -218,6 +229,9 @@ export function initAppliedLearning() {
       const record = await loadRecord(lesson.caseId);
       if (token !== revision) return;
       period = record; question = appliedQuestion(period, id); application = appliedApplication(id, question);
+      $('applied-assessment-scope').textContent = id === 'period-vs-holding'
+        ? 'The explanation uses the earlier comparison at checkpoint ' + (question.contrastIndex + 1) + '. The application imagines a later checkpoint. Exploring the chart does not change either question.'
+        : 'The explanation refers to the marked question checkpoint or interval. The application is a separate thought experiment. Exploring other checkpoints does not change either question.';
       renderRecordedLessonSetup($('applied-setup'), period, lesson, question); $('applied-setup').hidden = false;
       $('applied-application-context').textContent = application.context;
       $('applied-application-question').textContent = application.question;
@@ -229,7 +243,7 @@ export function initAppliedLearning() {
       $('applied-source').textContent = 'Position #' + first.tokenId + ' · Ethereum WETH/USDC 0.3% · ' + period.points.length + ' checkpoints over ' + periodDuration(period.validation.durationSeconds) + ' · blocks ' + first.block.number + '–' + last.block.number + '.';
       $('applied-milestones').replaceChildren(...periodMilestones(period).map(item => {
         const button = document.createElement('button'); button.type = 'button'; button.className = 'button secondary'; button.dataset.index = item.index;
-        button.textContent = item.label + (item.index === question.index ? ' · Question' : '');
+        button.textContent = item.label + (item.index === question.index ? (id === 'period-vs-holding' ? ' · Final comparison' : ' · Question') : '');
         button.addEventListener('click', () => { draft.checkpoint = item.index; renderCheckpoint(); persist(); }); return button;
       }));
       $('applied-reveal').textContent = draft.prediction ? 'See what happens →' : 'Not sure — show me →'; $('applied-reveal').disabled = false;
@@ -259,7 +273,8 @@ export function initAppliedLearning() {
     if (!question) return;
     const numeric = checkAppliedAnswer(question, draft.answer, question.reason).numeric;
     $('applied-answer').setAttribute('aria-invalid', String(!numeric));
-    $('applied-calculation-feedback').textContent = numeric ? 'Calculation matches. Lesson completion is unchanged.' : 'Revisit the marked question checkpoint, units and requested rounding. This optional practice does not affect completion.';
+    $('applied-calculation-feedback').textContent = numeric ? 'Calculation matches. Lesson completion is unchanged.'
+      : 'Revisit the ' + (lesson.id === 'period-vs-holding' ? 'final comparison' : 'marked question') + ' checkpoint, units and requested rounding. This optional practice does not affect completion.';
   });
   $('applied-assessment-form').addEventListener('submit', event => { event.preventDefault(); if (!draft?.revealed || !question) return; check(); });
   $('applied-restart').addEventListener('click', () => { progress.drafts[lesson.id] = fresh(); activate(true); });

@@ -61,9 +61,10 @@ test('new lending and leverage follow-ups follow the existing financial models',
   assert.equal(checkLendingUnderstanding('conditions', 'interest', 'backing-faster').passed, true);
   assert.equal(checkLendingUnderstanding('conditions', 'interest', 'lower').passed, false, 'An old answer cannot grade the new situation.');
   const loop = loopCase('stress');
-  const rise = calculateLoop({ ...loop.input, future: 3000 });
-  assert.ok(rise.end.netAssets > rise.holdingValue);
-  assert.equal(checkLoopUnderstanding('stress', 'exposure', 'loop-gain').passed, true);
+  assert.ok(loop.result.end.healthFactor > 1);
+  assert.ok(loop.result.end.netAssets < loop.result.holdingValue);
+  assert.equal(checkLoopUnderstanding('stress', 'exposure', 'backing-not-profit').passed, true);
+  assert.equal(checkLoopUnderstanding('stress', 'exposure', 'loop-gain').passed, false);
   assert.equal(checkLoopUnderstanding('stress', 'exposure', 'falls').passed, false);
 });
 

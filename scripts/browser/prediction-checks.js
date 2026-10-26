@@ -15,9 +15,10 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
     }; check();
   })`);
   const nonvisual = {
-    'range-boundaries': ['path', 'both-inside'], 'fee-tiers': ['trades', 'no'],
+    'range-boundaries': ['path', 'both-inside'], 'fee-tiers': ['trades', 'smaller-share'],
     'range-management': ['asset', 'automatic'], 'fees-over-time': ['growth', 'same'],
-    'between-samples': ['counters', 'not-proof'], 'period-vs-holding': ['basket', 'hold'],
+    'between-samples': ['counters', 'fee-records'], 'period-vs-holding': ['shortfall', 'current-values'],
+    'final-challenge': ['total', 'relative-gap'],
   };
   try {
     for (const width of [1440, 390]) {
@@ -57,6 +58,12 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         if (nonvisual[id]) {
           for (const [group, value] of [['reason', nonvisual[id][0]], ['application', nonvisual[id][1]]]) {
             await evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);
+          }
+          if (id === 'final-challenge') {
+            await click('learn-check');
+            assert.equal(await text('learn-feedback-title'),'Review your setup.','Correct choices alone do not complete the construction task.');
+            assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),true);
+            await click('liquidity-task-example');
           }
           await click(prefix + '-check');
           assert.equal(await text(prefix + '-feedback-title'), 'Both answers are correct.');

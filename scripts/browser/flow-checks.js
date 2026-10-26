@@ -66,7 +66,9 @@ export async function checkExperimentFlow({ evaluate, click, fill, text, navigat
   assert.equal(await text('learn-resume'), 'Start lesson 1 ↓');
   await evaluate("document.querySelector('input[name=learn-prediction][value=less]').click()");
   await click('learn-run');
-  assert.ok(await evaluate("document.getElementById('learn-takeaway').getBoundingClientRect().height>0 && document.getElementById('learn-takeaway').getBoundingClientRect().top<document.getElementById('learn-explanation').getBoundingClientRect().top"));
+  assert.equal(await evaluate("document.getElementById('learn-takeaway').hidden"),true,'The old takeaway does not duplicate the finding and explanation.');
+  assert.ok(await evaluate("['learn-prediction-feedback','learn-explanation','learn-pitfall'].every(id=>{const element=document.getElementById(id);return element.checkVisibility()&&element.textContent.trim().length>20})"),'The observed result still has a visible finding, explanation and relevant pitfall.');
+  assert.ok(await evaluate("(()=>{const finding=document.getElementById('learn-prediction-feedback').getBoundingClientRect(),explanation=document.getElementById('learn-explanation').getBoundingClientRect(),pitfall=document.getElementById('learn-pitfall').getBoundingClientRect(),assessment=document.getElementById('learn-assessment').getBoundingClientRect();return finding.bottom<=explanation.top+1&&explanation.bottom<=pitfall.top+1&&pitfall.bottom<=assessment.top+1})()"),'Interpretation follows the finding and precedes the understanding checks.');
   await navigate(base + 'learn.html#lesson=swap-impact');
   assert.match(await text('learn-resume'), /^Continue:/);
   await evaluate(progress === null ? "localStorage.removeItem('degenerator-learning-liquidity-v1')" : 'localStorage.setItem("degenerator-learning-liquidity-v1",' + JSON.stringify(progress) + ')');

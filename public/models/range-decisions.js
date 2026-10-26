@@ -15,27 +15,15 @@ export function managementCase(id, variant = 0) {
   if (id === 'range-width') {
     const price = [2300,1700,2000][variant], narrow = position(.05,price), wide = position(.25,price);
     const active = narrow.state === 'inside' && wide.state === 'inside' ? 'both' : wide.state === 'inside' ? 'wide' : 'none';
-    // Separate, supplied fee/cost assumptions for the follow-up, not earned-fee estimates.
-    const fees = variant === 1 ? [400, 15] : [5, 20];
-    const costs = variant === 1 ? [10, 2] : [20, 5];
-    const comparison = variant === 0 ? null : {
-      narrow: narrow.lpBeforeFees + fees[0] - costs[0],
-      wide: wide.lpBeforeFees + fees[1] - costs[1],
-      fees, costs,
-    };
-    const application = !comparison ? 'unknown' : comparison.narrow > comparison.wide ? 'narrow' : 'wide';
-    return {id, variant, price, narrow, wide, comparison, prediction:active, reason:'bounds', application};
+    const application = ['mix', 'whole-period', 'own-basket'][variant];
+    return {id, variant, price, narrow, wide, prediction:active, reason:'bounds', application};
   }
   if (id === 'fee-tiers') {
     // Supplied teaching facts, not an earnings estimate or observations from a real pool.
     const rates = variant === 2 ? [.3,.05] : [.05,.3];
     const fees = [12, 4];
-    const principal = variant === 2 ? [5010, 5040] : null;
-    const costs = variant === 2 ? [5, 5] : null;
-    const totals = principal?.map((value, index) => value + fees[index] - costs[index]);
-    const application = variant === 0 ? 'no' : variant === 1
-      ? (fees[0] > fees[1] ? 'a' : 'b') : (totals[0] > totals[1] ? 'a' : 'b');
-    return {id, variant, rates, fees, principal, costs, totals, prediction:'unknown', reason:'trades', application};
+    const application = ['smaller-share', 'more-income', 'smaller-advantage'][variant];
+    return {id, variant, rates, fees, prediction:'unknown', reason:'trades', application};
   }
   const prices = [[1600,1400],[2400,2800],[1400,1600]][variant];
   const first=position(.1,prices[0]), second=position(.1,prices[1]), returned=position(.1,initialPrice);

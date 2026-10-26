@@ -1,4 +1,12 @@
 /* Shared lesson patterns: a persistent scene, visible prediction, local controls. */
+.learning-application-scene { margin: 18px 0 26px; padding: 18px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); }
+.learning-application-scene > h4 { margin: 0 0 8px; font-size: 17px; }
+.learning-application-scene .scene-question-scope { margin-top: 0; }
+.learning-application-scene .comparison-figure { margin-top: 18px; }
+.learning-application-scene .scene-consequence { margin: 14px 0; font-size: 15px; }
+.learning-application-scene .scene-essential-note { margin-bottom: 0; }
+.learning-application-scene .learn-answer-feedback { margin-top: 16px; }
+@media (max-width: 450px) { .learning-application-scene { padding: 14px 10px; } }
 .learn-setup { font-size: 16px; line-height: 1.6; color: var(--text); margin: 20px 0; padding: 18px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 10px; }
 .learn-setup .learn-setup-title { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--accent); }
 .learn-setup dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px 20px; margin: 0; }

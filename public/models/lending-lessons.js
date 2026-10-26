@@ -10,7 +10,7 @@ const answers = {
   supply: ['earn', 'separate', 'enable'],
   borrow: ['same', 'liability', 'boundary'],
   conditions: ['lower', 'interest', 'backing-faster'],
-  respond: ['repay', 'debt', 'none'],
+  respond: ['repay', 'tradeoff', 'none'],
 };
 
 export function lendingCase(id) {

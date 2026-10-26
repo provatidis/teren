@@ -4,8 +4,8 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
   const choose = (prefix, group, value) => evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);
   const cases = [
     ['learn.html#lesson=swap-impact', 'learn', 'same', 'less', 'curve', 'deeper-less', 'learn-reasons', 'learn-applications', 'learn-run'],
-    ['learn.html#manage=fee-tiers', 'manage', 'a', 'unknown', 'trades', 'no', 'manage-reasons', 'manage-applications', 'manage-reveal'],
-    ['learn.html#applied=period-vs-holding', 'applied', 'fees-win', 'can-trail', 'basket', 'hold', 'applied-reasons', 'applied-applications', 'applied-reveal'],
+    ['learn.html#manage=fee-tiers', 'manage', 'a', 'unknown', 'trades', 'smaller-share', 'manage-reasons', 'manage-applications', 'manage-reveal'],
+    ['learn.html#applied=period-vs-holding', 'applied', 'fees-win', 'can-trail', 'shortfall', 'current-values', 'applied-reasons', 'applied-applications', 'applied-reveal'],
     ['lending.html#lesson=conditions', 'lend', 'higher', 'lower', 'interest', 'backing-faster', 'lend-reason-choices', 'lend-application-choices', 'lend-reveal'],
   ];
   const ready = () => evaluate(`new Promise(resolve => {
@@ -104,7 +104,7 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
     assert.match(await text('applied-comparison'), /−\$0.51[\s\S]*\+\$0.17/);
     await evaluate("document.querySelector('#applied-comparison button').click()");
     assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"), '6');
-    assert.match(await text('applied-question-window'), /final block/);
+    assert.match(await text('applied-question-window'), /Final comparison checkpoint: block 26090000/);
     assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
     for (const lesson of ['build', 'unwind']) {
       const route = base + 'lending.html#loop-lesson=' + lesson;

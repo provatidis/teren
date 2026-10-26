@@ -11,6 +11,7 @@ export const MANAGEMENT_LESSONS = Object.freeze([
     reasons:[['bounds','The wider boundaries include more possible prices.'],['budget','The wider position uses more capital to stay active.'],['protection','The wider position follows a different pool price.']],
     hint:'Look at the shown price and each pair of bounds. Active means eligible to earn from swaps.',
     takeaway:'A tighter range concentrates capital and brings the boundaries closer. It does not guarantee better profit.',
+    accomplishment:'You separated being active from being ahead of holding.',
     explanation:'The same price move can leave a narrow position inactive while a wider one still supplies liquidity. A narrow position may earn more while active, but actual fees depend on trades and competing liquidity. Being active is eligibility to earn, not a payment for waiting.',
     pitfall:'A narrow range is not automatically the better investment. You also need earned fees, token values and management costs.',
     reasonFeedback:{budget:'Both positions start with the same dollar budget. Their price bounds differ; the starting budget does not.',protection:'Both positions use the same pool price. Wider bounds include more of its possible prices.'},
@@ -21,6 +22,7 @@ export const MANAGEMENT_LESSONS = Object.freeze([
     reasons:[['trades','Trade activity, fee rate and its share of active liquidity.'],['rate','The swap fee tier and the position’s starting deposit.'],['clock','The swap fee tier and the time the position stays active.']],
     hint:'A larger fee per trade is only useful when trades use your active liquidity.',
     takeaway:'Read the fee rate, trade activity and your active share separately. Fee income is only part of profit.',
+    accomplishment:'You explained how trading activity and competing liquidity change fee income.',
     explanation:'A larger charge per swap does not establish larger earnings. The pools can receive different trade activity and have different competing liquidity. Any supplied fee totals here are made-up teaching facts after any protocol share; they are not earnings estimates or verified records.',
     pitfall:'Fee APR expresses fee income as a yearly rate. Check its observation period and what it excludes; it is not a promise of future profit.',
     reasonFeedback:{rate:'The rate and deposit matter, but trades must use the position’s active liquidity. Competing liquidity also affects its share.',clock:'Time alone creates no swap fees. Trades must use the position’s active liquidity.'},
@@ -31,6 +33,7 @@ export const MANAGEMENT_LESSONS = Object.freeze([
     reasons:[['asset','It still owns one token, whose dollar price matters.'],['locked','It keeps the dollar value reached at the range boundary.'],['liquidated','It sells its tokens and waits outside the pool.']],
     hint:'Below this ETH-price range the position holds ETH; above it, USDC. The example assumes USDC stays at $1.',
     takeaway:'Inactive is not closed. Price exposure remains, and managing a range can add costs.',
+    accomplishment:'You distinguished a range exit from removing liquidity, and explained what happens on a return.',
     explanation:'Outside its range, the position stops earning new swap fees. Its token quantities stay fixed until price returns. Holding ETH still exposes it to ETH price moves; holding USDC keeps its value fixed only under this example’s $1 assumption. Earlier fee tokens are not erased by the exit.',
     pitfall:'Changing a real v3 range requires removing liquidity and creating a position with new bounds. It can add network costs and require swaps for a new token mix. It does not refund earlier losses.',
     reasonFeedback:{locked:'Fixed token quantities do not guarantee a fixed dollar value. If the position holds ETH, its value follows ETH’s price.',liquidated:'Going out of range does not close or liquidate a plain Uniswap position. It keeps its tokens and can become active again.'},
@@ -59,55 +62,82 @@ export function managementPresentation(result) {
     links:[{label:'Explore this setup in Experiment ↗',scenario:result.second}],note:'Hypothetical principal before fees, with unchanged liquidity and USDC = $1. No range changes or earned fees are simulated.'};
 }
 
-// Follow-ups retain the topic but change the supplied facts. Totals are displayed;
-// learners interpret the result rather than calculate fees or round an answer.
+// Follow-ups change one condition or ask which evidence supports a comparison.
+// The learner explains consequences; no arithmetic is required.
 export function managementApplication(result) {
   if (result.id === 'range-width') {
-    const choices = [
-      ['narrow', 'The narrower position has the higher final value.'],
-      ['wide', 'The wider position has the higher final value.'],
-      ['unknown', 'There is not enough information to compare final values.'],
-    ];
-    const comparison = result.comparison;
+    if (result.variant === 0) return {
+      context: 'Move ETH to $2,090, inside both ranges. Before fees, each position is worth less than holding its own starting tokens.',
+      question: 'How can a position be active and still trail holding?',
+      choices: [
+        ['mix', 'Swaps have changed its token mix while it remains active.'],
+        ['capital', 'Being active has reduced the amount originally deposited.'],
+        ['uncollected', 'Uncollected fees have been deducted from its token value.'],
+      ],
+      hint: 'Active describes whether swaps can use the liquidity. Compare the tokens now held with the starting basket.',
+      feedback: 'Swaps change the position’s token mix even inside the range. Being active makes it eligible for fees; it does not make its principal worth as much as holding.',
+    };
+    if (result.variant === 1) return {
+      context: 'The narrower position is now outside its range. It earned more fees during an earlier active spell than the wider position.',
+      question: 'What evidence would let you compare their final values?',
+      accomplishment: 'You identified the whole-period evidence needed to compare two ranges.',
+      choices: [
+        ['whole-period', 'Final token values, all period fees and each position’s costs.'],
+        ['active-time', 'The time each position spent active during this period.'],
+        ['early-fees', 'The fee amounts from the earlier active spell.'],
+      ],
+      hint: 'Earlier fees and current activity describe only parts of the result.',
+      feedback: 'Compare final token values plus all period fees, minus costs. A position can finish ahead despite being inactive at the endpoint; the earlier fee ranking is not enough.',
+    };
     return {
-      context: comparison
-        ? 'Keep the shown prices and starting budgets. Supply hypothetical fees and LP-only costs. Narrow: fees ' + usd(comparison.fees[0]) + ', costs ' + usd(comparison.costs[0]) + ', final value ' + usd(comparison.narrow) + '. Wider: fees ' + usd(comparison.fees[1]) + ', costs ' + usd(comparison.costs[1]) + ', final value ' + usd(comparison.wide) + '. These are assumptions, not estimated earnings.'
-        : 'The narrow position earned more fees during an earlier active spell. Total fees, final token values and costs for the whole period are not supplied.',
-      question: 'What can you conclude about their final values over the whole period?',
-      choices,
-      hint: comparison ? 'Read the two final values; both already include the supplied fees and costs.' : 'An earlier fee advantage describes only part of the whole period.',
-      feedback: comparison
-        ? 'The ' + (result.application === 'narrow' ? 'narrower' : 'wider') + ' position finishes ahead with these supplied assumptions. Another set of fees or costs could change that result.'
-        : 'The missing whole-period values prevent a comparison. Range width and an earlier fee advantage are not enough.',
+      context: 'Both ranges started with $5,000, but they required different amounts of ETH and USDC. You want to know what providing liquidity added compared with keeping those tokens.',
+      question: 'Which holding benchmark is fair for each position?',
+      accomplishment: 'You matched each position with its own starting-token benchmark.',
+      choices: [
+        ['own-basket', 'The ETH and USDC amounts that funded that position.'],
+        ['same-mix', 'The same half-ETH, half-USDC basket for both positions.'],
+        ['start-dollars', 'The original $5,000 dollar amount for both positions.'],
+      ],
+      hint: 'Holding keeps the tokens you would otherwise have deposited.',
+      feedback: 'Each position is compared with its own starting tokens. Equal dollar budgets can contain different token amounts, so their holding values can differ when ETH moves.',
     };
   }
   if (result.id === 'fee-tiers') {
     if (result.variant === 0) return {
-      context: 'A dashboard shows a high fee APR based on yesterday’s fees. It excludes changes in token value and management costs.',
-      question: 'What does that fee APR describe?',
+      context: 'A dashboard turns yesterday’s fees into a yearly fee APR. Today the trades, fee tier and your liquidity stay the same, but more liquidity competes at every traded price.',
+      question: 'What happens to your fee income from those trades?',
+      accomplishment: 'You explained why more competition can lower fee income despite an unchanged fee tier.',
       choices: [
-        ['no', 'A yearly rate based on the observed fee income.'],
-        ['a', 'A yearly rate based on the position’s total return.'],
-        ['b', 'A yearly rate paid on the position’s deposited tokens.'],
+        ['smaller-share', 'It falls because your share of active liquidity is smaller.'],
+        ['fixed-apr', 'It stays the same because yesterday’s APR sets the payment.'],
+        ['larger-pool', 'It rises because the pool now contains more liquidity.'],
       ],
-      hint: 'Read what the card includes and the period it observed.',
-      feedback: 'Fee APR annualizes the observed fee income. It omits other parts of profit and does not establish what the next year will earn.',
+      hint: 'The APR describes earlier fee income. Today’s fees are shared among today’s active liquidity.',
+      feedback: 'The same trades produce the same fee pool, but your smaller share earns less. Yesterday’s annualized fee income is not a rate credited to your deposit.',
     };
-    const withCosts = result.variant === 2;
-    return {
-      context: withCosts
-        ? 'Use these supplied hypothetical totals. The positions have equal starting budgets and can use different ranges. A: principal ' + usd(result.principal[0]) + ', fees ' + usd(result.fees[0]) + ', costs ' + usd(result.costs[0]) + ', final value ' + usd(result.totals[0]) + '. B: principal ' + usd(result.principal[1]) + ', fees ' + usd(result.fees[1]) + ', costs ' + usd(result.costs[1]) + ', final value ' + usd(result.totals[1]) + '. The final values already include fees and costs.'
-        : 'Use the supplied example day: position A earned ' + usd(result.fees[0]) + ' in swap fees; B earned ' + usd(result.fees[1]) + '. These are fictional teaching facts after any protocol share.',
-      question: withCosts ? 'Which position finishes with the higher value in this example?' : 'Which position earned more swap fees on this supplied day?',
+    if (result.variant === 1) return {
+      context: 'Keep the fee tier and your share of active liquidity unchanged. More trading volume now uses your position while it is active.',
+      question: 'What changes because of that extra trading?',
+      accomplishment: 'You linked increased trading activity to fee income without changing the fee tier.',
       choices: [
-        ['a', 'Position A has the higher ' + (withCosts ? 'final value.' : 'fee income.')],
-        ['b', 'Position B has the higher ' + (withCosts ? 'final value.' : 'fee income.')],
-        ['no', 'The supplied information does not establish either result.'],
+        ['more-income', 'Your position earns more swap fees from that activity.'],
+        ['same-income', 'Your fee income stays fixed until the fee tier changes.'],
+        ['higher-tier', 'Your position moves into a higher fee tier automatically.'],
       ],
-      hint: withCosts ? 'Read the final values, rather than comparing the fee amounts by themselves.' : 'Read the supplied fee income, rather than choosing by the swap fee tier.',
-      feedback: withCosts
-        ? 'B finishes ahead even though A earned more fees. Principal value and costs also contribute to the result.'
-        : 'A earned more in this supplied example, despite its lower swap fee tier. The fee tier is a charge per trade, not the position’s earnings.',
+      hint: 'The fee tier charges a percentage of each swap. Your share is unchanged here.',
+      feedback: 'More volume using the same active share at the same tier produces more fee income. The pool’s fee tier has not changed.',
+    };
+    return {
+      context: 'Between two checkpoints, no new fee tokens accrue. The existing fees keep the same dollar value, costs stay unchanged, and the principal falls further behind holding.',
+      question: 'What happens to the LP’s result compared with holding?',
+      accomplishment: 'You traced a worsening comparison to principal value even when fee income stays the same.',
+      choices: [
+        ['smaller-advantage', 'It worsens because the principal shortfall has grown.'],
+        ['same-result', 'It stays the same because the fee income is unchanged.'],
+        ['higher-apr', 'It improves because the earned fees remain collectable.'],
+      ],
+      hint: 'Fee income is one part of the comparison; principal value matters too.',
+      feedback: 'With fee value and costs unchanged, a larger principal shortfall makes the LP’s comparison worse. Collectable fees are assets, but their existence does not determine the whole result.',
     };
   }
   return {

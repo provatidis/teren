@@ -24,10 +24,10 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     ['swap-impact','less','18132','curve','deeper-less'],
     ['pool-share','less','4.76','ownership','share-same'],
     ['token-balances','less','0.884','rebalance','original-mix'],
-    ['loss-vs-profit','gain','428.93','benchmark','matches'],
+    ['loss-vs-profit','gain','428.93','benchmark','loss-and-gap'],
     ['fee-break-even','short','428.93','assumption','same'],
     ['range-boundaries','usdc','0','path','both-inside'],
-    ['final-challenge','hold','328.93','total','different'],
+    ['final-challenge','hold','328.93','total','relative-gap'],
   ];
   for (const [id, prediction, answer, reason, application] of cases) {
     await navigate(base + 'learn.html#lesson=' + id);
@@ -70,6 +70,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
       assert.equal(await text('learn-progress-count'), '0 of 7 checked');
       await choose('learn-reason', reason);
     }
+    if (id === 'final-challenge') await click('liquidity-task-example');
     await click('learn-check');
     assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
     assert.equal(await evaluate("document.getElementById('learn-continue').hidden"), false);

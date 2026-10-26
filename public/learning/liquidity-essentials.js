@@ -1,7 +1,7 @@
 export const COURSE = { id: 'liquidity-essentials-v1', title: 'Liquidity essentials' };
 export const LESSONS = [
   {
-    id: 'swap-impact', protocol: 'Uniswap v2-style', title: 'Trade size and execution price', short: 'Swaps & price impact', concept: 'Swaps', skill: 'Explain how trade size affects execution.',
+    id: 'swap-impact', completion: 'You connected trade size and pool depth to the price a swap receives.', protocol: 'Uniswap v2-style', title: 'Trade size and execution price', short: 'Swaps & price impact', concept: 'Swaps', skill: 'Explain how trade size affects execution.',
     intro: 'Trade ETH for USDC. Watch the pool’s balances change, then compare a small trade with a larger one.',
     prediction: 'How will this swap’s average price compare with the starting price?',
     predictions: [['less', 'A lower average price than the starting price'], ['same', 'The same average price as the starting price'], ['more', 'A higher average price than the starting price']],
@@ -13,7 +13,7 @@ export const LESSONS = [
     takeaway: 'A quote describes a trade against finite reserves. Spot price alone cannot tell you its proceeds.',
   },
   {
-    id: 'pool-share', protocol: 'Uniswap v2-style', title: 'Ownership after a liquidity deposit', short: 'Providing liquidity', concept: 'Ownership', skill: 'Explain what your share represents after a matching deposit.',
+    id: 'pool-share', completion: 'You separated your ownership percentage from the tokens behind that claim.', protocol: 'Uniswap v2-style', title: 'Ownership after a liquidity deposit', short: 'Providing liquidity', concept: 'Ownership', skill: 'Explain what your share represents after a matching deposit.',
     intro: 'Add both tokens to the pool and receive a share of it. Then watch what happens to your share when someone trades.',
     prediction: 'After your deposit, which balances determine your pool share?',
     predictions: [['less', 'The enlarged pool, including my deposit'], ['same', 'The pool balances before my deposit']],
@@ -25,7 +25,7 @@ export const LESSONS = [
     takeaway: 'Your deposit becomes part of the bigger pool. LP tokens are a claim on changing assets.',
   },
   {
-    id: 'token-balances', protocol: 'Uniswap v2-style', title: 'Token balances after a price change', short: 'Changing token balances', concept: 'Allocation', skill: 'Explain what a price move does to token quantities.',
+    id: 'token-balances', completion: 'You traced how swaps change the tokens a liquidity position owns.', protocol: 'Uniswap v2-style', title: 'Token balances after a price change', short: 'Changing token balances', concept: 'Allocation', skill: 'Explain what a price move does to token quantities.',
     intro: 'When ETH’s market price changes, traders exchange tokens with the pool. Follow what comes in and what goes out.',
     prediction: 'At your selected future price, will the LP hold less, more, or the same ETH as at the start?',
     predictions: [['less', 'Less ETH'], ['more', 'More ETH'], ['same', 'The same ETH']],
@@ -37,7 +37,7 @@ export const LESSONS = [
     takeaway: 'Equal dollar weights do not mean fixed token quantities.',
   },
   {
-    id: 'loss-vs-profit', protocol: 'Uniswap v2-style', title: 'Dollar profit and impermanent loss', short: 'Loss versus profit', concept: 'Benchmarks', skill: 'Separate dollar profit from impermanent loss.',
+    id: 'loss-vs-profit', completion: 'You distinguished dollar profit or loss from performance against holding.', protocol: 'Uniswap v2-style', title: 'Dollar profit and impermanent loss', short: 'Loss versus profit', concept: 'Benchmarks', skill: 'Separate dollar profit from impermanent loss.',
     intro: 'An LP can gain dollars and still fall behind holding. Change ETH’s price and compare both benchmarks.',
     prediction: 'Before fees, is the LP worth at least the original budget at your selected price?',
     predictions: [['gain', 'Yes — it gains dollars or breaks even'], ['loss', 'No — it loses dollars']],
@@ -49,7 +49,7 @@ export const LESSONS = [
     takeaway: 'Choose the benchmark before interpreting a return.',
   },
   {
-    id: 'fee-break-even', protocol: 'Uniswap v2-style', title: 'Fees needed to match holding', short: 'Fees & break-even', concept: 'Fee income', skill: 'Distinguish a fee target from assumed and earned fees.',
+    id: 'fee-break-even', completion: 'You separated an assumed fee amount from fees actually earned.', protocol: 'Uniswap v2-style', title: 'Fees needed to match holding', short: 'Fees & break-even', concept: 'Fee income', skill: 'Distinguish a fee target from assumed and earned fees.',
     intro: 'How much would fees need to add for LP to match holding? Move the fee assumption and watch the gap close.',
     prediction: 'Do your assumed fees cover the gap to holding at this future price?',
     predictions: [['enough', 'They match or exceed the gap'], ['short', 'The LP still trails holding']],
@@ -61,8 +61,8 @@ export const LESSONS = [
     takeaway: 'Required fees and expected fees are different numbers.',
   },
   {
-    id: 'range-boundaries', protocol: 'Uniswap v3-style', title: 'Token balances at range boundaries', short: 'Concentrated liquidity', concept: 'Ranges', skill: 'Identify the token held at either range boundary.',
-    intro: 'A concentrated position commits capital to a price interval. At or below its lower boundary it holds ETH; at or above its upper boundary it holds USDC. Within the range it can hold both.',
+    id: 'range-boundaries', completion: 'You connected range position, token ownership and eligibility to earn fees.', protocol: 'Uniswap v3-style', title: 'Token balances at range boundaries', short: 'Concentrated liquidity', concept: 'Ranges', skill: 'Identify the token held at either range boundary.',
+    intro: 'A concentrated position supplies liquidity within a chosen price range. Follow the token mix as ETH moves through its boundaries.',
     prediction: 'At the selected future price, what will the position hold?',
     predictions: [['eth', 'Only ETH'], ['both', 'ETH and USDC'], ['usdc', 'Only USDC']],
     question: 'What percentage of the final principal value is ETH? Use two decimal places.',
@@ -73,13 +73,13 @@ export const LESSONS = [
     takeaway: 'The final price tells you which tokens remain. Past fees need records of earlier activity.',
   },
   {
-    id: 'final-challenge', protocol: 'Uniswap v2-style', title: 'Compare liquidity with holding', short: 'Final challenge', concept: 'Apply what you learned', skill: 'Compare an LP with holding and justify the conclusion.',
+    id: 'final-challenge', completion: 'You built an example where matching holding still leaves a dollar loss.', protocol: 'Uniswap v2-style', title: 'Compare liquidity with holding', short: 'Final challenge', concept: 'Apply what you learned', skill: 'Compare an LP with holding and justify the conclusion.',
     intro: 'Use the same starting tokens to compare holding with LP. Change price or assumed fees, then explain which assumption drives the result.',
     prediction: 'With your selected price and fee assumption, which has the higher final dollar value?',
     predictions: [['hold', 'Holding the starting tokens'], ['lp', 'The LP, including fees — or a tie']],
     question: 'How much ADDITIONAL assumed fee income would the LP need to match holding? Enter 0 if it already matches or beats holding.',
-    reasoning: 'What is the sound way to interpret this experiment?',
-    reasons: [['total', 'Compare the same starting tokens; keep fees and omitted costs visible.'], ['fees', 'Compare fee income with the dollar value of the starting deposit.'], ['forecast', 'Use the simulated return to estimate this real position’s next return.']],
+    reasoning: 'What explains the LP’s result against holding at the question price?',
+    reasons: [['total', 'Compare the fee contribution with the principal shortfall against holding.'], ['fees', 'Any fee income puts the LP ahead of its original holding basket.'], ['forecast', 'The displayed fee assumption records what trades have already earned.']],
     hint: 'Additional fees = max(0, holding − LP including the current assumed fees).',
     explanation: 'The result is conditional on the inputs. Token rebalancing, price changes and assumed fees each contribute. Gas, protocol-specific execution and the trading path are absent, so this is an experiment you can reproduce rather than a forecast.',
     takeaway: 'A useful conclusion names the benchmark, assumptions and missing information.',

@@ -4,9 +4,10 @@ import { readFile } from 'node:fs/promises';
 import { LESSON_IDS, VARIANTS, lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
 import { lessonApplication, checkLessonUnderstanding } from '../public/models/lesson-application.js';
 import { lessonApplicationCopy } from '../public/lib/lesson-application-copy.js';
-import { appliedApplication, checkAppliedUnderstanding } from '../public/lib/applied-applications.js';
+import { appliedApplication, appliedCostExample, checkAppliedUnderstanding } from '../public/lib/applied-applications.js';
 import { appliedQuestion } from '../public/lib/applied-lessons.js';
 import { validatePositionPeriod } from '../public/data/position-period.js';
+import { matchChallengeHolding } from '../public/models/liquidity-challenge.js';
 import { LESSONS } from '../public/learning/liquidity-essentials.js';
 import { APPLIED_LESSONS } from '../public/learning/applied-liquidity.js';
 import { parseProgress } from '../public/data/learning-progress.js';
@@ -28,12 +29,13 @@ test('every exercise requires explanation and transfer, independently of numeric
   for (const id of LESSON_IDS) for (let variant = 0; variant < VARIANTS; variant++) {
     const input = lessonSetup(id,variant), before = {...input}, result = runLesson(id,input,variant);
     const copy = lessonApplicationCopy(id,result), item = LESSONS.find(lesson=>lesson.id===id);
+    const task = id === 'final-challenge' ? matchChallengeHolding(result.setup, result.setup.initialPrice * .75) : undefined;
     assert.equal(copy.choices.filter(([value])=>value===copy.expected).length,1);
-    assert.equal(checkLessonUnderstanding(id,input,variant,result.reason,copy.expected).passed,true);
-    assert.equal(checkLessonUnderstanding(id,input,variant,'',copy.expected).passed,false);
-    assert.equal(checkLessonUnderstanding(id,input,variant,result.reason,'').passed,false);
+    assert.equal(checkLessonUnderstanding(id,input,variant,result.reason,copy.expected,task).passed,true);
+    assert.equal(checkLessonUnderstanding(id,input,variant,'',copy.expected,task).passed,false);
+    assert.equal(checkLessonUnderstanding(id,input,variant,result.reason,'',task).passed,false);
     for (const [reason] of item.reasons) for (const [answer] of copy.choices) {
-      assert.equal(checkLessonUnderstanding(id,input,variant,reason,answer).passed,reason===result.reason && answer===copy.expected);
+      assert.equal(checkLessonUnderstanding(id,input,variant,reason,answer,task).passed,reason===result.reason && answer===copy.expected);
     }
     assert.equal(checkLessonUnderstanding(id,input,variant,'unknown','unknown').passed,false);
     assert.deepEqual(input,before);
@@ -46,20 +48,25 @@ test('transfer changes the actual selected setup, including extremes and falling
     const start = lessonSetup('swap-impact',variant);
     for (const amount of [1,start.reserveEth/2]) {
       const result=runLesson('swap-impact',{amount},variant), app=lessonApplication('swap-impact',result);
-      assert.equal(app.reserveEth,start.reserveEth*2);
-      assert.ok(app.impact<result.impact);
-      assert.equal(app.expected,'deeper-less');
+      assert.equal(app.reserveEth,start.reserveEth*(variant===1?.5:2));
+      assert.equal(app.impact<result.impact,variant!==1);
+      assert.equal(app.expected,variant===1?'deeper-more':'deeper-less');
     }
     const share=runLesson('pool-share',lessonSetup('pool-share',variant),variant), app=lessonApplication('pool-share',share);
-    assert.equal(app.expected,'share-same');
+    assert.equal(app.expected,['share-same','diluted-same-claim','reverse-swap'][variant]);
     for (const multiplier of [.5,1,1.5,2]) {
       const futurePrice=start.initialPrice*multiplier;
       const balances=lessonApplication('token-balances',runLesson('token-balances',{futurePrice},variant));
-      assert.equal(balances.expected,'original-mix');
+      assert.equal(balances.expected,variant===1?'more-eth-less-value':'original-mix');
       assert.equal(balances.next.setup.initialPrice,start.initialPrice);
-      assert.deepEqual(balances.next.result.pooled,balances.next.result.held);
+      if (variant===1) {
+        assert.ok(balances.next.result.pooled.eth>balances.next.result.held.eth);
+        assert.ok(balances.next.result.lpValue<start.investment);
+      } else assert.deepEqual(balances.next.result.pooled,balances.next.result.held);
       const loss=lessonApplication('loss-vs-profit',runLesson('loss-vs-profit',{futurePrice},variant));
-      assert.equal(loss.expected,multiplier===1?'trails':'matches');
+      assert.equal(loss.expected,multiplier<1?'gain-and-gap':'loss-and-gap');
+      assert.ok(loss.next.result.lpBeforeFees < loss.next.result.holdValue);
+      assert.equal(loss.next.result.lpReturn>0,multiplier<1);
       for (const fees of [0,100,start.investment/2]) {
         const original=runLesson('fee-break-even',{futurePrice,fees},variant), changed=lessonApplication('fee-break-even',original);
         assert.notEqual(changed.fees,fees); assert.equal(changed.next.result.breakEvenFees,original.result.breakEvenFees);
@@ -67,10 +74,13 @@ test('transfer changes the actual selected setup, including extremes and falling
       }
       for (const width of [.05,.1,.5]) {
         const original=runLesson('range-boundaries',{futurePrice,width},variant), changed=lessonApplication('range-boundaries',original);
-        assert.equal(changed.expected,'both-inside');
-        assert.equal(changed.next.result.state,'inside');
-        assert.ok(changed.next.result.pooled.eth>0 && changed.next.result.pooled.usdc>0);
-        assert.ok(changed.next.result.finalEthPercent<50);
+        assert.equal(changed.expected,['both-inside','mostly-eth','eth-owned'][variant]);
+        if (variant===2) { assert.equal(changed.next.result.state,'lower-edge'); assert.equal(changed.next.result.pooled.usdc,0); }
+        else {
+          assert.equal(changed.next.result.state,'inside');
+          assert.ok(changed.next.result.pooled.eth>0 && changed.next.result.pooled.usdc>0);
+          assert.equal(changed.next.result.finalEthPercent<50,variant===0);
+        }
       }
     }
   }
@@ -80,16 +90,17 @@ test('applied transfer exercises distinguish thought experiments from unchanged 
   const before = [JSON.stringify(baseline),JSON.stringify(returning)];
   for (const item of APPLIED_LESSONS) {
     const question=appliedQuestion(item.caseId==='in-range'?baseline:returning,item.id), app=appliedApplication(item.id,question);
-    assert.equal(app.expected,item.id==='fees-over-time'?'same':item.id==='between-samples'?'not-proof':'hold');
+    assert.equal(app.expected,item.id==='fees-over-time'?'same':item.id==='between-samples'?'fee-records':'current-values');
     for (const [reason] of item.reasons) for (const [answer] of app.choices) {
       assert.equal(checkAppliedUnderstanding(question,app,reason,answer).passed,reason===question.reason && answer===app.expected);
     }
     assert.equal(checkAppliedUnderstanding(question,app,question.reason,'').passed,false);
     if (item.id==='period-vs-holding') {
-      assert.ok(question.view.gapUSD>0); assert.ok(app.gapUSD<0);
-      assert.equal(app.lpUSD,question.view.lpUSD-1);
-      assert.match(app.context,/hypothetical \$1.00 LP-only cost/);
-      assert.match(app.feedback,/historical result itself has not changed/);
+      const cost=appliedCostExample(question);
+      assert.ok(question.view.gapUSD>0); assert.ok(cost.gapUSD<0);
+      assert.equal(cost.lpUSD,question.view.lpUSD-1);
+      assert.match(cost.text,/\$1.00/);
+      assert.match(app.feedback,/fee|value/);
     }
   }
   assert.deepEqual([JSON.stringify(baseline),JSON.stringify(returning)],before);

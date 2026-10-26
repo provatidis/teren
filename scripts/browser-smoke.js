@@ -34,6 +34,7 @@ import { checkNavigation, checkMobileNavigation } from './browser/navigation-che
 import { checkWorkspaces } from './browser/workspace-checks.js';
 import { checkExamples } from './browser/example-checks.js';
 import { checkLearning, checkMobileLearning } from './browser/learning-checks.js';
+import { checkLearningApplications } from './browser/learning-application-checks.js';
 import { checkPositions, checkMobilePositions } from './browser/position-checks.js';
 import { checkSavedExperiments, checkMobileSavedExperiments } from './browser/saved-experiment-checks.js';
 // Optional real-browser smoke test, using Chromium's DevTools protocol and Node built-ins.
@@ -185,6 +186,18 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (process.env.BROWSER_CHECKS === 'recorded-lessons') {
+    await navigate(base + 'liquidity.html');
+    await checkAppliedLearning({ evaluate, click, fill, text, navigate, reload, base, call, nextEvent });
+    await checkMobileAppliedLearning({ evaluate, click, fill, text, navigate, base, call });
+    assert.deepEqual(errors, [], 'No uncaught browser errors');
+    return;
+  }
+  if (process.env.BROWSER_CHECKS === 'learning-tasks') {
+    await checkLearningApplications({ evaluate, click, fill, text, navigate, reload, base, call });
+    assert.deepEqual(errors, [], 'No uncaught browser errors');
+    return;
+  }
   if (process.env.BROWSER_CHECKS === 'lp-costs') {
     await call('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: profile, eventsEnabled: true });
     await checkLPEconomics({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
@@ -687,6 +700,7 @@ try {
   await checkLoopStressLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkReviewPolish({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkComparisonLessons({ evaluate, click, fill, text, navigate, reload, base, call });
+  await checkLearningApplications({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   await checkPredictions({ evaluate, click, text, navigate, reload, base, call });
   await checkLessonFeedback({ evaluate, click, fill, text, navigate, reload, base, call });

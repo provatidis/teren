@@ -7,8 +7,8 @@ const cases = {
 };
 const answers = {
   build: ['same', 'debt', 'supplied'],
-  stress: ['loop', 'exposure', 'loop-gain'],
-  unwind: ['stages', 'backing', 'blocked'],
+  stress: ['loop', 'exposure', 'backing-not-profit'],
+  unwind: ['stages', 'backing', 'repay-wallet'],
 };
 
 export function loopCase(id) {

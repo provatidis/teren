@@ -130,7 +130,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' });
     await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
   };
-  const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'loop-gain'], ['unwind', 'all', 'backing', 'blocked']];
+  const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'backing-not-profit'], ['unwind', 'all', 'backing', 'repay-wallet']];
   for (const [index, [id, prediction, reason, application]] of lessons.entries()) {
     await navigate(base + 'lending.html#loop-lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#lending-learn input[type=number]').length"), 0);
@@ -239,6 +239,37 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     assert.equal(await text('lend-feedback-title'), 'Review your answers.');
     await choose('reason', reason); await choose('application', application); await click('lend-check');
     assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
+    if (id === 'unwind') {
+      assert.equal(await text('lend-application-label'), 'APPLY · FIND THE MISSING ACTION');
+      assert.equal(await text('unwind-application-title'), 'Paused after Sell ETH');
+      assert.match(await text('unwind-application-wallet'), /7,378.34 USDC/);
+      assert.equal(await text('unwind-application-debt'), '8,735.01 USDC');
+      assert.equal(await evaluate("document.getElementById('unwind-application-contrast').hidden"), true, 'Completion does not require opening the visual answer.');
+      const observed = await evaluate("document.getElementById('lend-money-flow').textContent");
+      const saved = await evaluate("localStorage.getItem('teren-loop-learning-v1')");
+      const handoff = await evaluate("document.getElementById('lend-explore').href");
+      await evaluate("document.getElementById('unwind-application-show').focus()");
+      await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' });
+      await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+      assert.equal(await text('unwind-application-title'), 'After Repay');
+      assert.equal(await text('unwind-application-wallet'), '0 USDC 0 ETH');
+      assert.equal(await text('unwind-application-debt'), '1,356.67 USDC');
+      assert.equal(await text('unwind-application-cash-contrast'), '7,378.34 → 0 USDC');
+      assert.equal(await text('unwind-application-debt-contrast'), '8,735.01 → 1,356.67 USDC');
+      assert.equal(await evaluate("document.getElementById('unwind-application-show').getAttribute('aria-expanded')"), 'true');
+      assert.equal(await evaluate("document.getElementById('lend-money-flow').textContent"), observed);
+      assert.equal(await evaluate("localStorage.getItem('teren-loop-learning-v1')"), saved);
+      assert.equal(await evaluate("document.getElementById('lend-explore').href"), handoff);
+      await click('unwind-application-show');
+      assert.equal(await text('unwind-application-title'), 'Paused after Sell ETH');
+      await choose('application', 'keep-cash');
+      assert.equal(await evaluate("document.getElementById('unwind-application-show').hidden"), true);
+      await click('lend-check');
+      assert.equal(await text('lend-feedback-title'), 'Review your answers.');
+      assert.equal(await evaluate("document.getElementById('unwind-application-show').hidden"), false, 'A wrong answer can inspect the same repayment evidence.');
+      await choose('application', application); await click('lend-check');
+      assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
+    }
     assert.equal(await text('lend-progress'), (index + 1) + ' of 3 checked');
     assert.match(await evaluate("document.getElementById('lend-explore').href"), /loop=borrowing-loop-v1/);
     assert.equal(await evaluate("document.getElementById('lend-explore').target"), '_blank');
@@ -330,10 +361,15 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       assert.equal(await text('lend-progress'), progressBefore);
       assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
     } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
-    await choose('reason', 'backing'); await choose('application', 'blocked'); await click('lend-check'); await settle(evaluate);
+    await choose('reason', 'backing'); await choose('application', 'repay-wallet'); await click('lend-check'); await settle(evaluate);
     assert.equal(await evaluate('document.activeElement.id'), 'lend-feedback');
     assert.ok(await evaluate("document.getElementById('lend-next').getBoundingClientRect().bottom<=innerHeight"));
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
+    await click('unwind-application-show');
+    assert.equal(await text('unwind-application-title'), 'After Repay');
+    assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
+    assert.equal(await evaluate("document.querySelector('#unwind-application .loop-flow-balances').getAnimations({subtree:true}).length"), 0);
+    assert.ok(await evaluate("document.getElementById('unwind-application-show').getBoundingClientRect().height>=44"));
   }
   console.log('PASS: loop results, invalid-field focus, expanded ledger/unwind, readable chart and lesson feedback at 390px/320px');
 }

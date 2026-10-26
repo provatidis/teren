@@ -110,7 +110,8 @@
           <form id="learn-assessment-form" novalidate>
 
             <fieldset class="learn-fieldset"><legend id="learn-reason-question"></legend><div id="learn-reasons" class="learn-choices"></div></fieldset>
-            <div class="learn-application-setup"><p class="eyebrow">APPLY · CHANGE ONE ASSUMPTION</p><p id="learn-application-context"></p></div>
+            <div class="learn-application-setup"><p id="learn-application-label" class="eyebrow">APPLY · CHANGE THE SITUATION</p><p id="learn-application-context"></p></div>
+            <div id="learn-application-task" hidden></div>
             <fieldset class="learn-fieldset"><legend id="learn-application-question"></legend><div id="learn-applications" class="learn-choices"></div></fieldset>
             <details id="learn-hint" class="learn-hint"><summary>Need a hint?</summary><p id="learn-hint-text"></p></details>
             <button id="learn-check" class="button primary" type="submit">Check answers →</button>
@@ -119,12 +120,12 @@
           <div id="learn-continue" class="learn-continue" hidden><a id="learn-next" class="button primary" href="#lesson=pool-share">Next lesson →</a><button id="learn-fresh" class="learn-text-button" type="button">Test a fresh variation ↻</button></div></div>
         </section>
         <section id="learn-share" class="card learn-share" hidden aria-labelledby="learn-share-title">
-          <p class="eyebrow">KEEP YOUR EXPERIMENT</p><h3 id="learn-share-title">Save or share this scenario</h3>
-          <p class="body-copy">Share the model inputs or download a result card. Your answers and learning progress stay in this browser.</p>
+          <p class="eyebrow">KEEP THE WORKED EXAMPLE</p><h3 id="learn-share-title">Share the worked example</h3>
+          <p class="body-copy">This link and card use the worked example above. Your separate challenge setup, answers and progress stay in this browser.</p>
           <div class="learn-share-actions"><button id="learn-create-card" class="button secondary" type="button">Create result card</button><button id="learn-copy" class="button secondary" type="button">Copy scenario link</button></div>
           <label class="sr-only" for="learn-share-url">Reproducible experiment link</label><input id="learn-share-url" class="learn-share-url" type="text" readonly>
           <p id="learn-card-status" class="fine-print" role="status"></p>
-          <div id="learn-card-preview" hidden><img id="learn-card-image" alt="Final challenge result card with inputs, holding and LP values, assumed fees and model limitations."><a id="learn-card-download" class="button secondary" download="teren-learning-challenge-cp50-v1.png">Download PNG</a></div>
+          <div id="learn-card-preview" hidden><img id="learn-card-image" alt="Worked example result card with inputs, holding and LP values, assumed fees and model limitations."><a id="learn-card-download" class="button secondary" download="teren-learning-challenge-cp50-v1.png">Download PNG</a></div>
         </section>
       </article>
       <article id="learn-management" class="learn-lesson management-lesson" aria-labelledby="manage-title" hidden>
@@ -199,7 +200,7 @@
         </section>
         <section id="applied-assessment" class="card learn-assessment" aria-labelledby="applied-check-title" hidden>
           <p class="eyebrow">03 · CHECK YOUR UNDERSTANDING</p><h3 id="applied-check-title">Explain the record and apply the idea</h3>
-          <p class="fine-print">The explanation refers to the marked question checkpoint or interval. The application is a separate thought experiment. Exploring other checkpoints does not change either question.</p>
+          <p id="applied-assessment-scope" class="fine-print"></p>
           <form id="applied-assessment-form" novalidate>
 
             <fieldset class="learn-fieldset"><legend id="applied-reason-question"></legend><div id="applied-reasons" class="learn-choices"></div></fieldset>

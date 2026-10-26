@@ -13,7 +13,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     for (let i = 0; i < 3 && !(await text('learn-variation-label')).includes('1 of 3'); i++) await click('learn-variation');
   };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
-  for (const [id, reason, application] of [['loss-vs-profit', 'benchmark', 'matches'], ['fee-break-even', 'assumption', 'same'], ['final-challenge', 'total', 'different']]) {
+  for (const [id, reason, application] of [['loss-vs-profit', 'benchmark', 'loss-and-gap'], ['fee-break-even', 'assumption', 'same'], ['final-challenge', 'total', 'relative-gap']]) {
     await navigate(base + 'learn.html#lesson=' + id); await reset();
     assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false);
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
@@ -44,7 +44,9 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     await click('learn-run');
     assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked')===null"), true);
     assert.match(await text('comparison-scope'), /^Showing the question setup/);
-    await choose('learn-reason', reason); await choose('learn-application', application); await click('learn-check');
+    await choose('learn-reason', reason); await choose('learn-application', application);
+    if (id === 'final-challenge') await click('liquidity-task-example');
+    await click('learn-check');
     assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
     const link = await evaluate("document.getElementById('learn-explore').href");
     assert.match(link, /future=4000/);

@@ -58,7 +58,7 @@ export async function checkLoanResponseLesson({ evaluate, click, fill, text, nav
   await click('lend-reveal');
   assert.equal(await evaluate("document.getElementById('response-budget').value"), '1000');
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
-  await choose('reason', 'debt'); await choose('application', 'none'); await click('lend-check');
+  await choose('reason', 'tradeoff'); await choose('application', 'none'); await click('lend-check');
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   await key('End'); await reload();
   assert.equal(await evaluate("document.getElementById('response-budget').value"), '1000');
@@ -67,12 +67,25 @@ export async function checkLoanResponseLesson({ evaluate, click, fill, text, nav
   assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
   await choose('prediction', 'add'); await click('lend-reveal');
   assert.match(await text('lend-prediction-feedback'), /^The result differs from your prediction\./);
-  await choose('reason', 'debt'); await choose('application', 'none'); await click('lend-check');
+  await choose('reason', 'tradeoff'); await choose('application', 'none'); await click('lend-check');
   await reload();
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked').value"), 'add');
   assert.deepEqual(await working(), drafts);
   assert.equal(await evaluate("document.getElementById('lend-explore').href"), handoff);
+  await evaluate(`{
+    const progress = JSON.parse(localStorage.getItem('teren-lending-learning-v1'));
+    progress.drafts.respond.reason = 'debt';
+    delete progress.drafts.respond.questionRevisions;
+    localStorage.setItem('teren-lending-learning-v1', JSON.stringify(progress));
+  }`);
+  await reload();
+  assert.equal(await evaluate("document.getElementById('lend-feedback').hidden"), true, 'An old completed answer does not show success for a revised question.');
+  assert.equal(await evaluate("document.querySelector('input[name=lend-reason]:checked')"), null);
+  assert.equal(await evaluate("document.querySelector('input[name=lend-application]:checked').value"), 'none');
+  assert.ok(await evaluate("JSON.parse(localStorage.getItem('teren-lending-learning-v1')).completed.includes('respond')"));
+  await choose('reason', 'tradeoff'); await click('lend-check');
+  assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
   await navigate(base + 'lending.html#loop-lesson=stress');
   assert.equal(await evaluate("document.getElementById('lend-prediction-field').closest('.scene-prediction')===null"), false);
   await navigate(base + 'lending.html#loop-lesson=build');
