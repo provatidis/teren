@@ -7,7 +7,7 @@ export const LOAN_LEARNING_KEY = 'teren-lending-learning-v1';
 export const LIQUIDATION_DRAFT_KEY = 'teren-liquidation-draft-v1';
 export const LENDING_LESSON_IDS = ['supply', 'borrow', 'conditions', 'respond'];
 export const LENDING_QUESTION_REVISIONS = Object.freeze({
-  borrow: Object.freeze({ application: 1 }),
+  borrow: Object.freeze({ application: 2 }),
   respond: Object.freeze({ reason: 1, application: 1 }),
 });
 

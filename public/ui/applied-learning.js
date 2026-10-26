@@ -239,9 +239,9 @@ export function initAppliedLearning() {
       renderAppliedQuestionEvidence($('applied-collection-evidence'), $('applied-price-evidence'), question, application);
       renderQuestionEvidence($('applied-reason-evidence'), application.reasonEvidence);
       renderQuestionEvidence($('applied-application-evidence'), application.evidence);
-      $('applied-check-title').textContent = comparison ? 'Follow the tokens' : 'Explain the record and apply the idea';
+      $('applied-check-title').textContent = comparison ? 'Explain the recovery, then follow the next move' : 'Explain the record and apply the idea';
       $('applied-reason-context').textContent = application.reasonContext || (comparison
-        ? 'The owner thinks collecting these fees will close the gap.'
+        ? ''
         : application.reasonEvidence ? '' : id === 'fees-over-time' ? 'Consider the full ' + periodDuration(question.view.durationSeconds) + ' record.'
           : 'Between checkpoints ' + question.index + ' and ' + (question.index + 1) + ', both recorded prices are outside the range.');
       $('applied-reason-context').hidden = !$('applied-reason-context').textContent;

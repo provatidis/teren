@@ -1,3 +1,6 @@
+import { formatTokenQuantity } from '../lib/format.js';
+import { loanHash } from '../lib/lending-links.js';
+
 const supplySource = { title: 'Aave: supplying tokens', url: 'https://aave.com/help/supplying/supply-tokens' };
 const receiptSource = { title: 'Aave v3: supplied balances and receipt tokens', url: 'https://aave.com/docs/aave-v3/smart-contracts/tokenization' };
 const collateralSource = { title: 'Aave: collateral and borrowing limits', url: 'https://aave.com/help/supplying/toggle-collateral-status' };
@@ -60,15 +63,30 @@ export const LENDING_LESSONS = [
       collateral: 'Borrowing does not itself lower ETH’s price or subtract the borrowed amount from your supplied ETH.',
       fee: 'The borrowed amount is money you owe back. Interest and transaction costs are separate charges.',
     },
-    applicationLabel: 'After a price fall',
-    applicationContext: 'ETH falls. The existing debt is now above the limit for new borrowing, but the loan remains above its liquidation boundary. No interest or other changes occur.',
-    applicationQuestion: 'What does that mean for this loan?',
-    applications: [['borrowing-blocked', 'More borrowing is blocked; the existing debt is not yet eligible for liquidation.'], ['limit', 'The existing debt can be liquidated as soon as the borrowing limit is exceeded.'], ['reset', 'The debt is reduced automatically to fit the new borrowing limit.']],
-    applicationFeedback: 'The borrowing limit applies to new loans. The liquidation threshold governs existing debt. A price change does not reset the debt.',
+    applicationLabel: 'Borrowing the maximum',
+    applicationContext: 'Start again at the original ETH price with the same supplied ETH. This time, borrow the maximum this market allows.',
+    applicationEvidence: ({ application }) => ({
+      title: 'How much room does the maximum leave?',
+      rows: [
+        ['Loan amount', formatTokenQuantity(application.input.borrow, 2) + ' USDC'],
+        ['ETH supplied', formatTokenQuantity(application.input.collateral, 4) + ' ETH'],
+        ['Price fall to the boundary', formatTokenQuantity(application.priceFallPercent, 2) + '%'],
+      ],
+      priceMargin: {
+        startPrice: application.input.start,
+        boundaryPrice: application.result.end.boundaryPrice,
+        label: 'ETH price and liquidation boundary',
+      },
+      note: 'No interest accrues here. USDC stays at $1, and the collateral rules stay unchanged.',
+      explore: { href: loanHash(application.input), text: 'Try a lower loan amount in the lab ↗' },
+    }),
+    applicationQuestion: 'What does being allowed to borrow this amount tell you?',
+    applications: [['opening-limit', 'It meets the rule for opening the loan; a small ETH price fall can still bring it to liquidation.'], ['price-buffer', 'The borrowing limit leaves enough room for ETH’s usual price swings.'], ['full-value', 'Liquidation waits until the debt exceeds the full value of the ETH.']],
+    applicationFeedback: 'The maximum is the opening limit under today’s prices and rules. The separate liquidation threshold leaves only the price margin shown here.',
     applicationFeedbackByChoice: {
-      'borrowing-blocked': 'These are two separate limits. This loan cannot borrow more, but it still has enough backing under the liquidation rule.',
-      limit: 'The new-borrowing limit does not trigger liquidation of an existing loan. This loan has not crossed the separate liquidation boundary.',
-      reset: 'The debt remains owed. A lower collateral value reduces borrowing capacity; it does not repay or cancel any debt.',
+      'opening-limit': 'The maximum tells you what can be borrowed now. It does not promise protection from a price fall. Here the loan reaches its liquidation boundary after the small fall shown above.',
+      'price-buffer': 'The opening limit checks today’s values. It does not predict future price swings or promise enough room for them. The gap between the opening and liquidation rules is small here.',
+      'full-value': 'The liquidation rule counts only part of the collateral’s value. The loan reaches that boundary while the ETH is still worth more than the debt.',
     },
     hint: 'Separate the rule for opening a loan from the rule for liquidating an existing loan.',
     deeper: [

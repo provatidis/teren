@@ -1,5 +1,6 @@
 import { sceneNode as node } from './lesson-scene.js';
 import { usd, formatTokenQuantity } from './format.js';
+import { appendQuestionComparison } from './lesson-question-evidence.js';
 
 // The question brings its evidence with it; the explorer remains independent.
 export function renderAppliedQuestionEvidence(collection, price, question, application) {
@@ -8,18 +9,15 @@ export function renderAppliedQuestionEvidence(collection, price, question, appli
   if (!visible) return;
   const heading = (id, text) => { const element = node('h4', text); element.id = id; return element; };
   const earlier = question.contrast, end = question.view, exposure = application.exposure;
-  const pair = node('dl', undefined, 'applied-value-pair');
-  for (const [key, label, value, detail] of [
-    ['lp', 'LP, including earned fees', earlier.lpUSD, 'Principal ' + usd(earlier.principalUSD) + ' + fees ' + usd(earlier.feesUSD)],
-    ['hold', 'Holding the starting tokens', earlier.holdingUSD, 'The original ETH and USDC'],
-  ]) {
-    const row = node('div'), amount = node('dd', usd(value));
-    amount.id = 'applied-collection-' + key + '-value';
-    row.append(node('dt', label), ' ', amount, ' ', node('dd', detail, 'applied-evidence-detail'));
-    pair.append(row);
-  }
-  collection.append(heading('applied-collection-heading', 'Collecting the fees'),
-    node('p', 'Earlier in the record · the LP trails holding by ' + usd(-earlier.gapUSD) + '.', 'applied-evidence-moment'), pair);
+  collection.append(heading('applied-collection-heading', 'Why the comparison improved'),
+    node('p', 'Checkpoint '+(question.contrastIndex+1)+' → the end: ETH falls from '+usd(earlier.price)+' to '+usd(end.price)+'. Both are above the '+usd(end.range.upperPrice)+' upper bound.', 'applied-evidence-moment'));
+  appendQuestionComparison(collection,{
+    caption:'Two contributions to the recovery',format:'usd',rows:[
+      {label:'Smaller principal shortfall',value:question.recovery.principalImprovement,detail:usd(-earlier.principalGapUSD)+' behind holding → '+usd(-end.principalGapUSD)+' behind'},
+      {label:'Increase in period fee value',value:question.recovery.feeValueChange,detail:usd(earlier.feesUSD)+' → '+usd(end.feesUSD)},
+    ],
+  });
+  collection.append(node('p','Together, these move the LP from '+usd(-earlier.gapUSD)+' behind holding to '+usd(end.gapUSD)+' ahead, before costs. The liquidity and bounds stay unchanged.','applied-evidence-detail'));
 
   const figure = node('figure', undefined, 'applied-eth-comparison');
   figure.append(node('figcaption', 'ETH held by each strategy'));

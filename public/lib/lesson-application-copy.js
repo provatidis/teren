@@ -1,22 +1,35 @@
+import { scenarioHash } from './scenario-links.js';
 import { lessonApplication } from '../models/lesson-application.js';
-import { usd, fmt } from './format.js';
+import { usd, fmt, signedUSD, percent } from './format.js';
 
 export function lessonApplicationCopy(id, outcome) {
   const application = lessonApplication(id, outcome), s = outcome.setup;
   const base = {application, expected: application.expected};
-  if (id === 'swap-impact') return {...base,
-    label: outcome.variant === 1 ? 'A shallower pool' : 'A deeper pool',
-    context: 'Swap the same ' + s.amount + ' ETH in a pool with ' + (outcome.variant === 1 ? 'half as much' : 'twice as much') + ' of each token. Its starting price and 0.3% fee stay the same.',
-    question: 'How does the trade’s price impact compare?', choices: [['deeper-more','It is larger.'],['deeper-less','It is smaller.'],['deeper-same','It is the same.']],
-    hint: 'Compare the same trade with the amount of liquidity available to it.',
-    feedbackByChoice: {
-      [outcome.variant === 1 ? 'deeper-less' : 'deeper-more']: outcome.variant === 1
-        ? 'The trade is unchanged, but it now uses a larger fraction of the pool. Fewer reserves make the exchange rate move more.'
-        : 'The trade is unchanged, but it now uses a smaller fraction of the pool. More reserves make the exchange rate move less.',
-      'deeper-same': 'The starting price is the same because both reserves changed together. The available depth is different, so this trade moves the price by a different amount.',
-    },
-    feedback: outcome.variant === 1 ? 'The same trade uses a larger fraction of the shallower pool, so it moves the price more. Halving both reserves keeps the starting price unchanged.'
-      : 'The trade uses a smaller fraction of the deeper pool, so it moves the price less. Doubling both reserves keeps the starting price unchanged.'};
+  if (id === 'swap-impact') {
+    const highImpact = application.impact > application.tolerance;
+    return {...base,
+      label: 'Your wallet’s warning',
+      context: 'You are selling ' + fmt(s.amount, 0) + ' ETH. The wallet quotes this simulated pool, including the 0.3% swap fee. Nothing changes in the pool before the trade executes.',
+      evidence: {
+        title: 'The swap quote',
+        rows: [['You receive', fmt(application.quote, 2) + ' USDC'],
+          ['Price impact, excluding fee', fmt(application.impact, 2) + '%'], ['Slippage tolerance', '0.5%']],
+      },
+      question: 'What happens with this quote and a 0.5% slippage tolerance?',
+      choices: [['quote-received', 'You receive the quoted USDC amount.'],
+        ['spot-limit', 'You receive within 0.5% of the starting-price value.'],
+        ['quote-misread', highImpact ? 'The swap fails because price impact exceeds 0.5%.'
+          : 'You receive 0.5% less than the quote, even though nothing changed.']],
+      hint: 'The quote already reflects the effect of your trade. Slippage tolerance sets a limit relative to that quote.',
+      feedbackByChoice: {
+        'spot-limit': 'The limit is measured from the quote, not the starting price. This trade changes the pool’s reserves, and its quoted proceeds already include that price impact.',
+        'quote-misread': highImpact
+          ? 'Price impact and slippage tolerance are different. The impact is already in this quote; the 0.5% tolerance limits how far execution may fall below the quote.'
+          : 'Slippage tolerance is a maximum allowed shortfall, not an extra fee. With the pool unchanged, this swap still receives the quoted amount.',
+      },
+      feedback: 'The unchanged pool pays the quoted ' + fmt(application.quote, 2) + ' USDC. The 0.5% tolerance sets a minimum of about ' + fmt(application.minimumReceived, 2) + ' USDC if the pool changes before execution; it does not undo your own price impact.',
+    };
+  }
   if (id === 'pool-share' && outcome.variant === 1) return {...base,
     label: 'Another provider deposits',
     context: 'Another provider adds both tokens in the pool’s current proportions. No trades, fees or withdrawals occur.',
@@ -72,6 +85,33 @@ export function lessonApplicationCopy(id, outcome) {
       'extra-tokens': 'Price movement is not a payment to the LP. In this fee-free case, the return journey reverses the earlier exchange of tokens.',
     },
     feedback: 'At the original price, the same liquidity holds its original token amounts in this model. Swaps reverse the earlier change in mix. This does not promise that a real price will return.'};
+  if (id === 'loss-vs-profit' && application.kind === 'dashboard-benchmark') {
+    const r = application.next.result;
+    const comparison = Math.abs(r.difference) < 1e-8 ? 'The total matches holding.'
+      : 'The total is ' + usd(Math.abs(r.difference)) + (r.difference > 0 ? ' ahead of holding.' : ' behind holding.');
+    return {...base,
+      label: 'Reading your dashboard',
+      context: 'ETH moved from ' + usd(s.initialPrice) + ' to ' + usd(s.futurePrice) + '. This hypothetical dashboard reports return against your original deposit. Fees are supplied for this example, not estimated from the price move.',
+      evidence: {
+        title: 'Your position page',
+        rows: [['Original deposit', usd(s.investment)], ['Position tokens, excluding fees', usd(r.lpBeforeFees)],
+          ['Fees, held separately', usd(application.fees)], ['Total value, including fees', usd(r.lpValue)],
+          ['Return versus deposit', signedUSD(r.lpValue - s.investment) + ' (' + percent(r.lpReturn) + ')']],
+        note: 'Fees are held as USDC, worth $1 each. Costs are excluded.',
+        explore: {href: 'liquidity.html' + scenarioHash(application.next.setup), text: 'Try this dashboard’s price and fees in Experiment ↗'},
+      },
+      question: 'To see whether providing liquidity beat holding, what should you compare the total ' + usd(r.lpValue) + ' with?',
+      choices: [['holding-basket', usd(r.holdValue) + ': keeping the starting ETH and USDC.'],
+        ['original-deposit', usd(s.investment) + ': the original dollar deposit.'],
+        ['all-eth', usd(application.allEthValue) + ': putting the entire deposit into ETH.']],
+      hint: 'Compare two choices made with the same starting tokens: supplying them to the pool or keeping them.',
+      feedbackByChoice: {
+        'original-deposit': 'That is the dollar return already shown by this dashboard. It combines ETH’s price move with the effect of supplying liquidity. Keeping the same starting tokens is the comparison that separates those choices.',
+        'all-eth': 'An all-ETH investment starts with a different token mix. To compare supplying liquidity with keeping your deposit, use the same starting ETH and USDC.',
+      },
+      feedback: comparison + ' Keeping the starting ' + fmt(r.held.eth, 4) + ' ETH and ' + fmt(r.held.usdc, 2) + ' USDC would now be worth ' + usd(r.holdValue) + '. The dashboard’s dollar return alone does not show that comparison.',
+    };
+  }
   if (id === 'loss-vs-profit') return {...base,
     label: 'Withdrawing the position',
     context: 'ETH is now ' + usd(application.futurePrice) + '. Both strategies are ' + (application.next.result.lpReturn > 0 ? 'above' : 'below') + ' the starting budget, but the LP trails holding. The owner withdraws all the LP’s tokens. Price stays fixed, with no fees or costs.',

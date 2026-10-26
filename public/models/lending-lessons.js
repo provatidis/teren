@@ -8,7 +8,7 @@ const cases = {
 };
 const answers = {
   supply: ['earn', 'separate', 'enable'],
-  borrow: ['same', 'liability', 'borrowing-blocked'],
+  borrow: ['same', 'liability', 'opening-limit'],
   conditions: ['lower', 'interest', 'backing-faster'],
   respond: ['repay', 'tradeoff', 'remaining-backing'],
 };
@@ -16,7 +16,20 @@ const answers = {
 export function lendingCase(id) {
   if (!Object.hasOwn(cases, id)) throw new RangeError('Choose a lending lesson.');
   const input = { ...LOAN_DEFAULTS, ...cases[id] };
-  return { input, result: calculateLoan(input), prediction: answers[id][0] };
+  const example = { input, result: calculateLoan(input), prediction: answers[id][0] };
+  if (id === 'borrow') example.application = maximumBorrowingCase(input);
+  return example;
+}
+
+// Keep the application separate from Observe's unchanged $5,000 loan.
+export function maximumBorrowingCase(input) {
+  const starting = calculateLoan(input);
+  const applicationInput = {
+    ...input, borrow: starting.startingLimit, future: input.start, days: 0,
+  };
+  const result = calculateLoan(applicationInput);
+  const priceFallPercent = (1 - result.end.boundaryPrice / applicationInput.future) * 100;
+  return { input: applicationInput, result, priceFallPercent };
 }
 
 export function checkLendingUnderstanding(id, reason, application) {

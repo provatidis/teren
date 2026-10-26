@@ -7,7 +7,7 @@ import { usd } from '../lib/format.js';
 import { MANAGEMENT_CHAPTER, MANAGEMENT_LESSONS, managementPresentation, managementApplication } from '../learning/choosing-ranges.js';
 import { MANAGEMENT_IDS, MANAGEMENT_VARIANTS, managementCase, checkManagementUnderstanding } from '../models/range-decisions.js';
 import { managementLessonFromHash } from '../lib/management-links.js';
-import { readManagementProgress, saveManagementProgress, MANAGEMENT_QUESTION_REVISIONS } from '../data/management-progress.js';
+import { readManagementProgress, saveManagementProgress, managementQuestionRevisions } from '../data/management-progress.js';
 import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningSources, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback, renderUnderstandingFeedback, clearUnderstandingFeedback } from '../lib/learning-elements.js';
 import { rangeHash } from '../lib/range-links.js';
@@ -18,7 +18,7 @@ export function initManagementLearning() {
   const predictionFeedbackElement = $('manage-prediction-feedback');
   const predictionField = $('manage-prediction-field');
   const visualLesson = () => lesson?.id === 'range-width';
-  const fresh=(variant=0)=>({variant,prediction:'',reason:'',application:'',revealed:false,choiceSeed:newChoiceSeed(),questionRevisions:{...MANAGEMENT_QUESTION_REVISIONS[lesson.id]}});
+  const fresh=(variant=0)=>({variant,prediction:'',reason:'',application:'',revealed:false,choiceSeed:newChoiceSeed(),questionRevisions:managementQuestionRevisions(lesson.id,variant)});
   function focus(id) {$(id).focus({preventScroll:true});$(id).scrollIntoView({block:'start',behavior:'instant'});}
   function navigation() {
     $('manage-progress-count').textContent=progress.completed.length+' of 3 checked';

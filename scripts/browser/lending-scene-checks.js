@@ -14,8 +14,19 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
   await navigate(base + 'lending.html#lesson=supply');
   const working = await isolated();
   const completed = JSON.parse(await saved()).completed;
+  await evaluate(`(() => {
+    const key = 'teren-lending-learning-v1', progress = JSON.parse(localStorage.getItem(key));
+    progress.drafts.borrow = { prediction: 'same', reason: 'liability', application: 'borrowing-blocked', revealed: true, seed: 17, questionRevisions: { application: 1 } };
+    localStorage.setItem(key, JSON.stringify(progress));
+  })()`);
+  await navigate(base + 'lending.html#lesson=borrow');
+  assert.equal(await evaluate("document.querySelector('input[name=lend-application]:checked')"), null);
+  assert.equal(await evaluate("document.querySelector('input[name=lend-reason]:checked').value"), 'liability');
+  assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked').value"), 'same');
+  assert.deepEqual(JSON.parse(await saved()).completed, completed);
+  assert.equal(JSON.parse(await saved()).drafts.borrow.questionRevisions.application, 2);
   for (const [id, questionStage, reason, application] of [
-    ['supply', '2', 'separate', 'enable'], ['borrow', '1', 'liability', 'borrowing-blocked'],
+    ['supply', '2', 'separate', 'enable'], ['borrow', '1', 'liability', 'opening-limit'],
   ]) {
     await navigate(base + 'lending.html#lesson=' + id);
     await click('lend-retry');
@@ -61,6 +72,21 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
     await click('lend-reveal');
     assert.equal(await stage(), questionStage);
     if (id === 'supply') assert.equal(await text('loan-scene-collateral'), 'Collateral off');
+    if (id === 'borrow') {
+      assert.equal(await text('lend-application-label'), 'Borrowing the maximum');
+      assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#lend-application-evidence dd')).map(value=>value.textContent)"), ['7,500 USDC', '5 ETH', '6.25%']);
+      assert.match(await text('lend-application-evidence'), /1,875/);
+      assert.match(await text('lend-application-evidence'), /2,000/);
+      assert.equal(await evaluate("document.querySelector('#lend-application-evidence .learn-price-track').style.getPropertyValue('--price-boundary')"), '93.75%');
+      assert.match(await evaluate("document.querySelector('#lend-application-evidence .learn-price-margin').textContent"), /Liquidation boundary: \$1,875\.00 Starting price: \$2,000\.00/);
+      assert.equal(await evaluate("document.querySelector('#lend-application-evidence .learn-price-track').getAttribute('aria-hidden')"), 'true', 'The decorative bar has equivalent readable price labels.');
+      assert.equal(await evaluate("document.querySelector('#lend-application-evidence .learn-explore').textContent"), 'Try a lower loan amount in the lab ↗');
+      assert.deepEqual(await evaluate("(() => { const link = document.querySelector('#lend-application-evidence .learn-explore'); const p = new URLSearchParams(new URL(link.href).hash.slice(1)); return [link.target, ...['borrow','start','future','days','maxLTV','threshold'].map(key=>Number(p.get(key)))]; })()"), ['_blank', 7500, 2000, 2000, 0, 75, 80]);
+      assert.match(await text('lend-explanation'), /borrowing limit.*liquidation threshold/);
+      await choose('application', 'price-buffer'); await click('lend-check');
+      assert.equal(await evaluate("document.getElementById('lend-application-choices-feedback').dataset.state"), 'different');
+      assert.match(await text('lend-application-choices-feedback'), /does not predict future price swings/);
+    }
     assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
     await choose('reason', reason); await choose('application', application); await click('lend-check');
     assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
@@ -69,9 +95,12 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
     assert.match(handoff, /loan=collateral-loan-v1/);
     assert.match(handoff, id === 'supply' ? /collateralEnabled=false/ : /borrow=5000/);
     assert.match(handoff, id === 'supply' ? /days=365/ : /days=0/);
+    assert.equal(await text('lend-explore'), 'Explore this setup in Experiment ↗');
+    const evidence = await text('lend-application-evidence');
     await click('loan-scene-next');
     assert.equal(await saved(), checked);
     assert.equal(await evaluate("document.getElementById('lend-explore').href"), handoff);
+    assert.equal(await text('lend-application-evidence'), evidence, 'Exploring Observe never changes the separate maximum-borrowing application.');
     await reload();
     assert.equal(await stage(), questionStage);
     assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
@@ -97,6 +126,12 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
     await call('Emulation.setDeviceMetricsOverride', { width, height: 740, deviceScaleFactor: 1, mobile: true });
     for (const id of ['supply', 'borrow']) {
       await navigate(base + 'lending.html#lesson=' + id);
+      if (id === 'borrow') {
+        await click('lend-reveal');
+        assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+        assert.equal(await text('lend-application-evidence-value-2'), '6.25%');
+        assert.ok(await evaluate("document.getElementById('lend-application-evidence').getBoundingClientRect().width<=innerWidth"));
+      }
       await evaluate("document.querySelector('.scene-jump > summary').click()");
       const count = await evaluate("document.querySelectorAll('.scene-jump [data-stage]').length");
       for (let i = 0; i < count; i++) {

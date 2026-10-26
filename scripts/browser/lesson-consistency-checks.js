@@ -49,8 +49,8 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   assert.match(await text('applied-metrics'),/−\$0.01/);
   assert.match(await text('applied-explanation'),/earlier checkpoint[\s\S]*principal plus earned fees still trails holding[\s\S]*final checkpoint/);
   assert.match(await text('applied-prediction-feedback'),/checkpoint 7.*\$0.23.*trails holding by \$0.51.*\$0.17 ahead, before costs/);
-  await choose('applied-application','smaller-lead'); await choose('applied-reason','narrower-gap'); await click('applied-check');
-  assert.match(await text('applied-reasons-feedback'),/earned fees already count[\s\S]*wallet[\s\S]*gap stay the same/i);
+  await choose('applied-application','smaller-lead'); await choose('applied-reason','reinvested'); await click('applied-check');
+  assert.match(await text('applied-reasons-feedback'),/fees remain separate from principal[\s\S]*not reinvested[\s\S]*holding basket/i);
   assert.equal(await text('applied-feedback-title'),'Review your answers.');
   await navigate(base + 'liquidity.html');
   console.log('PASS: lesson direction, unchanged-price reasoning, misconception feedback, optional calculation isolation, historical question scope and versioned teaching compatibility');

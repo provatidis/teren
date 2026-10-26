@@ -14,7 +14,7 @@ export function lessonSetup(id, variant = 0) {
   if (!LESSON_IDS.includes(id) || !Number.isInteger(variant) || variant < 0 || variant >= VARIANTS) throw new Error('Choose a supported lesson and variation.');
   const base = bases[variant];
   return {
-    ...base, futurePrice: id === 'range-boundaries' ? base.initialPrice * 1.2 : base.futurePrice,
+    ...base, futurePrice: id === 'range-boundaries' ? base.initialPrice * [1.2, 0.85, 1.05][variant] : base.futurePrice,
     fees: ['fee-break-even', 'final-challenge'].includes(id) ? base.fees : 0,
     width: 0.1,
   };

@@ -44,7 +44,7 @@ test('question revisions preserve completion and clear only materially changed a
       const inputs=lessonSetup(id,variant), old={version:1,completed:[id],lastLesson:id,drafts:{[id]:{variant,inputs,prediction:'less',reason:'old-reason',application:'old-answer',answer:'123',ran:true}}};
       const clean=parseProgress(old), draft=clean.drafts[id], revision=essentialQuestionRevisions(id,variant);
       assert.deepEqual(clean.completed,[id]); assert.deepEqual(draft.inputs,inputs);
-      assert.equal(draft.prediction,'less'); assert.equal(draft.answer,'123'); assert.equal(draft.ran,true);
+      assert.equal(draft.prediction,revision.prediction===1?'less':''); assert.equal(draft.answer,'123'); assert.equal(draft.ran,true);
       assert.equal(draft.reason,revision.reason===1?'old-reason':'');
       assert.equal(draft.application,revision.application===1?'old-answer':'');
       assert.deepEqual(parseProgress(clean),clean);

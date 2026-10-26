@@ -274,6 +274,9 @@ export function initLearning() {
     $('learn-explore').href = home.href;
     $('learn-explore').textContent = r ? 'Explore this setup in Experiment ↗' : 'Open the swap sandbox ↗';
     $('learn-explore-note').textContent = r ? 'Opens Experiment in a new tab with this setup. Your existing experiments and virtual balances stay separate.' : 'Opens your independent swap sandbox in a new tab; its existing virtual balances are preserved.';
+    if (lesson.id === 'swap-impact') $('learn-explore-note').textContent = 'In your independent sandbox, compare two trade sizes before executing either. Watch how price impact changes.';
+    else if (lesson.id === 'loss-vs-profit') $('learn-explore-note').textContent = 'Try adding fees in Experiment. Find a positive dollar return that still trails holding the starting tokens.';
+    else if (lesson.id === 'range-boundaries') $('learn-explore-note').textContent = 'Move ETH below, inside and above the bounds. Watch which token remains and when swaps can use the position.';
     if (r && lesson.id === 'final-challenge') $('learn-share-url').value = home.href;
     $('learn-answer').value = draft.answer;
     $('learn-answer').setAttribute('aria-invalid', 'false');
@@ -296,7 +299,7 @@ export function initLearning() {
     const index = LESSON_IDS.indexOf(id);
     draft = progress.drafts[id] || { variant: 0, inputs: lessonSetup(id), prediction: '', answer: '', reason: '', application: '', choiceSeed: newChoiceSeed(), ran: false };
     const revisions = essentialQuestionRevisions(id, draft.variant);
-    draft.reasonRevision = revisions.reason; draft.applicationRevision = revisions.application;
+    draft.predictionRevision = revisions.prediction; draft.reasonRevision = revisions.reason; draft.applicationRevision = revisions.application;
     if (!validChoiceSeed(draft.choiceSeed)) draft.choiceSeed = newChoiceSeed();
     draft.application ||= '';
     if (!lesson.predictions.some(([value]) => value === draft.prediction)) draft.prediction = '';

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { APPLIED_IDS, appliedLessonFromHash, appliedQuestion, checkAppliedAnswer } from '../public/lib/applied-lessons.js';
+import { APPLIED_IDS, appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../public/lib/applied-lessons.js';
 import { appliedApplication, appliedCostExample, appliedPriceExposure, checkAppliedUnderstanding } from '../public/lib/applied-applications.js';
 import { APPLIED_LESSONS } from '../public/learning/applied-liquidity.js';
 import { validatePositionPeriod } from '../public/data/position-period.js';
@@ -28,8 +28,8 @@ test('applied questions use verified period earnings, interval counters and the 
   assert.equal(final.view.holding.amount0, 4982691068n); assert.equal(final.view.holding.amount1, 14920139441099507n);
   assert.ok(final.view.principalGapUSD < 0 && final.view.gapUSD > 0);
   assert.ok(Math.abs(final.answer - .17457169368572067) < 1e-12);
-  assert.equal(checkAppliedAnswer(final, '0.17', 'same-gap').passed, true);
-  assert.equal(checkAppliedAnswer(final, '0.18', 'same-gap').numeric, false);
+  assert.equal(checkAppliedAnswer(final, '0.17', 'price-returned').passed, true);
+  assert.equal(checkAppliedAnswer(final, '0.18', 'price-returned').numeric, false);
   assert.ok(periodPointView(returning, 8).gapUSD < 0, 'Earning fees does not guarantee beating holding at every checkpoint.');
 });
 test('exploring a different checkpoint cannot alter the fixed question or accept unsupported evidence', () => {
@@ -88,10 +88,10 @@ test('bundled record loading shares requests, validates evidence and retries a f
   await assert.rejects(bad('in-range'), /summary differs/);
 });
 
-test('collecting the earlier period fees conserves the owner’s tokens and comparison value', () => {
+test('collecting fees still conserves tokens even though the finale now explains price recovery', () => {
   const original = JSON.stringify(returning), question = appliedQuestion(returning, 'period-vs-holding');
   const view = question.contrast;
-  assert.equal(question.reason, 'same-gap');
+  assert.equal(question.reason, 'price-returned');
   assert.equal(question.contrastIndex, 6);
   assert.ok(view.feesUSD > 0 && view.gapUSD < 0);
   const ownerBefore = {usdc: view.principal.amount0 + view.earned0, eth: view.principal.amount1 + view.earned1};
@@ -112,7 +112,7 @@ test('the price-rise application follows the real ETH exposure, including uncoll
   assert.equal(exposure.principalETH, 0);
   assert.ok(exposure.feeETH > 0 && exposure.feeETH < exposure.holdingETH);
   assert.equal(exposure.lpETH, exposure.feeETH);
-  assert.equal(checkAppliedUnderstanding(question, application, 'same-gap', 'smaller-lead').passed, true);
+  assert.equal(checkAppliedUnderstanding(question, application, 'price-returned', 'smaller-lead').passed, true);
   for (const wrong of ['narrower-gap', 'wider-gap', 'shortfall']) {
     assert.equal(checkAppliedUnderstanding(question, application, wrong, 'smaller-lead').passed, false);
   }
@@ -165,8 +165,8 @@ test('applied question revisions preserve evidence navigation, optional calculat
   for(const id of APPLIED_IDS)for(const key of ['prediction','answer','revealed','checkpoint'])assert.equal(migrated.drafts[id][key],old.drafts[id][key]);
   assert.equal(migrated.drafts['period-vs-holding'].choiceSeed,7);
   migrated.drafts['between-samples'].reason='returned';
-  migrated.drafts['between-samples'].application='smaller-share';
-  migrated.drafts['period-vs-holding'].reason='same-gap';
+  migrated.drafts['between-samples'].application='edge-placement';
+  migrated.drafts['period-vs-holding'].reason='price-returned';
   migrated.drafts['period-vs-holding'].application='smaller-lead';
   assert.deepEqual(parseAppliedProgress(migrated),migrated);
 });
@@ -180,11 +180,11 @@ test('the 1.46 question revision clears only the replaced comparison answers', (
   const migrated = parseAppliedProgress(old), draft = migrated.drafts['period-vs-holding'];
   assert.deepEqual(migrated.completed, old.completed);
   assert.equal(draft.reason, ''); assert.equal(draft.application, '');
-  assert.deepEqual(draft.questionRevisions, {prediction: 1, reason: 3, application: 3});
+  assert.deepEqual(draft.questionRevisions, {prediction: 1, reason: 4, application: 3});
   for (const key of ['prediction', 'answer', 'revealed', 'checkpoint', 'choiceSeed']) {
     assert.equal(draft[key], old.drafts['period-vs-holding'][key]);
   }
-  draft.reason = 'same-gap'; draft.application = 'smaller-lead';
+  draft.reason = 'price-returned'; draft.application = 'smaller-lead';
   assert.deepEqual(parseAppliedProgress(migrated), migrated);
 });
 
@@ -213,16 +213,17 @@ test('outside samples plus recorded active time require a return inside unchange
   assert.equal(question.interval.secondsInRange, 2724);
   assert.equal(application.reasonEvidence.rows[2][1], '45m 24s');
   assert.match(application.reasonEvidence.rows[3][1], /Unchanged/);
-  assert.equal(application.expected, 'smaller-share');
-  assert.equal(checkAppliedUnderstanding(question, application, 'returned', 'smaller-share').passed, true);
-  assert.equal(checkAppliedUnderstanding(question, application, 'counters', 'smaller-share').passed, false);
+  assert.equal(application.expected, 'edge-placement');
+  assert.equal(checkAppliedUnderstanding(question, application, 'returned', 'edge-placement').passed, true);
+  assert.equal(checkAppliedUnderstanding(question, application, 'counters', 'edge-placement').passed, false);
   assert.equal(checkAppliedUnderstanding(question, application, 'returned', 'fee-records').passed, false);
-  // Identical fee allocations at each traded price, with unchanged own liquidity.
-  // More competing active liquidity lowers every component, even if shares vary by price.
-  const samples = [{fees:10,own:5,others:10,added:2},{fees:20,own:5,others:2,added:8}];
-  const first = samples.reduce((sum, p) => sum + p.fees * p.own / (p.own + p.others), 0);
-  const second = samples.reduce((sum, p) => sum + p.fees * p.own / (p.own + p.others + p.added), 0);
-  assert.ok(second < first);
+  assert.ok(question.placement.upwardRoomPercent>0&&question.placement.upwardRoomPercent<.5);
+  assert.equal(question.placement.secondsInRange,50256);
+  assert.equal(question.placement.durationSeconds,120468);
+  assert.match(application.evidence.rows[3][1],/0.44%/);
+  assert.match(application.evidence.note,/41.7%/);
+  assert.match(application.evidence.note,/do not reveal every move/);
+  assert.equal(question.placement.range.lowerPrice,periodPointView(returning,0).range.lowerPrice);
   for (let i=0;i<returning.points.length;i++) periodPointView(returning,i);
   assert.deepEqual(appliedApplication('between-samples', appliedQuestion(returning,'between-samples')), application);
   assert.equal(JSON.stringify(returning), before);
@@ -235,8 +236,46 @@ test('revised interval questions clear obsolete selections but preserve completi
   const migrated = parseAppliedProgress(old), draft = migrated.drafts['between-samples'];
   assert.deepEqual(migrated.completed, old.completed);
   assert.equal(draft.reason, ''); assert.equal(draft.application, '');
-  assert.deepEqual(draft.questionRevisions, {prediction:1,reason:2,application:3});
+  assert.deepEqual(draft.questionRevisions, {prediction:1,reason:2,application:4});
   for (const key of ['prediction','answer','revealed','checkpoint','choiceSeed']) assert.equal(draft[key], old.drafts['between-samples'][key]);
-  draft.reason='returned'; draft.application='smaller-share';
+  draft.reason='returned'; draft.application='edge-placement';
   assert.deepEqual(parseAppliedProgress(migrated), migrated);
+});
+
+
+test('the recorded recovery separates unchanged principal exposure from the increase in fee value', () => {
+  const original=JSON.stringify(returning),q=appliedQuestion(returning,'period-vs-holding');
+  assert.equal(q.reason,'price-returned');
+  assert.equal(q.contrast.state,'above'); assert.equal(q.view.state,'above');
+  assert.equal(q.contrast.principal.amount0,q.view.principal.amount0);
+  assert.equal(q.contrast.principal.amount1,0n); assert.equal(q.view.principal.amount1,0n);
+  assert.ok(returning.points.some((_,index)=>index>q.contrastIndex&&index<q.index&&periodPointView(returning,index).state==='inside'),
+    'Matching all-USDC endpoints do not imply that the position stayed outside between them.');
+  const reentryChoice=APPLIED_LESSONS.find(lesson=>lesson.id==='period-vs-holding').reasons.find(([key])=>key==='reentered')[1];
+  assert.match(reentryChoice,/At the final checkpoint/);
+  assert.match(appliedReasonFeedback('period-vs-holding','reentered'),/did return inside between these checkpoints/);
+  assert.ok(q.contrast.price>q.view.price&&q.view.price>q.view.range.upperPrice);
+  assert.ok(Math.abs(q.recovery.principalImprovement-.46863)<.00001);
+  assert.ok(Math.abs(q.recovery.feeValueChange-.21792656548525485)<1e-12);
+  assert.ok(Math.abs(q.recovery.principalImprovement+q.recovery.feeValueChange-q.recovery.gapChange)<1e-9);
+  const holdingETH=Number(q.view.holding.amount1)/1e18;
+  assert.ok(Math.abs(q.recovery.principalImprovement-holdingETH*(q.contrast.price-q.view.price))<1e-9);
+  assert.equal(JSON.stringify(returning),original);
+});
+
+test('the new recorded questions preserve the compatible interval reason and final application', () => {
+  const old={version:1,completed:APPLIED_IDS,drafts:{
+    'between-samples':{prediction:'possible',reason:'returned',application:'smaller-share',answer:'2724',revealed:true,checkpoint:3,choiceSeed:6,questionRevisions:{prediction:1,reason:2,application:3}},
+    'period-vs-holding':{prediction:'can-trail',reason:'same-gap',application:'smaller-lead',answer:'0.17',revealed:true,checkpoint:6,choiceSeed:7,questionRevisions:{prediction:1,reason:3,application:3}},
+  }};
+  const migrated=parseAppliedProgress(old);
+  assert.deepEqual(migrated.completed,old.completed);
+  assert.equal(migrated.drafts['between-samples'].reason,'returned');
+  assert.equal(migrated.drafts['between-samples'].application,'');
+  assert.equal(migrated.drafts['period-vs-holding'].reason,'');
+  assert.equal(migrated.drafts['period-vs-holding'].application,'smaller-lead');
+  for(const id of Object.keys(old.drafts))for(const key of ['prediction','answer','revealed','checkpoint','choiceSeed'])assert.equal(migrated.drafts[id][key],old.drafts[id][key]);
+  migrated.drafts['between-samples'].application='edge-placement';
+  migrated.drafts['period-vs-holding'].reason='price-returned';
+  assert.deepEqual(parseAppliedProgress(migrated),migrated);
 });

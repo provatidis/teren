@@ -13,7 +13,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     for (let i = 0; i < 3 && !(await text('learn-variation-label')).includes('1 of 3'); i++) await click('learn-variation');
   };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
-  for (const [id, reason, application] of [['loss-vs-profit', 'benchmark', 'gap-unchanged'], ['fee-break-even', 'assumption', 'gap-reopens'], ['final-challenge', 'total', 'relative-gap']]) {
+  for (const [id, reason, application] of [['loss-vs-profit', 'benchmark', 'holding-basket'], ['fee-break-even', 'assumption', 'gap-reopens'], ['final-challenge', 'total', 'relative-gap']]) {
     await navigate(base + 'learn.html#lesson=' + id); await reset();
     assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false);
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
@@ -54,6 +54,14 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
       await click('learn-check');
       assert.match(await text('learn-applications-feedback'), /Matching holding at one price does not lock in that result/);
       assert.equal(await text('learn-feedback-title'), 'Review your answers.');
+    } else if (id === 'loss-vs-profit') {
+      for (const phrase of ['Original deposit', '$5,000.00', 'Position tokens, excluding fees', '$7,071.07', 'Fees, held separately', '$180.00', '$7,251.07']) assert.ok(questionEvidence.includes(phrase));
+      assert.match(await evaluate("document.querySelector('#learn-application-evidence a').href"), /future=4000.*fees=180/);
+      assert.equal(await evaluate("document.querySelector('#learn-application-evidence a').target"), '_blank');
+      await fill('comparison-price', '1000');
+      assert.equal(await text('learn-application-evidence'), questionEvidence, 'Exploring a price must not rewrite the dashboard question.');
+      await choose('learn-reason', reason); await choose('learn-application', 'original-deposit'); await click('learn-check');
+      assert.match(await text('learn-applications-feedback'), /dollar return already shown/);
     } else assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), true);
     await choose('learn-reason', reason); await choose('learn-application', application);
     if (id === 'final-challenge') await click('liquidity-task-example');
@@ -76,6 +84,17 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
       assert.equal(await text('comparison-hold-value'), usd(question.result.holdValue));
       assert.equal(await text('comparison-lp-value'), usd(question.result.lpValue));
       assert.equal(await text('comparison-start-value'), usd(question.setup.investment));
+      if (id === 'loss-vs-profit') {
+        if (variant === 1) {
+          assert.equal(await text('learn-application-label'), 'Withdrawing the position');
+          assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), true);
+          await choose('learn-reason', 'benchmark'); await choose('learn-application', 'gap-unchanged'); await click('learn-check');
+          assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+        } else if (variant === 2) {
+          await choose('learn-reason', 'benchmark'); await choose('learn-application', 'holding-basket'); await click('learn-check');
+          assert.match(await text('learn-applications-feedback'), /48.47 ahead of holding/);
+        }
+      }
     }
   }
   console.log('PASS: three comparison lessons, all variants, optional predictions, fixed benchmarks, exact fee target, mode preservation, isolated exploration and restored conceptual completion');
@@ -123,7 +142,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
       } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
       assert.equal(await evaluate(`document.getElementById('${slider}').value`), await evaluate(`document.getElementById('${slider}').max`));
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      if (id === 'fee-break-even') {
+      if (id === 'fee-break-even' || id === 'loss-vs-profit') {
         await click('learn-run');
         assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), false);
         assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);

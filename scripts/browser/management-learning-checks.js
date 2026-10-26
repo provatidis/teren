@@ -45,7 +45,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
       await click('manage-variation');assert.equal(await text('manage-variation-label'),'Situation '+(variant+1)+' of 3');
       assert.equal(await evaluate("document.getElementById('manage-reveal').disabled"),false);assert.equal(await evaluate("document.getElementById('manage-observe').hidden"),true);
       await choose('manage-prediction',id==='range-width'?(variant===2?'both':'wide'):id==='fee-tiers'?'unknown':variant===1?'same':'rises');await click('manage-reveal');
-      const changedAnswer=id==='range-width'?(variant===1?'wide-mix':'own-basket'):id==='fee-tiers'?(variant===1?'more-income':'larger-share'):variant===1?'removed':'automatic';
+      const changedAnswer=id==='range-width'?(variant===1?'wide-mix':'own-basket'):id==='fee-tiers'?(variant===1?'more-income':'larger-share'):variant===1?'removed':'sold-earlier';
       await choose('manage-reason',reason);await choose('manage-application',changedAnswer);await click('manage-check');assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
       if(id==='range-width'&&variant===1){
         assert.match(await text('manage-application-context'),/\$1,700.00.*\$1,800.00/);
@@ -55,6 +55,20 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
       if(id==='range-width'&&variant===2)assert.match(await text('manage-metrics'),/Narrow range Active.*Wider range Active/s);
       if(id==='fee-tiers')assert.match(await text('manage-metrics'),/Position A fees \$12.00.*Position B fees \$4.00/s);
       if(id==='range-management'&&variant===1)assert.match(await text('manage-metrics'),/USDC/);
+      if(id==='range-management'&&variant===2){
+        assert.match(await text('manage-application-evidence'),/Original range left in place.*\$5,000.00.*Moved range.*\$3,667.49/s);
+        assert.match(await text('manage-applications-feedback'),/sells the remaining ETH.*\$1,540.00/s);
+        const handoff=await evaluate("document.querySelector('#manage-application-evidence a').href");
+        const linked=new URLSearchParams(new URL(handoff).hash.slice(1));
+        assert.equal(linked.get('start'),'1400');assert.equal(linked.get('future'),'1400');
+        assert.equal(linked.get('lower'),'1260');assert.equal(linked.get('upper'),'1540');
+        assert.equal(await evaluate("document.querySelectorAll('#manage-application-evidence .learn-evidence-track').length"),2);
+        await choose('manage-application','kept-eth');await click('manage-check');
+        assert.equal(await evaluate("document.getElementById('manage-applications-feedback').dataset.state"),'different');
+        assert.match(await text('manage-applications-feedback'),/does the opposite/);
+        await choose('manage-application','sold-earlier');await click('manage-check');
+      }
+
     }
   }
   assert.equal(await text('manage-progress-count'),'3 of 3 checked');assert.equal(await evaluate("document.getElementById('manage-next').hash"),'#applied=fees-over-time');
@@ -102,6 +116,13 @@ assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),
     assert.equal(await evaluate("document.getElementById('learn-course').open"),false);assert.equal(await text('manage-title'),'A higher fee rate is not a higher return');
     assert.equal(await evaluate("document.getElementById('manage-title').getBoundingClientRect().top>=document.querySelector('.topbar').getBoundingClientRect().bottom"),true);
     await click('learn-resume');assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
+    await navigate(base+'learn.html#manage=range-management');
+    for(let reset=0;reset<3&&(await text('manage-variation-label'))!=='Situation 3 of 3';reset++)await click('manage-variation');
+    await click('manage-reveal');
+    assert.equal(await evaluate("(()=>{const n=document.getElementById('manage-application-evidence'),r=n.getBoundingClientRect();return n.checkVisibility()&&r.left>=0&&r.right<=innerWidth})()"),true);
+    assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
+    assert.match(await text('manage-application-evidence'),/\$3,667.49/);
+
     await click('manage-topics');
     await evaluate("document.querySelector('[data-applied-id=fees-over-time]').click()");
     assert.equal(await evaluate("document.getElementById('learn-management').hidden&&!document.getElementById('learn-applied').hidden"),true);

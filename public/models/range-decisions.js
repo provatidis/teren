@@ -29,10 +29,20 @@ export function managementCase(id, variant = 0) {
   const prices = [[1600,1400],[2400,2800],[1400,1600]][variant];
   const first=position(.1,prices[0]), second=position(.1,prices[1]), returned=position(.1,initialPrice);
   const difference=second.lpBeforeFees-first.lpBeforeFees;
+  // A supplied path for comparing two actions, not a historical replay or an
+  // optimization rule. Both alternatives start with the same existing position.
+  const cost = 15;
+  const rebalance = variant === 2 ? {
+    before: first,
+    unchanged: returned,
+    cost,
+    moved: calculateRange({investment:first.lpBeforeFees-cost,initialPrice:prices[0],futurePrice:initialPrice,
+      lowerPrice:1260,upperPrice:1540,fees:0,fullRangeFees:0}),
+  } : null;
   return {
-    id, variant, prices, first, second, returned,
+    id, variant, prices, first, second, returned, rebalance,
     prediction: Math.abs(difference) < 1e-8 ? 'same' : difference < 0 ? 'falls' : 'rises',
-    reason: 'asset', application: variant === 1 ? 'removed' : 'automatic',
+    reason: 'asset', application: ['automatic','removed','sold-earlier'][variant],
   };
 }
 export function checkManagementUnderstanding(id, variant, reason, answer) {

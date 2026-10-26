@@ -211,3 +211,17 @@
 .learn-question-facts dd { margin: 5px 0 0; font-size: 16px; font-weight: 600; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .learn-question-evidence .learn-question-note { margin: 14px 0 0; font-size: 14px; line-height: 1.7; color: var(--muted); }
 .learn-application-setup .learn-question-evidence { margin: 14px 0 0; padding: 0; border: 0; background: none; }
+.learn-evidence-comparison, .learn-price-margin { margin: 20px 0 0; }
+:is(.learn-evidence-comparison, .learn-price-margin) figcaption { margin-bottom: 14px; font-size: 15px; font-weight: 600; line-height: 1.6; }
+.learn-evidence-row + .learn-evidence-row { margin-top: 18px; }
+.learn-evidence-label { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; line-height: 1.6; }
+.learn-evidence-label strong { font-size: 16px; font-variant-numeric: tabular-nums; }
+.learn-evidence-track { margin-top: 8px; height: 16px; border-radius: 4px; background: var(--bg); overflow: hidden; }
+.learn-evidence-track > span { display: block; height: 100%; background: var(--accent); border-radius: inherit; }
+.learn-evidence-row:nth-of-type(2) .learn-evidence-track > span { background: repeating-linear-gradient(135deg, var(--accent) 0 3px, var(--hover) 3px 6px); border: 1px solid var(--accent); }
+.learn-evidence-detail { margin: 8px 0 0; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.learn-price-track { position: relative; height: 22px; margin-top: 12px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--bg); }
+.learn-price-room { position: absolute; left: var(--price-boundary); right: 0; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, var(--accent) 0 3px, var(--hover) 3px 6px); }
+.learn-price-boundary { position: absolute; left: var(--price-boundary); height: calc(100% + 10px); top: -5px; border-left: 2px dashed var(--text); }
+.learn-price-axis { display: flex; justify-content: space-between; margin-top: 7px; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.learn-question-evidence > .learn-explore { display: inline-flex; align-items: center; min-height: 44px; margin-top: 10px; padding: 8px 0; font-size: 14px; line-height: 1.6; }

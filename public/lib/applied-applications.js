@@ -1,4 +1,4 @@
-import { usd, formatTokenQuantity } from './format.js';
+import { usd, fmt, formatTokenQuantity } from './format.js';
 import { periodDuration } from './period-presentation.js';
 
 export function appliedPriceExposure(question) {
@@ -51,8 +51,10 @@ export function appliedApplication(id, question) {
       },
     };
   }
-  if (id === 'between-samples') return {
-    expected: 'smaller-share', label: 'Two equally active hours',
+  if (id === 'between-samples') {
+    const {placement}=question;
+    return {
+    expected: 'edge-placement', label: 'Wide, but near the upper edge',
     reasonEvidence: {
       title: 'Activity between the two observations',
       rows: [
@@ -64,25 +66,30 @@ export function appliedApplication(id, question) {
       note: 'The active-time counter covers the interval between these observations. It does not show the exact moments of each crossing.',
     },
     evidence: {
-      title: 'A hypothetical comparison',
+      title: 'Where this range started',
       rows: [
-        ['Time active', 'One hour in each case'],
-        ['USDC fees shared among LPs', 'The same at every traded price'],
-        ['Your liquidity and fee tier', 'Unchanged'],
-        ['Other active liquidity', 'More in the second hour, at every traded price'],
+        ['Lower bound', usd(placement.range.lowerPrice)],
+        ['Starting ETH price', usd(placement.startPrice)],
+        ['Upper bound', usd(placement.range.upperPrice)],
+        ['Room for a rise at the start', fmt(placement.upwardRoomPercent,2)+'%'],
       ],
-      note: 'These are supplied assumptions for two new hours, not another part of the historical record.',
+      note: 'The recorded counter shows '+fmt(100*placement.secondsInRange/placement.durationSeconds,1)+'% of the full '+periodDuration(placement.durationSeconds)+' period in range. It measures time; sampled prices do not reveal every move between checkpoints.',
     },
-    context: 'Both hours are equally active, but more liquidity competes for the same fees in the second hour.',
-    question: 'How do your USDC fee earnings compare in the second hour?',
-    choices: [['more-fees', 'You earn more.'], ['smaller-share', 'You earn less.'], ['same-fees', 'You earn the same.']],
-    hint: 'Time in range makes the position eligible. Its share of active liquidity determines its share of these fees.',
-    feedback: 'Your liquidity is unchanged, but it is a smaller part of the active total. The same USDC fees are shared more widely, so you earn less despite equal active time.',
+    context: 'This range stretches from '+usd(placement.range.lowerPrice)+' to '+usd(placement.range.upperPrice)+'. Yet ETH starts near its top. Consider the room it has in each direction.',
+    question: 'Why can a small ETH rise take this wide position out of range?',
+    choices: [
+      ['edge-placement','Most of the range lies below the starting price; little room remains above it.'],
+      ['centered','The full width gives equal room for a price rise and a price fall.'],
+      ['follows-price','The wide range moves its bounds upward as ETH rises, keeping the same room.'],
+    ],
+    hint: 'Compare the starting price with each bound. Width and placement describe different parts of the setup.',
+    feedback: 'A rise of just '+fmt(placement.upwardRoomPercent,2)+'% from the starting price reaches the upper bound. Most of the width is below it. A wide range can still be close to an exit; it depends where the price sits within the bounds.',
     feedbackByChoice: {
-      'more-fees': 'More competing liquidity does not add fees in this example. The supplied fee totals stay the same, while your share gets smaller.',
-      'same-fees': 'Equal active time does not give an equal fee payment. More competing liquidity means a smaller share of the same fees.',
+      centered: 'The range is not centered on its starting price. The lower bound is far away, while the upper bound is less than 1% above it.',
+      'follows-price': 'These bounds stay fixed throughout the record. They do not follow ETH; moving a range requires an action by its owner.',
     },
   };
+  }
   if (id !== 'period-vs-holding') throw new Error('Choose an applied exercise.');
   const exposure = appliedPriceExposure(question);
   return {expected: exposure.ethDifference < 0 ? 'smaller-lead' : exposure.ethDifference > 0 ? 'larger-lead' : 'same-lead', exposure,

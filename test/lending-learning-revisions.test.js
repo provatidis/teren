@@ -2,12 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseLendingProgress, readLendingProgress, saveLendingProgress } from '../public/data/lending-state.js';
 import { LOOP_LEARNING_KEY, readLoopProgress, saveLoopProgress } from '../public/data/loop-state.js';
-import { checkLendingUnderstanding } from '../public/models/lending-lessons.js';
+import { lendingCase, maximumBorrowingCase, checkLendingUnderstanding } from '../public/models/lending-lessons.js';
 import { checkLoopUnderstanding, loopCase } from '../public/models/loop-lessons.js';
 import { LENDING_LESSONS } from '../public/learning/lending-essentials.js';
 import { LOOP_LESSONS } from '../public/learning/borrowing-loops.js';
 import { LOAN_DEFAULTS, calculateLoan } from '../public/models/collateral-loan-v1.js';
 import { liquidateBalances } from '../public/models/single-liquidation-v1.js';
+import { readLoanHash } from '../public/lib/lending-links.js';
 
 const memory = () => {
   const entries = new Map();
@@ -47,7 +48,7 @@ test('the latest loan applications preserve current explanations, predictions an
   const saved = {
     version: 1, currentLesson: 'respond', completed: ['borrow', 'respond'],
     drafts: {
-      borrow: { prediction: 'same', reason: 'liability', application: 'boundary', revealed: true, seed: 4 },
+      borrow: { prediction: 'same', reason: 'liability', application: 'borrowing-blocked', revealed: true, seed: 4, questionRevisions: { application: 1 } },
       respond: { prediction: 'repay', reason: 'tradeoff', application: 'none', revealed: true, seed: 9, questionRevisions: { reason: 1 } },
     },
   };
@@ -61,12 +62,13 @@ test('the latest loan applications preserve current explanations, predictions an
     assert.equal(draft.seed, saved.drafts[id].seed);
     assert.equal(draft.revealed, true);
     assert.equal(draft.application, '');
-    assert.equal(draft.questionRevisions.application, 1);
+    assert.equal(draft.questionRevisions.application, id === 'borrow' ? 2 : 1);
   }
-  parsed.drafts.borrow.application = 'borrowing-blocked';
+  parsed.drafts.borrow.application = 'opening-limit';
   parsed.drafts.respond.application = 'remaining-backing';
   assert.deepEqual(parseLendingProgress(parsed), parsed);
   assert.equal(checkLendingUnderstanding('borrow', 'liability', 'boundary').passed, false);
+  assert.equal(checkLendingUnderstanding('borrow', 'liability', 'borrowing-blocked').passed, false);
   assert.equal(checkLendingUnderstanding('respond', 'tradeoff', 'none').passed, false);
 });
 
@@ -75,7 +77,46 @@ test('a loan can exceed its borrowing limit before it becomes eligible for liqui
   assert.ok(loan.end.debt / loan.end.collateralValue > LOAN_DEFAULTS.maxLTV / 100);
   assert.ok(loan.end.healthFactor > 1);
   assert.equal(loan.end.debt, LOAN_DEFAULTS.borrow);
-  assert.equal(checkLendingUnderstanding('borrow', 'liability', 'borrowing-blocked').passed, true);
+  assert.match(LENDING_LESSONS.find(lesson => lesson.id === 'borrow').explanation, /past the borrowing limit without yet making the loan eligible for liquidation/);
+});
+
+test('the maximum-borrowing application shows model-derived headroom without changing the observed loan', () => {
+  const example = lendingCase('borrow'), before = structuredClone(example);
+  const { input, result, priceFallPercent } = example.application;
+  assert.equal(example.input.borrow, 5000);
+  assert.equal(example.result.start.healthFactor, 1.6);
+  assert.equal(input.borrow, 7500);
+  assert.equal(input.future, 2000);
+  assert.equal(input.days, 0);
+  assert.equal(result.end.boundaryPrice, 1875);
+  assert.equal(priceFallPercent, 6.25);
+  const atBoundary = calculateLoan({ ...input, future: result.end.boundaryPrice });
+  assert.equal(atBoundary.end.healthFactor, 1);
+  assert.equal(atBoundary.end.status, 'boundary');
+  assert.equal(calculateLoan({ ...input, future: 1874 }).end.status, 'eligible');
+  const lesson = LENDING_LESSONS.find(item => item.id === 'borrow');
+  const { explore, ...evidence } = lesson.applicationEvidence(example);
+  assert.deepEqual(evidence, {
+    title: 'How much room does the maximum leave?',
+    rows: [['Loan amount', '7,500 USDC'], ['ETH supplied', '5 ETH'], ['Price fall to the boundary', '6.25%']],
+    priceMargin: { startPrice: 2000, boundaryPrice: 1875, label: 'ETH price and liquidation boundary' },
+    note: 'No interest accrues here. USDC stays at $1, and the collateral rules stay unchanged.',
+  });
+  assert.equal(explore.text, 'Try a lower loan amount in the lab ↗');
+  assert.deepEqual(readLoanHash(explore.href).input, input);
+  assert.equal(checkLendingUnderstanding('borrow', 'liability', 'opening-limit').passed, true);
+  assert.deepEqual(example, before);
+});
+
+test('maximum-borrowing headroom follows different collateral rules and prices', () => {
+  const original = { ...LOAN_DEFAULTS, collateral: 4, start: 2500, future: 1800, maxLTV: 60, threshold: 75, days: 365 };
+  const before = structuredClone(original), application = maximumBorrowingCase(original);
+  assert.equal(application.input.borrow, 6000);
+  assert.equal(application.input.future, 2500);
+  assert.equal(application.input.days, 0);
+  assert.equal(application.result.end.boundaryPrice, 2000);
+  assert.ok(Math.abs(application.priceFallPercent - 20) < 1e-12);
+  assert.deepEqual(original, before);
 });
 
 test('a recovery after a completed hypothetical liquidation does not restore the original token balances', () => {

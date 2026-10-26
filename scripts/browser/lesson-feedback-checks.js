@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 export async function checkLessonFeedback({ evaluate, click, fill, text, navigate, reload, base, call }) {
   const choose = (prefix, group, value) => evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);
   const cases = [
-    ['learn.html#lesson=swap-impact', 'learn', 'same', 'less', 'curve', 'deeper-less', 'learn-reasons', 'learn-applications', 'learn-run'],
+    ['learn.html#lesson=swap-impact', 'learn', 'same', 'less', 'curve', 'quote-received', 'learn-reasons', 'learn-applications', 'learn-run'],
     ['learn.html#manage=fee-tiers', 'manage', 'a', 'unknown', 'trades', 'smaller-share', 'manage-reasons', 'manage-applications', 'manage-reveal'],
-    ['learn.html#applied=period-vs-holding', 'applied', 'fees-win', 'can-trail', 'same-gap', 'smaller-lead', 'applied-reasons', 'applied-applications', 'applied-reveal'],
+    ['learn.html#applied=period-vs-holding', 'applied', 'fees-win', 'can-trail', 'price-returned', 'smaller-lead', 'applied-reasons', 'applied-applications', 'applied-reveal'],
     ['lending.html#lesson=conditions', 'lend', 'higher', 'lower', 'interest', 'backing-faster', 'lend-reason-choices', 'lend-application-choices', 'lend-reveal'],
   ];
   const ready = () => evaluate(`new Promise(resolve => {

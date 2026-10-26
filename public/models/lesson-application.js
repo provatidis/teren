@@ -9,8 +9,10 @@ export function essentialQuestionRevisions(id, variant) {
     || (['swap-impact', 'token-balances'].includes(id) && variant === 1)
     || (['pool-share', 'range-boundaries'].includes(id) && variant > 0);
   return {
+    prediction: id === 'range-boundaries' && variant > 0 ? 2 : 1,
     reason: id === 'final-challenge' ? 2 : 1,
-    application: ['loss-vs-profit', 'fee-break-even'].includes(id) ? 3 : changed ? 2 : 1,
+    application: id === 'swap-impact' ? 3 : id === 'loss-vs-profit' && variant !== 1 ? 4
+      : ['loss-vs-profit', 'fee-break-even'].includes(id) ? 3 : changed ? 2 : 1,
   };
 }
 
@@ -18,9 +20,11 @@ export function essentialQuestionRevisions(id, variant) {
 export function lessonApplication(id, outcome) {
   const s = outcome.setup;
   if (id === 'swap-impact') {
-    const reserveEth = s.reserveEth * (outcome.variant === 1 ? .5 : 2);
-    const impact = s.amount * .997 / (reserveEth + s.amount * .997) * 100;
-    return {kind: 'deeper-pool', reserveEth, impact, expected: impact < outcome.impact ? 'deeper-less' : 'deeper-more'};
+    const tolerance = 0.5;
+    return {kind: 'wallet-quote', quote: outcome.out, impact: outcome.impact, tolerance,
+      minimumReceived: outcome.out * (1 - tolerance / 100),
+      startingValue: s.amount * s.initialPrice,
+      expected: 'quote-received'};
   }
   if (id === 'pool-share') return {kind: outcome.variant === 1 ? 'later-deposit' : 'later-swap',
     expected: outcome.variant === 1 ? 'diluted-same-claim' : outcome.variant === 2 ? 'reverse-swap' : 'share-same'};
@@ -31,6 +35,13 @@ export function lessonApplication(id, outcome) {
     }
     const next = runLesson(id, {futurePrice: s.initialPrice}, outcome.variant);
     return {kind: 'price-return', next, expected: 'original-mix'};
+  }
+  if (id === 'loss-vs-profit' && outcome.variant !== 1) {
+    const fees = outcome.variant === 2 ? 200 : 180;
+    const setup = {...s, fees};
+    const next = {setup, result: calculateScenario(setup)};
+    return {kind: 'dashboard-benchmark', fees, next,
+      allEthValue: s.investment / s.initialPrice * s.futurePrice, expected: 'holding-basket'};
   }
   if (id === 'loss-vs-profit') {
     const futurePrice = s.futurePrice < s.initialPrice ? s.initialPrice * 2 : s.initialPrice / 2;
