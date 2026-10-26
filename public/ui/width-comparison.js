@@ -4,6 +4,7 @@ import { widthFlowHash, widthFlowFromHash } from '../lib/width-flow-links.js';
 import { FEE_FLOW_MODEL, DEFAULT_FEE_FLOW } from '../models/range-fee-flow-v2.js';
 import { readWidthDraft, saveWidthDraft } from '../data/width-draft.js';
 import { saveExperimentLocation } from '../data/experiment-location.js';
+import { moneyMetric } from '../lib/money-metric.js';
 import { assetAmounts, rangePriceLabels, STATE_COPY } from '../lib/range-presentation.js';
 import { compactUSD, fmt, percent, signedUSD, usd, formatTokenQuantity } from '../lib/format.js';
 
@@ -146,9 +147,9 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
         refs.mix.setAttribute('aria-label', 'Current principal value: ' + fmt(share, 1) + '% ETH and ' + fmt(100 - share, 1) + '% USDC');
         refs.eth.textContent = formatTokenQuantity(range.pooled.eth, 5) + ' ETH';
         refs.usdc.textContent = formatTokenQuantity(range.pooled.usdc, 2, 2) + ' USDC';
-        refs.principal.textContent = usd(range.lpValue);
-        refs.change.textContent = signedUSD(range.lpValue - current.investment);
-        refs.fees.textContent = usd(range.breakEvenFees);
+        moneyMetric(refs.principal, range.lpValue);
+        moneyMetric(refs.change, range.lpValue - current.investment, true);
+        moneyMetric(refs.fees, range.breakEvenFees);
         refs.feeNote.textContent = fmt(100 * range.breakEvenFees / current.investment, 2) + '% of starting capital';
       }
       for (const button of $('width-price-shortcuts').children) {

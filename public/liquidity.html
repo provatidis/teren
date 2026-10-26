@@ -127,7 +127,8 @@
               <button type="button" data-range-width="0.05" aria-pressed="false">Tight <span>±5%</span></button>
               <button type="button" data-range-width="0.1" aria-pressed="true">Moderate <span>±10%</span></button>
               <button type="button" data-range-width="0.5" aria-pressed="false">Wide <span>±50%</span></button>
-            </div><p class="fine-print">Presets center the range on your starting price. Each range determines the ETH and USDC needed.</p></fieldset>
+              <button type="button" data-range-centered="20" aria-pressed="false">50/50 start <span>20% total width</span></button>
+            </div><p class="fine-print">± presets use equal dollar distances on each side of the starting price. The 50/50 preset balances the starting token values, as in Compare widths.</p></fieldset>
             <div id="cl-starting-mix" class="cl-starting-mix">
               <span class="label">Your starting token mix</span><p id="cl-initial-assets"></p>
               <svg class="cl-allocation-bar" role="img" aria-labelledby="cl-initial-allocation-title">
@@ -278,7 +279,7 @@
             <div class="scenario-field"><label for="width-a">Range A width · %</label><input id="width-a" type="number" min="1" max="400" step="any" value="20" aria-describedby="width-a-error width-definition"><p id="width-a-error" class="field-error" hidden></p></div>
             <div class="scenario-field"><label for="width-b">Range B width · %</label><input id="width-b" type="number" min="1" max="400" step="any" value="100" aria-describedby="width-b-error width-definition"><p id="width-b-error" class="field-error" hidden></p></div>
           </div>
-          <p id="width-definition" class="fine-print">Width is the total price span, measured against the starting ETH price.</p>
+          <p id="width-definition" class="fine-print">Width is the total price span, measured against the starting ETH price. Bounds are centered to start 50/50 by value. A 20% total width here differs slightly from the range lab’s ±10% preset.</p>
           <div class="scenario-field width-price-field"><label for="width-price">Compare at this ETH price · USD</label><input id="width-price" type="number" min="0.01" max="10000000" step="any" value="2400" aria-describedby="width-price-error"><p id="width-price-error" class="field-error" hidden></p></div>
           <p id="width-error" class="field-error" role="alert"></p>
         </form>

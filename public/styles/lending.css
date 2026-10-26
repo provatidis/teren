@@ -127,6 +127,20 @@
 .loan-liquidation-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .loan-liquidation .scenario-field { margin: 16px 0; }
 .loan-liquidation a { font-size: 14px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.boundary-distance { font-weight: 600; color: var(--text); }
+.liquidation-flow { display: grid; gap: 14px; list-style: none; padding: 0; margin: 24px 0; }
+.liquidation-flow li { padding: 18px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); }
+.liquidation-flow li > span { display: block; font-size: 14px; line-height: 1.6; color: var(--muted); }
+.liquidation-flow strong { display: block; margin-top: 10px; font-size: 23px; font-variant-numeric: tabular-nums; }
+.liquidation-flow li:last-child { border-color: var(--allocation-eth); }
+.liquidation-flow li:last-child > strong { color: var(--allocation-eth); }
+.liquidation-flow p { font-size: 14px; line-height: 1.8; margin: 12px 0 0; }
+.liquidation-flow .liquidation-bonus { display: inline; font-size: inherit; color: #e5bd85; }
+@media (min-width: 751px) {
+  .liquidation-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+#loop-liquidation-result h3 { margin-top: 28px; font-size: 18px; }
+#loop-liquidation-net { color: #e5bd85; }
 #loan-compounding { margin-top: 8px; }
 #loan-compounding, #loan-liquidation { scroll-margin-top: calc(var(--lab-feedback-height, 0px) + 24px); }
 @media (max-width: 750px) {

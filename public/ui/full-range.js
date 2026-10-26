@@ -7,6 +7,7 @@ import { readSharedScenario, RANGE_MODEL } from '../lib/link-router.js';
 import { scenarioCSV } from '../lib/scenario-csv.js';
 import { experimentScenario } from '../models/experiments.js';
 import { fmt, usd, signedUSD, percent, compactUSD } from '../lib/format.js';
+import { moneyMetric } from '../lib/money-metric.js';
 import { downloadBlob } from '../lib/download.js';
 import { resultCardBlob } from '../lib/result-card.js';
 import { validateExperimentDraft } from '../data/saved-experiments.js';
@@ -120,8 +121,8 @@ export function initFullRangeLab({ navigation }) {
       $('scenario-export').disabled = false;
       $('scenario-image').disabled = false;
       $('scenario-save').disabled = false;
-      $('scenario-hold-value').textContent = usd(result.holdValue);
-      $('scenario-lp-value').textContent = usd(result.lpValue);
+      moneyMetric($('scenario-hold-value'), result.holdValue);
+      moneyMetric($('scenario-lp-value'), result.lpValue);
       $('scenario-hold-return').textContent = `${percent(result.holdReturn)} vs. initial investment`;
       $('scenario-lp-return').textContent = `${percent(result.lpReturn)} vs. initial investment`;
       const magnitude = Math.abs(result.difference);
@@ -130,7 +131,7 @@ export function initFullRangeLab({ navigation }) {
         : `Liquidity finishes ${usd(magnitude)} (${fmt(Math.abs(result.differencePercent))}%) ${result.difference > 0 ? 'ahead of' : 'behind'} holding under these assumptions.`;
       $('scenario-verdict').className = `scenario-verdict ${result.difference >= 0 ? 'gain' : 'loss'}`;
       $('scenario-il').textContent = percent(result.impermanentLoss);
-      $('scenario-break-even').textContent = usd(result.breakEvenFees);
+      moneyMetric($('scenario-break-even'), result.breakEvenFees);
       feeContext.update(result);
       $('scenario-price-change').textContent = percent((result.ratio - 1) * 100);
       $('scenario-hold-eth').textContent = `${fmt(result.held.eth, 6)} ETH`;

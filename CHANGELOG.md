@@ -1,5 +1,13 @@
 # Release history
 
+## 1.42.0 · 2026-10-26
+
+- Add a separate, editable liquidation event to ETH/USDC borrowing loops. Show USDC repaid, ETH removed, the bonus cost and remaining balances without counting spent borrowing as wallet cash. Retain unpaid debt when collateral is exhausted; keep headline endpoints and unwind previews separate.
+- Preserve event assumptions in loop drafts, named experiments, exports, Home resumption and shared links. Legacy links retain their original balances and use default event assumptions when opened.
+- Show liquidation-boundary distance from the selected ETH price in single loans and loops. Include both the main and reference loop boundaries in the sensitivity chart.
+- Use conversion-rate valuation for new LST setups, with the chosen oracle explained beside the discount control and a sourced explanation of the simplified Aave-style approach. Existing saved oracle choices retain their meaning.
+- Keep headline money and token amounts together on narrow screens, abbreviate large headline values with exact values retained in titles and existing tables/exports, and show all four lending tools on phones. Add a 50/50-centered range preset and distinguish it from the existing symmetric dollar-distance presets.
+
 ## 1.41.1 · 2026-10-26
 
 - Restore the assessed build/unwind diagram alongside saved lesson explanations. Opening an explanation after exploring another step returns to the same assessed outcome.

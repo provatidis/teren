@@ -1,6 +1,7 @@
 import { LOOP_DEFAULTS, LOOP_LIMITS, validateLoop } from '../models/borrowing-loop-v1.js';
 import { parseLendingProgress } from './lending-state.js';
 import { validReferenceRounds, validReferenceBorrowPercent } from '../models/loop-comparison.js';
+import { LIQUIDATION_LIMITS, validateLiquidation } from '../models/single-liquidation-v1.js';
 
 export const LOOP_DRAFT_KEY = 'teren-loop-draft-v1';
 export const LOOP_LEARNING_KEY = 'teren-loop-learning-v1';
@@ -13,9 +14,11 @@ export function readLoopDraft(getStorage = () => globalThis.sessionStorage) {
     if (!raw) return { input: { ...LOOP_DEFAULTS }, comparisonRounds: null, status: 'empty' };
     const saved = JSON.parse(raw);
     if (saved.version !== 1 || Object.keys(validateLoop(saved.input)).length) throw new Error('Unsupported draft');
+    if (saved.liquidation != null && Object.keys(validateLiquidation(saved.liquidation)).length) throw new Error('Unsupported event');
     return {
       input: Object.fromEntries([...Object.keys(LOOP_LIMITS), 'interestMode'].map(key => [key, saved.input[key]])),
       comparisonRounds: validReferenceRounds(saved.comparisonRounds) ? saved.comparisonRounds : null,
+      ...(saved.liquidation == null ? {} : { liquidation: Object.fromEntries(Object.keys(LIQUIDATION_LIMITS).map(key => [key, saved.liquidation[key]])) }),
       ...(validReferenceRounds(saved.comparisonRounds) && validReferenceBorrowPercent(saved.comparisonBorrowPercent, saved.input.maxLTV)
         ? { comparisonBorrowPercent: saved.comparisonBorrowPercent } : {}),
       status: 'ready',
@@ -23,10 +26,13 @@ export function readLoopDraft(getStorage = () => globalThis.sessionStorage) {
   } catch { return { input: { ...LOOP_DEFAULTS }, comparisonRounds: null, status: 'unavailable' }; }
 }
 
-export function saveLoopDraft(input, getStorage = () => globalThis.sessionStorage, comparisonRounds = null, comparisonBorrowPercent = null) {
+export function saveLoopDraft(input, getStorage = () => globalThis.sessionStorage, comparisonRounds = null, comparisonBorrowPercent = null, liquidation = null) {
   if (Object.keys(validateLoop(input)).length || (comparisonRounds !== null && !validReferenceRounds(comparisonRounds))) return false;
   if (comparisonBorrowPercent !== null && (comparisonRounds === null || !validReferenceBorrowPercent(comparisonBorrowPercent, input.maxLTV))) return false;
-  try { getStorage().setItem(LOOP_DRAFT_KEY, JSON.stringify({ version: 1, input, comparisonRounds, ...(comparisonBorrowPercent === null ? {} : { comparisonBorrowPercent }) })); return true; }
+  if (liquidation !== null && Object.keys(validateLiquidation(liquidation)).length) return false;
+  try { getStorage().setItem(LOOP_DRAFT_KEY, JSON.stringify({ version: 1, input, comparisonRounds,
+    ...(comparisonBorrowPercent === null ? {} : { comparisonBorrowPercent }),
+    ...(liquidation === null ? {} : { liquidation }) })); return true; }
   catch { return false; }
 }
 

@@ -186,6 +186,12 @@ For elapsed years `t = days / 365`, the selected growth factor is `1 + APR × t`
 
 At later price `Q`, net assets are `accrued ETH × Q − accrued USDC debt`; holding retains the exact original `C` ETH without supply interest. A separate supply-only reference accrues interest on `C` without borrowing. Health factor and the price boundary use the same collateral-threshold/debt definitions as the single-loan model. Values remain pre-liquidation endpoints, with negative net assets and unpaid obligations retained. The sensitivity chart varies price at fixed accrued balances; it does not show a trading path.
 
+### One liquidation event
+
+The separate **What would liquidation take?** view applies `single-liquidation-v1` to the loop's already accrued collateral and debt. At a price strictly below the boundary, requested repayment is `debt × repayment fraction`, capped by `collateral value / (1 + bonus fraction)`. The liquidator receives ETH worth repayment plus bonus. Remaining net assets are `remaining ETH × selected price − remaining debt`: the loop has spent its borrowed cash, so none is added back. Net assets fall by the bonus, not by the full collateral seizure. An exact boundary or zero debt does not execute this illustration. Exhausted collateral leaves any unpaid debt visible.
+
+This event is an alternative endpoint illustration, not a step applied to the headline balances, reference comparison or withdrawal-first unwind below. It neither reconstructs earlier liquidations nor implements protocol-specific close-factor, dust or shortfall rules. Optional versioned event fields preserve the assumptions in shares and saved records without changing the loop's construction or interest calculation.
+
 ### Withdrawal-first unwind preview
 
 At an endpoint strictly above the liquidation boundary, for collateral dollar value `V`, debt `D` and threshold fraction `h`:

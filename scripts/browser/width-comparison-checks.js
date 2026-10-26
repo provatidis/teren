@@ -72,8 +72,9 @@ export async function checkWidthComparison({ evaluate, click, fill, text, naviga
       await navigate(base + 'liquidity.html' + widthHash(DEFAULT_WIDTHS));
       await dragRangeToMax({ evaluate, call, fill }, 'width-price-slider');
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      const cards = await evaluate("Array.from(document.querySelectorAll('.width-result')).map(el=>({top:el.getBoundingClientRect().top,width:el.getBoundingClientRect().width}))");
-      assert.ok(Math.abs(cards[0].top - cards[1].top) < 1 && cards.every(card => card.width >= 115), 'Keep both outcomes side by side.');
+      const cards = await evaluate("Array.from(document.querySelectorAll('.width-result')).map(el=>{const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right}})");
+      assert.ok(cards[1].top >= cards[0].bottom && cards.every(card => card.left >= 0 && card.right <= width),
+        'Give each outcome the available phone width, without overlap or clipping.');
       await evaluate("document.querySelector('.width-edges summary').click();document.querySelector('#width-chart-details summary').click()"); await settle(evaluate);
       assert.ok(await evaluate("Array.from(document.querySelectorAll('#width-price-shortcuts button')).every(button=>button.getBoundingClientRect().height>=44)"));
       assert.ok(await evaluate("Array.from(document.querySelectorAll('#width-gap-chart .chart-label')).every(label=>parseFloat(getComputedStyle(label).fontSize)*label.ownerSVGElement.getBoundingClientRect().width/600>=11.9)"));

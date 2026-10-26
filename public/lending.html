@@ -56,7 +56,12 @@
       <div id="lending-route-note" class="notice" role="status" hidden>
         <p>That lending lesson link could not be opened. <a href="#lesson=supply">Open the first lesson →</a></p>
       </div>
-      <nav id="lending-tools" class="lending-tools" aria-label="Lending experiments"><a id="lending-tool-loan" href="#experiment" aria-current="page">Single loan</a><a id="lending-tool-loops" href="#loops">Borrowing loops</a><a id="lending-tool-lst" href="#lst-loops">LST loops</a><a href="#saved-experiments">Saved experiments</a></nav>
+      <nav id="lending-tools" class="lending-tools" aria-label="Lending experiments">
+        <a id="lending-tool-loan" href="#experiment" aria-current="page" aria-label="Single loan"><span class="lending-tool-long">Single loan</span><span class="lending-tool-short" aria-hidden="true">Loan</span></a>
+        <a id="lending-tool-loops" href="#loops" aria-label="Borrowing loops · ETH loops"><span class="lending-tool-long">Borrowing loops</span><span class="lending-tool-short" aria-hidden="true">ETH loops</span></a>
+        <a id="lending-tool-lst" href="#lst-loops">LST loops</a>
+        <a href="#saved-experiments" aria-label="Saved experiments"><span class="lending-tool-long">Saved experiments</span><span class="lending-tool-short" aria-hidden="true">Saved</span></a>
+      </nav>
       <section id="lending-experiment" aria-label="Lending experiment">
         <p class="loan-model-label">Illustrative ETH/USDC inputs · USDC = $1</p>
         <div id="loan-route-note" class="notice" role="status" hidden>
@@ -157,6 +162,7 @@
                 </div>
                 <strong id="loan-health" class="loan-health">1.60</strong>
                 <p id="loan-boundary" class="loan-boundary"></p>
+                <p id="loan-boundary-distance" class="loan-boundary boundary-distance"></p>
                 <p id="loan-initial-health" class="fine-print"></p>
                 <details id="loan-chart-details" class="loan-chart-details">
                   <summary>See health factor across prices</summary>
@@ -525,6 +531,7 @@
                   </p>
                   <p id="loop-risk-boundary">
                   </p>
+                  <p id="loop-risk-distance" class="boundary-distance"></p>
                 </div>
                 <p id="loop-liquidation-warning" class="loan-attention" hidden>These balances are before liquidation. An actual liquidation would remove collateral and change the result. This endpoint does not show whether liquidation happened earlier.</p>
                 <details class="loop-disclosure">
@@ -576,6 +583,40 @@
                   </p>
                 </figure>
               </section>
+              <details id="loop-liquidation" class="card loan-liquidation">
+                <summary><strong>What would liquidation take?</strong><span id="loop-liquidation-caption">One event at your selected ETH price.</span></summary>
+                <p class="body-copy">A liquidator repays USDC debt and receives ETH collateral worth that repayment plus a bonus. The bonus comes from your ETH.</p>
+                <div class="loan-liquidation-inputs">
+                  <div class="scenario-field">
+                    <label for="loop-liquidation-repayPercent">Debt to repay <span>% of debt</span></label>
+                    <input id="loop-liquidation-repayPercent" type="number" min="1" max="100" step="any" value="50" aria-describedby="loop-liquidation-repayPercent-error">
+                    <p id="loop-liquidation-repayPercent-error" class="field-error" hidden></p>
+                  </div>
+                  <div class="scenario-field">
+                    <label for="loop-liquidation-bonusPercent">Extra collateral taken <span>% bonus</span></label>
+                    <input id="loop-liquidation-bonusPercent" type="number" min="0" max="30" step="any" value="5" aria-describedby="loop-liquidation-bonusPercent-error loop-liquidation-bonus-help">
+                    <p id="loop-liquidation-bonusPercent-error" class="field-error" hidden></p>
+                    <p id="loop-liquidation-bonus-help" class="fine-print">A percentage of the debt actually repaid, taken from your collateral.</p>
+                  </div>
+                </div>
+                <p class="fine-print">These percentages are editable assumptions, not Aave’s current liquidation rules.</p>
+                <p id="loop-liquidation-status" class="loan-attention" role="status"></p>
+                <div id="loop-liquidation-result" hidden>
+                  <ol class="liquidation-flow">
+                    <li><span>1 · Debt repaid by the liquidator</span><strong id="loop-liquidation-repaid"></strong></li>
+                    <li><span>2 · ETH taken from your collateral</span><strong id="loop-liquidation-removed"></strong><p id="loop-liquidation-removed-value"></p><p>Of this value, <strong id="loop-liquidation-penalty" class="liquidation-bonus"></strong> is the extra bonus.</p></li>
+                  </ol>
+                  <h3>What remains after this event</h3>
+                  <dl class="loan-balance-list">
+                    <div><dt>Supplied ETH remaining</dt><dd id="loop-liquidation-collateral"></dd></div>
+                    <div><dt>USDC debt remaining</dt><dd id="loop-liquidation-debt"></dd></div>
+                    <div><dt>Assets minus debt · before</dt><dd id="loop-liquidation-before"></dd></div>
+                    <div><dt>Assets minus debt · after</dt><dd id="loop-liquidation-net"></dd><dd id="loop-liquidation-loss" class="loan-balance-note"></dd></div>
+                  </dl>
+                  <p id="loop-liquidation-health" class="body-copy"></p>
+                </div>
+                <p class="fine-print">The borrowed USDC was spent buying ETH; no borrowed cash remains in your wallet. This is one event at the selected price after interest, with no extra funds or gas costs. It does not reconstruct earlier liquidations or resolve unpaid debt if collateral runs out.</p>
+              </details>
               <section class="card loop-card" aria-labelledby="loop-unwind-title">
                 <p class="eyebrow">03 · EXPLORE UNWINDING</p>
                 <h2 id="loop-unwind-title">Withdraw, sell, repay</h2>
@@ -633,7 +674,7 @@
           <summary>How this borrowing-loop model works</summary>
           <p>Each round borrows the chosen fraction of the ETH value just supplied. The first uses your original ETH; later rounds use the preceding purchase. Swapping spends the borrowed USDC and applies the assumed percentage loss. Supplying then moves that ETH into collateral. No new outside capital is added.</p>
           <p>All rounds happen at one starting price, before the selected time period. Supply interest adds ETH and borrow interest adds USDC debt. Choose fixed simple interest or continuous compounding; neither is exact Aave accounting. The earlier single-loan lab keeps its original simple-interest model.</p>
-          <p>The chart and headline values are pre-liquidation endpoints. The withdrawal-first unwind preview stops at or below health factor 1 and retains all debt. It runs at most 64 steps, showing unpaid debt if it cannot finish. It is not an execution plan or a protocol simulator. USDC = $1 is assumed. There is no wallet connection or live lending data.</p>
+          <p>The separate liquidation view uses already accrued collateral and debt, with no borrowed wallet cash left. It shows one assumed repayment plus bonus and keeps unpaid debt if collateral runs out. It does not change the headline, reference or unwind balances. The chart and headline values are pre-liquidation endpoints. The withdrawal-first unwind preview stops at or below health factor 1 and retains all debt. It runs at most 64 steps, showing unpaid debt if it cannot finish. It is not an execution plan or a protocol simulator. USDC = $1 is assumed. There is no wallet connection or live lending data.</p>
           <p>
             <a href="https://aave.com/help/borrowing/liquidations" target="_blank" rel="noopener noreferrer">Aave: health factor and liquidations ↗</a> · <a href="https://aave.com/help/borrowing/repay-tokens" target="_blank" rel="noopener noreferrer">Aave: repayment ↗</a>
           </p>
@@ -744,11 +785,13 @@
 </div>
                 <p class="fine-print">Leave additional lending yield at zero if the collateral earns none. Staking growth is already counted in the conversion rate.</p>
               </details>
+              <p id="lst-oracle-summary" class="lst-inline-result"></p>
               <details id="lst-oracle-settings"><summary>Oracle and dollar price</summary>
                 <div class="scenario-field"><label for="lst-oracleMode">How the lender values wstETH</label>
-                  <select id="lst-oracleMode" aria-describedby="lst-oracle-help lst-oracleMode-error"><option value="market">Follow the market discount</option><option value="rate">Track the conversion rate</option></select>
+                  <select id="lst-oracleMode" aria-describedby="lst-oracle-help lst-oracleMode-error"><option value="rate">Track the conversion rate</option><option value="market">Follow the market discount</option></select>
                   <p id="lst-oracleMode-error" class="field-error" hidden></p>
-                  <p id="lst-oracle-help" class="fine-print">Two simplified oracle assumptions. Actual feeds can lag, apply caps or use other rules. Neither option is labelled as a current Aave or Morpho oracle.</p>
+                  <p id="lst-oracle-help" class="fine-print">New setups track the conversion rate. A market discount then lowers the exit value without lowering health factor. Debt growth or a falling conversion rate can still affect health. Saved setups keep their chosen oracle.</p>
+                  <p class="fine-print">This resembles the conversion-rate approach described for Aave wstETH, but does not reproduce its caps, feeds or current market rules. <a href="https://governance.aave.com/t/exchange-rate-for-steth-eth-hardcoded/22693" target="_blank" rel="noopener noreferrer">BGD’s explanation of Aave’s oracle ↗</a></p>
                 </div>
                 <div class="scenario-field">
   <label for="lst-ethUSD">ETH price in dollars <span>USD</span></label>

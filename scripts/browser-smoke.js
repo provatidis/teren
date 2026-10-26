@@ -19,6 +19,7 @@ import { checkBorrowingLoops } from './browser/borrowing-loop-checks.js';
 import { checkProjectInformation, checkMobileTools } from './browser/clarity-checks.js';
 import { checkLending } from './browser/lending-checks.js';
 import { checkLoanConsequences } from './browser/loan-consequence-checks.js';
+import { checkLabRisk } from './browser/lab-risk-checks.js';
 import { checkManagementLearning, checkMobileManagementLearning } from './browser/management-learning-checks.js';
 import { checkLessonConsistency, checkMobileLessonConsistency } from './browser/lesson-consistency-checks.js';
 import { checkAppliedLearning, checkMobileAppliedLearning } from './browser/applied-learning-checks.js';
@@ -181,6 +182,11 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (process.env.BROWSER_CHECKS === 'risk') {
+    await checkLabRisk({ evaluate, click, fill, text, navigate, reload, base, call });
+    assert.deepEqual(errors, [], 'No uncaught browser errors');
+    return;
+  }
   if (process.env.BROWSER_CHECKS === 'scenes') {
     await navigate(base + 'lending.html');
     await checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call });
@@ -650,6 +656,7 @@ try {
   await checkMobileInspect({ evaluate, call, click, fill, navigate, nextEvent, base });
   await checkLending({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   await checkLoanConsequences({ evaluate, click, fill, text, navigate, base, call });
+  await checkLabRisk({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call });
   await checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkVisualLessonPilots({ evaluate, click, fill, text, navigate, reload, base, call });

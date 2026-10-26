@@ -4,7 +4,7 @@ import { LOAN_MODEL, LOAN_DEFAULTS, LOAN_LIMITS, calculateLoan, validateLoan } f
 import { readLoanDraft, saveLoanDraft, readLiquidationDraft, saveLiquidationDraft } from '../data/lending-state.js';
 import { LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation, singleLiquidation, interestReference, healthPriceCurve } from '../models/loan-explanations.js';
 import { loanHash, readLoanHash } from '../lib/lending-links.js';
-import { healthLabel, loanStatus, loanMoney as usd } from '../lib/lending-presentation.js';
+import { healthLabel, loanStatus, boundaryDistance, loanMoney as usd } from '../lib/lending-presentation.js';
 import { signedUSD, formatTokenQuantity } from '../lib/format.js';
 
 export function initLending() {
@@ -152,6 +152,7 @@ export function initLending() {
           : 'Below 1, this position becomes eligible for liquidation.';
     $('loan-boundary').textContent = end.boundaryPrice === null ? 'No boundary while debt is zero.'
       : 'At these balances, the ETH price boundary is ' + usd(end.boundaryPrice) + '. Lower prices would make the position eligible.';
+    $('loan-boundary-distance').textContent = boundaryDistance(input.future, end.boundaryPrice);
     $('loan-initial-health').textContent = 'Starting health factor: ' + healthLabel(start.healthFactor);
     $('loan-collateral-value').textContent = usd(end.collateralValue);
     $('loan-collateral-tokens').textContent = formatTokenQuantity(end.collateralTokens, 6) + ' ETH, including supply interest';

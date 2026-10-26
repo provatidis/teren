@@ -1,4 +1,5 @@
-import { usd, signedUSD } from './format.js';
+import { usd } from './format.js';
+import { moneyMetric } from './money-metric.js';
 
 // Present feedback beside inputs; calculation models remain the source of validity.
 export function labFeedback({ prefix, fields, limits, optional = [], range = false }) {
@@ -29,7 +30,14 @@ export function labFeedback({ prefix, fields, limits, optional = [], range = fal
   }
   function result(value, state = '') {
     const tied = Math.abs(value.difference) < 0.005;
-    $(prefix + '-quick-gap').textContent = tied ? 'Matches holding' : signedUSD(value.difference) + ' vs holding';
+    const gap = $(prefix + '-quick-gap');
+    if (tied) gap.textContent = 'Matches holding';
+    else {
+      const amount = document.createElement('span');
+      amount.className = 'money-figure';
+      moneyMetric(amount, value.difference, true);
+      gap.replaceChildren(amount, document.createTextNode(' vs holding'));
+    }
     $(prefix + '-quick-gap').className = tied || value.difference >= 0 ? 'gain' : 'loss';
     $(prefix + '-quick-values').textContent = 'LP ' + usd(value.lpValue) + ' · Holding ' + usd(value.holdValue);
     $(prefix + '-quick-note').textContent = (state ? state + ' · ' : '') + usd(value.fees) + ' assumed cash fees';

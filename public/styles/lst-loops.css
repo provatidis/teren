@@ -1,6 +1,13 @@
 .lst-lab { scroll-margin-top: 100px; }
 .lending-tools { overflow-x: auto; max-width: 100%; padding: 3px; }
 .lending-tools a { flex: 0 0 auto; white-space: nowrap; }
+.lending-tool-short { display: none; }
+@media (max-width: 750px) {
+  .lending-tools { display: grid; grid-template-columns: .8fr 1.2fr 1.2fr .8fr; gap: 6px; overflow: visible; }
+  .lending-tools a { min-width: 0; justify-content: center; padding: 10px 4px; font-size: 13px; white-space: nowrap; }
+  .lending-tool-short { display: inline; }
+  .lending-tool-long { display: none; }
+}
 .lst-mobile-result { display: none; }
 .lst-mobile-result > * { display: block; }
 .lst-mobile-result strong { font-size: 20px; line-height: 1.6; white-space: nowrap; font-variant-numeric: tabular-nums; }
