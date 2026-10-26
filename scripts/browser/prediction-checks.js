@@ -17,7 +17,7 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
   const nonvisual = {
     'range-boundaries': ['path', 'both-inside'], 'fee-tiers': ['trades', 'smaller-share'],
     'range-management': ['asset', 'automatic'], 'fees-over-time': ['growth', 'same'],
-    'between-samples': ['counters', 'fee-records'], 'period-vs-holding': ['shortfall', 'current-values'],
+    'between-samples': ['counters', 'fee-records'], 'period-vs-holding': ['same-gap', 'smaller-lead'],
     'final-challenge': ['total', 'relative-gap'],
   };
   try {

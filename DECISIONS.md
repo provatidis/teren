@@ -13,7 +13,7 @@ These are durable working choices. Revisit them when evidence or the owner's dir
 
 ## Learning and explanation
 
-- Explain results plainly. Keep decisive assumptions and essential misconceptions nearby; place derivations and detailed accounting in optional disclosures.
+- Explain results plainly. Put the evidence needed to answer beside the question and name the situation, rather than narrating internal lesson state. Keep decisive assumptions and essential misconceptions nearby; place derivations and detailed accounting in optional disclosures.
 - Before a prediction, show the starting balances, the action or condition being tested, and what stays fixed. Give explicit feedback when the outcome is revealed. Recorded lessons introduce the position first; questions about a particular historical outcome require the relevant evidence, rather than a guess about hidden data.
 - Invite an expectation with the prediction question and choices visible together. Predictions are ungraded and optional, with a clear “Not sure — show me” route. Completion checks explanation and application; arithmetic and rounding practice stay optional in Go deeper.
 - Keep **Predict → Observe → Check**, with explanation and application inside Check. Build from noticing a change to explaining its cause, applying it elsewhere and combining earlier ideas. Use plausible misconceptions and changed circumstances, rather than larger-number comparisons or wording clues, to deepen the questions. A new topic can begin simply again.

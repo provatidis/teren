@@ -1,5 +1,25 @@
 import { usd } from './format.js';
 
+export function appliedPriceExposure(question) {
+  const { view } = question;
+  const lpETHRaw = view.principal.amount1 + view.earned1;
+  if (view.state !== 'above' || !(view.price > view.range.upperPrice)
+      || view.principal.amount1 !== 0n || !(view.holding.amount1 > lpETHRaw)) {
+    throw new Error('The price-rise question requires an above-range position with less ETH than holding.');
+  }
+  return {
+    principalETH: Number(view.principal.amount1) / 1e18,
+    feeETH: Number(view.earned1) / 1e18,
+    lpETH: Number(lpETHRaw) / 1e18,
+    holdingETH: Number(view.holding.amount1) / 1e18,
+    principalUSDC: Number(view.principal.amount0) / 1e6,
+    feeUSDC: Number(view.earned0) / 1e6,
+    lpUSDC: Number(view.principal.amount0 + view.earned0) / 1e6,
+    holdingUSDC: Number(view.holding.amount0) / 1e6,
+    ethDifference: Number(lpETHRaw - view.holding.amount1) / 1e18,
+  };
+}
+
 export function appliedApplication(id, question) {
   if (id === 'fees-over-time') return {
     expected: 'same', context: 'Imagine collecting only the newly earned fee tokens at the question checkpoint. Liquidity, bounds and prices stay unchanged; gas is excluded.',
@@ -14,12 +34,13 @@ export function appliedApplication(id, question) {
     hint: 'Recorded active time and recorded fee earnings answer different questions.',
     feedback: 'Equal active time does not imply equal fees. Compare the new fee tokens for each interval; trades and the position’s share of active liquidity can differ.'};
   if (id !== 'period-vs-holding') throw new Error('Choose an applied exercise.');
-  return {expected: 'current-values',
-    context: 'Imagine a later checkpoint where more fee tokens have been earned. You want to know whether the LP’s advantage over holding has grown.',
-    question: 'What else do you need to compare?',
-    choices: [['current-values','Updated principal, fee and holding values, with costs counted consistently.'],['active-time','The time the position spent in range since this checkpoint.'],['collection','Whether the owner collected the fee tokens during that time.']],
-    hint: 'More fee tokens do not tell you how the rest of the position or the holding basket changed.',
-    feedback: 'Value principal and all new period fees at the later checkpoint, then compare with the same starting tokens held until then, including each strategy’s costs. More fee tokens alone do not establish a larger advantage.'};
+  const exposure = appliedPriceExposure(question);
+  return {expected: exposure.ethDifference < 0 ? 'smaller-lead' : exposure.ethDifference > 0 ? 'larger-lead' : 'same-lead', exposure,
+    context: 'ETH now rises further and stays above the range. The owner leaves the position unchanged, with no new fees or costs. USDC stays at $1.',
+    question: 'What happens to the LP’s lead over holding?',
+    choices: [['larger-lead','It grows.'],['smaller-lead','It shrinks.'],['same-lead','It stays the same.']],
+    hint: 'Look at how much ETH each side owns, including the LP’s earned fee tokens.',
+    feedback: 'Holding owns more ETH than the LP’s small ETH fee balance. Both gain value as ETH rises, but holding gains more, so the LP’s lead shrinks. A small rise need not erase the lead.'};
 }
 // A hypothetical cost applied to the final observation, not a change to the record.
 export function appliedCostExample(question) {

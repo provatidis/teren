@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { APPLIED_IDS, appliedLessonFromHash, appliedQuestion, checkAppliedAnswer } from '../public/lib/applied-lessons.js';
-import { appliedApplication, appliedCostExample, checkAppliedUnderstanding } from '../public/lib/applied-applications.js';
+import { appliedApplication, appliedCostExample, appliedPriceExposure, checkAppliedUnderstanding } from '../public/lib/applied-applications.js';
 import { APPLIED_LESSONS } from '../public/learning/applied-liquidity.js';
 import { validatePositionPeriod } from '../public/data/position-period.js';
 import { periodPointView } from '../public/lib/period-presentation.js';
@@ -28,8 +28,8 @@ test('applied questions use verified period earnings, interval counters and the 
   assert.equal(final.view.holding.amount0, 4982691068n); assert.equal(final.view.holding.amount1, 14920139441099507n);
   assert.ok(final.view.principalGapUSD < 0 && final.view.gapUSD > 0);
   assert.ok(Math.abs(final.answer - .17457169368572067) < 1e-12);
-  assert.equal(checkAppliedAnswer(final, '0.17', 'shortfall').passed, true);
-  assert.equal(checkAppliedAnswer(final, '0.18', 'shortfall').numeric, false);
+  assert.equal(checkAppliedAnswer(final, '0.17', 'same-gap').passed, true);
+  assert.equal(checkAppliedAnswer(final, '0.18', 'same-gap').numeric, false);
   assert.ok(periodPointView(returning, 8).gapUSD < 0, 'Earning fees does not guarantee beating holding at every checkpoint.');
 });
 test('exploring a different checkpoint cannot alter the fixed question or accept unsupported evidence', () => {
@@ -88,20 +88,66 @@ test('bundled record loading shares requests, validates evidence and retries a f
   await assert.rejects(bad('in-range'), /summary differs/);
 });
 
-test('the final explanation uses the earlier shortfall while the cost illustration preserves the final record', () => {
-  const original=JSON.stringify(returning), question=appliedQuestion(returning,'period-vs-holding');
-  assert.equal(question.reason,'shortfall');
-  assert.ok(question.contrast.feesUSD>0 && question.contrast.feesUSD < -question.contrast.principalGapUSD);
-  const application=appliedApplication('period-vs-holding',question);
-  assert.equal(application.expected,'current-values');
-  assert.equal(checkAppliedUnderstanding(question,application,'shortfall','current-values').passed,true);
-  for(const wrong of ['collect','exit'])assert.equal(checkAppliedUnderstanding(question,application,wrong,'current-values').passed,false);
-  const example=appliedCostExample(question);
-  assert.equal(example.costUSD,1); assert.equal(example.lpUSD,question.view.lpUSD-1);
-  assert.ok(question.view.gapUSD>0 && example.gapUSD<0);
-  assert.match(example.text,/hypothetical \$1.00 LP-only cost/);
-  assert.match(example.text,/historical record is unchanged/);
-  assert.equal(JSON.stringify(returning),original);
+test('collecting the earlier period fees conserves the owner’s tokens and comparison value', () => {
+  const original = JSON.stringify(returning), question = appliedQuestion(returning, 'period-vs-holding');
+  const view = question.contrast;
+  assert.equal(question.reason, 'same-gap');
+  assert.equal(question.contrastIndex, 6);
+  assert.ok(view.feesUSD > 0 && view.gapUSD < 0);
+  const ownerBefore = {usdc: view.principal.amount0 + view.earned0, eth: view.principal.amount1 + view.earned1};
+  const positionAfter = {...view.principal}, walletAfter = {amount0: view.earned0, amount1: view.earned1};
+  const ownerAfter = {usdc: positionAfter.amount0 + walletAfter.amount0, eth: positionAfter.amount1 + walletAfter.amount1};
+  assert.deepEqual(ownerAfter, ownerBefore);
+  const value = tokens => Number(tokens.usdc) / 1e6 + Number(tokens.eth) / 1e18 * view.price;
+  assert.equal(value(ownerBefore) - view.holdingUSD, value(ownerAfter) - view.holdingUSD);
+  assert.ok(Math.abs(value(ownerBefore) - view.lpUSD) < 1e-9);
+  assert.equal(JSON.stringify(returning), original);
+});
+test('the price-rise application follows the real ETH exposure, including uncollected fee ETH', () => {
+  const original = JSON.stringify(returning), question = appliedQuestion(returning, 'period-vs-holding');
+  const view = question.view, exposure = appliedPriceExposure(question);
+  const application = appliedApplication('period-vs-holding', question);
+  assert.equal(application.expected, 'smaller-lead');
+  assert.deepEqual(application.exposure, exposure);
+  assert.equal(exposure.principalETH, 0);
+  assert.ok(exposure.feeETH > 0 && exposure.feeETH < exposure.holdingETH);
+  assert.equal(exposure.lpETH, exposure.feeETH);
+  assert.equal(checkAppliedUnderstanding(question, application, 'same-gap', 'smaller-lead').passed, true);
+  for (const wrong of ['narrower-gap', 'wider-gap', 'shortfall']) {
+    assert.equal(checkAppliedUnderstanding(question, application, wrong, 'smaller-lead').passed, false);
+  }
+  // Value the unchanged raw token balances independently at successively higher prices.
+  const valueLP = price => Number(view.principal.amount0 + view.earned0) / 1e6
+    + Number(view.principal.amount1 + view.earned1) / 1e18 * price;
+  const valueHolding = price => Number(view.holding.amount0) / 1e6 + Number(view.holding.amount1) / 1e18 * price;
+  const initialGap = valueLP(view.price) - valueHolding(view.price);
+  let previousGap = initialGap;
+  for (const increase of [.01, 1, 10, 100]) {
+    const price = view.price + increase;
+    const lp = valueLP(price), holding = valueHolding(price), gap = lp - holding;
+    assert.ok(lp > valueLP(view.price), 'Previously earned ETH fees gain value outside the range.');
+    assert.ok(holding > valueHolding(view.price));
+    assert.ok(gap < previousGap);
+    assert.ok(Math.abs((gap - initialGap) - exposure.ethDifference * increase) < 1e-9);
+    if (increase === .01) assert.ok(gap > 0, 'A shrinking lead need not reverse.');
+    previousGap = gap;
+  }
+  for (const changed of [
+    {...view, state: 'inside'},
+    {...view, price: view.range.upperPrice},
+    {...view, principal: {...view.principal, amount1: 1n}},
+    {...view, holding: {...view.holding, amount1: view.earned1}},
+  ]) assert.throws(() => appliedPriceExposure({...question, view: changed}), /above-range position/);
+  assert.equal(JSON.stringify(returning), original);
+});
+test('the separate cost illustration preserves the final record', () => {
+  const original = JSON.stringify(returning), question = appliedQuestion(returning, 'period-vs-holding');
+  const example = appliedCostExample(question);
+  assert.equal(example.costUSD, 1); assert.equal(example.lpUSD, question.view.lpUSD - 1);
+  assert.ok(question.view.gapUSD > 0 && example.gapUSD < 0);
+  assert.match(example.text, /hypothetical \$1.00 LP-only cost/);
+  assert.match(example.text, /historical record is unchanged/);
+  assert.equal(JSON.stringify(returning), original);
 });
 test('applied question revisions preserve evidence navigation, optional calculations and completed lessons', () => {
   const old={version:1,completed:APPLIED_IDS,drafts:{
@@ -119,7 +165,24 @@ test('applied question revisions preserve evidence navigation, optional calculat
   for(const id of APPLIED_IDS)for(const key of ['prediction','answer','revealed','checkpoint'])assert.equal(migrated.drafts[id][key],old.drafts[id][key]);
   assert.equal(migrated.drafts['period-vs-holding'].choiceSeed,7);
   migrated.drafts['between-samples'].application='fee-records';
-  migrated.drafts['period-vs-holding'].reason='shortfall';
-  migrated.drafts['period-vs-holding'].application='current-values';
+  migrated.drafts['period-vs-holding'].reason='same-gap';
+  migrated.drafts['period-vs-holding'].application='smaller-lead';
   assert.deepEqual(parseAppliedProgress(migrated),migrated);
+});
+
+test('the 1.46 question revision clears only the replaced comparison answers', () => {
+  const old = {version: 1, completed: ['period-vs-holding'], drafts: {
+    'period-vs-holding': {prediction: 'can-trail', reason: 'shortfall', application: 'current-values',
+      answer: '0.17', revealed: true, checkpoint: 6, choiceSeed: 7,
+      questionRevisions: {prediction: 1, reason: 2, application: 2}},
+  }};
+  const migrated = parseAppliedProgress(old), draft = migrated.drafts['period-vs-holding'];
+  assert.deepEqual(migrated.completed, old.completed);
+  assert.equal(draft.reason, ''); assert.equal(draft.application, '');
+  assert.deepEqual(draft.questionRevisions, {prediction: 1, reason: 3, application: 3});
+  for (const key of ['prediction', 'answer', 'revealed', 'checkpoint', 'choiceSeed']) {
+    assert.equal(draft[key], old.drafts['period-vs-holding'][key]);
+  }
+  draft.reason = 'same-gap'; draft.application = 'smaller-lead';
+  assert.deepEqual(parseAppliedProgress(migrated), migrated);
 });

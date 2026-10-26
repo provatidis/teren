@@ -1,5 +1,11 @@
 # Release history
 
+## 1.46.1 · 2026-10-26
+
+- Replace the recorded comparison lesson’s final checks with two concrete situations: collecting earned fees without changing total value, and a further ETH rise while the position remains above its range. Use concise, parallel answer choices and explain the consequences after checking.
+- Put the relevant earlier balances beside the collection question and the final ETH holdings beside the price question. Include ETH held in earned fees, use a shared visual scale, and distinguish a shrinking lead from necessarily falling behind. Remove instructions about lesson state in favor of local context.
+- Preserve completed progress, predictions and the selected historical checkpoint while clearing answers to the two replaced questions. Extend accounting, migration and desktop/mobile checks; recorded evidence and financial models remain unchanged.
+
 ## 1.46.0 · 2026-10-26
 
 - Review all twenty lessons around explanation and application. Replace weak number comparisons and predictable repeat questions with changes in conditions, plausible misconceptions and feedback tied to the selected answer. Keep Predict → Observe → Check, optional predictions and direct lesson access.
