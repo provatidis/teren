@@ -5,7 +5,7 @@ export const APPLIED_KEY = 'passiko-applied-liquidity-v1';
 export const APPLIED_QUESTION_REVISIONS = Object.freeze({
   'fees-over-time': Object.freeze({prediction:1,reason:1,application:1}),
   'between-samples': Object.freeze({prediction:1,reason:1,application:2}),
-  'period-vs-holding': Object.freeze({prediction:1,reason:2,application:2}),
+  'period-vs-holding': Object.freeze({prediction:1,reason:3,application:3}),
 });
 export const emptyAppliedProgress = () => ({ version: 1, completed: [], drafts: {} });
 export function parseAppliedProgress(value) {

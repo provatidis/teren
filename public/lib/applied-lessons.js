@@ -22,7 +22,7 @@ export function appliedQuestion(period, id) {
   // return. Keep the final period endpoint as the assessed result and handoff.
   const contrastIndex = 6, contrast = periodPointView(period, contrastIndex);
   if (!(contrast.feesUSD > 0 && contrast.gapUSD < 0 && view.gapUSD > 0)) throw new Error('The recorded comparison checkpoints no longer match this lesson.');
-  return { index, view, interval, contrastIndex, contrast, answer: view.gapUSD, answerDigits: 2, prediction: 'can-trail', reason: 'shortfall' };
+  return { index, view, interval, contrastIndex, contrast, answer: view.gapUSD, answerDigits: 2, prediction: 'can-trail', reason: 'same-gap' };
 }
 export function checkAppliedAnswer(question, answer, reason) {
   const numeric = learningAnswerMatches(answer, question.answer, question.answerDigits, question.wholeAnswer);
@@ -40,9 +40,11 @@ export function appliedReasonFeedback(id, reason) {
       status: 'An outside sample describes one block. The question interval records activity and earned tokens between two outside samples.',
     },
     'period-vs-holding': {
-      collect: 'Earned fee tokens already have value before collection. At the earlier checkpoint, their value is smaller than the principal shortfall against holding.',
-      exit: 'A range exit stops new earnings while inactive; it does not erase earlier fees. Here those fees are still worth less than the principal shortfall.',
+      'narrower-gap': 'The earned fees already count in the comparison. Collecting them moves the same tokens into the owner’s wallet, so the total value and the gap stay the same.',
+      'wider-gap': 'Collected fees still belong to the owner. Count the position and those wallet tokens together: with no costs or price change, the total value and the gap stay the same.',
     },
   };
-  return feedback[id]?.[reason] || 'Choose a conclusion supported by the marked question checkpoint or interval.';
+  return feedback[id]?.[reason] || (id === 'period-vs-holding'
+    ? 'Choose what collecting these earned fees changes.'
+    : 'Choose a conclusion supported by the marked question checkpoint or interval.');
 }

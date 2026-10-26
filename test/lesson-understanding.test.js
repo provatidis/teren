@@ -90,7 +90,7 @@ test('applied transfer exercises distinguish thought experiments from unchanged 
   const before = [JSON.stringify(baseline),JSON.stringify(returning)];
   for (const item of APPLIED_LESSONS) {
     const question=appliedQuestion(item.caseId==='in-range'?baseline:returning,item.id), app=appliedApplication(item.id,question);
-    assert.equal(app.expected,item.id==='fees-over-time'?'same':item.id==='between-samples'?'fee-records':'current-values');
+    assert.equal(app.expected,item.id==='fees-over-time'?'same':item.id==='between-samples'?'fee-records':'smaller-lead');
     for (const [reason] of item.reasons) for (const [answer] of app.choices) {
       assert.equal(checkAppliedUnderstanding(question,app,reason,answer).passed,reason===question.reason && answer===app.expected);
     }
