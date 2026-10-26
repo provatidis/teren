@@ -1,5 +1,6 @@
 import { checkFeeFlow } from './browser/fee-flow-checks.js';
 import { checkLSTLoops } from './browser/lst-loop-checks.js';
+import { checkLSTTargets } from './browser/lst-target-checks.js';
 import { checkWeekReplay, checkMobileWeekReplay } from './browser/week-replay-checks.js';
 import { checkMatchedComparison } from './browser/matched-comparison-checks.js';
 import { checkWidthComparison } from './browser/width-comparison-checks.js';
@@ -202,8 +203,10 @@ try {
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     return;
   }
-  if (process.env.BROWSER_CHECKS === 'lst') {
-    await checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call });
+  if (['lst', 'lst-targets'].includes(process.env.BROWSER_CHECKS)) {
+    await call('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: profile, eventsEnabled: true });
+    if (process.env.BROWSER_CHECKS === 'lst') await checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call });
+    await checkLSTTargets({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     return;
   }
@@ -659,6 +662,7 @@ try {
   await checkLabRisk({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call });
   await checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call });
+  await checkLSTTargets({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
   await checkVisualLessonPilots({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkFoundationLessons({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkLendingScenes({ evaluate, click, text, navigate, reload, base, call });

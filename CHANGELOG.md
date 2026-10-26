@@ -1,5 +1,12 @@
 # Release history
 
+## 1.43.0 · 2026-10-26
+
+- Add exact wstETH exposure targets alongside borrowing rounds. Show the assumed flash-assisted construction, temporary and long-term debt, swap losses, build flash fee and LTV limit. Define exposure as a multiple of original wstETH holdings, with collateral-to-net-equity leverage shown separately.
+- Compare selling all collateral into WETH with repaying debt and keeping unsold wstETH. Follow either exit step by step, count every obligation and show the appropriate holding benchmark. Blocked exits retain collateral and debt; a retained token's market value is not sale proceeds.
+- Introduce `lst-loop-v2` for the added assumptions. Preserve v1 links, drafts, exports and named records, including their rounds and oracle choices. New targets and exit destinations survive sharing, saving, comparison and Home resumption.
+- Give LST selectors full touch targets and bring the selected exit walkthrough below the sticky navigation. Extend accounting, compatibility and desktop/mobile browser checks; update the guide and methods.
+
 ## 1.42.0 · 2026-10-26
 
 - Add a separate, editable liquidation event to ETH/USDC borrowing loops. Show USDC repaid, ETH removed, the bonus cost and remaining balances without counting spent borrowing as wallet cash. Retain unpaid debt when collateral is exhausted; keep headline endpoints and unwind previews separate.

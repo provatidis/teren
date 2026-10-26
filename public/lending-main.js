@@ -73,4 +73,4 @@ document.addEventListener('click', event => {
 route();
 if (lendingLessonFromHash(location.hash) || loopLessonFromHash(location.hash)) focusInitialLesson('lend-title');
 
-initSavedExperiments({ labs: { 'collateral-loan-v1': loanLab, 'borrowing-loop-v1': loopLab, 'lst-loop-v1': lstLab }, onOpen: () => route(true) });
+initSavedExperiments({ labs: { 'collateral-loan-v1': loanLab, 'borrowing-loop-v1': loopLab, 'lst-loop-v1': lstLab, 'lst-loop-v2': lstLab }, onOpen: () => route(true) });
