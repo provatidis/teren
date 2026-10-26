@@ -12,6 +12,11 @@ const descriptions = {
   release: ['Release the collateral', 'The original loan is cleared. The wstETH moves into the wallet; the flash obligation remains.'],
   sell: ['Sell the wstETH for WETH', 'Use the market sale price, after the assumed swap loss. The conversion rate alone does not determine these proceeds.'],
   settle: ['Settle the temporary loan and costs', 'Repay the flash principal and fee, then subtract the flat exit cost. Only the remaining WETH belongs to you.'],
+  'build-flash': ['Borrow temporarily to buy the target', 'The flash lender sends WETH. This temporary debt must be repaid before the assumed transaction ends.'],
+  finance: ['Borrow against the completed collateral', 'The new WETH loan covers the temporary principal and its fee. The completed collateral must support this debt within maximum LTV.'],
+  'build-settle': ['Settle the build flash loan', 'Pay the temporary principal and fee. The collateralized WETH loan remains, with no borrowed cash left in the wallet.'],
+  'sell-part': ['Sell only what repayment needs', 'Sell enough wstETH at the market price, after swap loss, to pay the flash principal, fee and flat exit cost. Keep the rest.'],
+  keep: ['Keep the unsold wstETH', 'Pay the remaining obligations and costs. The unsold wstETH stays in your wallet, with no loan. It still has staking exposure and market risk.'],
 };
 
 function node(tag, text, className) {
@@ -26,7 +31,7 @@ export function createLSTScene(root, mode) {
   const prefix = 'lst-' + mode + '-scene';
   const label = node('p', '', 'eyebrow');
   label.id = prefix + '-step'; label.setAttribute('aria-live', 'polite');
-  const title = node('h3'); title.id = prefix + '-title';
+  const title = node('h3'); title.id = prefix + '-title'; title.tabIndex = -1;
   const route = node('p', '', 'lst-scene-route');
   const copy = node('p', '', 'body-copy');
   const balances = node('dl', undefined, 'lst-scene-balances');
@@ -40,21 +45,29 @@ export function createLSTScene(root, mode) {
   function draw() {
     const step = steps[index], p = step.position;
     root.dataset.action = step.action;
-    label.textContent = (mode === 'build' && step.round ? 'Round ' + step.round + ' · ' : '') + 'Step ' + (index + 1) + ' of ' + steps.length;
+    const context = mode === 'exit' ? (current.input.exitMode === 'wsteth' ? 'Keep wstETH' : 'Exit to WETH') + ' · '
+      : step.round ? 'Round ' + step.round + ' · ' : '';
+    label.textContent = context + 'Step ' + (index + 1) + ' of ' + steps.length;
     const [heading, explanation] = descriptions[step.action];
     title.textContent = heading;
-    copy.textContent = explanation;
+    copy.textContent = step.action === 'release' && current.end.debt === 0
+      ? 'Move the supplied wstETH into the wallet. There is no loan to repay and no flash debt.' : explanation;
     route.textContent = {
       start: 'Collateral · wallet · obligations', borrow: 'Lender → wallet + WETH debt',
       buy: 'WETH → wstETH', supply: 'Wallet → collateral', flash: 'Flash lender → wallet + temporary debt',
       repay: 'Wallet → original lender', release: 'Collateral → wallet', sell: 'wstETH → WETH',
       settle: 'Wallet → flash lender + costs',
+      'build-flash': 'Flash lender → WETH wallet + temporary debt',
+      finance: 'Collateralized lender → WETH wallet + long-term debt',
+      'build-settle': 'WETH wallet → flash lender + fee',
+      'sell-part': 'Only the wstETH needed → WETH',
+      keep: 'Repay obligations · retain wstETH',
     }[step.action];
     const entries = [
       ['Supplied collateral', quantity(p.collateral, 'wstETH'), 'collateral'],
       ['In the wallet', quantity(p.walletWETH, 'WETH') + ' + ' + quantity(p.walletLST, 'wstETH'), 'wallet'],
       ['WETH debt', quantity(p.debt, 'WETH'), 'debt'],
-      ...(mode === 'exit' ? [['Temporary flash debt', quantity(p.flashDebt, 'WETH'), 'debt']] : []),
+      ...(mode === 'exit' || current.input.buildMode === 'target' ? [['Temporary flash debt', quantity(p.flashDebt, 'WETH'), 'debt']] : []),
     ];
     balances.replaceChildren(...entries.map(([name, value, kind]) => {
       const row = node('div'); row.dataset.kind = kind;

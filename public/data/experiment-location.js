@@ -9,6 +9,7 @@ const destinations = {
   'collateral-loan-v1': { page: 'lending.html', prefix: '#loan=collateral-loan-v1&', title: 'Lending · single loan' },
   'borrowing-loop-v1': { page: 'lending.html', prefix: '#loop=borrowing-loop-v1&', title: 'Lending · borrowing loops' },
   'lst-loop-v1': { page: 'lending.html', prefix: '#lst=lst-loop-v1&', title: 'Lending · correlated-asset loops' },
+  'lst-loop-v2': { page: 'lending.html', prefix: '#lst=lst-loop-v2&', title: 'Lending · correlated-asset loops' },
 };
 
 function locationView(value) {

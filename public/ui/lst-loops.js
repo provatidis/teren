@@ -1,10 +1,11 @@
-import { LST_MODEL, LST_DEFAULTS, LST_KEYS, validateLST, calculateLST } from '../models/lst-loop-v1.js';
+import { LST_MODEL, LST_DEFAULTS, LST_KEYS, validateLST, calculateLST, upgradeLST, targetExposureLimit } from '../models/lst-loop-v2.js';
 import { LST_VIEWS, lstHash, readLSTHash } from '../lib/lst-links.js';
 import { readLSTDraft, saveLSTDraft } from '../data/lst-state.js';
 import { saveExperimentLocation } from '../data/experiment-location.js';
 import { createLSTScene } from '../lib/lst-scene.js';
 import { healthLabel, loanStatus } from '../lib/lending-presentation.js';
 import { fmt, usd, formatTokenQuantity } from '../lib/format.js';
+import { lstExitCopy, lstExitFacts } from '../lib/lst-presentation.js';
 
 const tokens = (value, token = 'WETH') => formatTokenQuantity(value, 4) + ' ' + token;
 const signed = value => (value > 0 ? '+' : value < 0 ? '−' : '') + tokens(Math.abs(value));
@@ -18,6 +19,7 @@ export function initLSTLoops() {
   const active = () => location.hash === '#lst-loops' || readLSTHash(location.hash).status !== 'none';
 
   function write(input) {
+    if (!Object.hasOwn(input, 'buildMode')) input = upgradeLST(input);
     for (const key of LST_KEYS) {
       const field = $('lst-' + key);
       if (field.type === 'checkbox') field.checked = input[key];
@@ -27,7 +29,7 @@ export function initLSTLoops() {
   function read() {
     return Object.fromEntries(LST_KEYS.map(key => {
       const field = $('lst-' + key);
-      return [key, field.type === 'checkbox' ? field.checked : key === 'oracleMode' ? field.value : field.value.trim() === '' ? NaN : Number(field.value)];
+      return [key, field.type === 'checkbox' ? field.checked : ['oracleMode', 'buildMode', 'exitMode'].includes(key) ? field.value : field.value.trim() === '' ? NaN : Number(field.value)];
     }));
   }
   function pairs(id, entries) {
@@ -77,6 +79,22 @@ export function initLSTLoops() {
     $('lst-share-status').textContent = '';
     $('lst-save-status').textContent = '';
     const input = read(), errors = validateLST(input);
+    $('lst-target-settings').hidden = input.buildMode !== 'target';
+    $('lst-round-settings').hidden = input.buildMode !== 'rounds';
+    $('lst-build-flash-setting').hidden = input.buildMode !== 'target';
+    const targetLimit = ['maxLTV', 'swapCost', 'buildFlashFee'].some(key => errors[key]) ? null : targetExposureLimit(input);
+    $('lst-target-limit').textContent = targetLimit === null ? 'Check the build costs and maximum LTV to calculate the limit.'
+      : 'Target limit: ' + formatTokenQuantity(Math.min(50, Math.floor((targetLimit + 1e-12) * 1000) / 1000), 3) + '× at these costs and maximum LTV.';
+    $('lst-target-execution-note').hidden = input.buildMode !== 'target';
+    for (const button of document.querySelectorAll('[data-lst-target]')) {
+      const target = Number(button.dataset.lstTarget);
+      button.disabled = targetLimit === null || target > targetLimit + 1e-12;
+      button.setAttribute('aria-pressed', String(input.targetExposure === target));
+    }
+    for (const destination of ['weth', 'wsteth']) {
+      $('lst-exit-' + destination).setAttribute('aria-pressed', String(input.exitMode === destination));
+      $('lst-exit-' + destination + '-card').dataset.selected = String(input.exitMode === destination);
+    }
     firstInvalid = LST_KEYS.find(key => errors[key]);
     for (const key of LST_KEYS) {
       $('lst-' + key).setAttribute('aria-invalid', String(!!errors[key]));
@@ -95,17 +113,26 @@ export function initLSTLoops() {
     if (firstInvalid) {
       current = null;
       $('lst-build-summary').textContent = 'Check the inputs to calculate this loop.';
+      $('lst-build-risk').textContent = '';
       $('lst-discount-result').textContent = 'Result unavailable until the highlighted inputs are valid.';
       $('lst-carry-value').textContent = 'Check inputs';
       $('lst-carry-health').textContent = 'Unavailable';
       $('lst-exit-status').textContent = 'Exit preview unavailable until the inputs are valid.';
+      $('lst-exit-status').dataset.state = 'unavailable';
+      $('lst-exit-comparison-note').textContent = 'Check the highlighted assumptions to compare the exits.';
+      for (const destination of ['weth', 'wsteth']) {
+        $('lst-exit-' + destination + '-value').textContent = 'Check inputs';
+        $('lst-exit-' + destination + '-note').textContent = 'No outcome is shown until the assumptions are valid.';
+      }
       $('lst-liquidation').hidden = !['repayPercent', 'bonus'].includes(firstInvalid);
       $('lst-liquidation-results').hidden = true;
       return;
     }
     current = calculateLST(input);
     const r = current, p = r.end;
-    $('lst-build-summary').textContent = fmt(r.exposure, 2) + '× starting wstETH · ' + tokens(r.start.collateral, 'wstETH') + ' supplied · ' + tokens(r.start.debt) + ' owed after all rounds.';
+    $('lst-build-summary').textContent = (r.start.debt === 0 ? 'No borrowing: ' : input.buildMode === 'target' ? 'Flash-assisted build: ' : 'After all rounds: ') + formatTokenQuantity(r.exposure, 3) + '× starting wstETH · ' + tokens(r.start.collateral, 'wstETH') + ' supplied · ' + tokens(r.start.debt) + ' owed.';
+    $('lst-build-risk').textContent = 'Starting LTV: ' + fmt(r.start.debt / r.start.collateralValue * 100, 2) + '% · Health factor: ' + healthLabel(r.start.healthFactor) + '. Collateral / net equity after build costs: ' + fmt(r.start.collateralValue / r.start.net, 3) + '×.';
+    $('lst-target-help').textContent = formatTokenQuantity(input.targetExposure, 6) + '× means ' + tokens(input.collateral * input.targetExposure, 'wstETH') + ' from your original ' + tokens(input.collateral, 'wstETH') + ', before interest. This measures staked-token holdings, not net ETH price exposure.';
     buildScene.render(r, resetScenes);
     exitScene.render(r, resetScenes);
     $('lst-net').textContent = tokens(p.net);
@@ -137,6 +164,7 @@ export function initLSTLoops() {
     $('lst-rate-summary').textContent = 'Borrow APR compounds continuously: ' + fmt((Math.exp(input.borrowAPR / 100) - 1) * 100) + '% equivalent APY at the initial rate.' + (input.rateChange ? ' The rate changes on day ' + input.changeDay + '.' : ' It stays fixed in this scenario.');
     pairs('lst-ledger', [
       ['Starting wstETH value', tokens(r.initialValue)], ['Build swap losses', signed(-r.buildCosts)],
+      ...(input.buildMode === 'target' ? [['Build flash loan fee', signed(-r.buildFlashCost)]] : []),
       ['Staking growth · through conversion rate', signed(r.stakingGain)],
       ['Additional collateral lending growth', signed(r.lendingGain)],
       ['WETH borrowing interest', signed(-r.borrowInterest)], ['Market discount on all collateral', signed(-r.discountLoss)],
@@ -156,20 +184,20 @@ export function initLSTLoops() {
         ['Net market value after this event', tokens(l.remaining.net)],
       ]);
     }
-    const exitCopy = {
-      complete: 'The assumed exit clears both debts and converts the remaining value to WETH.',
-      boundary: 'Exit preview stopped: the current position is at the boundary, below it, or would already have reached it under the assumed rates. Actual liquidation would change these balances.',
-      unavailable: 'Exit unavailable under your assumptions. Collateral stays supplied and all debt remains owed.',
-      shortfall: 'The sale cannot cover both debts and the assumed costs. ' + tokens(r.exit.shortfall) + ' of additional funding would be needed; the preview does not add it.',
-    };
-    $('lst-exit-status').textContent = exitCopy[r.exit.status];
+    $('lst-exit-status').textContent = lstExitCopy(r);
     $('lst-exit-status').dataset.state = r.exit.status;
-    pairs('lst-exit-outcome', r.exit.status === 'complete' ? [
-      ['WETH after the complete exit', tokens(r.exit.cash)], ['WETH debt remaining', tokens(0)],
-      ['Exit swap loss', tokens(r.exit.swapLoss)], ['Flash loan fee', tokens(r.exit.flashCost)], ['Flat exit cost', tokens(r.exit.gas)],
-      ['Holding, sold with the same swap and flat costs', r.holdingAfterExit < 0 ? 'Costs exceed proceeds' : tokens(r.holdingAfterExit)],
-      ['Loop minus holding after these exits', r.holdingAfterExit < 0 ? 'Comparison unavailable' : signed(r.exit.cash - r.holdingAfterExit)],
-    ] : [['Collateral still supplied', tokens(p.collateral, 'wstETH')], ['WETH debt still owed', tokens(p.debt)], ['Market assets minus debt · before liquidation', tokens(p.net)]]);
+    pairs('lst-exit-outcome', lstExitFacts(r));
+    $('lst-exit-comparison-note').textContent = r.exit.status === 'complete'
+      ? (p.debt > 0 ? 'Both routes clear the debt. ' : 'There is no debt to repay. ') + 'Keeping wstETH avoids selling the retained tokens, which still carry staking exposure and market risk. Its displayed WETH value is a valuation at this price.'
+      : 'Neither exit runs under these assumptions. Review the reason below; no collateral moves and no debt is cleared in the preview.';
+    for (const destination of ['weth', 'wsteth']) {
+      const e = r.exits[destination], complete = e.status === 'complete';
+      $('lst-exit-' + destination + '-value').textContent = !complete ? 'Exit not run'
+        : destination === 'weth' ? tokens(e.cash) : tokens(e.retained, 'wstETH');
+      $('lst-exit-' + destination + '-note').textContent = !complete ? 'The position and debt remain in place.'
+        : destination === 'weth' ? 'After repayment and costs. No wstETH or loan remains.'
+          : 'Market value now: ' + tokens(e.remaining.net) + '. No loan remains; the unsold tokens stay invested.';
+    }
     if (save) persist(input);
   }
   function changeView(next) {
@@ -183,7 +211,29 @@ export function initLSTLoops() {
     $('lst-view-' + target).focus();
     $('lending-lst').scrollIntoView({ block: 'start', behavior: 'instant' });
   });
-  for (const key of LST_KEYS) $('lst-' + key).addEventListener('input', () => render(true));
+  for (const key of LST_KEYS) $('lst-' + key).addEventListener('input', () => {
+    if (key === 'buildMode') {
+      // Leave an invalid, unsaved edit behind when switching construction modes.
+      // Valid preferences are retained and saved, including the inactive mode.
+      const inactive = $('lst-buildMode').value === 'rounds'
+        ? [['targetExposure', 1, 50], ['buildFlashFee', 0, 5]] : [['rounds', 0, 8], ['borrowPercent', 1, 95]];
+      for (const [name, min, max] of inactive) {
+        const field = $('lst-' + name), value = Number(field.value);
+        if (!field.value.trim() || !Number.isFinite(value) || value < min || value > max || name === 'rounds' && !Number.isInteger(value)) field.value = LST_DEFAULTS[name];
+      }
+    }
+    render(true, key === 'buildMode');
+  });
+  for (const button of document.querySelectorAll('[data-lst-target]')) button.addEventListener('click', () => {
+    $('lst-targetExposure').value = button.dataset.lstTarget; render(true);
+  });
+  for (const destination of ['weth', 'wsteth']) $('lst-exit-' + destination).addEventListener('click', () => {
+    $('lst-exitMode').value = destination; render(true, true);
+    if (current) {
+      $('lst-exit-scene-title').focus({ preventScroll: true });
+      $('lst-exit-scene').scrollIntoView({ block: 'start', behavior: 'instant' });
+    }
+  });
   $('lst-fix').addEventListener('click', () => {
     const field = $('lst-' + firstInvalid);
     if (!field) return;
@@ -224,6 +274,6 @@ export function initLSTLoops() {
   window.addEventListener('hashchange', loadRoute);
   return {
     getExperimentDraft: () => current ? { model: LST_MODEL, inputs: { ...current.input }, origin: null } : null,
-    setExperiment(entry) { write(entry.inputs); view = 'hold'; render(false, true); persist(entry.inputs); },
+    setExperiment(entry) { write(entry.inputs); view = 'hold'; render(false, true); if (current) persist(current.input); },
   };
 }

@@ -6,7 +6,7 @@ import { downloadBlob } from '../lib/download.js';
 
 export function initSavedExperiments({ labs, onOpen = () => {} }) {
   const $ = id => document.getElementById(id);
-  const saveButtons = { 'cp50-v1': 'scenario', 'cl-range-v1': 'cl', 'collateral-loan-v1': 'loan', 'borrowing-loop-v1': 'loop', 'lst-loop-v1': 'lst' };
+  const saveButtons = { 'cp50-v1': 'scenario', 'cl-range-v1': 'cl', 'collateral-loan-v1': 'loan', 'borrowing-loop-v1': 'loop', 'lst-loop-v1': 'lst', 'lst-loop-v2': 'lst' };
   let saved = readLibrary(), library = saved.library, temporary = saved.status === 'unavailable';
   let recovery = ['invalid','incompatible'].includes(saved.status), removed = null, editor = null, returnFocus = null;
   const selected = new Set();
@@ -72,7 +72,10 @@ export function initSavedExperiments({ labs, onOpen = () => {} }) {
     const draft = labs[model].getExperimentDraft();
     if (draft) beginEditor('new', draft, trigger);
   }
-  for (const model of Object.keys(labs)) $(saveButtons[model] + '-save').addEventListener('click', event => saveFromLab(model, event.currentTarget));
+  // Multiple saved model versions can reopen in one current lab. Bind its save
+  // control once; the lab supplies the current version in its draft.
+  const controls = new Map(Object.keys(labs).map(model => [saveButtons[model], model]));
+  for (const [prefix, model] of controls) $(prefix + '-save').addEventListener('click', event => saveFromLab(model, event.currentTarget));
   $('experiment-save-form').addEventListener('submit', event => {
     event.preventDefault(); if (!editor) return;
     try {
@@ -116,7 +119,7 @@ export function initSavedExperiments({ labs, onOpen = () => {} }) {
   }
   function renderList() {
     const query = $('experiments-search').value.trim().toLocaleLowerCase(), model = $('experiments-model').value;
-    const matches = library.experiments.filter(entry => (model === 'all' || entry.model === model) && (entry.name + '\n' + entry.notes).toLocaleLowerCase().includes(query));
+    const matches = library.experiments.filter(entry => (model === 'all' || entry.model === model || model === 'lst-loop-v1' && experimentFamily(entry.model) === 'correlated') && (entry.name + '\n' + entry.notes).toLocaleLowerCase().includes(query));
     $('experiments-no-match').hidden = !library.experiments.length || matches.length > 0;
     $('experiments-list').replaceChildren(...matches.map(entry => {
       const { result, modelName, family } = experimentView(entry);

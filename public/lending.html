@@ -690,10 +690,26 @@
         </div>
         <p id="lst-invalid" class="notice error" role="status" hidden>Check the highlighted assumptions. <button id="lst-fix" class="text-button" type="button">Go to the field →</button></p>
         <section id="lst-build" class="lst-panel card" aria-labelledby="lst-build-title">
-          <h2 id="lst-build-title">Borrow ETH to hold more staked ETH</h2>
-          <p class="body-copy">Supply wstETH, borrow WETH, buy more wstETH, then supply it. Each round adds collateral and debt.</p>
+          <h2 id="lst-build-title">Choose your staking exposure</h2>
+          <p class="body-copy">Set the amount of wstETH you want to hold, or build it in borrowing rounds. Follow the assets and debt through either route.</p>
           <div class="lst-two-column">
             <div class="lst-controls">
+              <div class="scenario-field">
+                <label for="lst-buildMode">How to build</label>
+                <select id="lst-buildMode" aria-describedby="lst-buildMode-error"><option value="target">Choose a target exposure</option><option value="rounds">Build in borrowing rounds</option></select>
+                <p id="lst-buildMode-error" class="field-error" hidden></p>
+              </div>
+              <div id="lst-target-settings">
+                <div class="scenario-field">
+                  <label for="lst-targetExposure">Target wstETH exposure <span>× original tokens</span></label>
+                  <input id="lst-targetExposure" type="number" min="1" max="50" step="any" value="3" aria-describedby="lst-targetExposure-error lst-target-help lst-target-limit">
+                  <p id="lst-targetExposure-error" class="field-error" hidden></p>
+                </div>
+                <div class="lst-target-presets" role="group" aria-label="Target exposure presets"><button type="button" data-lst-target="1">1×</button><button type="button" data-lst-target="2">2×</button><button type="button" data-lst-target="3">3×</button><button type="button" data-lst-target="5">5×</button></div>
+                <p id="lst-target-help" class="fine-print">3× means three times your original wstETH before interest. It measures staked-token holdings, not net ETH price exposure.</p>
+                <p id="lst-target-limit" class="fine-print"></p>
+              </div>
+              <div id="lst-round-settings" hidden>
               <div class="lst-slider-field">
   <label for="lst-rounds">Borrowing rounds <output id="lst-rounds-value" for="lst-rounds"></output></label>
   <input id="lst-rounds" type="range" min="0" max="8" step="1" value="3" aria-describedby="lst-rounds-error">
@@ -704,8 +720,11 @@
   <input id="lst-borrowPercent" type="number" min="1" max="95" step="any" value="75" aria-describedby="lst-borrowPercent-error">
   <p id="lst-borrowPercent-error" class="field-error" hidden></p>
 </div>
+              </div>
               <p id="lst-build-summary" class="lst-inline-result"></p>
+              <p id="lst-build-risk" class="fine-print"></p>
               <details id="lst-build-assumptions"><summary>Starting tokens, costs and collateral rules</summary>
+                <p id="lst-target-execution-note" class="fine-print">Assumes a flash-assisted build: buy and supply the extra wstETH, borrow against the completed collateral, then settle the temporary loan. Liquidity and execution are assumed; build gas is excluded.</p>
                 <div class="lst-fields"><div class="scenario-field">
   <label for="lst-collateral">Your starting wstETH <span>wstETH</span></label>
   <input id="lst-collateral" type="number" min="0.001" max="1000000" step="any" value="5" aria-describedby="lst-collateral-error">
@@ -720,6 +739,12 @@
   <label for="lst-swapCost">Loss on each build swap <span>%</span></label>
   <input id="lst-swapCost" type="number" min="0" max="5" step="any" value="0.1" aria-describedby="lst-swapCost-error">
   <p id="lst-swapCost-error" class="field-error" hidden></p>
+</div>
+<div id="lst-build-flash-setting" class="scenario-field">
+  <label for="lst-buildFlashFee">Build flash loan fee <span>%</span></label>
+  <input id="lst-buildFlashFee" type="number" min="0" max="5" step="any" value="0.05" aria-describedby="lst-buildFlashFee-error lst-build-flash-help">
+  <p id="lst-buildFlashFee-error" class="field-error" hidden></p>
+  <p id="lst-build-flash-help" class="fine-print">Financed by the final WETH loan. An assumption, not a live fee quote.</p>
 </div>
 <div class="scenario-field">
   <label for="lst-maxLTV">Maximum starting LTV <span>%</span></label>
@@ -826,7 +851,13 @@
         </section>
         <section id="lst-exit" class="lst-panel card" aria-labelledby="lst-exit-title" hidden>
           <h2 id="lst-exit-title">The debt has to leave with you</h2>
-          <p class="body-copy">Preview a complete exit to WETH. A temporary flash loan repays the debt before collateral is released; selling the wstETH then settles the flash loan and costs.</p>
+          <p class="body-copy">Clear the loan and choose what to keep. Sell all the wstETH for WETH, or sell only enough to repay and keep the rest.</p>
+          <input id="lst-exitMode" type="hidden" value="weth"><p id="lst-exitMode-error" class="field-error" hidden></p>
+          <div class="lst-exit-comparison" role="group" aria-label="Exit destination">
+            <article id="lst-exit-weth-card"><h3>Sell all to WETH</h3><strong id="lst-exit-weth-value"></strong><p id="lst-exit-weth-note"></p><button id="lst-exit-weth" type="button" class="button secondary" aria-pressed="true">Follow the WETH exit</button></article>
+            <article id="lst-exit-wsteth-card"><h3>Keep unsold wstETH</h3><strong id="lst-exit-wsteth-value"></strong><p id="lst-exit-wsteth-note"></p><button id="lst-exit-wsteth" type="button" class="button secondary" aria-pressed="false">Follow the wstETH exit</button></article>
+          </div>
+          <p id="lst-exit-comparison-note" class="fine-print">When an exit can complete, both routes clear the debt. Retained wstETH still carries staking exposure and market risk.</p>
           <div class="lst-two-column"><div id="lst-exit-scene" class="lst-scene" aria-label="Follow the atomic exit"></div><div class="lst-controls">
             <label class="loan-checkbox"><input id="lst-exitAvailable" type="checkbox" checked aria-describedby="lst-exitAvailable-error"> Assume the flash loan, withdrawal and swap can execute</label><p id="lst-exitAvailable-error" class="field-error" hidden></p>
             <div class="lst-fields"><div class="scenario-field">
@@ -852,8 +883,10 @@
         <div class="lst-actions"><button id="lst-save" class="button secondary" type="button">Save experiment</button><button id="lst-share" class="button secondary" type="button">Copy LST loop link</button><button id="lst-reset" class="text-button" type="button">Reset LST setup</button></div>
         <p id="lst-save-status" class="fine-print" role="status"></p><p id="lst-storage" class="fine-print" role="status"></p><p id="lst-share-status" class="fine-print" role="status"></p><input id="lst-share-url" type="text" readonly aria-label="LST loop link" hidden>
         <details id="lst-methods" class="loan-method card"><summary>How this experiment works</summary>
-          <p>All build rounds happen at the starting conversion rate. wstETH’s staking return changes that rate; additional collateral yield changes the supplied token balance. The two yields are counted separately. APY is an annual growth factor. Borrow APR compounds continuously, with an optional rate change, over a 365-day year.</p>
+          <p>Build at the starting conversion rate, either in borrowing rounds or to an exact target. The target is a multiple of original wstETH holdings. Its flash-assisted purchase adds swap losses and a build flash fee to the financing needed; build gas is excluded. The maximum-LTV check does not establish available liquidity or executable transactions.</p>
+          <p>wstETH’s staking return changes the conversion rate; additional collateral yield changes the supplied token balance. The two yields are counted separately. APY is an annual growth factor. Borrow APR compounds continuously, with an optional rate change, over a 365-day year.</p>
           <p>The model tracks ETH-denominated value. A dollar-price change alone cancels out of the collateral-to-debt ratio. A market discount can change sale proceeds without changing an oracle that tracks the conversion rate. A rate-only boundary reached earlier is flagged even if the later health factor recovers.</p>
+          <p>Both exit routes repay the debt and costs. Selling everything leaves WETH; selling only enough leaves unsold wstETH, which keeps its staking exposure and market risk. The first compares with selling the original holding under the same cost assumptions. The second compares with keeping the original tokens without an exit transaction.</p>
           <p>The loop, thresholds and execution costs are hypothetical. Aave e-mode has category-specific rules; Morpho Blue markets have their own collateral, debt asset, oracle and liquidation threshold, and their collateral does not earn lending interest by default. Live rates, protocol caps, oracle limits, slashing events, withdrawal queues and real execution require separate evidence.</p>
           <p><a href="https://docs.lido.fi/contracts/wsteth/" target="_blank" rel="noopener noreferrer">Lido: how wstETH works ↗</a> · <a href="https://aave.com/help/borrowing/e-mode" target="_blank" rel="noopener noreferrer">Aave: e-mode ↗</a> · <a href="https://docs.morpho.org/learn/concepts/blue/" target="_blank" rel="noopener noreferrer">Morpho: market parameters ↗</a> · <a href="methods.html#lst-loops">Teren’s methods →</a></p>
         </details>

@@ -13,6 +13,7 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
   const open = id => evaluate(`document.getElementById('${id}').open=true`);
   try {
     await click('lst-reset');
+    await fill('lst-buildMode', 'rounds');
     assert.equal(await evaluate('document.body.dataset.lendingView'), 'lst');
     assert.equal(await visible('lending-experiment'), false);
     assert.equal(await visible('lending-loops'), false);
@@ -100,7 +101,7 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
     await click('lst-save'); await fill('experiment-name', 'Browser LST carry');
     await fill('experiment-notes', 'Rates and oracle are hypothetical.'); await click('experiment-save-confirm');
     const entry = await evaluate("JSON.parse(localStorage.getItem('degenerator-experiments-v1')).experiments.find(x=>x.name==='Browser LST carry')");
-    assert.equal(entry.model, 'lst-loop-v1');
+    assert.equal(entry.model, 'lst-loop-v2');
     await navigate(base + 'liquidity.html#saved=' + entry.id);
     assert.equal(await evaluate('document.body.dataset.lendingView'), 'lst');
     assert.equal(await visible('lst-hold'), true);
@@ -113,13 +114,14 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
     // Successful clipboard copies do not change an intentionally invalid address.
     if (new URL(shareURL).hash.includes('&view=')) assert.equal(readLSTHash(new URL(shareURL).hash).status, 'ready');
     await navigate(base);
-    assert.match(await evaluate("document.querySelector('a[href*=\"#lst=lst-loop-v1\"]')?.textContent || ''"), /correlated-asset loops/i);
+    assert.match(await evaluate("document.querySelector('a[href*=\"#lst=lst-loop-v2\"]')?.textContent || ''"), /correlated-asset loops/i);
     assert.ok(await evaluate("!!document.querySelector('a[href=\"lending.html#lst-loops\"]')"));
     console.log('PASS: named LST experiments reopen across topics, malformed links preserve drafts, and Home offers direct access and resumption');
 
     for (const width of [390, 320]) {
       await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
       await navigate(base + 'lending.html#lst-loops'); await click('lst-reset');
+      await fill('lst-buildMode', 'rounds');
       await dragRangeToMax({ evaluate, call, fill }, 'lst-rounds');
       assert.equal((await state()).input.rounds, 8);
       await click('lst-view-hold');

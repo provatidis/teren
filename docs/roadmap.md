@@ -1,12 +1,12 @@
 # Next discussion
 
-Updated for 1.42.0. These are discussion priorities, not commitments to build every item.
+Updated for 1.43.0. These are discussion priorities, not commitments to build every item.
 
 ## Next lab iteration
 
-The lab-risk release adds the ETH/USDC loop liquidation event, visible price boundaries, clearer oracle assumptions and mobile fixes. Next, prioritize the experienced LST workflow: enter a target exposure, inspect the construction, and compare a full WETH exit with repaying debt while retaining unleveraged wstETH. Keep round-by-round explanations available. Define leverage, construction costs and execution assumptions explicitly; an ideal LTV ceiling is not proof that a flash-loan transaction can execute.
+The lab-risk release added the ETH/USDC loop liquidation event, visible price boundaries and clearer oracle assumptions. Release 1.43.0 adds exact LST targets, the flash-assisted construction ledger and a comparison of full WETH exits with retaining unsold wstETH after repayment. Borrowing rounds and older scenarios remain available. The LTV ceiling is an accounting constraint, not proof that a transaction can execute.
 
-Follow with a consistent explicit interest choice for single-loan results, preserving existing simple-interest scenarios, and optional LP costs plus an assumed **position** fee APR and duration. Do not automatically multiply a pool APR by concentration: competing active liquidity and time in range remain separate assumptions. An atomic ETH/USDC exit and fee-aware sandbox arbitrage are later candidates.
+Next, add a consistent explicit interest choice for single-loan results, preserving existing simple-interest scenarios. Optional LP costs plus an assumed **position** fee APR and duration are a separate follow-up. Do not automatically multiply a pool APR by concentration: competing active liquidity and time in range remain separate assumptions. An atomic ETH/USDC exit and fee-aware sandbox arbitrage are later candidates.
 
 ## Learning depth
 
