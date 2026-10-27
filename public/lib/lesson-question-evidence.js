@@ -1,5 +1,6 @@
 import { sceneNode as node } from './lesson-scene.js';
 import { usd } from './format.js';
+import { createRangeGuide } from './range-scene-guide.js';
 
 export function appendQuestionComparison(container, comparison) {
   const figure = node('figure', undefined, 'learn-evidence-comparison');
@@ -41,6 +42,25 @@ function appendPriceMargin(container, margin) {
   container.append(figure);
 }
 
+function appendPriceRange(container, range) {
+  const figure = node('figure', undefined, 'applied-start-figure');
+  const low = Math.min(range.lowerPrice, range.startPrice);
+  const high = Math.max(range.upperPrice, range.startPrice);
+  const pad = (high - low) * .15;
+  const guide = createRangeGuide({
+    min: low - pad, max: high + pad,
+    lower: range.lowerPrice, upper: range.upperPrice,
+    price: range.startPrice, recorded: true,
+  });
+  figure.append(
+    node('figcaption', 'Starting ETH price: ' + usd(range.startPrice)),
+    guide.element,
+    node('p', 'Band = position range; marker = starting price.', 'applied-start-key'),
+  );
+  if (range.markerDescription) figure.append(node('p', range.markerDescription, 'sr-only'));
+  container.append(figure);
+}
+
 // These are facts for the adjacent question, independent of an explored frame.
 export function renderQuestionEvidence(container, evidence) {
   container.replaceChildren();
@@ -61,6 +81,7 @@ export function renderQuestionEvidence(container, evidence) {
   if (facts.childElementCount) container.append(facts);
   if (evidence.comparison) appendQuestionComparison(container, evidence.comparison);
   if (evidence.priceMargin) appendPriceMargin(container, evidence.priceMargin);
+  if (evidence.priceRange) appendPriceRange(container, evidence.priceRange);
   if (evidence.note) container.append(node('p', evidence.note, 'learn-question-note'));
   if (evidence.explore) {
     const link = node('a', evidence.explore.text, 'learn-explore');

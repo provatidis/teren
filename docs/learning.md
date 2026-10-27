@@ -21,12 +21,12 @@ Keep the evidence needed for a question beside it, and name the situation being 
 | Trade size | Every unit receives the starting spot price; a slippage limit removes impact. | Explain changing reserves; distinguish price impact already included in a wallet quote from slippage tolerance relative to that quote. |
 | Ownership | Withdrawal guarantees the original dollar deposit or original ETH. | Follow a claim through swaps in either direction; distinguish them from another provider's proportional deposit. |
 | Token balances | Rebalancing creates tokens, pays interest or protects a falling asset. | Explain swaps and a price return; distinguish holding more ETH from having more dollar value. |
-| Loss versus profit | Dollar profit means beating holding; withdrawal erases or charges the holding gap. | Choose the original-token benchmark for a fictional position dashboard; retain a withdrawal at an unchanged price in another variation. |
+| Loss versus profit | Dollar profit means beating holding; withdrawal erases or charges the holding gap. | Explain the swaps behind the changed exposure, then choose the original-token benchmark for a fictional dashboard or consider withdrawal. Reasoning follows the selected price, including an unchanged price. |
 | Break-even fees | Matching holding once locks in the result; a required fee target predicts earnings. | Keep earned USDC fees fixed while ETH moves farther from its starting price. |
 | Range boundaries | Outside means liquidation, no earlier fees, or no price exposure. | Predict all-USDC, all-ETH and mixed principal across the three fresh variations; distinguish eligibility for swaps from earned fees. |
 | Final challenge | Matching holding means making a dollar profit; a correct simulation proves safety. | Construct a case that matches holding while both finish below the starting capital, then explain the two comparisons. |
 | Narrow and wide ranges | Tighter capital concentration always means greater profit; price exposure means a position is trading. | Compare eligibility, follow a price move below one range, and choose each position’s own holding basket. |
-| Fee tiers and APR | The highest charge earns most; a past fee APR fixes future profit; collection itself compounds liquidity. | Change competition, trading volume or the owner’s active liquidity while keeping the other conditions stated. |
+| Fee tiers and APR | The highest charge earns most; a past fee APR fixes future profit; reinvesting guarantees a larger fee share. | Explain a lower-tier pool earning more, interpret yesterday’s APR after competition changes, and distinguish collection from reinvesting while other LPs add more liquidity. |
 | Exits, returns and costs | Inactive means closed or protected; changing bounds refunds losses. | Interpret outside principal values and re-entry; compare leaving a range in place with moving it after a fall before a rebound. |
 | Period fees | All collectable tokens are new period income; collection is compounding. | Identify new fee tokens; collect them with principal unchanged. |
 | Between samples | Endpoints describe every crossing; a wide range leaves ample room on both sides of the starting price. | Infer a return and exit from recorded active time; use the position’s placement to explain why a small rise can leave a wide range. |
@@ -42,7 +42,7 @@ Direct lesson links open at the requested heading, below the primary navigation.
 
 The width and outside-value cases are calculated hypothetical endpoints from `cl-range-v1`. They do not reconstruct a trading path, predict fees or model native ticks. Equal budgets across widths use different initial token mixes, so each position has its own holding benchmark. Price inputs and bounds are visible before predicting.
 
-Fee-tier predictions start without earnings data, then reveal supplied fictional fee totals after any protocol share. These figures are not derived from the rate alone. They are labelled teaching facts and never presented as a forecast or independently checked history.
+Fee-tier predictions start without earnings data, then reveal supplied fictional volumes, fee totals and equal active shares, with no protocol fee. The applications show calculated amounts and shares; learners explain the mechanism without annualizing income or calculating proportions. The APR screenshot uses a fictional past day, and the reinvestment case uses a separate fictional pool. These are teaching facts, never forecasts or independently checked history.
 
 The three historical exercises continue to use the original two independently checked records. Their fixed question checkpoint or interval remains separate from exploration. Any changed setup is labelled a thought experiment.
 
@@ -52,7 +52,7 @@ The second topic introduces one collateral asset and one debt asset before any l
 
 | Step | Misconception to challenge | Changed situation |
 | --- | --- | --- |
-| Supply and collateral | Supplying requires borrowing; earning supply interest and enabling collateral are the same action. | Enable collateral without opening a loan; identify capacity versus actual debt. |
+| Supply and collateral | Supplying requires borrowing; collateral settings move tokens or create debt. | Return supplied ETH to the wallet: distinguish withdrawal from disabling collateral, with no debt and enough pool liquidity explicitly stated. |
 | Borrowing and debt | Borrowed cash increases wealth; the maximum allowed loan is a recommended amount. | Show the maximum loan’s narrow price headroom and distinguish the opening limit from the liquidation threshold. |
 | Prices, interest and time | An unchanged ETH price means an unchanged loan. | Change the supplied growth rates; distinguish faster collateral growth from growing debt. |
 | Repay or add collateral | Adding collateral repays debt; a later price recovery restores liquidated collateral. | Compare the two responses, then distinguish improved backing from reversing an actual liquidation. |

@@ -33,7 +33,10 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
       assert.match(await text('applied-interval-summary'), /26084375 → 26085000/);
       assert.match(await text('applied-observation'), /Both endpoints are outside/);
       assert.match(await text('applied-reason-evidence'), /26084375.*26085000.*45m 24s.*Unchanged/s);
-      assert.match(await text('applied-application-evidence'), /Where this range started.*Starting ETH price.*Upper bound.*0.44%.*41.7%/s);
+      assert.match(await text('applied-application-evidence'), /Where this range started.*Starting ETH price.*Lower.*Upper/s);
+      assert.doesNotMatch(await text('applied-application-evidence'), /0\.44%/);
+      assert.equal(await evaluate("document.querySelector('#applied-application-evidence .scene-range-marker').checkVisibility()"), true);
+      assert.match(await text('applied-application-evidence'), /starting price marker is close to the upper bound/);
       assert.equal(await evaluate("document.getElementById('applied-reason-evidence').checkVisibility()&&document.getElementById('applied-application-evidence').checkVisibility()"),true);
     }
     if (id === 'period-vs-holding') {

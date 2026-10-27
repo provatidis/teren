@@ -32,6 +32,38 @@ export function tokenBalanceNarration(outcome) {
     explanation: 'ETH moves from ' + usd(s.initialPrice) + ' to ' + usd(s.futurePrice) + '. ' + exchange + ' The LP starts with ' + fmt(r.held.eth, 6) + ' ETH and ' + fmt(r.held.usdc, 2) + ' USDC, and ends with ' + fmt(r.pooled.eth, 6) + ' ETH and ' + fmt(r.pooled.usdc, 2) + ' USDC. Tokens move through swaps; neither ETH nor USDC is created by the pool.' };
 }
 
+export function lossProfitReasoning(outcome) {
+  const { initialPrice, futurePrice } = outcome.setup;
+  const direction = futurePrice > initialPrice ? 'up' : futurePrice < initialPrice ? 'down' : 'same';
+  const correct = direction === 'up'
+    ? 'Swaps exchanged ETH for USDC as ETH rose, leaving the LP with less ETH to gain value.'
+    : direction === 'down'
+      ? 'Swaps exchanged USDC for ETH as ETH fell, increasing the LP’s ETH while holding kept its original mix.'
+      : 'At the starting price, this fee-free model has the same token amounts as the original holding.';
+  const exposure = direction === 'up'
+    ? 'Half the original deposit was in USDC, so the LP missed part of ETH’s rise.'
+    : direction === 'down'
+      ? 'Half the original deposit was in ETH, so the price fall explains the gap to holding.'
+      : 'A pool that starts 50/50 keeps pace with the original holding at every price.';
+  return {
+    direction,
+    reasoning: direction === 'up' ? 'When ETH rises, why does the LP gain less than holding?'
+      : direction === 'down' ? 'When ETH falls, why does the LP lose more than holding?'
+        : 'Why does the LP match holding before fees at this price?',
+    reasons: [['traded-mix', correct], ['same-exposure', exposure],
+      ['swap-fees', direction === 'same' ? 'Swap fees earned along the way cover the gap to holding.' : 'The LP pays trading fees that reduce its return.']],
+    feedback: correct + (direction === 'same' ? ' A different final price would change the mix and the comparison.' : ' Holding keeps the exact ETH and USDC that funded the position.'),
+    feedbackByChoice: {
+      'same-exposure': direction === 'same'
+        ? 'The values match because the price is unchanged here. At a different final price, swaps leave the LP with a different mix from holding.'
+        : 'Holding starts with the same 50/50 split. The difference comes from the LP exchanging tokens as the price moves, while holding keeps the original amounts.',
+      'swap-fees': direction === 'same'
+        ? 'No fees are included. At the starting price, the LP has the original token amounts and matches holding without fee income.'
+        : 'No fees are included in this comparison. The shortfall comes from the changed token mix; it is not a trading fee charged to the LP.',
+    },
+  };
+}
+
 export function rangeBoundaryNarration(outcome) {
   const { setup: s } = outcome;
   const exchange = s.futurePrice > s.initialPrice
@@ -46,8 +78,13 @@ export function rangeBoundaryNarration(outcome) {
 export function lessonReasonFeedback(id, outcome, reason, feedbackByChoice = {}) {
   if (id === 'token-balances') {
     const copy = tokenBalanceNarration(outcome);
-    if (reason === 'mint') return 'The pool does not create ETH or USDC. ' + copy.exchange;
+    if (reason === 'automatic') return 'Tokens change hands through trades. The pool does not move between token mixes on a timer or without a swap. ' + copy.exchange;
     if (reason === 'interest') return 'This model includes no interest, earned fees or compounding. ' + copy.exchange;
+  }
+  if (id === 'loss-vs-profit') {
+    const copy = lossProfitReasoning(outcome);
+    return reason === outcome.reason ? copy.feedback : copy.feedbackByChoice[reason]
+      || 'Compare the LP’s changed token mix with the original tokens kept by holding.';
   }
   if (id === 'range-boundaries' && reason === 'zero') return outcome.prediction === 'both'
     ? 'This endpoint is inside the range, but that does not establish earlier earnings. Past fees require historical fee accounting, separate from the final token mix.'

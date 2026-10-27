@@ -62,7 +62,7 @@ export function runLesson(id, input, variant = 0) {
   const gap = Math.max(0, result.breakEvenFees - setup.fees);
   const answers = {
     'token-balances': { prediction: result.pooled.eth < result.held.eth ? 'less' : result.pooled.eth > result.held.eth ? 'more' : 'same', answer: result.pooled.eth, answerDigits: 3, unit: 'ETH', reason: 'rebalance' },
-    'loss-vs-profit': { prediction: result.lpReturn >= 0 ? 'gain' : 'loss', answer: result.breakEvenFees, answerDigits: 2, unit: 'USD', reason: 'benchmark' },
+    'loss-vs-profit': { prediction: result.lpReturn >= 0 ? 'gain' : 'loss', answer: result.breakEvenFees, answerDigits: 2, unit: 'USD', reason: 'traded-mix' },
     'fee-break-even': { prediction: result.difference >= -1e-8 ? 'enough' : 'short', answer: result.breakEvenFees, answerDigits: 2, unit: 'USD', reason: 'assumption' },
     'final-challenge': { prediction: result.difference >= -1e-8 ? 'lp' : 'hold', answer: gap, answerDigits: 2, unit: 'USD', reason: 'total' },
   };

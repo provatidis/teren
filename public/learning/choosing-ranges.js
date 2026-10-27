@@ -9,13 +9,13 @@ export const MANAGEMENT_LESSONS = Object.freeze([
   {id:'range-width',short:'Narrow and wide ranges',title:'Does a tighter range always win?',adds:'Start by changing only the range width.',
     intro:'Keep the starting budget and price the same. Change the range, then see where each position can take part in swaps.',
     reasoning:'Why can a wider range remain active after a narrower range stops?',
-    reasons:[['bounds','The wider boundaries include more possible prices.'],['budget','The wider position uses more capital to stay active.'],['protection','The wider position follows a different pool price.']],
+    reasons:[['bounds','The wider boundaries include more possible prices.'],['budget','The wider position uses more capital to stay active.'],['protection','The wider position moves its bounds as the price changes.']],
     hint:'Look at the shown price and each pair of bounds. Active means eligible to earn from swaps.',
     takeaway:'A tighter range concentrates capital and brings the boundaries closer. It does not guarantee better profit.',
     accomplishment:'You separated being active from being ahead of holding.',
     explanation:'The same price move can leave a narrow position inactive while a wider one still supplies liquidity. A narrow position may earn more while active, but actual fees depend on trades and competing liquidity. Being active is eligibility to earn, not a payment for waiting.',
     pitfall:'A narrow range is not automatically the better investment. You also need earned fees, token values and management costs.',
-    reasonFeedback:{budget:'Both positions start with the same dollar budget. Their price bounds differ; the starting budget does not.',protection:'Both positions use the same pool price. Wider bounds include more of its possible prices.'},
+    reasonFeedback:{budget:'Both positions start with the same dollar budget. Their price bounds differ; the starting budget does not.',protection:'Neither position moves its bounds. The wider position stays active because its original range includes this price.'},
     deeper:['Each range starts with its own required token mix. Equal budgets do not make their holding benchmarks identical. Compare each position with its own starting tokens.', 'These are calculated endpoint examples, not a price history or backtest. The model omits ticks and earned fees. Range width alone cannot tell us how much either position would earn.'],sources:[ranges,fees]},
   {id:'fee-tiers',short:'Fee tiers and APR',title:'A higher fee rate is not a higher return',adds:'Add fee rates, trade activity and a past APR figure.',
     intro:'Two hypothetical WETH/USDC pools use different swap fee tiers. A tier is the charge on each trade, not the interest rate on your deposit. In v3, different fee tiers belong to separate pools.',
@@ -24,10 +24,10 @@ export const MANAGEMENT_LESSONS = Object.freeze([
     hint:'A larger fee per trade is only useful when trades use your active liquidity.',
     takeaway:'Read the fee rate, trade activity and your active share separately. Fee income is only part of profit.',
     accomplishment:'You explained how trading activity and competing liquidity change fee income.',
-    explanation:'A larger charge per swap does not establish larger earnings. The pools can receive different trade activity and have different competing liquidity. Any supplied fee totals here are made-up teaching facts after any protocol share; they are not earnings estimates or verified records.',
+    explanation:'A larger charge per swap does not mean larger earnings. Volume and the fee tier determine the pool’s fees; each position receives a share according to its active liquidity.',
     pitfall:'Fee APR expresses fee income as a yearly rate. Check its observation period and what it excludes; it is not a promise of future profit.',
     reasonFeedback:{rate:'The rate and deposit matter, but trades must use the position’s active liquidity. Competing liquidity also affects its share.',clock:'Time alone creates no swap fees. Trades must use the position’s active liquidity.'},
-    deeper:['Swap fees, protocol fees, network costs and external rewards are different items. An LP’s fee income is the part actually earned by that position, after any protocol share.', 'In native Uniswap v3, earned fee tokens stay separate from principal until collected or reinvested. An automatic manager may add its own behavior and costs. A high historical fee rate does not establish that those actions are worthwhile.'],sources:[fees,{title:'Teren: explore arbitrage and changing fee competition',url:'https://teren.sh/liquidity.html#fee-mechanics'},{title:'Revert: performance comparisons and omitted gas',url:'https://docs.revert.finance/revert/open-positions'}]},
+    deeper:['Swap fees, protocol fees, network costs and external rewards are different items. An LP’s fee income is the part actually earned by that position, after any protocol share.', 'In native Uniswap v3, earned fee tokens stay separate from principal until collected or reinvested. An automatic manager may add its own behavior and costs. A high historical fee rate does not tell us whether those actions are worthwhile.'],sources:[fees,{title:'Teren: explore arbitrage and changing fee competition',url:'https://teren.sh/liquidity.html#fee-mechanics'},{title:'Revert: performance comparisons and omitted gas',url:'https://docs.revert.finance/revert/open-positions'}]},
   {id:'range-management',short:'Exits, returns and costs',title:'What happens after a range exit?',adds:'Add continued price exposure, a return and management costs.',
     intro:'Keep one hypothetical position’s liquidity and bounds unchanged. After ETH leaves its range, compare a further price move. The position still owns one token; going out of range does not liquidate a plain Uniswap position.',
     reasoning:'Why does the principal value behave this way outside the range?',
@@ -54,11 +54,11 @@ export function managementPresentation(result) {
   if(id==='fee-tiers')return {
     reasonLabel:'The fee tier is one ingredient',
     reasonContext:'Each position started with the same dollar budget, in a different WETH/USDC pool. The fee tier is the charge per swap.',
-    finding: 'The fee tiers do not establish which position earns more. Now add a fictional day’s fee totals below and see how the result can differ from the tier ranking.',
+    finding: 'The fee tiers do not tell us which position earns more. Now add a fictional day’s fee totals below and see how the result can differ from the tier ranking.',
     prediction:'From these fee tiers alone, which position will earn more swap fees?',
     predictions:[['unknown','The fee tiers alone cannot tell us'],['a','Position A'],['b','Position B']],
-    metrics:[['Position A fees',usd(result.fees[0]),fmt(result.rates[0],2)+'% tier · supplied example day'],['Position B fees',usd(result.fees[1]),fmt(result.rates[1],2)+'% tier · supplied example day'],['Whole-period profit','Unknown','Fee income alone does not establish profit']],links:[],
-    note:'The fee totals are supplied teaching facts. They are not calculated from the fee rate, imported data or a forecast.'};
+    metrics:[['Position A fees',usd(result.fees[0]),fmt(result.rates[0],2)+'% tier · supplied example day'],['Position B fees',usd(result.fees[1]),fmt(result.rates[1],2)+'% tier · supplied example day'],['Whole-period profit','Unknown','Fee income alone does not tell us profit']],links:[],
+    note:'The fee totals are supplied teaching facts using fictional volumes and active shares. They are not imported records or a forecast.'};
   const held=result.first.pooled.eth===0?'USDC':'ETH';
   return {
     reasonLabel:'Outside the range',
@@ -126,54 +126,91 @@ export function managementApplication(result) {
   }
   if (result.id === 'fee-tiers') {
     if (result.variant === 0) return {
-      label:'More competition today',
-      context: 'A dashboard turns yesterday’s fees into a yearly fee APR. Today the trades, fee tier and your liquidity stay the same, but more liquidity competes at every traded price.',
-      question: 'What happens to your fee income from those trades?',
-      accomplishment: 'You explained why more competition can lower fee income despite an unchanged fee tier.',
+      label: 'Two pools, one day',
+      context: 'Both positions stay active and receive 0.1% of their pool’s fees throughout this fictional day. Neither pool takes a protocol share.',
+      evidence: {
+        title: 'Follow the fees from trades to each position',
+        rows: [
+          ['Pool A · 0.05% tier', '$' + fmt(result.volumes[0] / 1e6, 0) + ' million traded → $' + fmt(result.poolFees[0], 0) + ' in pool fees'],
+          ['Pool B · 0.30% tier', '$' + fmt(result.volumes[1] / 1e6, 0) + ' million traded → $' + fmt(result.poolFees[1], 0) + ' in pool fees'],
+        ],
+        comparison: {
+          caption: 'Each position receives the same 0.1% share',
+          rows: [
+            {label: 'Position A fees', value: result.fees[0]},
+            {label: 'Position B fees', value: result.fees[1]},
+          ],
+        },
+      },
+      question: 'A charges less per swap but earns more here. What explains that result?',
+      accomplishment: 'You traced fee income through trading activity, the fee tier and the position’s share.',
       choices: [
-        ['smaller-share', 'It falls because your share of active liquidity is smaller.'],
-        ['fixed-apr', 'It stays the same because the trades and fee tier are unchanged.'],
-        ['larger-pool', 'It rises because the larger pool earns more fees overall.'],
+        ['more-volume', 'A’s greater trading volume more than offsets its lower fee rate.'],
+        ['bigger-share', 'A’s lower fee tier gives its position a larger share of pool fees.'],
+        ['auto-compound', 'A’s earned fees automatically add liquidity and increase its share.'],
       ],
-      hint: 'The APR describes earlier fee income. Today’s fees are shared among today’s active liquidity.',
-      feedback: 'The same trades produce the same fee pool, but your smaller share earns less. Yesterday’s annualized fee income is not a rate credited to your deposit.',
+      hint: 'Separate the charge per trade, the trades using the pool and the share paid to each position.',
+      feedback: 'A takes a smaller percentage of much more volume, producing a larger pool of fees. Both positions receive the same share, so A earns more. Token values and costs would still be needed to compare profit.',
       feedbackByChoice: {
-        'fixed-apr':'The trades and fee tier are unchanged, but the fees are shared among more active liquidity. Your smaller share earns less.',
-        'larger-pool':'More liquidity does not create extra fees from the same trades. It shares those fees more widely.',
+        'bigger-share': 'Both positions receive 0.1% of their pool’s fees. The difference comes from trading volume and the fee rate, not a larger share for A.',
+        'auto-compound': 'Earned fees in a native v3 position stay separate until reinvested. Both shares remain fixed at 0.1% here; the extra income comes from the trades.',
       },
     };
-    if (result.variant === 1) return {
-      label:'More trading at the same fee tier',
-      context: 'Keep the fee tier and your share of active liquidity unchanged. More trading volume now uses your position while it is active.',
-      question: 'What changes because of that extra trading?',
-      accomplishment: 'You linked increased trading activity to fee income without changing the fee tier.',
-      choices: [
-        ['more-income', 'Your fee income rises at the same fee tier.'],
-        ['same-income', 'Your fee income stays the same at that fee tier.'],
-        ['higher-tier', 'Your fee income rises because the fee tier increases.'],
-      ],
-      hint: 'The fee tier charges a percentage of each swap. Your share is unchanged here.',
-      feedback: 'More volume using the same active share at the same tier produces more fee income. The pool’s fee tier has not changed.',
-      feedbackByChoice: {
-        'same-income':'The fee tier sets a percentage per swap, not a fixed payment. More volume produces more fees at that same percentage.',
-        'higher-tier':'The tier stays fixed. Earnings rise because more volume pays that fee, not because the rate increases.',
-      },
-    };
+    if (result.variant === 1) {
+      const {deposit, yesterday, today} = result.competition;
+      return {
+        label: 'Yesterday’s APR screenshot',
+        context: 'A dashboard turns yesterday’s fee income into a yearly rate. Today the same trades use the same pool at the same fee tier. Your liquidity is unchanged, but the total active liquidity at every traded price has doubled.',
+        evidence: {
+          title: 'The screenshot and the changed pool',
+          rows: [
+            ['Starting deposit', usd(deposit)],
+            ['Yesterday’s fee income', usd(yesterday.income)],
+            ['Screenshot: fee APR', fmt(yesterday.apr, 1) + '% · one day annualized'],
+            ['Your active share', fmt(yesterday.share * 100, 2) + '% yesterday → ' + fmt(today.share * 100, 2) + '% today'],
+          ],
+          note: 'A fictional fee-only APR, using 365 days with no compounding. It excludes token gains or losses and costs.',
+        },
+        question: 'What does the added competition mean for using that screenshot to plan your fee income?',
+        accomplishment: 'You connected a past fee APR to the trading activity and competition behind it.',
+        choices: [
+          ['smaller-share', 'The same trades now pay you less because your active share is smaller.'],
+          ['fixed-apr', 'The same trades still pay you that rate because your deposit is unchanged.'],
+          ['larger-pool', 'The same trades now pay you more because the pool has attracted more liquidity.'],
+        ],
+        hint: 'The screenshot describes yesterday. Today’s fees are shared among today’s active liquidity.',
+        feedback: 'Your share has halved, so those same trades pay you ' + usd(today.income) + ' instead of ' + usd(yesterday.income) + '. The screenshot annualizes a past day; it does not lock in a payment rate.',
+        feedbackByChoice: {
+          'fixed-apr': 'Your deposit and the trades are unchanged, but your share of active liquidity has halved. Fee APR is a summary of past earnings, not interest credited at a fixed rate.',
+          'larger-pool': 'More liquidity shares the fees from these same trades. It does not create extra fees by itself, and your smaller share earns less.',
+        },
+      };
+    }
+    const {shareBefore, shareAfter} = result.reinvestment;
     return {
-      label: 'Putting earned fees back to work',
-      context: 'You use collected fees to add liquidity in the same range. Other LPs also supply active liquidity; their amounts, the price and the fee tier stay the same.',
-      question: 'How does this change your share of the fees from the next swap inside your range?',
-      accomplishment: 'You distinguished collecting fees from reinvesting them to increase active liquidity.',
+      label: 'Reinvesting while other LPs add liquidity',
+      context: 'First you collect earned fees into your wallet. Then you use them to increase your liquidity by 20% in the same range. During that time, other LPs double their active liquidity at the same prices. The fee tier and prices are unchanged.',
+      evidence: {
+        title: 'Your share of the next swap’s fees',
+        rows: [
+          ['Before collecting', fmt(shareBefore * 100, 2) + '%'],
+          ['After collecting, before any deposits', fmt(shareBefore * 100, 2) + '%'],
+          ['After your deposit and the other LPs’ deposits', fmt(shareAfter * 100, 2) + '%'],
+        ],
+        note: 'These are supplied shares in a separate fictional pool. Your added liquidity is active throughout the next swap.',
+      },
+      question: 'You added liquidity, but your fee share fell. What explains the fall?',
+      accomplishment: 'You distinguished collecting fees, reinvesting them and changes in competing liquidity.',
       choices: [
-        ['larger-share', 'Your share increases.'],
-        ['same-share', 'Your share stays the same.'],
-        ['smaller-deposit-share', 'Your share decreases.'],
+        ['competition-offset', 'Other LPs grew their liquidity faster than you grew yours.'],
+        ['collection-reduced', 'Collecting the earned fees took some of your liquidity out.'],
+        ['return-on-capital', 'The percentage is a return on capital, diluted by your larger deposit.'],
       ],
-      hint: 'Compare your liquidity with everyone else’s. The fee tier and your share are different things.',
-      feedback: 'The added liquidity gives you a larger share of active liquidity, so you receive a larger share of that swap’s fees. Collection alone would not change your share.',
+      hint: 'Collection moved the fee tokens. Compare whose liquidity changed when the deposits followed.',
+      feedback: 'Collecting left your share unchanged. Reinvesting increased your liquidity, but the other LPs added proportionally more, reducing your share to ' + fmt(shareAfter * 100, 2) + '%. If only you had added liquidity, your share would have grown.',
       feedbackByChoice: {
-        'same-share': 'The fee tier is unchanged, but your share is not. Depositing the fees increases your liquidity while everyone else’s stays fixed.',
-        'smaller-deposit-share': 'You added to your own liquidity, not someone else’s. Your part of the active total grows, so your share of the fees grows.',
+        'collection-reduced': 'Collection moved earned fee tokens to your wallet without removing liquidity. Your share stayed at ' + fmt(shareBefore * 100, 2) + '% until the deposits changed the active total.',
+        'return-on-capital': 'This percentage is your share of a swap’s fees, not an APR on your deposit. It depends on your active liquidity relative to the other LPs’ liquidity.',
       },
     };
   }
@@ -188,7 +225,7 @@ export function managementApplication(result) {
           {label:'Original range left in place',value:unchanged.lpBeforeFees,detail:'$1,800–$2,200 range'},
           {label:'Moved range',value:moved.lpBeforeFees,detail:'$1,260–$1,540 range; '+usd(cost)+' cost included'},
         ]},
-        note:'Both start with the same existing position. These are calculated outcomes for this supplied price path, not a forecast.',
+        note:'Both start with the same existing position. Any amount below one cent left after funding stays in the wallet. These are calculated outcomes for this supplied price path, not a forecast.',
         explore:{href:'liquidity.html'+rangeHash({...moved,futurePrice:moved.initialPrice}),text:'Move ETH back to $2,000 in the lab ↗'},
       },
       question:'Why does moving the range recover less value on this rebound?',
@@ -217,7 +254,7 @@ export function managementApplication(result) {
       ['removed', 'A new deposit is needed to supply liquidity again.'],
       ['fees', 'The position earns the swap fees missed while it was outside.'],
     ],
-    hint: 'Check whether the owner removed liquidity or only collected fees. Those actions are different.',
+    hint: 'Check whether liquidity was left in the pool or withdrawn before price returned.',
     feedbackByChoice: {
       ...(result.variant === 1
         ? {automatic:'There is no liquidity left in the position to reactivate. Returning price does not move the withdrawn wallet tokens back into the pool.'}
@@ -226,6 +263,6 @@ export function managementApplication(result) {
     },
     feedback: result.variant === 1
       ? 'All liquidity was removed. The old bounds cannot supply liquidity by themselves; a new deposit is needed.'
-      : 'The liquidity remains, so it becomes active again inside its bounds. Collecting only fee tokens does not remove principal. Activity does not recover fees missed outside the range.',
+      : 'The liquidity remains, so it becomes active again inside its bounds. Activity does not recover fees missed outside the range.',
   };
 }

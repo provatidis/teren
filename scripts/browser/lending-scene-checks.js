@@ -26,7 +26,7 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
   assert.deepEqual(JSON.parse(await saved()).completed, completed);
   assert.equal(JSON.parse(await saved()).drafts.borrow.questionRevisions.application, 2);
   for (const [id, questionStage, reason, application] of [
-    ['supply', '2', 'separate', 'enable'], ['borrow', '1', 'liability', 'opening-limit'],
+    ['supply', '2', 'separate', 'withdraw'], ['borrow', '1', 'liability', 'opening-limit'],
   ]) {
     await navigate(base + 'lending.html#lesson=' + id);
     await click('lend-retry');

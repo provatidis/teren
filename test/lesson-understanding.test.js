@@ -134,7 +134,7 @@ test('every essentials misconception has specific feedback and every application
     const copy=lessonApplicationCopy(item.id,result);
     assert.ok(copy.label);
     for (const [reason] of item.reasons) {
-      const dynamic=item.id==='token-balances'||(item.id==='range-boundaries'&&reason==='zero');
+      const dynamic=['token-balances','loss-vs-profit'].includes(item.id)||(item.id==='range-boundaries'&&reason==='zero');
       if(reason!==result.reason&&!dynamic) assert.ok(item.reasonFeedbackByChoice[reason]);
     }
     for (const [answer] of copy.choices) if(answer!==copy.expected) assert.ok(copy.feedbackByChoice[answer]);
@@ -148,7 +148,7 @@ test('revised essentials applications clear obsolete answers without erasing com
   for(const id of ['loss-vs-profit','fee-break-even']) for(let variant=0;variant<VARIANTS;variant++) {
     const result=runLesson(id,lessonSetup(id,variant),variant);
     const old={version:1,completed:[id],lastLesson:id,drafts:{[id]:{
-      variant,inputs:result.setup,reason:result.reason,reasonRevision:1,
+      variant,inputs:result.setup,reason:result.reason,reasonRevision:essentialQuestionRevisions(id,variant).reason,
       application:id==='loss-vs-profit'?'loss-and-gap':'same',applicationRevision:2,
       prediction:result.prediction,answer:'123',ran:true,choiceSeed:19,
     }}};

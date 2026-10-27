@@ -28,9 +28,9 @@ test('rising, falling and unchanged prices agree with the explanation and never 
       assert.match(lessonWalkthrough('token-balances', result)[2][0], /unchanged/);
     }
     assert.match(copy.explanation, /neither ETH nor USDC is created/);
-    assert.equal(checkLesson('token-balances', input, variant, String(result.answer), 'mint').passed, false);
+    assert.equal(checkLesson('token-balances', input, variant, String(result.answer), 'automatic').passed, false);
     assert.equal(checkLesson('token-balances', input, variant, String(result.answer), 'interest').passed, false);
-    assert.match(lessonReasonFeedback('token-balances', result, 'mint'), /does not create ETH or USDC/);
+    assert.match(lessonReasonFeedback('token-balances', result, 'automatic'), /Tokens change hands through trades/);
   }
 });
 test('all foundation distractors are rejected and explain the misconception in every variation', () => {
@@ -46,7 +46,7 @@ test('all foundation distractors are rejected and explain the misconception in e
 test('optional calculation precision rejects adjacent wrong numbers while accepting the requested rounding', () => {
   for (const [id, answer, wrong, reason] of [
     ['swap-impact', '18132', '18133', 'curve'], ['pool-share', '4.76', '4.75', 'ownership'],
-    ['token-balances', '.884', '.883', 'rebalance'], ['loss-vs-profit', '428.93', '428.94', 'benchmark'],
+    ['token-balances', '.884', '.883', 'rebalance'], ['loss-vs-profit', '428.93', '428.94', 'traded-mix'],
     ['fee-break-even', '428.93', '428.94', 'assumption'], ['range-boundaries', '0', '.04', 'path'],
     ['final-challenge', '328.93', '328.94', 'total'],
   ]) {

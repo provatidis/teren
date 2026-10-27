@@ -220,9 +220,14 @@ test('outside samples plus recorded active time require a return inside unchange
   assert.ok(question.placement.upwardRoomPercent>0&&question.placement.upwardRoomPercent<.5);
   assert.equal(question.placement.secondsInRange,50256);
   assert.equal(question.placement.durationSeconds,120468);
-  assert.match(application.evidence.rows[3][1],/0.44%/);
-  assert.match(application.evidence.note,/41.7%/);
-  assert.match(application.evidence.note,/do not reveal every move/);
+  assert.deepEqual(application.evidence.priceRange, {
+    ...question.placement.range, startPrice: question.placement.startPrice,
+    markerDescription: 'The starting price marker is close to the upper bound, with most of the range below it.',
+  });
+  assert.doesNotMatch(JSON.stringify(application.evidence), /0\.44%/);
+  assert.match(application.feedback, /0\.44%/);
+  assert.ok(application.feedbackByChoice['both-bounds']);
+  assert.match(application.reasonEvidence.note, /does not show the exact moments/);
   assert.equal(question.placement.range.lowerPrice,periodPointView(returning,0).range.lowerPrice);
   for (let i=0;i<returning.points.length;i++) periodPointView(returning,i);
   assert.deepEqual(appliedApplication('between-samples', appliedQuestion(returning,'between-samples')), application);
@@ -236,7 +241,7 @@ test('revised interval questions clear obsolete selections but preserve completi
   const migrated = parseAppliedProgress(old), draft = migrated.drafts['between-samples'];
   assert.deepEqual(migrated.completed, old.completed);
   assert.equal(draft.reason, ''); assert.equal(draft.application, '');
-  assert.deepEqual(draft.questionRevisions, {prediction:1,reason:2,application:4});
+  assert.deepEqual(draft.questionRevisions, {prediction:1,reason:2,application:5});
   for (const key of ['prediction','answer','revealed','checkpoint','choiceSeed']) assert.equal(draft[key], old.drafts['between-samples'][key]);
   draft.reason='returned'; draft.application='edge-placement';
   assert.deepEqual(parseAppliedProgress(migrated), migrated);
@@ -261,6 +266,23 @@ test('the recorded recovery separates unchanged principal exposure from the incr
   const holdingETH=Number(q.view.holding.amount1)/1e18;
   assert.ok(Math.abs(q.recovery.principalImprovement-holdingETH*(q.contrast.price-q.view.price))<1e-9);
   assert.equal(JSON.stringify(returning),original);
+});
+
+test('the placement revision clears its old answer while retaining the interval reasoning', () => {
+  const old = { version: 1, completed: ['between-samples'], drafts: {
+    'between-samples': { prediction: 'possible', reason: 'returned', application: 'edge-placement',
+      revealed: true, checkpoint: 8, choiceSeed: 14,
+      questionRevisions: { prediction: 1, reason: 2, application: 4 } },
+  } };
+  const clean = parseAppliedProgress(old);
+  const draft = clean.drafts['between-samples'];
+  assert.deepEqual(clean.completed, old.completed);
+  assert.equal(draft.application, '');
+  for (const key of ['prediction', 'reason', 'revealed', 'checkpoint', 'choiceSeed']) {
+    assert.equal(draft[key], old.drafts['between-samples'][key]);
+  }
+  draft.application = 'edge-placement';
+  assert.deepEqual(parseAppliedProgress(clean), clean);
 });
 
 test('the new recorded questions preserve the compatible interval reason and final application', () => {

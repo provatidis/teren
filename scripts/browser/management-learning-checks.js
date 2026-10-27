@@ -4,7 +4,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
   const keys=['degenerator-learning-liquidity-v1','passiko-applied-liquidity-v1','defi-sandbox-v1','degenerator-pool-snapshot-v1','degenerator-v3-position-snapshot-v1','degenerator-experiments-v1'];
   const before=await evaluate('JSON.stringify('+JSON.stringify(keys)+'.map(key=>localStorage.getItem(key)))');
   const choose=(name,value)=>evaluate(`document.querySelector('input[name="${name}"][value="${value}"]').click()`);
-  const cases=[['range-width','none','bounds','mix'],['fee-tiers','b','trades','smaller-share'],['range-management','same','asset','automatic']];
+  const cases=[['range-width','none','bounds','mix'],['fee-tiers','b','trades','more-volume'],['range-management','same','asset','automatic']];
   for(const [id,prediction,reason,application]of cases) {
     await navigate(base+'learn.html#manage='+id);
     assert.equal(await evaluate("document.getElementById('learn-essential').hidden&&document.getElementById('learn-applied').hidden&&!document.getElementById('learn-management').hidden"),true);
@@ -25,7 +25,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
     await choose('manage-reason',id==='range-width'?'budget':id==='fee-tiers'?'clock':'liquidated');await choose('manage-application',application);await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Review your answers.');
     assert.equal(await evaluate("document.getElementById('manage-continue').hidden"),true);
-    await choose('manage-reason',reason);await choose('manage-application',id==='range-width'?'capital':id==='fee-tiers'?'fixed-apr':'fees');await click('manage-check');
+    await choose('manage-reason',reason);await choose('manage-application',id==='range-width'?'capital':id==='fee-tiers'?'bigger-share':'fees');await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Review your answers.');
     await choose('manage-application',application);await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
@@ -45,23 +45,31 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
       await click('manage-variation');assert.equal(await text('manage-variation-label'),'Situation '+(variant+1)+' of 3');
       assert.equal(await evaluate("document.getElementById('manage-reveal').disabled"),false);assert.equal(await evaluate("document.getElementById('manage-observe').hidden"),true);
       await choose('manage-prediction',id==='range-width'?(variant===2?'both':'wide'):id==='fee-tiers'?'unknown':variant===1?'same':'rises');await click('manage-reveal');
-      const changedAnswer=id==='range-width'?(variant===1?'wide-mix':'own-basket'):id==='fee-tiers'?(variant===1?'more-income':'larger-share'):variant===1?'removed':'sold-earlier';
+      const changedAnswer=id==='range-width'?(variant===1?'wide-mix':'own-basket'):id==='fee-tiers'?(variant===1?'smaller-share':'competition-offset'):variant===1?'removed':'sold-earlier';
       await choose('manage-reason',reason);await choose('manage-application',changedAnswer);await click('manage-check');assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
       if(id==='range-width'&&variant===1){
         assert.match(await text('manage-application-context'),/\$1,700.00.*\$1,800.00/);
         assert.match(await text('manage-applications-feedback'),/wider position.*ETH for USDC/i);
       }
-      if(id==='fee-tiers'&&variant===2)assert.match(await text('manage-applications-feedback'),/larger share.*Collection alone/s);
+      if(id==='fee-tiers'&&variant===1){
+        assert.match(await text('manage-application-evidence'),/87.6%.*0.10% yesterday.*0.05% today/s);
+        assert.match(await text('manage-applications-feedback'),/\$6.00 instead of \$12.00/);
+      }
+      if(id==='fee-tiers'&&variant===2){
+        assert.match(await text('manage-application-evidence'),/Before collecting.*10.00%.*After collecting.*10.00%.*6.25%/s);
+        assert.match(await text('manage-applications-feedback'),/Collecting left your share unchanged.*other LPs added proportionally more/s);
+      }
       if(id==='range-width'&&variant===2)assert.match(await text('manage-metrics'),/Narrow range Active.*Wider range Active/s);
-      if(id==='fee-tiers')assert.match(await text('manage-metrics'),/Position A fees \$12.00.*Position B fees \$4.00/s);
+      if(id==='fee-tiers')assert.match(await text('manage-metrics'),/Position A fees \$12.00.*Position B fees \$6.00/s);
       if(id==='range-management'&&variant===1)assert.match(await text('manage-metrics'),/USDC/);
       if(id==='range-management'&&variant===2){
-        assert.match(await text('manage-application-evidence'),/Original range left in place.*\$5,000.00.*Moved range.*\$3,667.49/s);
+        assert.match(await text('manage-application-evidence'),/Original range left in place.*\$5,000.00.*Moved range.*\$3,667.48/s);
         assert.match(await text('manage-applications-feedback'),/sells the remaining ETH.*\$1,540.00/s);
         const handoff=await evaluate("document.querySelector('#manage-application-evidence a').href");
         const linked=new URLSearchParams(new URL(handoff).hash.slice(1));
         assert.equal(linked.get('start'),'1400');assert.equal(linked.get('future'),'1400');
         assert.equal(linked.get('lower'),'1260');assert.equal(linked.get('upper'),'1540');
+        assert.equal(linked.get('investment'),'3584.28');
         assert.equal(await evaluate("document.querySelectorAll('#manage-application-evidence .learn-evidence-track').length"),2);
         await choose('manage-application','kept-eth');await click('manage-check');
         assert.equal(await evaluate("document.getElementById('manage-applications-feedback').dataset.state"),'different');
@@ -115,13 +123,31 @@ assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),
     await click('manage-topics');await evaluate("document.querySelector('[data-management-id=fee-tiers]').click()");
     assert.equal(await evaluate("document.getElementById('learn-course').open"),false);assert.equal(await text('manage-title'),'A higher fee rate is not a higher return');
     assert.equal(await evaluate("document.getElementById('manage-title').getBoundingClientRect().top>=document.querySelector('.topbar').getBoundingClientRect().bottom"),true);
+    for (let reset=0;reset<3&&(await text('manage-variation-label'))!=='Situation 1 of 3';reset++) await click('manage-variation');
+    for (let variant=0;variant<3;variant++) {
+      await click('manage-reveal');
+      assert.equal(await evaluate("(()=>{const n=document.getElementById('manage-application-evidence'),r=n.getBoundingClientRect();return n.checkVisibility()&&r.left>=0&&r.right<=innerWidth})()"),true);
+      assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
+      assert.match(await text('manage-application-evidence'), variant===0 ? /\$24 million.*\$12,000/s : variant===1 ? /87.6%/ : /6.25%/);
+      if (variant === 0) {
+        assert.equal(await evaluate(`Array.from(document.querySelectorAll('#manage-application-evidence dd')).every(element => {
+          return Array.from(element.textContent.matchAll(/\\$[\\d,.]+/g)).every(match => {
+            const range = document.createRange();
+            range.setStart(element.firstChild, match.index);
+            range.setEnd(element.firstChild, match.index + match[0].length);
+            return range.getClientRects().length === 1;
+          });
+        })`), true, 'Each currency amount stays on one line.');
+      }
+      if (variant<2) await click('manage-variation');
+    }
     await click('learn-resume');assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
     await navigate(base+'learn.html#manage=range-management');
     for(let reset=0;reset<3&&(await text('manage-variation-label'))!=='Situation 3 of 3';reset++)await click('manage-variation');
     await click('manage-reveal');
     assert.equal(await evaluate("(()=>{const n=document.getElementById('manage-application-evidence'),r=n.getBoundingClientRect();return n.checkVisibility()&&r.left>=0&&r.right<=innerWidth})()"),true);
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
-    assert.match(await text('manage-application-evidence'),/\$3,667.49/);
+    assert.match(await text('manage-application-evidence'),/\$3,667.48/);
 
     await click('manage-topics');
     await evaluate("document.querySelector('[data-applied-id=fees-over-time]').click()");

@@ -11,6 +11,7 @@ import { APPLIED_LESSONS } from '../public/learning/applied-liquidity.js';
 import { LESSON_IDS } from '../public/models/lesson-experiments.js';
 import { APPLIED_IDS } from '../public/lib/applied-lessons.js';
 import { rangeFromHash, rangeHash } from '../public/lib/range-links.js';
+import { calculateRange } from '../public/models/cl-range-v1.js';
 
 test('range widths use the same budget and price but each range’s own funding and holding basket',()=>{
   for(let variant=0;variant<3;variant++){
@@ -30,10 +31,10 @@ test('range widths use the same budget and price but each range’s own funding 
   }
 });
 test('fee tiers alone never establish earnings, including supplied totals that reverse the tier ranking',()=>{
-  assert.deepEqual(managementCase('fee-tiers',0).fees,[12,4]);
+  assert.deepEqual(managementCase('fee-tiers',0).fees,[12,6]);
   for(let variant=0;variant<3;variant++){
     const result=managementCase('fee-tiers',variant),presentation=managementPresentation(result);
-    assert.equal(result.prediction,'unknown');assert.equal(result.application,['smaller-share','more-income','larger-share'][variant]);
+    assert.equal(result.prediction,'unknown');assert.equal(result.application,['more-volume','smaller-share','competition-offset'][variant]);
     assert.match(presentation.note,/supplied teaching facts/);assert.equal(presentation.links.length,0);
     if(variant===1)assert.ok(result.fees[0]>result.fees[1]&&result.rates[0]<result.rates[1]);
   }
@@ -92,8 +93,8 @@ test('new progress is bounded and independent of existing work, including blocke
 test('every existing subject has a plain visible pitfall, and the fee-target question has a clear scope',async()=>{
   assert.deepEqual(Object.keys(POOL_PITFALLS),[...LESSON_IDS,...APPLIED_IDS]);
   for(const entry of Object.values(POOL_PITFALLS)){assert.ok(entry.title&&entry.copy);assert.equal(new URL(entry.url).protocol,'https:');assert.doesNotMatch(entry.copy,/÷|×|√/);}
-  assert.match(POOL_PITFALLS['swap-impact'].copy,/slippage limit/);assert.match(POOL_PITFALLS['loss-vs-profit'].copy,/before withdrawal/);
-  assert.match(POOL_PITFALLS['range-boundaries'].copy,/value can keep falling/);assert.match(POOL_PITFALLS['between-samples'].copy,/require trades/);
+  assert.match(POOL_PITFALLS['swap-impact'].copy,/larger trade needs its own quote/);assert.match(POOL_PITFALLS['loss-vs-profit'].copy,/Waiting does not guarantee/);
+  assert.match(POOL_PITFALLS['range-boundaries'].copy,/stops earning new swap fees while inactive/);assert.match(POOL_PITFALLS['between-samples'].copy,/require trades/);
   assert.match(LESSONS.find(item=>item.id==='fee-break-even').reasoning,/break-even fee target/);
   assert.doesNotMatch(LESSONS.find(item=>item.id==='pool-share').prediction,/÷|×|percent|divide/);
   for(const lesson of [...LESSONS,...APPLIED_LESSONS]){
@@ -123,7 +124,7 @@ test('range question revisions retire only changed draft answers and preserve co
   assert.equal(migrated.drafts['range-width'].choiceSeed,42);
   assert.equal(migrated.drafts['range-management'].application,'removed');
   migrated.drafts['range-width'].application='own-basket';
-  migrated.drafts['fee-tiers'].application='more-income';
+  migrated.drafts['fee-tiers'].application='smaller-share';
   assert.deepEqual(parseManagementProgress(migrated),migrated,'Current answers survive repeated saves and reloads.');
 });
 
@@ -142,17 +143,46 @@ test('a rise below the narrow range changes only the wider position’s token mi
   assert.equal(result.application, 'wide-mix');
 });
 
-test('reinvesting fees increases fee share while collecting alone does not', () => {
-  const own = 100, competitors = 900, reinvested = 20, fees = 10;
-  const before = own / (own + competitors) * fees;
-  const collectedOnly = own / (own + competitors) * fees;
-  const after = (own + reinvested) / (own + reinvested + competitors) * fees;
-  assert.equal(collectedOnly, before);
-  assert.ok(after > before);
+test('fictional fee evidence balances volume, fee tiers and each position’s active share', () => {
+  const result = managementCase('fee-tiers', 0);
+  for (let pool = 0; pool < 2; pool++) {
+    assert.equal(result.poolFees[pool], result.volumes[pool] * result.rates[pool] / 100);
+    assert.equal(result.fees[pool], result.poolFees[pool] * result.activeShare);
+  }
+  assert.ok(result.rates[0] < result.rates[1]);
+  assert.ok(result.fees[0] > result.fees[1]);
+  const application = managementApplication(result);
+  assert.deepEqual(application.evidence.comparison.rows.map(row => row.value), result.fees);
+  assert.equal(result.application, 'more-volume');
+  assert.equal(checkManagementUnderstanding('fee-tiers', 0, 'trades', 'bigger-share').passed, false);
+});
+
+test('the APR example distinguishes past annualization from income after active liquidity doubles', () => {
+  const result = managementCase('fee-tiers', 1);
+  const {deposit, yesterday, today} = result.competition;
+  assert.equal(yesterday.apr, yesterday.income / deposit * 365 * 100);
+  assert.equal(today.share, yesterday.share / 2);
+  assert.equal(today.income, yesterday.income / 2);
+  assert.equal(today.income, result.poolFees[0] * today.share);
+  assert.equal(result.application, 'smaller-share');
+  assert.match(managementApplication(result).feedback, /\$6.00 instead of \$12.00/);
+});
+
+test('reinvestment can add own liquidity while faster competing growth reduces fee share', () => {
   const result = managementCase('fee-tiers', 2);
-  assert.equal(result.application, 'larger-share');
-  assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'trades', 'larger-share').passed, true);
-  assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'trades', 'smaller-advantage').passed, false);
+  const {ownBefore, othersBefore, ownAfter, othersAfter, shareBefore, shareAfter} = result.reinvestment;
+  const collectedOnlyShare = ownBefore / (ownBefore + othersBefore);
+  const reinvestedWithoutCompetition = ownAfter / (ownAfter + othersBefore);
+  assert.equal(collectedOnlyShare, shareBefore);
+  assert.ok(reinvestedWithoutCompetition > shareBefore);
+  assert.equal(ownAfter, ownBefore * 1.2);
+  assert.equal(othersAfter, othersBefore * 2);
+  assert.equal(shareAfter, ownAfter / (ownAfter + othersAfter));
+  assert.ok(shareAfter < shareBefore);
+  assert.equal(shareAfter, .0625);
+  assert.equal(result.application, 'competition-offset');
+  assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'trades', 'competition-offset').passed, true);
+  assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'trades', 'collection-reduced').passed, false);
 });
 
 test('the second range-application revision clears replaced answers without losing completed situations', () => {
@@ -164,25 +194,27 @@ test('the second range-application revision clears replaced answers without losi
   assert.deepEqual(migrated.completed, old.completed);
   for (const id of old.completed) {
     assert.equal(migrated.drafts[id].application, '');
-    assert.equal(migrated.drafts[id].questionRevisions.application, 3);
+    assert.equal(migrated.drafts[id].questionRevisions.application, id === 'fee-tiers' ? 4 : 3);
     for (const key of ['prediction','reason','revealed','choiceSeed','variant']) assert.equal(migrated.drafts[id][key], old.drafts[id][key]);
   }
   migrated.drafts['range-width'].application = 'wide-mix';
-  migrated.drafts['fee-tiers'].application = 'larger-share';
+  migrated.drafts['fee-tiers'].application = 'competition-offset';
   assert.deepEqual(parseManagementProgress(migrated), migrated);
 });
 
 
 test('moving a range after a fall changes exposure to the supplied rebound, with costs counted once', () => {
-  const result=managementCase('range-management',2), {before,unchanged,moved,cost}=result.rebalance;
+  const result=managementCase('range-management',2), {before,unchanged,moved,cashRemainder,cost}=result.rebalance;
   assert.equal(before.futurePrice,1400); assert.equal(unchanged.futurePrice,2000);
   assert.equal(before.pooled.usdc,0); assert.ok(Math.abs(before.pooled.eth-2.5709181086842334)<1e-12);
-  assert.equal(moved.investment,before.lpBeforeFees-cost);
+  assert.equal(moved.investment,3584.28);
+  assert.ok(cashRemainder >= 0 && cashRemainder < .01);
+  assert.equal(moved.investment + cashRemainder, before.lpBeforeFees - cost);
   assert.equal(cost,15); assert.equal(moved.initialPrice,1400); assert.equal(moved.futurePrice,2000);
   assert.equal(moved.lowerPrice,1260); assert.equal(moved.upperPrice,1540);
   assert.ok(moved.initial.eth<before.pooled.eth); assert.ok(moved.initial.usdc>0);
   assert.equal(moved.pooled.eth,0); assert.equal(unchanged.lpBeforeFees,5000);
-  assert.ok(Math.abs(moved.lpBeforeFees-3667.485532841495)<1e-9);
+  assert.equal(moved.lpBeforeFees.toFixed(2),'3667.48');
   assert.equal(result.application,'sold-earlier');
   const application=managementApplication(result);
   assert.deepEqual(application.evidence.comparison.rows.map(row=>row.value),[unchanged.lpBeforeFees,moved.lpBeforeFees]);
@@ -190,6 +222,10 @@ test('moving a range after a fall changes exposure to the supplied rebound, with
   assert.equal(link.investment,moved.investment); assert.equal(link.initialPrice,1400);
   assert.equal(link.futurePrice,1400); assert.equal(link.lowerPrice,1260); assert.equal(link.upperPrice,1540);
   assert.equal(link.fees,0); assert.equal(link.fullRangeFees,0);
+  const linkedRebound = calculateRange({...link, futurePrice: 2000});
+  assert.equal(linkedRebound.lpBeforeFees, application.evidence.comparison.rows[1].value);
+  assert.equal(linkedRebound.lpBeforeFees.toFixed(2), '3667.48');
+  assert.match(application.evidence.note, /below one cent.*stays in the wallet/);
   assert.equal(managementPresentation(result).links[0].scenario,result.second,'Observe handoff still opens the original example.');
 });
 
@@ -204,5 +240,32 @@ test('only the replaced third management application is retired', () => {
     for(const key of ['variant','prediction','reason','revealed','choiceSeed'])assert.equal(draft[key],previous[key]);
     if(variant===2)draft.application='sold-earlier';
     assert.deepEqual(parseManagementProgress(migrated),migrated);
+  }
+});
+
+
+test('the concrete fee questions retire older applications while keeping learning progress and explanations', () => {
+  for (let variant = 0; variant < 3; variant++) {
+    const previous = {
+      variant, prediction: 'unknown', reason: 'trades',
+      application: ['smaller-share', 'more-income', 'larger-share'][variant],
+      revealed: true, choiceSeed: 12,
+      questionRevisions: {prediction: 1, reason: 1, application: 3},
+    };
+    const migrated = parseManagementProgress({version: 1, completed: ['fee-tiers'], drafts: {'fee-tiers': previous}});
+    const draft = migrated.drafts['fee-tiers'];
+    assert.deepEqual(migrated.completed, ['fee-tiers']);
+    assert.equal(draft.application, '');
+    assert.equal(draft.questionRevisions.application, 4);
+    for (const key of ['prediction', 'reason', 'revealed', 'choiceSeed', 'variant']) assert.equal(draft[key], previous[key]);
+    draft.application = managementCase('fee-tiers', variant).application;
+    assert.deepEqual(parseManagementProgress(migrated), migrated);
+  }
+});
+
+test('range-return questions discuss the supplied removal decision, not an unrelated fee collection', () => {
+  for (let variant = 0; variant < 2; variant++) {
+    const application = managementApplication(managementCase('range-management', variant));
+    assert.doesNotMatch(application.hint + application.feedback, /collect/i);
   }
 });

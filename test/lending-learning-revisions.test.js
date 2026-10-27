@@ -28,7 +28,9 @@ test('revised loan questions clear obsolete answers and retain compatible answer
   assert.deepEqual(legacy, before);
   assert.deepEqual(parsed.completed, legacy.completed);
   assert.equal(parsed.currentLesson, 'respond');
-  assert.deepEqual(parsed.drafts.supply, legacy.drafts.supply);
+  assert.deepEqual(parsed.drafts.supply, {
+    ...legacy.drafts.supply, application: '', questionRevisions: { application: 1 },
+  });
   assert.deepEqual(parsed.drafts.respond, {
     prediction: 'repay', reason: '', application: '', revealed: true, seed: 7,
     questionRevisions: { reason: 1, application: 1 },
@@ -42,6 +44,36 @@ test('revised loan questions clear obsolete answers and retain compatible answer
   assert.equal(checkLendingUnderstanding('respond', 'tradeoff', 'remaining-backing').passed, true);
   parsed.drafts.respond.questionRevisions.reason = 2;
   assert.equal(parseLendingProgress(parsed).drafts.respond.reason, '', 'An unknown revision cannot grade a current question.');
+});
+
+test('the withdrawal application retires the collateral-toggle answer without resetting other learning work', () => {
+  const legacy = {
+    version: 1, currentLesson: 'supply', completed: ['supply', 'borrow', 'conditions'],
+    drafts: {
+      supply: { prediction: 'earn', reason: 'separate', application: 'enable', revealed: true, seed: 19 },
+      borrow: { prediction: 'same', reason: 'liability', application: 'opening-limit', revealed: true, seed: 4, questionRevisions: { application: 2 } },
+      conditions: { prediction: 'lower', reason: 'interest', application: 'backing-faster', revealed: true, seed: 12 },
+    },
+  };
+  const before = structuredClone(legacy), parsed = parseLendingProgress(legacy);
+  assert.deepEqual(legacy, before);
+  assert.equal(parsed.currentLesson, 'supply');
+  assert.deepEqual(parsed.completed, legacy.completed);
+  assert.deepEqual(parsed.drafts.supply, {
+    ...legacy.drafts.supply, application: '', questionRevisions: { application: 1 },
+  });
+  for (const id of ['borrow', 'conditions']) assert.deepEqual(parsed.drafts[id], legacy.drafts[id]);
+  assert.equal(checkLendingUnderstanding('supply', 'separate', 'enable').passed, false);
+  assert.equal(checkLendingUnderstanding('supply', 'separate', '').passed, false);
+  const lesson = LENDING_LESSONS.find(item => item.id === 'supply');
+  for (const [answer] of lesson.applications) {
+    assert.equal(checkLendingUnderstanding('supply', 'separate', answer).passed, answer === 'withdraw');
+  }
+  parsed.drafts.supply.application = 'withdraw';
+  const storage = memory();
+  assert.equal(saveLendingProgress(parsed, () => storage), true);
+  assert.deepEqual(readLendingProgress(() => storage).progress, parsed);
+  assert.deepEqual(parseLendingProgress(parsed), parsed);
 });
 
 test('the latest loan applications preserve current explanations, predictions and completed lessons', () => {

@@ -1,6 +1,6 @@
 # Review status, evidence gaps and limitations
 
-Assessed against **Teren 1.49.0, 27 October 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. LST experiments now compare exposure targets under shared conditions, including oracle-price headroom and after-exit outcomes. The evidence status below is unchanged.
+Assessed against **Teren 1.50.0, 27 October 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. Lesson questions now separate causal explanations from applications more clearly, including concrete fee-tier and competition cases. The evidence status below is unchanged.
 
 [Project overview](../README.md) · [Models](models.md) · [Learning and observation plan](learning.md) · [Roadmap](roadmap.md) · [Historical reviews](review-history.md)
 
