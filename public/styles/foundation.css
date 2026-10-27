@@ -141,3 +141,15 @@ footer{flex-direction:column; font-size:10px}
  .stat strong{font-size:22px;margin:0;white-space:nowrap;overflow-wrap:normal;text-align:right}
  .stat-note{grid-column:1/-1}
 }
+
+/* Keep pending controls inaccessible without shortening a reloaded document. */
+#app-content[inert] { visibility: hidden; opacity: 0; }
+.notice.app-startup { display: block; margin: 24px 0; padding: 24px; }
+body:not(.home-page) .app-startup[data-state="loading"] {
+ position: fixed; top: max(150px, calc(var(--header-height, 85px) + 24px)); z-index: 5;
+ left: max(20px, calc((100vw - 1200px) / 2)); right: max(20px, calc((100vw - 1200px) / 2)); margin: 0;
+ max-height: calc(100dvh - 170px); overflow: auto;
+}
+.app-startup h1, .app-startup h2 { margin: 0 0 12px; font-size: 24px; line-height: 1.3; letter-spacing: -.02em; }
+.app-startup p { max-width: 60ch; font-size: 16px; line-height: 1.6; }
+.app-startup .button { margin-top: 8px; }

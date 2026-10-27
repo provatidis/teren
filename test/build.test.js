@@ -75,6 +75,29 @@ test('shared dependencies have one hashed identity across entry points', async (
   }
 }));
 
+test('guarded dynamic entries retain hashed dependencies, preloads and invalidation', async () => fixture(async options => {
+  await writeFile(join(options.sourceRoot, 'entry.js'), "await import('./main.js');\n");
+  await writeFile(join(options.sourceRoot, 'index.html'), '<head><script type="module" src="entry.js"></script></head>');
+  const first = await buildSite(options);
+  const entry = await readFile(join(options.outputRoot, first.assets['entry.js']), 'utf8');
+  const html = await readFile(join(options.outputRoot, 'index.html'), 'utf8');
+  assert.ok(entry.includes("import('./" + first.assets['main.js'] + "')"));
+  for (const source of ['main.js', 'lib/value.js']) {
+    assert.ok(html.includes('rel="modulepreload" href="./' + first.assets[source] + '"'));
+  }
+  await writeFile(join(options.sourceRoot, 'lib/value.js'), 'export const value = 2;\n');
+  const second = await buildSite(options);
+  assert.notEqual(first.assets['entry.js'], second.assets['entry.js']);
+  assert.notEqual(first.assets['main.js'], second.assets['main.js']);
+  await writeFile(join(options.sourceRoot, 'entry.js'), 'await import(location.hash);\n');
+  await assert.rejects(buildSite(options), /literal local path/);
+  assert.ok((await readFile(join(options.outputRoot, 'index.html'), 'utf8')).includes(second.assets['entry.js']));
+  await writeFile(join(options.sourceRoot, 'entry.js'), "await import('./missing.js');\n");
+  await assert.rejects(buildSite(options), /Missing local asset/);
+  await writeFile(join(options.sourceRoot, 'entry.js'), "await import('./entry.js');\n");
+  await assert.rejects(buildSite(options), /Circular build dependency/);
+}));
+
 test('build rejects cycles and missing imports before deleting the last good build', async () => fixture(async options => {
   const good = await buildSite(options);
   await writeFile(join(options.sourceRoot, 'lib/value.js'), "export { value } from '../main.js';\n");

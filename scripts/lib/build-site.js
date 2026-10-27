@@ -3,6 +3,7 @@ import { cp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve, relative, posix } from 'node:path';
 
 const moduleImports = /((?:import|export)\s+[^;]*?\sfrom\s*['"])([^'"]+)(['"])/g;
+const dynamicImports = /(\bimport\s*\(\s*['"])([^'"]+)(['"]\s*\))/g;
 const cssImports = /(@import\s+url\(["'])([^"']+)(["']\)\s*;)/g;
 const digest = text => createHash('sha256').update(text).digest('hex').slice(0, 16);
 
@@ -63,17 +64,22 @@ export async function buildSite({ sourceRoot, outputRoot, version }) {
     const operation = (async () => {
       let source = await readFile(resolve(sourceRoot, name), 'utf8');
       const imports = [];
-      if (name.endsWith('.js') && /\bimport\s*\(/.test(source)) throw new Error('Dynamic imports require explicit build support: ' + name);
-      source = await replaceAsync(source, name.endsWith('.js') ? moduleImports : cssImports, async match => {
-        const target = targetFor(name, match[2]);
-        imports.push(target);
-        const built = await asset(target, [...ancestry, name]);
-        if (name.endsWith('.css')) {
-          if (!target.endsWith('.css')) throw new Error('CSS imports must reference CSS: ' + name);
-          return '/* ' + target + ' */\n' + rebaseCSS(built.source, target, name);
-        }
-        return match[1] + relativeAsset(name, built.name, match[2].startsWith('/')) + match[3];
-      });
+      const javascript = name.endsWith('.js');
+      if (javascript && /\bimport\s*\(/.test(source.replace(dynamicImports, ''))) {
+        throw new Error('Dynamic imports must use a literal local path: ' + name);
+      }
+      for (const pattern of javascript ? [moduleImports, dynamicImports] : [cssImports]) {
+        source = await replaceAsync(source, pattern, async match => {
+          const target = targetFor(name, match[2]);
+          imports.push(target);
+          const built = await asset(target, [...ancestry, name]);
+          if (name.endsWith('.css')) {
+            if (!target.endsWith('.css')) throw new Error('CSS imports must reference CSS: ' + name);
+            return '/* ' + target + ' */\n' + rebaseCSS(built.source, target, name);
+          }
+          return match[1] + relativeAsset(name, built.name, match[2].startsWith('/')) + match[3];
+        });
+      }
       // Fail safely if an unsupported import form would leave a network chain
       // or silently change media/layer semantics. Sources use plain local imports.
       if (name.endsWith('.css') && /@import\b/.test(source.replace(/\/\*[\s\S]*?\*\//g, ''))) {

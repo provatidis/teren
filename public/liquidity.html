@@ -31,7 +31,7 @@
   <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
   <meta name="twitter:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
   <link rel="stylesheet" href="styles.css">
-  <script type="module" src="main.js"></script>
+  <script type="module" src="liquidity-entry.js"></script>
 </head>
 <body class="liquidity-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -41,7 +41,13 @@
     <nav class="site-nav" aria-label="Liquidity modes"><div class="product-nav"><a href="learn.html">Learn</a><a id="nav-experiment" href="#experiment" aria-current="page">Experiment</a><a id="nav-inspect" href="#inspect">Inspect</a></div></nav>
   </header>
   <main id="main-content" tabindex="-1">
-    <noscript><div class="notice"><p>JavaScript is needed for the calculators and snapshot imports. Enable it to use the playground.</p></div></noscript>
+    <section id="app-startup" class="notice app-startup" data-state="loading" aria-labelledby="app-startup-title">
+      <h1 id="app-startup-title">Opening this page…</h1>
+      <p id="app-startup-message" role="status">The interactive tools aren’t ready yet. If this message stays here, reload the page.</p>
+      <button id="app-reload" class="button secondary" type="button" hidden>Reload page</button>
+      <noscript><div class="notice"><p>JavaScript is needed for the calculators and snapshot imports. Enable it to use the playground.</p></div></noscript>
+    </section>
+    <div id="app-content" inert>
     <section class="intro">
       <div><p id="workspace-eyebrow" class="eyebrow evidence-badge">HYPOTHETICAL MODELS</p><h1 id="workspace-title" tabindex="-1">Compare liquidity scenarios</h1><p id="workspace-subtitle" class="subtitle">Change price, range or fees. Compare with holding.</p></div><div id="experiment-entry" class="intro-actions intro-range-link"><a id="example-start" class="button primary" href="#lp-lab"><span>Try an example</span><span aria-hidden="true">→</span></a><a href="learn.html#lesson=swap-impact">Start learning →</a></div>
     </section>
@@ -811,6 +817,7 @@
         </div>
         <button id="comparison-export" class="button secondary" type="button" disabled>Export both positions and their evidence</button>
       </section>
+    </div>
     </div>
     <footer class="site-footer">
       <span>Teren · Look closely.</span>

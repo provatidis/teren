@@ -29,7 +29,7 @@
   <meta name="twitter:description" content="Learn how liquidity pools work through interactive lessons on swaps, price ranges and fees, with recorded cases to explore.">
   <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
   <link rel="stylesheet" href="styles.css">
-  <script type="module" src="learn-main.js"></script>
+  <script type="module" src="learn-entry.js"></script>
 </head>
 <body class="learning-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -39,7 +39,13 @@
     <nav class="site-nav" aria-label="Liquidity modes"><div class="product-nav"><a href="learn.html" aria-current="page">Learn</a><a href="liquidity.html#experiment">Experiment</a><a href="liquidity.html#inspect">Inspect</a></div></nav>
   </header>
   <main id="main-content" tabindex="-1">
-    <noscript><div class="notice"><p>JavaScript is needed for the interactive lessons and progress. Enable it to predict, run and check your experiments. <a href="liquidity.html#experiment">Open Experiment →</a></p></div></noscript>
+    <section id="app-startup" class="notice app-startup" data-state="loading" aria-labelledby="app-startup-title">
+      <h1 id="app-startup-title">Opening this page…</h1>
+      <p id="app-startup-message" role="status">The interactive tools aren’t ready yet. If this message stays here, reload the page.</p>
+      <button id="app-reload" class="button secondary" type="button" hidden>Reload page</button>
+      <noscript><div class="notice"><p>JavaScript is needed for the interactive lessons and progress. Enable it to predict, run and check your experiments. <a href="liquidity.html#experiment">Open Experiment →</a></p></div></noscript>
+    </section>
+    <div id="app-content" inert>
     <section class="intro learn-intro">
       <div><p class="eyebrow">LEARN BY DOING</p><h1 id="learn-page-title">Liquidity essentials</h1><p id="learn-page-subtitle" class="subtitle">Explore Uniswap v2-style full-range pools and Uniswap v3-style price ranges with interactive examples.</p></div>
       <button type="button" id="learn-resume" class="button secondary">Start lesson 1 ↓</button>
@@ -216,6 +222,7 @@
           <p id="applied-reflection" class="learn-reading" hidden>A useful habit: follow the tokens you own, including earned fees, then compare with what you would have held.</p>
         </section>
       </article>
+    </div>
     </div>
     <footer class="site-footer">
       <span>Teren · Look closely.</span>

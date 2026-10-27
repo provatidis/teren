@@ -36,7 +36,8 @@ export async function checkReviewPolish({ evaluate, click, fill, text, navigate,
   assert.equal(await evaluate('document.activeElement.id'), 'learn-lesson-title');
   await evaluate('scrollTo(0,400)'); await settle(evaluate);
   await reload(); await settle(evaluate);
-  assert.ok(Math.abs(await evaluate('scrollY') - 400) <= 2, 'Reload keeps the reading position.');
+  const reloadedScroll = await evaluate('scrollY');
+  assert.ok(Math.abs(reloadedScroll - 400) <= 2, 'Reload keeps the reading position: expected 400, got ' + reloadedScroll);
   assert.equal(await text('learn-lesson-number'), 'LESSON 1 OF 7');
   await navigate(base + 'learn.html#lesson=final-challenge'); await settle(evaluate);
   assert.equal(await text('learn-lesson-number'), 'FINAL CHALLENGE · 7 OF 7');

@@ -1,5 +1,10 @@
 # Release history
 
+## 1.50.8 · 2026-10-28
+
+- Keep lab and lesson controls and results unavailable until their page has initialized, and remove pre-rendered health verdicts. Missing scripts or startup errors now show a reload message instead of editable-looking defaults and stale risk verdicts. A static explanation remains if the startup guard itself cannot load; Home keeps its ordinary links available.
+- Preserve shared routes and saved work on reload. Extend content hashing and preloads to literal dynamic imports, and add desktop/mobile checks for missing entries and dependencies, interrupted initialization, delayed loading, recovery and JavaScript-disabled access.
+
 ## 1.50.7 · 2026-10-27
 
 - Show one field error for invalid width-comparison inputs and replace stale setup summaries until the relevant inputs are valid. Preserve the last valid comparison and restore results after correction.
