@@ -1,5 +1,4 @@
 import { periodPointView, periodIntervalView, periodMilestones } from './period-presentation.js';
-import { learningAnswerMatches } from '../models/learning-answer.js';
 
 export const APPLIED_IDS = Object.freeze(['fees-over-time', 'between-samples', 'period-vs-holding']);
 export function appliedLessonFromHash(hash) {
@@ -16,13 +15,13 @@ export function appliedQuestion(period, id) {
     : period.points.length - 1;
   if (!Number.isInteger(index)) throw new Error('The recorded between-samples interval is missing.');
   const view = periodPointView(period, index), interval = periodIntervalView(period, index);
-  if (id === 'fees-over-time') return { index, view, interval, answer: view.feesUSD, answerDigits: 2, prediction: 'earned', reason: 'growth' };
+  if (id === 'fees-over-time') return { index, view, interval, prediction: 'earned', reason: 'growth' };
   if (id === 'between-samples') {
     const start=periodPointView(period,0),end=periodPointView(period,period.points.length-1);
     const placement={startPrice:start.price,range:start.range,
       upwardRoomPercent:100*(start.range.upperPrice-start.price)/start.price,
       durationSeconds:end.durationSeconds,secondsInRange:end.secondsInRange};
-    return { index, view, interval, placement, answer: interval.secondsInRange, answerDigits: 0, wholeAnswer: true, prediction: 'possible', reason: 'returned' };
+    return { index, view, interval, placement, prediction: 'possible', reason: 'returned' };
   }
   // A named teaching checkpoint in this fixed record, not a search for its worst
   // return. Keep the final period endpoint as the assessed result and handoff.
@@ -34,12 +33,7 @@ export function appliedQuestion(period, id) {
   }
   const recovery={principalImprovement:view.principalGapUSD-contrast.principalGapUSD,
     feeValueChange:view.feesUSD-contrast.feesUSD,gapChange:view.gapUSD-contrast.gapUSD};
-  return { index, view, interval, contrastIndex, contrast, recovery, answer: view.gapUSD, answerDigits: 2, prediction: 'can-trail', reason: 'price-returned' };
-}
-export function checkAppliedAnswer(question, answer, reason) {
-  const numeric = learningAnswerMatches(answer, question.answer, question.answerDigits, question.wholeAnswer);
-  const reasoning = reason === question.reason;
-  return { numeric, reasoning, passed: numeric && reasoning };
+  return { index, view, interval, contrastIndex, contrast, recovery, prediction: 'can-trail', reason: 'price-returned' };
 }
 export function appliedReasonFeedback(id, reason) {
   const feedback = {

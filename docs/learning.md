@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [User guide](guide.md) · [Current review](review.md) · [Observation plan](#observation-plan)
 
-Teren has twenty lessons across liquidity and lending. The visible method is **Predict → Observe → Check**. Check combines an explanation with an application to another situation; predictions are ungraded and no required question asks the learner to calculate or round a result. Numeric practice remains optional in the liquidity essentials and historical chapters. The separate wstETH/WETH experiment has no dedicated lesson chapter yet; its interpretation tasks are included in the observation plan.
+Teren has twenty lessons across liquidity and lending. The visible method is **Predict → Observe → Check**. Check combines an explanation with an application to another situation; predictions are ungraded and questions do not ask the learner to calculate or round a result. Go deeper retains worked examples, formulas and original sources. The separate wstETH/WETH experiment has no dedicated lesson chapter yet; its interpretation tasks are included in the observation plan.
 
 ## What the research establishes
 

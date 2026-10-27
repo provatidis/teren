@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { APPLIED_IDS, appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../public/lib/applied-lessons.js';
+import { APPLIED_IDS, appliedLessonFromHash, appliedQuestion, appliedReasonFeedback } from '../public/lib/applied-lessons.js';
 import { appliedApplication, appliedCostExample, appliedPriceExposure, checkAppliedUnderstanding } from '../public/lib/applied-applications.js';
 import { APPLIED_LESSONS } from '../public/learning/applied-liquidity.js';
 import { validatePositionPeriod } from '../public/data/position-period.js';
@@ -16,20 +16,17 @@ test('applied questions use verified period earnings, interval counters and the 
   assert.deepEqual(APPLIED_LESSONS.map(item => item.id), APPLIED_IDS);
   const fees = appliedQuestion(baseline, 'fees-over-time');
   assert.equal(fees.index, 8); assert.equal(fees.view.earned0, 112674n); assert.equal(fees.view.earned1, 896672855663157n);
-  assert.ok(Math.abs(fees.answer - 2.3572428756221475) < 1e-12);
-  assert.equal(checkAppliedAnswer(fees, '2.36', 'growth').passed, true);
+  assert.ok(Math.abs(fees.view.feesUSD - 2.3572428756221475) < 1e-12);
   const between = appliedQuestion(returning, 'between-samples');
   assert.equal(between.index, 8); assert.equal(between.view.state, 'above'); assert.equal(between.interval.startState, 'above');
-  assert.equal(between.answer, 2724); assert.equal(between.interval.durationSeconds, 7560);
+  assert.equal(between.interval.secondsInRange, 2724); assert.equal(between.interval.durationSeconds, 7560);
   assert.ok(between.interval.earned0 > 0n && between.interval.earned1 > 0n);
-  assert.equal(checkAppliedAnswer(between, '17580', 'returned').numeric, false, 'Cumulative active time is not the interval answer.');
+  assert.equal(between.view.secondsInRange, 17580, 'Cumulative active time differs from this interval’s active time.');
   const final = appliedQuestion(returning, 'period-vs-holding');
   assert.equal(final.index, 16); assert.equal(final.prediction, 'can-trail');
   assert.equal(final.view.holding.amount0, 4982691068n); assert.equal(final.view.holding.amount1, 14920139441099507n);
   assert.ok(final.view.principalGapUSD < 0 && final.view.gapUSD > 0);
-  assert.ok(Math.abs(final.answer - .17457169368572067) < 1e-12);
-  assert.equal(checkAppliedAnswer(final, '0.17', 'price-returned').passed, true);
-  assert.equal(checkAppliedAnswer(final, '0.18', 'price-returned').numeric, false);
+  assert.ok(Math.abs(final.view.gapUSD - .17457169368572067) < 1e-12);
   assert.ok(periodPointView(returning, 8).gapUSD < 0, 'Earning fees does not guarantee beating holding at every checkpoint.');
 });
 test('exploring a different checkpoint cannot alter the fixed question or accept unsupported evidence', () => {
@@ -40,14 +37,11 @@ test('exploring a different checkpoint cannot alter the fixed question or accept
   assert.throws(() => appliedQuestion(returning, 'unknown'), /applied exercise/);
   assert.throws(() => appliedQuestion({ ...returning, points: [returning.points[0], returning.points.at(-1)] }, 'between-samples'), /interval is missing/);
 });
-test('optional applied calculation practice validates numbers and can reuse reasoning', () => {
+test('recorded conclusions match the available prediction and explanation choices', () => {
   for (const item of APPLIED_LESSONS) {
     const question = appliedQuestion(item.caseId === 'in-range' ? baseline : returning, item.id);
     assert.ok(item.predictions.some(([id]) => id === question.prediction));
     assert.ok(item.reasons.some(([id]) => id === question.reason));
-    assert.equal(checkAppliedAnswer(question, String(question.answer), question.reason).passed, true);
-    assert.equal(checkAppliedAnswer(question, String(question.answer), 'wrong').passed, false);
-    for (const answer of ['', ' ', 'Infinity', 'NaN', 'no']) assert.equal(checkAppliedAnswer(question, answer, question.reason).passed, false);
   }
 });
 test('applied routes are explicit and cannot hijack essential or malformed lesson links', () => {

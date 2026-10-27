@@ -10,7 +10,7 @@ import { lessonWalkthrough } from '../lib/lesson-walkthrough.js';
 import { renderLessonSetup, liquidityLessonSetup } from '../lib/lesson-setup.js';
 import { renderQuestionEvidence } from '../lib/lesson-question-evidence.js';
 import { LESSONS } from '../learning/liquidity-essentials.js';
-import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, checkLesson } from '../models/lesson-experiments.js';
+import { LESSON_IDS, VARIANTS, lessonSetup, runLesson } from '../models/lesson-experiments.js';
 import { checkLessonUnderstanding, essentialQuestionRevisions } from '../models/lesson-application.js';
 import { lessonApplicationCopy } from '../lib/lesson-application-copy.js';
 import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
@@ -149,9 +149,8 @@ export function initLearning() {
     predictionFeedbackElement.textContent = '';
     draft.ran = false; draft.answer = ''; draft.reason = ''; draft.application = ''; outcome = null; applicationCopy = null;
     draft.task = null; draft.taskChecked = false;
-    $('learn-calculation-feedback').textContent = ''; $('learn-answer').setAttribute('aria-invalid', 'false');
     $('learn-results').hidden = true; $('learn-assessment').hidden = true; $('learn-feedback').hidden = true; $('learn-share').hidden = true; $('learn-continue').hidden = true;
-    $('learn-answer').value = ''; choices('learn-reasons', 'learn-reason', lesson.reasons, '');
+    choices('learn-reasons', 'learn-reason', lesson.reasons, '');
     $('learn-input-status').textContent = visualLesson()
       ? 'Question setup changed. Explore the new example, then open its explanation.'
       : 'Setup changed. Predict, then run the updated experiment.';
@@ -272,8 +271,6 @@ export function initLearning() {
     else if (lesson.id === 'loss-vs-profit') $('learn-explore-note').textContent = 'Try adding fees in Experiment. Find a positive dollar return that still trails holding the starting tokens.';
     else if (lesson.id === 'range-boundaries') $('learn-explore-note').textContent = 'Move ETH below, inside and above the bounds. Watch which token remains and when swaps can use the position.';
     if (r && lesson.id === 'final-challenge') $('learn-share-url').value = home.href;
-    $('learn-answer').value = draft.answer;
-    $('learn-answer').setAttribute('aria-invalid', 'false');
   }
   function loadLesson() {
     clearUnderstandingFeedback('learn');
@@ -304,11 +301,9 @@ export function initLearning() {
     $('learn-lesson-number').textContent = index === 6 ? 'FINAL CHALLENGE · 7 OF 7' : 'LESSON ' + (index + 1) + ' OF 7';
     $('learn-concept').textContent = lesson.concept; $('learn-skill').textContent = lesson.skill;
     $('learn-intro').textContent = lesson.intro; $('learn-prediction-question').textContent = lesson.prediction;
-    $('learn-question').textContent = lesson.question; $('learn-reason-question').textContent = lesson.reasoning;
-    $('learn-calculation-hint').textContent = lesson.hint; $('learn-hint').open = false;
-    $('learn-deeper').open = false; $('learn-math').open = false; $('learn-calculation').open = false;
-    $('learn-calculation-feedback').textContent = '';
-    $('learn-answer').value = draft.answer;
+    $('learn-reason-question').textContent = lesson.reasoning;
+    $('learn-hint').open = false;
+    $('learn-deeper').open = false; $('learn-math').open = false;
     $('learn-takeaway').textContent = lesson.takeaway;
     $('learn-takeaway').hidden = true;
     $('learn-results').hidden = true; $('learn-assessment').hidden = true; $('learn-feedback').hidden = true; $('learn-share').hidden = true; $('learn-continue').hidden = true;
@@ -380,16 +375,6 @@ export function initLearning() {
     title.scrollIntoView({ block: 'start', behavior: 'instant' });
   }
   $('learn-run').addEventListener('click', () => showResult());
-  $('learn-answer').addEventListener('input', () => {
-    draft.answer = $('learn-answer').value; $('learn-answer').setAttribute('aria-invalid', 'false');
-    $('learn-calculation-feedback').textContent = ''; persist();
-  });
-  $('learn-calculation-check').addEventListener('click', () => {
-    if (!outcome) return;
-    const numeric = checkLesson(lesson.id, draft.inputs, draft.variant, draft.answer, outcome.reason).numeric;
-    $('learn-answer').setAttribute('aria-invalid', String(!numeric));
-    $('learn-calculation-feedback').textContent = numeric ? 'Calculation matches. Lesson completion is unchanged.' : 'Revisit the displayed number, units and requested rounding. This optional practice does not affect completion.';
-  });
   $('learn-assessment-form').addEventListener('submit', event => { event.preventDefault(); if (!draft.ran) return; draft.reason = selection('learn-reason'); draft.application = selection('learn-application'); showCheck(); });
   function changeVariation() {
     const variant = (draft.variant + 1) % VARIANTS;

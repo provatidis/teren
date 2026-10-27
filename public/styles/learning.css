@@ -70,9 +70,7 @@
 .learn-bar-row:first-child .learn-bar>span{background:#a9c7f5}
 .learn-results .learn-reading{font-size:13px;margin:0 0 16px}
 .learn-explore{font-size:12px;color:var(--accent);font-weight:500}
-.learn-answer-label{display:block;font-size:13px;line-height:1.8;color:var(--muted);margin:20px 0 12px}
-.learn-answer,.learn-share-url{width:100%;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);border-radius:9px;padding:13px 15px;font-size:16px}
-.learn-answer[aria-invalid=true]{border-color:var(--error)}
+.learn-share-url{width:100%;border:1px solid var(--border-strong);background:var(--surface);color:var(--text);border-radius:9px;padding:13px 15px;font-size:16px}
 .learn-hint{margin:0 0 20px;border-top:1px solid var(--border);padding-top:14px;font-size:12px}
 .learn-hint summary{color:var(--accent);cursor:pointer}
 .learn-hint p{color:var(--muted);line-height:1.8}
@@ -187,8 +185,6 @@
 .learn-application-setup{margin:26px 0 14px;padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
 .learn-application-setup .eyebrow{margin:0 0 8px}
 .learn-application-setup p:last-child{margin:0;font-size:14px;line-height:1.8;color:var(--text)}
-.learn-calculation .learn-answer{display:block;margin-bottom:12px}
-.learn-calculation [role="status"]{min-height:1.8em}
 
 .learn-pitfall{margin:20px 0 24px;padding:16px 18px;border-left:3px solid #ae9969;background:var(--surface);border-radius:0 10px 10px 0;font-size:13px;line-height:1.85}
 .learn-pitfall strong{font-weight:600;color:var(--text)}.learn-pitfall p{margin:8px 0;color:var(--muted)}.learn-pitfall a{color:var(--accent);font-size:12px;text-decoration:underline;text-underline-offset:3px}

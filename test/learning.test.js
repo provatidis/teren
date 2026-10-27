@@ -3,7 +3,7 @@ import { DEEPER_READING } from '../public/learning/deeper-reading.js';
 import { lessonWalkthrough } from '../public/lib/lesson-walkthrough.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, checkLesson, validateLessonInputs } from '../public/models/lesson-experiments.js';
+import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, validateLessonInputs } from '../public/models/lesson-experiments.js';
 import { LESSONS } from '../public/learning/liquidity-essentials.js';
 import { LEARNING_KEY, emptyProgress, parseProgress, readProgress, saveProgress } from '../public/data/learning-progress.js';
 const close = (actual, expected, tolerance = 1e-6) => assert.ok(Math.abs(actual - expected) <= tolerance, actual + ' differs from ' + expected);
@@ -12,10 +12,9 @@ test('every lesson and transfer variation produces a finite, answerable exercise
   assert.deepEqual(LESSONS.map(lesson => lesson.id), LESSON_IDS);
   for (const lesson of LESSONS) for (let variant = 0; variant < VARIANTS; variant++) {
     const inputs = lessonSetup(lesson.id, variant), result = runLesson(lesson.id, inputs, variant);
-    assert.ok(Number.isFinite(result.answer));
+    assert.ok(Number.isFinite(result.out ?? result.share ?? result.result.lpValue));
     assert.ok(lesson.predictions.some(([id]) => id === result.prediction));
     assert.ok(lesson.reasons.some(([id]) => id === result.reason));
-    assert.equal(checkLesson(lesson.id, inputs, variant, String(result.wholeAnswer ? Math.round(result.answer) : result.answer), result.reason).passed, true);
   }
 });
 test('swap lesson reproduces the reference 1 ETH quote and larger orders get greater impact', () => {
@@ -54,19 +53,19 @@ test('a rally gives dollar profit while still losing to holding the starting tok
   const r = runLesson('loss-vs-profit', { futurePrice: 4000 });
   close(r.result.holdValue, 7500);
   close(r.result.lpBeforeFees, 7071.067811865476);
-  close(r.answer, 428.932188134524);
+  close(r.result.breakEvenFees, 428.932188134524);
   assert.ok(r.result.lpReturn > 0 && r.result.impermanentLoss < 0);
   assert.equal(runLesson('token-balances', { futurePrice: 1000 }).prediction, 'more');
   assert.equal(runLesson('token-balances', { futurePrice: 2000 }).prediction, 'same');
 });
 test('total break-even target differs from additional fees and assumptions never change principal', () => {
   const r = runLesson('fee-break-even', { futurePrice: 4000, fees: 100 });
-  close(r.answer, 428.932188134524);
+  close(r.result.breakEvenFees, 428.932188134524);
   assert.equal(r.prediction, 'short');
   const final = runLesson('final-challenge', { futurePrice: 4000, fees: 100 });
-  close(final.answer, 328.932188134524);
+  close(final.result.difference, -328.932188134524);
   const covered = runLesson('final-challenge', { futurePrice: 4000, fees: 600 });
-  assert.equal(covered.answer, 0);
+  assert.ok(covered.result.difference > 0);
   assert.equal(covered.prediction, 'lp');
   assert.deepEqual(covered.result.pooled, r.result.pooled);
 });
@@ -74,20 +73,13 @@ test('range exercise labels exact boundaries and does not infer earlier fees', (
   for (const [price, expected, share] of [[1000,'eth',100],[1800,'eth',100],[2000,'both',null],[2200,'usdc',0],[3000,'usdc',0]]) {
     const r = runLesson('range-boundaries', { futurePrice: price, width: 0.1 });
     assert.equal(r.prediction, expected);
-    if (share !== null) close(r.answer, share);
+    if (share !== null) close(r.result.finalEthPercent, share);
     assert.equal(r.reason, 'path');
   }
   const tight = runLesson('range-boundaries', { futurePrice: 2200, width: 0.05 });
   const wide = runLesson('range-boundaries', { futurePrice: 2200, width: 0.5 });
   assert.equal(tight.prediction, 'usdc');
   assert.equal(wide.prediction, 'both');
-});
-test('optional calculation checker validates rounding and can reuse reasoning', () => {
-  const inputs = lessonSetup('fee-break-even');
-  assert.equal(checkLesson('fee-break-even', inputs, 0, '428.93', 'assumption').passed, true);
-  for (const answer of ['', ' ', 'no', 'Infinity', '100']) assert.equal(checkLesson('fee-break-even', inputs, 0, answer, 'assumption').passed, false);
-  const badReason = checkLesson('fee-break-even', inputs, 0, '428.93', 'guarantee');
-  assert.equal(badReason.numeric, true); assert.equal(badReason.reasoning, false);
 });
 test('exercise validation preserves fixed assumptions and rejects unsupported inputs', () => {
   const r = validateLessonInputs('token-balances', { futurePrice: 4000, investment: 1, fees: 99999, initialPrice: 1 });

@@ -26,7 +26,7 @@ test('prediction feedback distinguishes a guess from a skipped observation', () 
 
 const [baseline, returning] = await Promise.all(['uniswap-v3-position-period.json','uniswap-v3-position-range-return.json'].map(async file => validatePositionPeriod(JSON.parse(await readFile(new URL('../public/examples/' + file, import.meta.url),'utf8')))));
 
-test('every exercise requires explanation and transfer, independently of numeric practice or predictions', () => {
+test('every exercise requires explanation and transfer, independently of predictions', () => {
   for (const id of LESSON_IDS) for (let variant = 0; variant < VARIANTS; variant++) {
     const input = lessonSetup(id,variant), before = {...input}, result = runLesson(id,input,variant);
     const copy = lessonApplicationCopy(id,result), item = LESSONS.find(lesson=>lesson.id===id);
