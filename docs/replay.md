@@ -38,7 +38,7 @@ This is one inactive week, not a typical yield or an estimate of how quickly ano
 
 ## Learn from these records
 
-The [Fees, time and range exits chapter](https://teren.sh/learn.html#applied=fees-over-time) uses the original in-range and exit-and-return records for three guided prediction-and-explanation exercises. Assessment targets come from the existing period accounting: final baseline fee value, the exit-and-return case’s 2,724 active seconds between blocks 26084375–26085000, and its final LP-minus-holding result before costs. Checkpoint exploration stays independent of the fixed question. Experiment handoffs start a separate principal-only hypothetical experiment with zero assumed future fees.
+The [Fees, time and range exits chapter](https://teren.sh/learn.html#applied=fees-over-time) uses the original in-range and exit-and-return records. Its conceptual checks distinguish new fees from earlier claims, use recorded active time to explain activity between outside samples, and connect the holding comparison to the tokens owned at named checkpoints. Supplied balances and diagrams support changed-situation questions; learners do not copy fee totals or calculate an answer. [Learning design](learning.md#visual-lesson-patterns) describes those questions. Exploring checkpoints leaves each question’s evidence unchanged. Experiment handoffs start a separate principal-only hypothetical experiment with zero assumed future fees.
 
 ## Calculations and checks
 
