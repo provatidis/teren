@@ -32,6 +32,12 @@ export function createFeeContext(prefix) {
   const assumption = node('p'); assumption.id = prefix + '-fee-assumption';
   body.append(target, window, daily, assumption,
     node('p', 'More time lowers the daily hurdle. Actual fees still depend on swaps and competing liquidity.', 'fee-context-takeaway'));
+  if (prefix === 'cl') {
+    const experiment = node('p');
+    const link = node('a', 'Explore how competing liquidity changes your fee share →');
+    link.href = 'liquidity.html#follow-fees';
+    experiment.append(link); body.append(experiment);
+  }
   const records = node('details', undefined, 'fee-context-records');
   records.append(node('summary', 'What did recorded positions earn?'));
   const content = node('div');
