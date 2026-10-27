@@ -56,6 +56,9 @@ export async function checkLoanResponseLesson({ evaluate, click, fill, text, nav
   assert.deepEqual(await working(), drafts);
   assert.equal(await evaluate("document.getElementById('lend-explore').href"), handoff);
   await click('lend-reveal');
+  assert.equal(await evaluate("document.getElementById('response-budget').value"), '0', 'Reading the question explanation preserves the explored budget.');
+  assert.equal(await text('lend-observe-title'), 'With $1,000.00 per choice');
+  await evaluate("document.querySelector('#lend-money-flow .scene-prediction-show').click()");
   assert.equal(await evaluate("document.getElementById('response-budget').value"), '1000');
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
   assert.equal(await text('lend-application-label'), 'A recovery after liquidation');

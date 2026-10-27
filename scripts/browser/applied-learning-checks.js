@@ -111,6 +111,23 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     assert.equal(await text('applied-feedback-title'),'Review your answers.');
     assert.equal(await evaluate("document.getElementById('applied-continue').hidden"),true);
     await choose('applied-application',application); await click('applied-check');
+    // A revised prediction is independent of the evidence already explored and checked.
+    await fill('applied-checkpoint','0');
+    const currentHandoff=await evaluate("document.getElementById('applied-explore').href");
+    await evaluate("document.querySelector('input[name=applied-prediction]:not(:checked)').click()");
+    assert.equal(await evaluate("document.getElementById('applied-prediction-feedback').dataset.state"),'different');
+    assert.equal(await evaluate("document.querySelector('input[name=applied-reason]:checked').value"),reason);
+    assert.equal(await evaluate("document.querySelector('input[name=applied-application]:checked').value"),application);
+    assert.equal(await evaluate("document.getElementById('applied-observe').hidden||document.getElementById('applied-assessment').hidden||document.getElementById('applied-continue').hidden"),false);
+    assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"),'0');
+    assert.equal(await evaluate("document.getElementById('applied-explore').href"),currentHandoff);
+    assert.equal(await evaluate("document.getElementById('applied-answer').value"),answer);
+    assert.match(await text('applied-calculation-feedback'),/Calculation matches/);
+    assert.equal(await text('applied-feedback-title'),'Both answers are correct.');
+    await choose('applied-prediction',prediction);
+    assert.equal(await evaluate("document.getElementById('applied-prediction-feedback').dataset.state"),'match');
+    await click('applied-reveal');
+    assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"),target,'Showing the outcome again explicitly returns to the question checkpoint.');
     const order = await evaluate("Array.from(document.querySelectorAll('input[name=applied-reason],input[name=applied-application]')).map(input=>input.value).join(',')");
     await reload(); await ready();
     assert.equal(await evaluate("Array.from(document.querySelectorAll('input[name=applied-reason],input[name=applied-application]')).map(input=>input.value).join(',')"),order);

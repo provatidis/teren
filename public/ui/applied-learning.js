@@ -136,14 +136,18 @@ export function initAppliedLearning() {
     $('applied-inspect').href = new URL('liquidity.html' + record.hash, location.href).href;
     drawChart(index);
   }
-  function reveal(resetCheckpoint = false) {
-    if (!period) return;
-    if (resetCheckpoint) draft.checkpoint = question.index;
-    draft.revealed = true;
+  function refreshPrediction() {
     const finding = lesson.id === 'fees-over-time' ? 'Fees accrued during this period without being collected.'
       : lesson.id === 'between-samples' ? 'The position was active between the two outside-range samples in the question.'
       : 'At checkpoint ' + (question.contrastIndex + 1) + ', the position has earned ' + usd(question.contrast.feesUSD) + ' in fees but still trails holding by ' + usd(-question.contrast.gapUSD) + '. At the final checkpoint it is ' + usd(question.view.gapUSD) + ' ahead, before costs.';
     renderPredictionFeedback($('applied-prediction-feedback'), lesson.predictions, draft.prediction, question.prediction, finding);
+    markPredictionRevealed(predictionField);
+  }
+  function reveal(resetCheckpoint = false) {
+    if (!period) return;
+    if (resetCheckpoint) draft.checkpoint = question.index;
+    draft.revealed = true;
+    refreshPrediction();
     renderRecordedComparison($('applied-comparison'), question, index => {
       draft.checkpoint = index; renderCheckpoint(); persist();
       $('applied-checkpoint').focus({ preventScroll: true });
@@ -152,7 +156,6 @@ export function initAppliedLearning() {
     costExample.hidden = !question.contrast;
     costExample.textContent = question.contrast ? appliedCostExample(question).text : '';
     $('applied-observe').hidden = false; $('applied-assessment').hidden = false;
-    markPredictionRevealed(predictionField);
     renderCheckpoint(); persist();
   }
   function check(save = true) {
@@ -211,18 +214,20 @@ export function initAppliedLearning() {
     $('applied-observe').hidden = true; $('applied-assessment').hidden = true; clearFeedback();
     $('applied-answer').value = draft.answer;
     choices('applied-predictions', 'applied-prediction', lesson.predictions, draft.prediction, value => {
-      draft.prediction = value; draft.revealed = false; draft.answer = ''; draft.reason = ''; draft.application = '';
-      $('applied-calculation-feedback').textContent = ''; $('applied-answer').setAttribute('aria-invalid', 'false');
-      $('applied-answer').value = ''; $('applied-observe').hidden = true; $('applied-assessment').hidden = true; clearFeedback();
-      document.querySelectorAll('input[name="applied-reason"],input[name="applied-application"]').forEach(input => { input.checked = false; });
-      $('applied-reveal').disabled = !period; $('applied-reveal').textContent = 'Reveal the recorded result →'; persist();
+      draft.prediction = value;
+      if (draft.revealed && question) refreshPrediction();
+      persist();
     });
     choices('applied-reasons', 'applied-reason', lesson.reasons, draft.reason, value => { draft.reason = value; clearFeedback(); persist(); });
     predictionPrompt = createPredictionPrompt(predictionField, {
       selected: draft.prediction, disabled: true, button: $('applied-reveal'),
       onShow: () => {
         if (!period) { activate(true); return; }
-        reveal(true); focusTitle('applied-observe-title');
+        if (draft.revealed) {
+          draft.checkpoint = question.index;
+          renderCheckpoint(); persist();
+        } else reveal(true);
+        focusTitle('applied-observe-title');
       },
     });
     $('applied-prediction-home').replaceChildren(predictionPrompt);

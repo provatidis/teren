@@ -129,7 +129,7 @@ export function createFoundationScene(id, input, variant, prediction) {
       { label: 'Lesson setup · ' + fmt(target, 0) + ' ETH', value: target },
     ],
     scopeText: amount => (amount === target ? 'Showing the lesson setup. ' : 'Exploring another amount. ')
-      + 'The checks use a ' + fmt(target, 0) + ' ETH ' + (deposit ? 'deposit, with matching USDC.' : 'swap.'),
+      + 'Prediction: a ' + fmt(target, 0) + ' ETH ' + (deposit ? 'deposit, with matching USDC.' : 'swap.'),
     onChange(amount) {
       frame = calculate(amount);
       if (player) player.show(index, false, false);

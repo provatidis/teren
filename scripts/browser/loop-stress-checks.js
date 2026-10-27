@@ -70,11 +70,15 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   assert.deepEqual(await working(), drafts);
   assert.equal(await evaluate("document.getElementById('lend-explore').href"), handoff);
   await click('stress-mode-time'); await key('stress-time', 'End'); await click('lend-reveal');
+  assert.equal(await mode(), 'time', 'Reading the question explanation preserves the explored comparison.');
+  assert.equal(await evaluate("document.getElementById('stress-time').value"), '365');
+  assert.equal(await text('lend-observe-title'), 'With ETH at $1,500.00');
+  await evaluate("document.querySelector('#lend-money-flow .scene-prediction-show').click()");
   assert.equal(await mode(), 'price');
   assert.equal(await evaluate("document.getElementById('stress-price').value"), '1500');
   assert.equal(await evaluate("Array.from(document.querySelectorAll('.stress-scene .scene-price-control [role=status]')).every(el=>el.textContent==='')"), true);
   assert.equal(await evaluate("document.querySelector('input[name=lend-prediction]:checked')===null"), true);
-  assert.match(await text('lend-prediction-feedback'), /^What happens The loop loses/);
+  assert.match(await text('lend-prediction-feedback'), /^What happens With ETH at \$1,500\.00: the loop loses/);
   assert.equal(await evaluate("document.getElementById('lend-explanation').hidden"), false);
   await choose('reason', 'exposure'); await choose('application', 'backing-not-profit'); await click('lend-check');
   assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');

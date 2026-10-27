@@ -9,10 +9,10 @@ import { readLendingProgress, saveLendingProgress, LENDING_QUESTION_REVISIONS } 
 import { readLoopProgress, saveLoopProgress, readLendingChapter, saveLendingChapter, LOOP_QUESTION_REVISIONS } from '../data/loop-state.js';
 import { loanHash } from '../lib/lending-links.js';
 import { loopHash } from '../lib/loop-links.js';
+import { fmt, usd } from '../lib/format.js';
 import { lendingMetrics } from '../lib/lending-presentation.js';
 import { loopLessonMetrics } from '../lib/loop-presentation.js';
 import { renderLoopMoneyFlow } from '../lib/loop-money-flow.js';
-import { createUnwindApplication } from '../lib/unwind-application.js';
 import { createLendingScene } from '../lib/lending-lesson-scenes.js';
 import { createLoanConditionScene } from '../lib/loan-condition-scene.js';
 import { createLoanResponseScene } from '../lib/loan-response-scene.js';
@@ -34,12 +34,27 @@ export function initLendingLearning() {
       route: '#loop-lesson=', label: 'LOOPING', experiment: '#loops', revisions: LOOP_QUESTION_REVISIONS },
   };
   let chapter = 'essentials', course = courses.essentials, progress = course.progress;
-  let lesson, draft, example, lessonScene, loopScene, applicationScene;
+  let lesson, draft, example, lessonScene, loopScene;
   const foundationLesson = () => chapter === 'essentials' && ['supply', 'borrow', 'conditions', 'respond'].includes(lesson?.id);
   const stressLesson = () => chapter === 'loops' && lesson?.id === 'stress';
   const visualLesson = () => foundationLesson() || chapter === 'loops' && ['build', 'stress', 'unwind'].includes(lesson?.id);
-  const revealLabel = () => visualLesson() ? 'Why this happens ↓' : 'Read the result ↓';
+  const revealLabel = () => visualLesson() ? 'Explain the question outcome ↓' : 'Read the result ↓';
   const fresh = () => ({ prediction: '', reason: '', application: '', revealed: false, seed: newChoiceSeed() });
+  function questionOutcome() {
+    const input = example.input;
+    if (lesson.id === 'supply') return 'After one year with collateral off';
+    if (lesson.id === 'borrow') return 'After borrowing ' + fmt(input.borrow, 0) + ' USDC';
+    if (lesson.id === 'conditions') return 'After one year at ' + usd(input.start) + ' per ETH';
+    if (lesson.id === 'respond') return 'With ' + usd(input.budget) + ' per choice';
+    if (lesson.id === 'build') return 'After borrowing, buying and supplying the ETH';
+    if (lesson.id === 'stress') return 'With ETH at ' + usd(input.future);
+    return 'After unwinding at ' + usd(input.future) + ' per ETH';
+  }
+  function updatePredictionFeedback() {
+    renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, example.prediction,
+      questionOutcome() + ': ' + lesson.finding[0].toLowerCase() + lesson.finding.slice(1));
+    markPredictionRevealed(predictionField);
+  }
   function navigation() {
     $('lend-progress').textContent = progress.completed.length + ' of ' + course.lessons.length + ' checked';
     for (const name of Object.keys(courses)) $('lend-chapter-' + name).setAttribute('aria-current', name === chapter ? 'true' : 'false');
@@ -62,12 +77,10 @@ export function initLendingLearning() {
     clearUnderstandingFeedback('lend');
     $('lend-feedback').hidden = true;
     $('lend-continue').hidden = true;
-    applicationScene?.reset();
   }
   function reveal() {
     draft.revealed = true;
-    renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, example.prediction, lesson.finding);
-    markPredictionRevealed(predictionField);
+    updatePredictionFeedback();
     $('lend-metrics').replaceChildren(...course.metrics(lesson.id, example.result).map(items => learningMetric(...items)));
     $('lend-metrics').hidden = visualLesson();
     $('lend-observe').hidden = false;
@@ -137,10 +150,10 @@ export function initLendingLearning() {
     $('lend-predict-card').hidden = showFlow;
     $('lend-explanation').hidden = showFlow && !foundationLesson() && !stress;
     $('lend-observe-label').textContent = showFlow ? 'CONNECT THE IDEA' : '02 · OBSERVE';
-    $('lend-observe-title').textContent = showFlow ? 'What to take away' : 'Read the result';
+    $('lend-observe-title').textContent = showFlow ? questionOutcome() : 'Read the result';
     $('lend-check-label').textContent = showFlow ? 'CHECK YOUR UNDERSTANDING' : '03 · CHECK YOUR UNDERSTANDING';
     $('lend-observe-title').after(predictionFeedbackElement);
-    lessonScene = null; loopScene = null; applicationScene = null;
+    lessonScene = null; loopScene = null;
     if (foundationLesson() || stress) {
       const prediction = createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) });
       if (stress) lessonScene = createLoopStressScene(example.input, prediction);
@@ -163,9 +176,6 @@ export function initLendingLearning() {
     $('lend-reason-context').hidden = !lesson.reasonContext;
     renderQuestionEvidence($('lend-application-evidence'), typeof lesson.applicationEvidence === 'function' ? lesson.applicationEvidence(example) : lesson.applicationEvidence);
     $('lend-application-question').textContent = lesson.applicationQuestion;
-    if (chapter === 'loops' && lesson.id === 'unwind') applicationScene = createUnwindApplication(example.result);
-    $('lend-application-scene').replaceChildren(...(applicationScene ? [applicationScene.element] : []));
-    $('lend-application-scene').hidden = !applicationScene;
     $('lend-hint-text').textContent = lesson.hint;
     $('lend-hint').open = false; $('lend-deeper').open = false;
     $('lend-deeper-copy').replaceChildren(...lesson.deeper.map(copy => {
@@ -181,14 +191,9 @@ export function initLendingLearning() {
         name: 'lend-' + key, values, selected: draft[key], seed: draft.seed, group: id + key,
         onChange(value) {
           draft[key] = value;
-          clearFeedback();
           if (key === 'prediction') {
-            predictionFeedbackElement.textContent = '';
-            draft.revealed = false; draft.reason = ''; draft.application = '';
-            for (const radio of document.querySelectorAll('input[name="lend-reason"],input[name="lend-application"]')) radio.checked = false;
-            $('lend-observe').hidden = true; $('lend-assessment').hidden = true;
-            $('lend-reveal').disabled = false; $('lend-reveal').textContent = revealLabel();
-          }
+            if (draft.revealed) updatePredictionFeedback();
+          } else clearFeedback();
           persist();
         },
       });
@@ -219,8 +224,10 @@ export function initLendingLearning() {
   }
   buildNavigation();
   function showResult(sceneFirst = false) {
-    lessonScene?.showQuestion();
-    loopScene?.showQuestion();
+    if (sceneFirst) {
+      lessonScene?.showQuestion();
+      loopScene?.showQuestion();
+    }
     reveal();
     if (sceneFirst && visualLesson()) { focusSceneOutcome($('lend-money-flow')); return; }
     const title = $('lend-observe-title');
