@@ -247,7 +247,18 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     if (id === 'unwind') {
       assert.equal(await text('lend-application-label'), 'The same sale, with a cost');
       assert.match(await text('lend-application-evidence'), /Before this sale/);
+      assert.match(await text('lend-application-evidence'), /Swap loss on this sale/);
       assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#lend-application-evidence dd')).map(value=>value.textContent)"), ['1,356.67 USDC', '1,356.67 USDC', '$2,000.00', '0.3%']);
+      const connection = /Selling about 0\.6783 ETH would leave 4\.07 USDC unpaid.*walkthrough sells about 0\.6804 ETH in its last repayment pass/;
+      assert.match(await text('lend-application-choices-feedback'), connection, 'Correct answers connect the hypothetical shortfall to the actual walkthrough.');
+      assert.equal(await evaluate(`(() => {
+        const evidence = document.getElementById('lend-application-evidence');
+        const question = document.getElementById('lend-application-question').closest('fieldset');
+        const recap = document.getElementById('lend-application-scene');
+        const hint = document.getElementById('lend-hint');
+        return Boolean(evidence.compareDocumentPosition(question) & Node.DOCUMENT_POSITION_FOLLOWING)
+          && question.nextElementSibling === recap && recap.nextElementSibling === hint;
+      })()`), true, 'Evidence leads directly to the question and all its choices, then the optional recap and hint.');
       assert.equal(await evaluate("document.getElementById('unwind-application-recap').open"), false, 'Completion does not require opening the repayment recap.');
       await click('unwind-application-summary');
       assert.equal(await text('unwind-application-title'), 'Paused after Sell ETH');
@@ -275,8 +286,12 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       assert.equal(await evaluate("document.getElementById('unwind-application-show').hidden"), false, 'The repayment recap remains available before answering.');
       await click('lend-check');
       assert.equal(await text('lend-feedback-title'), 'Review your answers.');
-      assert.match(await text('lend-application-choices-feedback'), /cost reduces.*USDC.*debt unpaid/);
+      assert.match(await text('lend-application-choices-feedback'), /cost reduces.*USDC/);
+      assert.match(await text('lend-application-choices-feedback'), connection, 'A wrong answer gets the same numerical connection to Observe.');
       assert.equal(await evaluate("document.getElementById('unwind-application-show').hidden"), false, 'A wrong answer retains access to the repayment recap.');
+      await choose('application', 'retained-eth'); await click('lend-check');
+      assert.match(await text('lend-application-choices-feedback'), /not taken separately from the ETH you keep/);
+      assert.match(await text('lend-application-choices-feedback'), connection);
       await choose('application', application); await click('lend-check');
       assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
     }
@@ -375,6 +390,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     assert.equal(await evaluate('document.activeElement.id'), 'lend-feedback');
     assert.ok(await evaluate("document.getElementById('lend-next').getBoundingClientRect().bottom<=innerHeight"));
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
+    assert.ok(await evaluate("document.getElementById('lend-application-question').closest('fieldset').getBoundingClientRect().bottom <= document.getElementById('lend-application-scene').getBoundingClientRect().top"), 'On phones the optional recap follows the entire question and its choices.');
     await click('unwind-application-summary');
     await click('unwind-application-show');
     assert.equal(await text('unwind-application-title'), 'After Repay');

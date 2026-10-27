@@ -1,5 +1,11 @@
 # Release history
 
+## 1.50.2 · 2026-10-27
+
+- Connect unwind feedback to the extra ETH sold in the walkthrough, distinguishing the hypothetical 4.07 USDC shortfall from the actual completed repayment. Label the assumed loss consistently as a swap loss.
+- Keep the unwind question and answer choices beside their evidence; place the optional sale-and-repayment recap afterward. Refine the leverage hint to separate collateral backing from net value.
+- Restore the recorded range's almost $1,300 width in the placement question. Keep the accessible picture, answer meanings and saved progress intact.
+
 ## 1.50.1 · 2026-10-27
 
 - Refine lesson checks around ownership share, borrowing headroom and losses before liquidation. Preserve helpful explanations and replace repeated misconceptions with distinct ones.
