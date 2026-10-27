@@ -100,6 +100,7 @@ const click = (id) => evaluate(`document.getElementById(${JSON.stringify(id)}).c
 const fill = (id, value) => evaluate(`(() => { const el = document.getElementById(${JSON.stringify(id)}); el.value = ${JSON.stringify(value)}; el.dispatchEvent(new Event('input', { bubbles: true })); })()`);
 
 async function waitForStartup() {
+  await call('Page.bringToFront');
   const deadline = Date.now() + 10000;
   const inspect = () => evaluate(`(() => {
     const notice = document.getElementById('app-startup');

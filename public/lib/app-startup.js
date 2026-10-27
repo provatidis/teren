@@ -22,7 +22,7 @@ export async function startPage(load) {
     document.getElementById('app-startup-title').textContent = 'This page couldn’t finish opening.';
     document.getElementById('app-startup-message').textContent = content
       ? 'The interactive tools are unavailable. Reload this page to try again.'
-      : 'Saved shortcuts are unavailable. You can still use the links below, or reload this page to try again.';
+      : 'Saved shortcuts are unavailable. You can still open the labs and lessons, or reload this page to try again.';
     console.error('Teren could not start this page.', error);
   }
 }
