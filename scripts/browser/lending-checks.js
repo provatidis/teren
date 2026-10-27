@@ -19,11 +19,32 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
         });
     })()`), 'Price shortcuts sit below their slider, separate from time, with readable touch targets.');
   };
+  const checkPresetValidation = async () => {
+    const selected = () => evaluate("Array.from(document.querySelectorAll('[data-loan-price][aria-pressed=true]')).map(button=>button.dataset.loanPrice)");
+    await fill('loan-future', '2000');
+    const saved = await evaluate("sessionStorage.getItem('teren-lending-draft-v1')");
+    assert.deepEqual(await selected(), ['1']);
+    for (const id of ['loan-future', 'loan-start']) {
+      await fill(id, '');
+      assert.deepEqual(await selected(), [], 'Incomplete prices cannot retain a selected price shortcut.');
+      assert.equal(await evaluate("document.getElementById('loan-outcomes').hidden && document.getElementById('loan-share').disabled"), true);
+      assert.equal(await evaluate("sessionStorage.getItem('teren-lending-draft-v1')"), saved, 'Invalid price edits preserve the last valid draft.');
+      await fill(id, '2000');
+      assert.deepEqual(await selected(), ['1']);
+      assert.equal(await evaluate("document.getElementById('loan-outcomes').hidden"), false);
+    }
+    await fill('loan-days', '');
+    await fill('loan-future', '1500');
+    assert.deepEqual(await selected(), ['0.75'], 'A valid price shortcut still updates while an unrelated field is incomplete.');
+    assert.equal(await evaluate("sessionStorage.getItem('teren-lending-draft-v1')"), saved);
+    await fill('loan-future', '2000'); await fill('loan-days', '0');
+  };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await navigate(base + 'lending.html#experiment');
   assert.equal(await text('loan-health'), '1.60');
   assert.equal(await text('loan-net-assets'), '$10,000.00');
   await checkPriceShortcuts(false);
+  await checkPresetValidation();
   await evaluate("document.querySelector('[data-loan-price=\"0.75\"]').click()");
   assert.equal(await evaluate("document.getElementById('loan-future').value"), '1500');
   assert.equal(await evaluate("document.getElementById('loan-days').value"), '0');
@@ -143,6 +164,7 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
     assert.equal(await evaluate("document.getElementById('loan-setup').open"), false);
     await click('loan-reset');
     await checkPriceShortcuts(true);
+    await checkPresetValidation();
     assert.ok(await evaluate("document.getElementById('loan-future').getBoundingClientRect().bottom < innerHeight"), 'The first editable condition fits on the initial mobile screen.');
     await fill('loan-future', '1200');
     assert.equal(await text('loan-state'), 'Eligible for liquidation');

@@ -216,6 +216,10 @@ export function initBorrowingLoops({ initLiquidation }) {
     const roundsValid = Number.isInteger(input.rounds) && !errors.rounds;
     $('loop-round-down').disabled = !roundsValid || input.rounds === 0;
     $('loop-round-up').disabled = !roundsValid || input.rounds === 5;
+    for (const button of document.querySelectorAll('[data-loop-rounds]')) button.setAttribute('aria-pressed', String(roundsValid && Number(button.dataset.loopRounds) === input.rounds));
+    for (const button of document.querySelectorAll('[data-loop-price]')) {
+      button.setAttribute('aria-pressed', String(!errors.start && !errors.future && input.future === input.start * Number(button.dataset.loopPrice)));
+    }
     $('loop-quick-result').dataset.state = firstInvalid ? 'invalid' : 'above';
     if (firstInvalid) {
       current = null;
@@ -264,8 +268,6 @@ export function initBorrowingLoops({ initLiquidation }) {
       ['Supply original ETH without borrowing', money(result.supplyOnlyValue)],
     ], 'loop-accounting').children);
     $('loop-rate-summary').textContent = fmt(input.supplyAPR) + '% supply · ' + fmt(input.borrowAPR) + '% borrow APR · ' + (input.interestMode === 'compound' ? 'continuous compounding' : 'simple interest') + ' · fixed rates';
-    for (const button of document.querySelectorAll('[data-loop-rounds]')) button.setAttribute('aria-pressed', String(Number(button.dataset.loopRounds) === input.rounds));
-    for (const button of document.querySelectorAll('[data-loop-price]')) button.setAttribute('aria-pressed', String(input.future === input.start * Number(button.dataset.loopPrice)));
     renderComparison(pair); renderLedger(result); renderChart(result, pair?.reference); renderUnwind(result);
     const event = liquidation.render(result);
     if (!event.valid) {
