@@ -1,4 +1,23 @@
 import assert from 'node:assert/strict';
+import { lessonSetup, validateLessonInputs } from '../../public/models/lesson-experiments.js';
+import { essentialQuestionRevisions } from '../../public/models/lesson-application.js';
+
+// Older saved questions can contain custom inputs even though the lesson no
+// longer offers a second editor. Seed only this test profile's selected draft.
+async function restoreQuestion(evaluate, id, changes) {
+  const revisions = essentialQuestionRevisions(id, 0);
+  const draft = {
+    variant: 0, inputs: validateLessonInputs(id, { ...lessonSetup(id), ...changes }),
+    prediction: '', answer: '', reason: '', application: '', ran: false, choiceSeed: 41,
+    predictionRevision: revisions.prediction, reasonRevision: revisions.reason, applicationRevision: revisions.application,
+  };
+  await evaluate(`(() => {
+    const key='degenerator-learning-liquidity-v1';
+    const progress=JSON.parse(localStorage.getItem(key)) || {version:1,completed:[],drafts:{}};
+    progress.drafts[${JSON.stringify(id)}]=${JSON.stringify(draft)};
+    localStorage.setItem(key,JSON.stringify(progress));
+  })()`);
+}
 
 export async function checkLessonConsistency({ evaluate, click, fill, text, navigate, base, call, nextEvent }) {
   const choose = (name, value) => evaluate(`document.querySelector('input[name="${name}"][value="${value}"]').click()`);
@@ -14,24 +33,27 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
     assert.ok(entries.some(url=>url.endsWith('/' + expected)), path + ' must load its canonical build identity.');
     if (manifest) assert.ok(!entries.some(url=>url.endsWith('/' + path)), path + ' must not mix hashed and unversioned modules.');
   }
-  for (const [price, prediction, answer, direction] of [['4000','less','.884','less ETH and more USDC'],['1000','more','1.768','more ETH and less USDC'],['2000','same','1.25','both token quantities stay the same']]) {
+  for (const [price, prediction, direction] of [[4000,'less','less ETH and more USDC'],[1000,'more','more ETH and less USDC'],[2000,'same','both token quantities stay the same']]) {
+    await restoreQuestion(evaluate,'token-balances',{futurePrice:price});
     await navigate(base + 'learn.html#lesson=token-balances');
-    await fill('learn-input-futurePrice',price); await choose('learn-prediction',prediction); await click('learn-run');
+    await choose('learn-prediction',prediction); await click('learn-run');
+    assert.equal(await evaluate("JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['token-balances'].inputs.futurePrice"),price,'The lesson retains the legacy custom question.');
     assert.ok((await text('learn-explanation')).includes(direction));
     await choose('learn-application','original-mix'); await choose('learn-reason','automatic'); await click('learn-check');
     assert.equal(await text('learn-feedback-title'),'Review your answers.');
     assert.match(await text('learn-reasons-feedback'),/Tokens change hands through trades/);
     assert.ok((await text('learn-reasons-feedback')).includes(direction));
     assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),true);
-    if (price === '2000') {
+    if (price === 2000) {
       assert.match(await text('learn-reason-question'),/stay the same/);
       assert.match(await text('learn-reasons'),/no price change/);
     }
     await choose('learn-reason','rebalance'); await click('learn-check');
     assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   }
+  await restoreQuestion(evaluate,'fee-break-even',{futurePrice:4000,fees:100});
   await navigate(base + 'learn.html#lesson=fee-break-even');
-  await fill('learn-input-futurePrice','4000'); await fill('learn-input-fees','100'); await choose('learn-prediction','short'); await click('learn-run');
+  await choose('learn-prediction','short'); await click('learn-run');
   assert.match(await text('learn-explanation'),/total fee target is \$428.93[\s\S]*\$328.93 additional/);
   await choose('learn-reason','assumption'); await choose('learn-application','gap-reopens'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
@@ -59,8 +81,8 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
 export async function checkMobileLessonConsistency({ evaluate, click, fill, text, navigate, base, call }) {
   for (const width of [390,320]) {
     await call('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:true});
+    await restoreQuestion(evaluate,'token-balances',{futurePrice:4000});
     await navigate(base + 'learn.html#lesson=token-balances');
-    await fill('learn-input-futurePrice','4000');
     await evaluate("document.querySelector('input[name=learn-prediction][value=less]').click()"); await click('learn-run');
     await evaluate("document.querySelector('input[name=learn-application][value=original-mix]').click()"); await evaluate("document.querySelector('input[name=learn-reason][value=automatic]').click()"); await click('learn-check');
     assert.match(await text('learn-reasons-feedback'),/less ETH and more USDC/);

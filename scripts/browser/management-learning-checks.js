@@ -29,6 +29,31 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
     assert.equal(await text('manage-feedback-title'),'Review your answers.');
     await choose('manage-application',application);await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
+    // Revising an expectation does not replace the example or erase later work.
+    await choose('manage-prediction',id==='range-width'?'wide':id==='fee-tiers'?'unknown':'falls');
+    assert.equal(await evaluate("document.getElementById('manage-prediction-feedback').dataset.state"),'match');
+    assert.equal(await evaluate("document.querySelector('input[name=manage-reason]:checked').value"),reason);
+    assert.equal(await evaluate("document.querySelector('input[name=manage-application]:checked').value"),application);
+    assert.equal(await evaluate("document.getElementById('manage-observe').hidden||document.getElementById('manage-assessment').hidden||document.getElementById('manage-continue').hidden"),false);
+    assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
+    if(id==='range-width') {
+      await evaluate("{const price=document.getElementById('range-scene-price');price.value='2090';price.dispatchEvent(new Event('input',{bubbles:true}));}");
+      assert.equal(await text('range-scene-narrow'),'Inside range');
+      assert.equal(await text('range-scene-wide'),'Inside range');
+      await click('manage-reveal');
+      assert.equal(await evaluate("document.getElementById('range-scene-price').value"),'2090','Opening the explanation preserves the explored price.');
+      assert.match(await text('manage-observe-title'),/\$2,300.00/);
+      assert.match(await text('manage-prediction-feedback'),/At \$2,300.00 per ETH, only the wider/);
+      assert.match(await text('manage-explore-note'),/question’s two positions.*\$2,300.00/);
+      assert.equal(await evaluate("Array.from(document.querySelectorAll('#manage-handoffs a')).every(link=>link.textContent.includes('$2,300.00')&&new URLSearchParams(link.hash.slice(1)).get('future')==='2300')"),true);
+      assert.doesNotMatch(await text('range-scene-price-scope'),/checks below/);
+      await choose('manage-prediction','none');
+      assert.equal(await evaluate("document.getElementById('range-scene-price').value"),'2090','Changing a prediction preserves the current comparison.');
+      assert.equal(await evaluate("document.getElementById('manage-prediction-feedback').dataset.state"),'different');
+      assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
+      await evaluate("document.querySelector('#manage-range-scene .scene-prediction-show').click()");
+      assert.equal(await evaluate("document.getElementById('range-scene-price').value"),'2300','Explicitly showing the prediction outcome returns to its price.');
+    }
     const saved=await evaluate("localStorage.getItem('passiko-range-learning-v1')");
     const order=await evaluate("Array.from(document.querySelectorAll('input[name=manage-reason],input[name=manage-application]')).map(input=>input.value).join(',')");
     await evaluate("document.querySelector('#manage-deeper summary').click()");

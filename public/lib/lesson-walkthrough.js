@@ -40,7 +40,7 @@ export function lessonWalkthrough(id, outcome) {
   ];
   if (id === 'fee-break-even') return [
     ['Measure the before-fee hurdle', usd(r.holdValue) + ' holding − ' + usd(r.lpBeforeFees) + ' LP principal = ' + usd(r.breakEvenFees) + ' total fee income needed.'],
-    ['Apply the current assumption', usd(r.lpBeforeFees) + ' + ' + usd(s.fees) + ' assumed cash fees = ' + usd(r.lpValue) + ' total LP value.'],
+    ['Add the fees in this example', usd(r.lpBeforeFees) + ' + ' + usd(s.fees) + ' assumed cash fees = ' + usd(r.lpValue) + ' total LP value.'],
     ['Distinguish total from additional', 'The remaining hurdle is max(0, ' + usd(r.breakEvenFees) + ' − ' + usd(s.fees) + ') = ' + usd(Math.max(0, r.breakEvenFees - s.fees)) + '. The question in this lesson asks for the TOTAL target.'],
     ['Name the missing evidence', 'Nothing in these endpoint inputs measures the volume, active-liquidity share or time path needed to support an earnings estimate.'],
   ];

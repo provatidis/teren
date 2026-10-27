@@ -60,6 +60,10 @@ export async function checkLoanConditionLesson({ evaluate, click, fill, text, na
   assert.deepEqual(await working(), drafts);
   assert.equal(await evaluate("document.getElementById('lend-explore').href"), handoff);
   await click('lend-reveal');
+  assert.equal(await mode(), 'price', 'Reading the question explanation preserves the explored comparison.');
+  assert.equal(await evaluate("document.getElementById('condition-price').value"), '3000');
+  assert.equal(await text('lend-observe-title'), 'After one year at $2,000.00 per ETH');
+  await evaluate("document.querySelector('#lend-money-flow .scene-prediction-show').click()");
   assert.equal(await mode(), 'time');
   assert.equal(await evaluate("document.getElementById('condition-time').value"), '365');
   assert.equal(await text('condition-health'), '1.45');

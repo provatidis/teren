@@ -70,6 +70,9 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
     assert.equal(await saved(), initial, 'Scene actions never alter saved answers.');
     await evaluate("document.querySelector('.scene-jump > summary').click()");
     await click('lend-reveal');
+    assert.equal(await stage(), '0', 'Reading the question explanation preserves the explored frame.');
+    assert.match(await text('lend-observe-title'), id === 'supply' ? /one year with collateral off/ : /borrowing 5,000 USDC/);
+    await evaluate("document.querySelector('#lend-money-flow .scene-prediction-show').click()");
     assert.equal(await stage(), questionStage);
     if (id === 'supply') assert.equal(await text('loan-scene-collateral'), 'Collateral off');
     if (id === 'borrow') {
@@ -95,7 +98,7 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
     assert.match(handoff, /loan=collateral-loan-v1/);
     assert.match(handoff, id === 'supply' ? /collateralEnabled=false/ : /borrow=5000/);
     assert.match(handoff, id === 'supply' ? /days=365/ : /days=0/);
-    assert.equal(await text('lend-explore'), 'Explore this setup in Experiment ↗');
+    assert.equal(await text('lend-explore'), 'Explore the question setup in Experiment ↗');
     const evidence = await text('lend-application-evidence');
     await click('loan-scene-next');
     assert.equal(await saved(), checked);
@@ -108,6 +111,10 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
     assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
     assert.equal(await evaluate("document.getElementById('lend-prediction-field').checkVisibility()"), true);
     await choose('prediction', id === 'supply' ? 'earn' : 'same');
+    assert.equal(await evaluate("document.getElementById('lend-assessment').hidden"), false);
+    assert.equal(await evaluate("document.getElementById('lend-feedback').hidden"), false);
+    assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
+    assert.deepEqual(await evaluate("['reason', 'application'].map(key => document.querySelector('input[name=\"lend-' + key + '\"]:checked').value)"), [reason, application]);
     assert.equal(await stage(), questionStage, 'Choosing a prediction must not reset the explored scene.');
     await click('lend-reveal');
     assert.match(await text('lend-prediction-feedback'), /^Your prediction matches/);

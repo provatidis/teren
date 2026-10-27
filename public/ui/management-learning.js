@@ -18,6 +18,7 @@ export function initManagementLearning() {
   const predictionFeedbackElement = $('manage-prediction-feedback');
   const predictionField = $('manage-prediction-field');
   const visualLesson = () => lesson?.id === 'range-width';
+  const explanationLabel = () => visualLesson() ? 'Explain the '+usd(outcome.price)+' outcome ↓' : 'Why this happens ↓';
   const fresh=(variant=0)=>({variant,prediction:'',reason:'',application:'',revealed:false,choiceSeed:newChoiceSeed(),questionRevisions:managementQuestionRevisions(lesson.id,variant)});
   function focus(id) {$(id).focus({preventScroll:true});$(id).scrollIntoView({block:'start',behavior:'instant'});}
   function navigation() {
@@ -39,10 +40,13 @@ export function initManagementLearning() {
   function choices(id,name,values,selected,onChange) {
     learningChoices($(id),{name,values,selected,seed:draft.choiceSeed,group:lesson.id+name,onChange,shuffle:name!=='manage-prediction'});
   }
-  function reveal() {
-    draft.revealed=true;
+  function refreshPrediction() {
     renderPredictionFeedback(predictionFeedbackElement, presentation.predictions, draft.prediction, outcome.prediction, presentation.finding);
     markPredictionRevealed(predictionField);
+  }
+  function reveal() {
+    draft.revealed=true;
+    refreshPrediction();
     $('manage-metrics').replaceChildren(...presentation.metrics.map(items=>learningMetric(...items)));
     $('manage-explanation').textContent=lesson.explanation;$('manage-takeaway').textContent=lesson.takeaway;$('manage-pitfall').textContent=lesson.pitfall;
     $('manage-handoffs').replaceChildren(...presentation.links.map(({label,scenario})=>{
@@ -50,7 +54,7 @@ export function initManagementLearning() {
       link.href=home.href;link.textContent=label;link.target='_blank';link.rel='noopener noreferrer';return link;
     }));
     $('manage-explore-note').textContent=presentation.note;
-    $('manage-observe').hidden=false;$('manage-assessment').hidden=false;$('manage-reveal').textContent='Why this happens ↓';persist();
+    $('manage-observe').hidden=false;$('manage-assessment').hidden=false;$('manage-reveal').textContent=explanationLabel();persist();
   }
   function check(save=true) {
     const result=checkManagementUnderstanding(lesson.id,draft.variant,draft.reason,draft.application);
@@ -85,6 +89,7 @@ export function initManagementLearning() {
     $('manage-adds').textContent='Uniswap v3-style · '+lesson.adds;$('manage-intro').textContent=lesson.intro;
     renderLessonSetup($('manage-setup'), managementLessonSetup(outcome));
     $('manage-prediction-question').textContent=presentation.prediction;$('manage-variation-label').textContent='Situation '+(draft.variant+1)+' of '+MANAGEMENT_VARIANTS;
+    $('manage-observe-title').textContent=visualLesson()?'At '+usd(outcome.price)+' per ETH':'Read the result';
     $('manage-reason-question').textContent=presentation.reasoning||lesson.reasoning;$('manage-application-context').textContent=application.context;$('manage-application-question').textContent=application.question;
     $('manage-reason-context').textContent=presentation.reasonContext||'';
     $('manage-reason-context').hidden=!presentation.reasonContext;
@@ -110,13 +115,11 @@ export function initManagementLearning() {
     }
 
     $('manage-observe').hidden=true;$('manage-assessment').hidden=true;clearFeedback();
-    $('manage-reveal').disabled=false;$('manage-reveal').textContent='Why this happens ↓';
+    $('manage-reveal').disabled=false;$('manage-reveal').textContent=explanationLabel();
     choices('manage-predictions','manage-prediction',presentation.predictions,draft.prediction,value=>{
-      predictionFeedbackElement.textContent = '';
-      draft.prediction=value;draft.revealed=false;draft.reason='';draft.application='';
-      $('manage-observe').hidden=true;$('manage-assessment').hidden=true;clearFeedback();
-      document.querySelectorAll('input[name="manage-reason"],input[name="manage-application"]').forEach(input=>{input.checked=false;});
-      $('manage-reveal').disabled=false;$('manage-reveal').textContent='Why this happens ↓';persist();
+      draft.prediction=value;
+      if(draft.revealed)refreshPrediction();
+      persist();
     });
     choices('manage-reasons','manage-reason',lesson.reasons,draft.reason,value=>{draft.reason=value;clearFeedback();persist();});
     choices('manage-applications','manage-application',application.choices,draft.application,value=>{draft.application=value;clearFeedback();persist();});
@@ -139,8 +142,9 @@ export function initManagementLearning() {
     link.addEventListener('click',()=>{if(matchMedia('(max-width: 750px)').matches)$('learn-course').open=false;});
   });
   function showResult(sceneFirst = false) {
-    if (visualLesson()) rangeScene.show(outcome.price);
-    reveal();
+    if (sceneFirst && visualLesson()) rangeScene.show(outcome.price);
+    if (draft.revealed) refreshPrediction();
+    else reveal();
     if (sceneFirst && visualLesson()) { focusSceneOutcome(rangeScene.element); return; }
     const id = 'manage-observe-title';
     $(id).tabIndex = -1; focus(id);

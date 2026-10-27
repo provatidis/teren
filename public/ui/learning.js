@@ -18,7 +18,7 @@ import { learningChoices, learningMetric, learningPitfall, learningChapter, focu
 import { POOL_PITFALLS } from '../learning/pool-pitfalls.js';
 import { managementLessonFromHash } from '../lib/management-links.js';
 import { readProgress, saveProgress } from '../data/learning-progress.js';
-import { fmt, usd, signedUSD, percent } from '../lib/format.js';
+import { fmt, usd, signedUSD, percent, formatTokenQuantity } from '../lib/format.js';
 import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
 import { resultCardBlob } from '../lib/result-card.js';
@@ -27,10 +27,10 @@ import { tokenBalanceNarration, lossProfitReasoning, rangeBoundaryNarration, ben
 
 function finalReason(outcome) {
   const r = outcome.result;
-  if (Math.abs(r.difference) < 1e-8) return 'The fees you entered exactly cover the gap between principal and holding.';
+  if (Math.abs(r.difference) < 1e-8) return 'The fees in this example exactly cover the gap between principal and holding.';
   return r.difference > 0
-    ? 'The fees you entered more than cover the principal shortfall against holding.'
-    : 'The fees you entered do not cover the principal shortfall against holding.';
+    ? 'The fees in this example more than cover the principal shortfall against holding.'
+    : 'The fees in this example do not cover the principal shortfall against holding.';
 }
 
 export function initLearning() {
@@ -87,46 +87,39 @@ export function initLearning() {
   function selection(name) { return document.querySelector('input[name="' + name + '"]:checked')?.value || ''; }
   function choices(container, name, values, selected) {
     learningChoices($(container),{name,values,selected,seed:draft.choiceSeed,group:lesson.id+name,shuffle:name!=='learn-prediction',onChange:value=>{
-      if(name==='learn-prediction') {draft.prediction=value;$('learn-run').disabled=false;if(draft.ran)invalidate();}
+      if(name==='learn-prediction') {draft.prediction=value;$('learn-run').disabled=false;if(draft.ran)renderPrediction();}
       else {draft[name==='learn-application'?'application':'reason']=value;draft.taskChecked=false;clearUnderstandingFeedback('learn');$('learn-feedback').hidden=true;$('learn-continue').hidden=true;$('learn-share').hidden=true;clearCard();}
       persist();
     }});
   }
-  function control(key, label, min, max, step, formatter) {
-    const wrap = document.createElement('div'); wrap.className = 'learn-control';
-    const line = document.createElement('div'); line.className = 'learn-control-label';
-    const name = document.createElement('label'); name.htmlFor = 'learn-input-' + key; name.textContent = label;
-    const display = document.createElement('output'); display.htmlFor = name.htmlFor; display.id = 'learn-output-' + key; display.textContent = formatter(draft.inputs[key]);
-    const input = document.createElement('input'); input.id = name.htmlFor; input.type = 'range'; input.min = min; input.max = max;
-    const offset = (draft.inputs[key] - min) / step;
-    input.step = Math.abs(offset - Math.round(offset)) < 1e-8 ? step : 'any';
-    input.value = draft.inputs[key];
-    input.setAttribute('aria-describedby', display.id);
-    input.addEventListener('input', () => {
-      draft.inputs[key] = Number(input.value); display.textContent = formatter(draft.inputs[key]);
-      input.setAttribute('aria-valuetext', formatter(draft.inputs[key])); invalidate(); persist(); updateSetup();
-    });
-    input.setAttribute('aria-valuetext', display.textContent);
-    line.append(name, ' ', display); wrap.append(line, input); return wrap;
-  }
   function renderControls() {
-    const s = draft.inputs, controls = [];
-    if (lesson.id === 'swap-impact') controls.push(control('amount', 'ETH to swap', 1, s.reserveEth / 2, 1, value => fmt(value, 0) + ' ETH'));
-    else if (lesson.id === 'pool-share') controls.push(control('depositEth', 'Matching ETH deposit', 1, s.reserveEth / 2, 1, value => fmt(value, 0) + ' ETH'));
-    else {
-      controls.push(control('futurePrice', 'Future ETH price', s.initialPrice / 2, s.initialPrice * 2, s.initialPrice / 100, usd));
-      if (['fee-break-even', 'final-challenge'].includes(lesson.id)) controls.push(control('fees', 'Assumed total cash fees', 0, s.investment / 2, 1, usd));
-      if (lesson.id === 'range-boundaries') {
-        const field = document.createElement('label'); field.className = 'learn-width'; field.textContent = 'Range around starting price';
-        const select = document.createElement('select'); select.id = 'learn-input-width';
-        for (const [value, label] of [[0.05, 'Tight · ±5%'], [0.1, 'Moderate · ±10%'], [0.5, 'Wide · ±50%']]) {
-          const option = document.createElement('option'); option.value = value; option.textContent = label; option.selected = value === s.width; select.append(option);
-        }
-        select.addEventListener('change', () => { draft.inputs.width = Number(select.value); invalidate(); persist(); updateSetup(); });
-        field.append(' ', select); controls.push(field);
-      }
+    controls.replaceChildren();
+    if (lesson.id !== 'range-boundaries') return;
+    const field = document.createElement('label'); field.className = 'learn-width'; field.textContent = 'Range around starting price';
+    const select = document.createElement('select'); select.id = 'learn-input-width';
+    for (const [value, label] of [[0.05, 'Tight · ±5%'], [0.1, 'Moderate · ±10%'], [0.5, 'Wide · ±50%']]) {
+      const option = document.createElement('option'); option.value = value; option.textContent = label;
+      option.selected = value === draft.inputs.width; select.append(option);
     }
-    $('learn-controls').replaceChildren(...controls);
+    select.addEventListener('change', () => {
+      draft.inputs.width = Number(select.value); invalidate(); persist(); updateSetup();
+    });
+    field.append(' ', select); controls.append(field);
+  }
+  function questionLabel() {
+    const s = draft.inputs;
+    if (lesson.id === 'swap-impact') return formatTokenQuantity(s.amount, 4) + ' ETH swap';
+    if (lesson.id === 'pool-share') return formatTokenQuantity(s.depositEth, 4) + ' ETH deposit';
+    return 'ETH at ' + usd(s.futurePrice) + (['fee-break-even', 'final-challenge'].includes(lesson.id) ? ' · ' + usd(s.fees) + ' in fees' : '');
+  }
+  function explanationLabel() {
+    const s = draft.inputs;
+    return 'Explain the ' + (foundationLesson() ? questionLabel() : usd(s.futurePrice) + ' outcome') + ' ↓';
+  }
+  function renderPrediction() {
+    renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, outcome.prediction,
+      questionLabel() + ': ' + lessonFinding(lesson.id, outcome));
+    markPredictionRevealed(predictionField);
   }
   function updateSetup() {
     const s = draft.inputs;
@@ -146,7 +139,7 @@ export function initLearning() {
         : createTokenBalanceScene(s, prediction);
       $('learn-prediction-home').replaceChildren();
       $('learn-scene').replaceChildren(lessonScene.element);
-      $('learn-run').textContent = 'Why this happens ↓';
+      $('learn-run').textContent = explanationLabel();
     } else {
       $('learn-prediction-home').replaceChildren(createPredictionPrompt(predictionField, { selected: draft.prediction, onShow: () => showResult() }));
     }
@@ -162,7 +155,7 @@ export function initLearning() {
     $('learn-input-status').textContent = visualLesson()
       ? 'Question setup changed. Explore the new example, then open its explanation.'
       : 'Setup changed. Predict, then run the updated experiment.';
-    $('learn-run').textContent = visualLesson() ? 'Why this happens ↓' : 'Run experiment →'; clearCard();
+    $('learn-run').textContent = visualLesson() ? explanationLabel() : 'Run experiment →'; clearCard();
   }
   const metric=learningMetric;
   function bar(label, percentValue, detail) {
@@ -230,8 +223,8 @@ export function initLearning() {
       if (s.fees) visual.push(bar('LP + ' + usd(s.fees) + ' assumed fees', r.lpValue / max * 100, usd(r.lpValue)));
     }
     $('learn-metrics').replaceChildren(...metrics); $('learn-visual').replaceChildren(...visual);
-    renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, outcome.prediction, lessonFinding(lesson.id, outcome));
-    markPredictionRevealed(predictionField);
+    $('learn-results-title').textContent = questionLabel();
+    renderPrediction();
     const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
     const lossCopy = lesson.id === 'loss-vs-profit' ? lossProfitReasoning(outcome) : null;
     $('learn-explanation').textContent = (tokenCopy ? tokenCopy.exchange + (tokenCopy.direction === 'same' ? '' : ' Trading to align pool and market prices is called arbitrage.') + ' Neither token is created by the pool.' : null)
@@ -266,15 +259,15 @@ export function initLearning() {
     learningPitfall($('learn-pitfall'),POOL_PITFALLS[lesson.id]);
     renderDeeper();
     $('learn-results').hidden = false; $('learn-assessment').hidden = false;
-    $('learn-run').textContent = visualLesson() ? 'Why this happens ↓' : 'Run again →';
+    $('learn-run').textContent = visualLesson() ? explanationLabel() : 'Run again →';
     $('learn-input-status').textContent = '';
     const home = new URL('liquidity.html', location.href);
     if (lesson.id === 'range-boundaries') home.hash = rangeHash(r);
     else if (r) home.hash = scenarioHash(s);
     else home.hash = 'swap-sandbox';
     $('learn-explore').href = home.href;
-    $('learn-explore').textContent = r ? 'Explore this setup in Experiment ↗' : 'Open the swap sandbox ↗';
-    $('learn-explore-note').textContent = r ? 'Opens Experiment in a new tab with this setup. Your existing experiments and virtual balances stay separate.' : 'Opens your independent swap sandbox in a new tab; its existing virtual balances are preserved.';
+    $('learn-explore').textContent = r ? 'Explore the question setup in Experiment ↗' : 'Open the swap sandbox ↗';
+    $('learn-explore-note').textContent = r ? 'Opens the question’s price, starting tokens and fees in a new tab.' : 'Opens your independent swap sandbox in a new tab; its existing virtual balances are preserved.';
     if (lesson.id === 'swap-impact') $('learn-explore-note').textContent = 'In your independent sandbox, compare two trade sizes before executing either. Watch how price impact changes.';
     else if (lesson.id === 'loss-vs-profit') $('learn-explore-note').textContent = 'Try adding fees in Experiment. Find a positive dollar return that still trails holding the starting tokens.';
     else if (lesson.id === 'range-boundaries') $('learn-explore-note').textContent = 'Move ETH below, inside and above the bounds. Watch which token remains and when swaps can use the position.';
@@ -315,6 +308,7 @@ export function initLearning() {
     $('learn-calculation-hint').textContent = lesson.hint; $('learn-hint').open = false;
     $('learn-deeper').open = false; $('learn-math').open = false; $('learn-calculation').open = false;
     $('learn-calculation-feedback').textContent = '';
+    $('learn-answer').value = draft.answer;
     $('learn-takeaway').textContent = lesson.takeaway;
     $('learn-takeaway').hidden = true;
     $('learn-results').hidden = true; $('learn-assessment').hidden = true; $('learn-feedback').hidden = true; $('learn-share').hidden = true; $('learn-continue').hidden = true;
@@ -329,16 +323,12 @@ export function initLearning() {
       'loss-vs-profit': 'Profit compared with what?', 'fee-break-even': 'Watch fees close the gap', 'final-challenge': 'Bring the comparison together', 'range-boundaries': 'Watch the price cross your range',
     }[lesson.id] || 'Your experiment';
     $('learn-results-title').after(predictionFeedbackElement);
-    if (visualLesson()) {
+    if (lesson.id === 'range-boundaries') {
       const settings = sceneNode('details', undefined, 'scene-question-settings');
-      const label = lesson.id === 'swap-impact' ? 'trade size' : lesson.id === 'pool-share' ? 'deposit'
-        : ['fee-break-even', 'final-challenge'].includes(lesson.id) ? 'price and fees' : lesson.id === 'range-boundaries' ? 'price or range' : 'price';
-      settings.append(sceneNode('summary', 'Change the question ' + label), controls);
+      settings.append(sceneNode('summary', 'Try a different range width'), controls);
       $('learn-controls-home').replaceChildren(settings);
     } else {
-      $('learn-prediction-home').append(predictionField);
       $('learn-controls-home').replaceChildren(controls);
-      $('learn-scene').replaceChildren(); lessonScene = null;
     }
     renderControls(); updateSetup(); updateProgress();
     if (draft.ran) {
@@ -380,8 +370,10 @@ export function initLearning() {
   }
   function showResult(sceneFirst = false) {
     draft.prediction = selection('learn-prediction');
-    if (visualLesson()) lessonScene.showQuestion();
-    draft.ran = true; renderResults(); persist();
+    if (sceneFirst && visualLesson()) lessonScene.showQuestion();
+    if (!draft.ran) { draft.ran = true; renderResults(); }
+    else renderPrediction();
+    persist();
     if (sceneFirst && visualLesson()) { focusSceneOutcome(lessonScene.element); return; }
     const title = $('learn-results-title');
     title.tabIndex = -1; title.focus({ preventScroll: true });

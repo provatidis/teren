@@ -61,7 +61,7 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
     }
     await navigate(base + 'learn.html#lesson=range-boundaries');
     await resetVariation('learn');
-    await click('learn-run');
+    await evaluate("document.querySelector('.scene-prediction-show').click()");
     assert.match(await text('boundary-scene-tokens'), /0.0000 ETH/);
     const guidesFit = () => evaluate(`(() => [...document.querySelectorAll('.scene-range-guide')].filter(guide => guide.checkVisibility()).every(guide => {
       const band = guide.querySelector('.scene-range-band').getBoundingClientRect();
@@ -108,16 +108,18 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
     assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
     for (const lesson of ['build', 'unwind']) {
       const route = base + 'lending.html#loop-lesson=' + lesson;
-      await navigate(route); await click('lend-reveal');
+      await navigate(route); await evaluate("document.querySelector('#lend-money-flow .scene-prediction-show').click()");
       const balances = () => evaluate(`['supplied', 'debt', 'wallet', 'selected'].map(id => document.getElementById('loop-flow-' + id).textContent)`);
       const outcome = await balances();
       if (lesson === 'build') { assert.equal(outcome[0], '7.5 ETH'); assert.equal(outcome[1], '5,000 USDC'); }
       else assert.equal(outcome[1], '0 USDC');
       const handoff = await evaluate("document.getElementById('lend-explore').href");
       await click('loop-flow-previous');
-      assert.notDeepEqual(await balances(), outcome);
+      const explored = await balances();
+      assert.notDeepEqual(explored, outcome);
       await click('lend-reveal');
-      assert.deepEqual(await balances(), outcome, 'Opening the explanation restores the assessed loop outcome.');
+      assert.deepEqual(await balances(), explored, 'Opening the question explanation preserves the explored loop step.');
+      assert.match(await text('lend-observe-title'), lesson === 'build' ? /After borrowing, buying and supplying/ : /After unwinding at \$2,000\.00/);
       await reload();
       assert.deepEqual(await balances(), outcome, 'Reload restores the same diagram as the revealed explanation.');
       await navigate(base + 'lending.html#lesson=supply'); await navigate(route);

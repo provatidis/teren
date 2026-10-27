@@ -1,5 +1,12 @@
 # Release history
 
+## 1.50.5 · 2026-10-27
+
+- Remove overlapping question sliders from the seven liquidity essentials lessons, retaining visual exploration, variations and the distinct range-width choice. Preserve existing custom lesson setups and saved completion.
+- Name the original example in explanations, prediction feedback and Experiment handoffs. Opening an explanation preserves the explored visual; explicitly showing the outcome returns to the question. Scope labels no longer imply that changed-situation questions use the original price.
+- Preserve later answers and feedback when revising a prediction or revisiting an explanation. Remove the first-pass unwind recap that no longer matched the last-pass sale-cost question; keep the full unwind walkthrough.
+- Extend interaction checks to reverse explored outcomes, follow explanations and handoffs, and revisit checked work on desktop and phones. Add this whole-lesson consistency check to the review guidance.
+
 ## 1.50.4 · 2026-10-27
 
 - Connect the range lab’s “Could fees cover this?” panel directly to Follow the fees, where changing competing liquidity shows its effect on fee share. Keep the recorded comparisons alongside this hypothetical experiment.

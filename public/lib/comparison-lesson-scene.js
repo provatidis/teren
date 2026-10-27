@@ -38,8 +38,8 @@ export function createComparisonScene(id, input, prediction) {
     holding.textContent = subject + (state.versusHolding === 'equal' ? ' matches holding.'
       : ' is ' + usd(Math.abs(r.difference)) + ' ' + state.versusHolding + ' holding.');
     basket.textContent = 'Both start with ' + fmt(r.held.eth, 4) + ' ETH + ' + fmt(r.held.usdc, 2) + ' USDC. All bars use the same fixed dollar scale.';
-    scope.textContent = (price === input.futurePrice && fees === input.fees ? 'Showing the question setup. ' : 'Exploring another setup. ')
-      + 'The checks use ETH at ' + usd(input.futurePrice) + (withFees ? ' and ' + usd(input.fees) + ' assumed fees.' : ', before fees.');
+    scope.textContent = (price === input.futurePrice && fees === input.fees ? 'Showing the prediction setup. ' : 'Exploring another setup. ')
+      + 'Prediction: ETH at ' + usd(input.futurePrice) + (withFees ? ' and ' + usd(input.fees) + ' assumed fees.' : ', before fees.');
     if (match) match.textContent = 'Match holding · ' + usd(r.breakEvenFees) + ' fees';
     return profit.textContent + ' ' + holding.textContent;
   }

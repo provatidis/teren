@@ -29,7 +29,11 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   await fill('token-scene-price', '2000');
   assert.equal(await evaluate("document.querySelector('.scene-token-figure').outerHTML"), figure);
   assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), saved, 'Exploration must not edit the question or progress.');
+  await fill('token-scene-price', '1000');
   await click('learn-run');
+  assert.equal(await evaluate("document.getElementById('token-scene-price').value"), '1000');
+  assert.match(await text('learn-results-title'), /\$4,000.00/);
+  assert.match(await text('learn-prediction-feedback'), /ETH at \$4,000.00/);
   assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked')===null"), true);
   await choose('learn-reason', 'rebalance'); await choose('learn-application', 'original-mix'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
@@ -37,7 +41,7 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   await fill('token-scene-price', '1000');
   assert.equal(await evaluate("document.getElementById('learn-explore').href"), link);
   assert.match(link, /future=4000/);
-  assert.match(await text('token-scene-price-scope'), /checks below still use \$4,000.00/);
+  assert.match(await text('token-scene-price-scope'), /Prediction: ETH at \$4,000.00/);
   await reload();
   assert.equal(await text('learn-feedback-title'), 'Both answers are correct.', 'Optional predictions must stay optional on restoration.');
 
@@ -45,8 +49,8 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   await evaluate(`{const progress=JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1'));progress.drafts['token-balances'].inputs.futurePrice=2033.25;localStorage.setItem('degenerator-learning-liquidity-v1',JSON.stringify(progress));}`);
   await reload();
   assert.equal(await evaluate("document.getElementById('token-scene-price').value"), '2033.25', 'Restored question prices must not snap to the exploration step.');
-  assert.equal(await evaluate("document.getElementById('learn-input-futurePrice').value"), '2033.25');
-  assert.match(await text('token-scene-price-scope'), /Showing the question price/);
+  assert.equal(await evaluate("document.getElementById('learn-input-futurePrice')"), null);
+  assert.match(await text('token-scene-price-scope'), /Showing the prediction price/);
   assert.match(await evaluate("document.getElementById('learn-explore').href"), /future=2033.25/);
   await evaluate(`localStorage.setItem('degenerator-learning-liquidity-v1',${JSON.stringify(completedTokens)})`);
 
@@ -63,11 +67,11 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   }
   assert.equal(await evaluate("localStorage.getItem('passiko-range-learning-v1')"), rangeSaved);
   await click('manage-reveal');
-  assert.equal(await evaluate("document.getElementById('range-scene-price').value"), '2300');
+  assert.equal(await evaluate("document.getElementById('range-scene-price').value"), '2800', 'Explanation preserves the explored price.');
   await choose('manage-reason', 'bounds'); await choose('manage-application', 'mix'); await click('manage-check');
   assert.equal(await text('manage-feedback-title'), 'Both answers are correct.');
   await fill('range-scene-price', '2000');
-  assert.match(await text('range-scene-price-scope'), /checks below still use \$2,300.00/);
+  assert.match(await text('range-scene-price-scope'), /Prediction: ETH at \$2,300.00/);
   await reload();
   assert.equal(await text('manage-feedback-title'), 'Both answers are correct.');
   assert.equal(await evaluate("document.getElementById('range-scene-price').value"), '2300');
@@ -99,6 +103,8 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
     assert.equal(await evaluate("document.querySelector('.loop-flow-balances').textContent"), snapshot);
     assert.equal(await evaluate("localStorage.getItem('teren-loop-learning-v1')"), before);
     await click('lend-reveal');
+    assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), '1', 'Explanation preserves the selected action.');
+    await evaluate("document.querySelector('.scene-prediction-show').click()");
     assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), id === 'build' ? '3' : '7');
     await choose('lend-reason', reason); await choose('lend-application', application); await click('lend-check');
     await reload();

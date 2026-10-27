@@ -43,14 +43,14 @@ export const MANAGEMENT_LESSONS = Object.freeze([
 export function managementPresentation(result) {
   const {id,variant}=result;
   if(id==='range-width')return {
-    finding: result.prediction === 'both' ? 'That price sits inside both ranges. The narrower range has less room before a boundary.' : 'Only the wider range includes this price. The narrow position still owns its tokens, but cannot take part in swaps here.',
+    finding: 'At '+usd(result.price)+' per ETH, '+(result.prediction === 'both' ? 'both positions are inside their ranges. The narrower range has less room before a boundary.' : 'only the wider range includes the price. The narrow position still owns its tokens, but cannot take part in swaps at this price.'),
     reasoning:variant===2?'Both are active here. Why can the wider position stay active over more prices?':null,
     reasonLabel:'The same price, two ranges',
     reasonContext:'At ETH '+usd(result.price)+', compare the narrow $1,900–$2,100 range with the wider $1,500–$2,500 range. Both started with $5,000.',
     prediction:'At that price, which position will be inside its range?', predictions:[['wide','Only the wider position'],['both','Both positions'],['none','Neither position']],
     metrics:[['Narrow range',result.narrow.state==='inside'?'Active':'Inactive','$1,900–$2,100'],['Wider range',result.wide.state==='inside'?'Active':'Inactive','$1,500–$2,500'],['Earned fees','Unknown','No fee income is estimated']],
-    links:[{label:'Explore the narrow setup in Experiment ↗',scenario:result.narrow},{label:'Explore the wider setup in Experiment ↗',scenario:result.wide}],
-    note:'Calculated hypothetical endpoints, with zero assumed fees. The links keep each range’s original funding and shown final price.'};
+    links:[{label:'Explore the narrow range at '+usd(result.price)+' ↗',scenario:result.narrow},{label:'Explore the wider range at '+usd(result.price)+' ↗',scenario:result.wide}],
+    note:'Open the question’s two positions in Experiment at '+usd(result.price)+' per ETH, with their original funding and zero fees.'};
   if(id==='fee-tiers')return {
     reasonLabel:'The fee tier is one ingredient',
     reasonContext:'Each position started with the same dollar budget, in a different WETH/USDC pool. The fee tier is the charge per swap.',

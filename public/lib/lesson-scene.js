@@ -12,7 +12,7 @@ export function createPredictionPrompt(fieldset, { selected, onShow, disabled = 
   const show = button || sceneNode('button');
   show.className = 'button secondary scene-prediction-show';
   show.type = 'button'; show.disabled = disabled;
-  const label = hasPrediction => { show.textContent = hasPrediction ? 'See what happens →' : 'Not sure — show me →'; };
+  const label = hasPrediction => { show.textContent = element.dataset.revealed === 'true' ? 'Show the outcome again ↓' : hasPrediction ? 'See what happens →' : 'Not sure — show me →'; };
   label(Boolean(selected));
   element.addEventListener('change', () => label(Boolean(fieldset.querySelector('input:checked'))));
   show.onclick = onShow;
@@ -25,7 +25,9 @@ export function createPredictionPrompt(fieldset, { selected, onShow, disabled = 
 }
 
 export function markPredictionRevealed(fieldset) {
-  fieldset.closest('.scene-prediction').querySelector('button').textContent = 'Show the outcome again ↓';
+  const prompt = fieldset.closest('.scene-prediction');
+  prompt.dataset.revealed = 'true';
+  prompt.querySelector('button').textContent = 'Show the outcome again ↓';
 }
 
 // Keep the diagram and its controls together when a learner requests an outcome.
@@ -44,8 +46,8 @@ export function createPriceExplorer({ id, min, max, step, start, target, format,
     labelText: 'Explore an ETH price',
     valueText: price => format(price) + ' per ETH',
     scopeText: price => price === target
-      ? 'Showing the question price. The checks below use ' + format(target) + '.'
-      : 'Exploring another price. The checks below still use ' + format(target) + '.',
+      ? 'Showing the prediction price: ' + format(target) + '.'
+      : 'Exploring another price. Prediction: ETH at ' + format(target) + '.',
   });
 }
 

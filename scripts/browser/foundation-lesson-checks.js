@@ -27,6 +27,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), await text('learn-prediction-question'));
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
+    assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0, 'The scene is the only amount editor.');
     const initial = await saved();
     await key('foundation-next', 'Enter');
     assert.equal(await stage(), '1');
@@ -54,10 +55,16 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     await click('foundation-replay'); await click('foundation-replay');
     assert.equal(await evaluate("document.querySelector('.foundation-pool').textContent"), frame);
     assert.equal(await saved(), initial, 'Playing and exploring must not alter saved answers or the assessed setup.');
+    const exploredAmount = await evaluate("document.getElementById('foundation-amount').value");
+    const exploredStage = await stage();
     await click('learn-run');
-    assert.equal(await evaluate("document.getElementById('foundation-amount').value"), amount);
-    assert.equal(await stage(), '1', 'The explanation must return to the actual question action.');
+    assert.equal(await evaluate("document.getElementById('foundation-amount').value"), exploredAmount);
+    assert.equal(await stage(), exploredStage, 'Reading the question explanation must not silently change the explored action.');
+    assert.equal(await evaluate("document.querySelector('.foundation-pool').textContent"), frame);
     assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked')===null"), true);
+    await evaluate("document.querySelector('.scene-prediction-show').click()");
+    assert.equal(await evaluate("document.getElementById('foundation-amount').value"), amount);
+    assert.equal(await stage(), '1', 'Explicitly showing the question outcome restores its amount and completed action.');
     await choose('learn-reason', reason); await choose('learn-application', application); await click('learn-check');
     assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
     const checked = await saved();
@@ -74,17 +81,21 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     assert.equal(await evaluate("document.querySelector('.scene-prediction input').checkVisibility()"), true);
     assert.equal(await evaluate("document.getElementById('learn-predictions').checkVisibility()"), true);
     await choose('learn-prediction', 'less');
-    await click('learn-run');
     assert.match(await text('learn-prediction-feedback'), /^Your prediction matches\./);
-    await evaluate("document.querySelector('.scene-question-settings > summary').click()");
-    const control = id === 'swap-impact' ? 'amount' : 'depositEth';
-    await fill('learn-input-' + control, '1');
-    assert.equal(await evaluate("document.getElementById('learn-results').hidden"), true);
+    assert.equal(await evaluate("document.querySelector('input[name=learn-reason]:checked').value"), reason);
+    assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked').value"), application);
+    assert.equal(await evaluate("document.getElementById('learn-results').hidden"), false);
+    assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), false);
+    assert.equal(await text('learn-feedback-title'), 'Both answers are correct.', 'Revising an expectation does not erase understanding checks.');
+    await fill('foundation-amount', '1');
+    await click('learn-run');
     assert.equal(await evaluate("document.getElementById('foundation-amount').value"), '1');
-    assert.match(await text('foundation-amount-scope'), /checks use a 1 ETH/);
+    assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), false);
     for (let variant = 1; variant <= 2; variant++) {
       await click('learn-variation');
       assert.match(await text('learn-variation-label'), new RegExp('Variation ' + (variant + 1)));
+      assert.equal(await evaluate("document.getElementById('learn-results').hidden"), true);
+      assert.equal(await evaluate("document.querySelector('input[name=learn-reason]:checked')"), null, 'Changing the actual question still starts fresh answers.');
       await click('foundation-next');
       if (id === 'pool-share') {
         assert.equal(await text('foundation-pool-price'), variant === 1 ? 'Pool price: $1,500.00 per ETH' : 'Pool price: $3,000.00 per ETH');
