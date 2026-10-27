@@ -28,13 +28,16 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
     return Object.fromEntries(Object.entries(fields).map(([key, id]) => [key, $(id).value.trim() ? Number($(id).value) : NaN]));
   }
   function validateFields(input) {
+    const invalidFields = [];
     for (const [key, id] of Object.entries(fields)) {
       const { min, max, label } = WIDTH_LIMITS[key];
       const invalid = !Number.isFinite(input[key]) || input[key] < min || input[key] > max;
       $(id).setAttribute('aria-invalid', String(invalid));
       $(id + '-error').hidden = !invalid;
       $(id + '-error').textContent = invalid ? label + ' must be between ' + fmt(min, min < 1 ? 2 : 0) + ' and ' + fmt(max, 0) + '.' : '';
+      if (invalid) invalidFields.push(key);
     }
+    return invalidFields;
   }
   function makeCards() {
     const cards = ['a', 'b'].map(id => {
@@ -114,7 +117,10 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
       + '; B ' + signedUSD(current.ranges[1].difference) + '. Each point is a separate hypothetical endpoint before fees.';
   }
   function render({ persist = false, updateDomain = true } = {}) {
-    const input = read(); validateFields(input);
+    const input = read(), invalidFields = validateFields(input);
+    const invalidStart = invalidFields.some(key => key === 'investment' || key === 'initialPrice');
+    $('width-setup-label').textContent = invalidStart ? 'Check capital and starting price'
+      : usd(input.investment) + ' each · ETH ' + usd(input.initialPrice);
     $('width-share-result').hidden = true;
     try {
       current = calculateWidthComparison(input);
@@ -129,7 +135,6 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
       }
       $('width-error').textContent = ''; $('width-results').hidden = false;
       $('width-share').disabled = false;
-      $('width-setup-label').textContent = usd(current.investment) + ' each · ETH ' + usd(current.initialPrice);
       $('width-inputs-overview').textContent = 'A ' + fmt(current.widthA, 2) + '% · B ' + fmt(current.widthB, 2) + '% · ' + usd(current.investment) + ' each';
       $('width-starting-tokens').textContent = 'Both start with ' + assetAmounts(current.initial) + '.';
       $('width-current').textContent = 'ETH ' + usd(current.futurePrice) + ' · ' + percent((current.futurePrice / current.initialPrice - 1) * 100) + ' from the start';
@@ -184,11 +189,13 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
         }
       }
     } catch (error) {
-      current = null; $('width-inputs').open = true; feeFlow.update(null); $('width-error').textContent = error.message;
+      current = null; $('width-inputs').open = true; feeFlow.update(null);
+      $('width-error').textContent = invalidFields.length ? '' : error.message;
+      $('width-inputs-overview').textContent = invalidFields.length ? 'Check the highlighted inputs' : 'Comparison unavailable';
       $('width-save-status').textContent = '';
       $('width-results').hidden = true; $('width-share').disabled = true;
       $('width-starting-tokens').textContent = 'Correct the highlighted inputs to compare the positions.';
-      if (['width-capital', 'width-start'].some(id => $(id).getAttribute('aria-invalid') === 'true')) $('width-setup').open = true;
+      if (invalidStart) $('width-setup').open = true;
     }
   }
   $('width-form').addEventListener('submit', event => event.preventDefault());

@@ -138,6 +138,9 @@ export function initLending() {
     $('loan-annual-growth').textContent = errors.supplyAPR || errors.borrowAPR || errors.interestMode ? ''
       : 'One-year growth at these fixed rates: ' + annualGrowth(input.supplyAPR) + ' supply · ' + annualGrowth(input.borrowAPR) + ' debt' + (compound ? ' (equivalent APY).' : '.');
     $('loan-show-result').textContent = invalidLoan ? 'Check inputs ↑' : 'Full result ↓';
+    for (const button of document.querySelectorAll('[data-loan-price]')) {
+      button.setAttribute('aria-pressed', String(!errors.start && !errors.future && input.future === input.start * Number(button.dataset.loanPrice)));
+    }
     current = invalid ? null : calculateLoan(input);
     if (invalidLoan) {
       $('loan-quick-health').textContent = 'Check loan inputs';
@@ -190,7 +193,6 @@ export function initLending() {
     $('loan-time-slider').value = input.days;
     $('loan-time-value').textContent = formatTokenQuantity(input.days, 4) + ' days';
     $('loan-time-slider').setAttribute('aria-valuetext', formatTokenQuantity(input.days, 4) + ' days; ETH price stays at ' + usd(input.future));
-    for (const button of document.querySelectorAll('[data-loan-price]')) button.setAttribute('aria-pressed', String(input.future === input.start * Number(button.dataset.loanPrice)));
     for (const name of ['unchanged', 'repay', 'add']) {
       const response = responses[name];
       $('loan-response-' + name).textContent = healthLabel(response.healthFactor);

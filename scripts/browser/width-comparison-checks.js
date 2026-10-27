@@ -24,8 +24,23 @@ export async function checkWidthComparison({ evaluate, click, fill, text, naviga
     await fill('width-a', '0');
     assert.equal(await evaluate("document.getElementById('width-results').hidden&&document.getElementById('width-share').disabled"), true);
     assert.equal(await evaluate("document.getElementById('width-a').getAttribute('aria-invalid')"), 'true');
+    assert.equal(await text('width-a-error'), 'Range A width must be between 1 and 400.');
+    assert.equal(await text('width-error'), '', 'An identified field error is not repeated by the model alert.');
+    assert.equal(await text('width-inputs-overview'), 'Check the highlighted inputs');
+    assert.equal(await text('width-setup-label'), '$5,000.00 each · ETH $2,000.00', 'Valid starting inputs remain informative.');
     assert.equal(await evaluate("localStorage.getItem('teren-width-comparison-v1')"), validDraft);
+    await fill('width-capital', '10000000000');
+    assert.equal(await text('width-capital-error'), 'Capital per position must be between 1 and 1,000,000,000.');
+    assert.equal(await text('width-error'), '');
+    assert.equal(await text('width-setup-label'), 'Check capital and starting price');
+    assert.equal(await evaluate("localStorage.getItem('teren-width-comparison-v1')"), validDraft);
+    await fill('width-capital', '6000');
+    assert.equal(await text('width-setup-label'), '$6,000.00 each · ETH $2,000.00', 'The starting summary follows repaired inputs even while another field is invalid.');
+    assert.equal(await text('width-inputs-overview'), 'Check the highlighted inputs');
+    await fill('width-capital', '5000');
     await fill('width-a', '12.345'); await fill('width-price', '2345.6789');
+    assert.equal(await text('width-inputs-overview'), 'A 12.35% · B 20.00% · $5,000.00 each');
+    assert.equal(await evaluate("document.getElementById('width-capital-error').hidden&&document.getElementById('width-a-error').hidden"), true);
     await evaluate("Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async()=>{throw new Error('Clipboard unavailable')}}})");
     await click('width-share');
     const shared = await evaluate("document.getElementById('width-share-url').value");
@@ -81,6 +96,20 @@ export async function checkWidthComparison({ evaluate, click, fill, text, naviga
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
       await evaluate("document.querySelector('[data-width-price=\"a-lower\"]').click()");
       assert.match(await text('width-cards'), /At the lower edge/);
+      const phoneDraft = await evaluate("localStorage.getItem('teren-width-comparison-v1')");
+      for (const [id, value] of [['width-capital', '10000000000'], ['width-start', '']]) {
+        await fill(id, value);
+        assert.equal(await text('width-error'), '');
+        assert.equal(await text('width-inputs-overview'), 'Check the highlighted inputs');
+        assert.equal(await text('width-setup-label'), 'Check capital and starting price');
+        assert.equal(await evaluate("document.getElementById('width-results').hidden&&document.getElementById('width-share').disabled"), true);
+        assert.equal(await evaluate("localStorage.getItem('teren-width-comparison-v1')"), phoneDraft);
+        assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+        assert.equal(await evaluate(`document.getElementById('${id}-error').scrollWidth<=document.getElementById('${id}-error').clientWidth`), true);
+        await fill(id, id === 'width-capital' ? '5000' : '2000');
+      }
+      assert.equal(await text('width-inputs-overview'), 'A 20.00% · B 100.00% · $5,000.00 each');
+      assert.equal(await evaluate("document.getElementById('width-results').hidden||document.getElementById('width-share').disabled"), false);
       await click('nav-inspect'); await settle(evaluate);
       assert.equal(await evaluate("document.getElementById('width-workspace').hidden"), true);
       await click('nav-experiment'); await settle(evaluate);

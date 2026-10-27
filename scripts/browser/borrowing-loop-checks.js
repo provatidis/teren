@@ -3,6 +3,36 @@ import assert from 'node:assert/strict';
 const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
 
 export async function checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call }) {
+  const checkPresetValidation = async () => {
+    const selected = type => evaluate(`Array.from(document.querySelectorAll('[data-loop-${type}][aria-pressed=true]')).map(button=>button.getAttribute('data-loop-${type}'))`);
+    const saved = await evaluate("sessionStorage.getItem('teren-loop-draft-v1')");
+    assert.deepEqual(await selected('price'), ['1']);
+    assert.deepEqual(await selected('rounds'), ['1']);
+    for (const id of ['loop-future', 'loop-start']) {
+      await fill(id, '');
+      assert.deepEqual(await selected('price'), [], 'Incomplete prices cannot retain a selected price shortcut.');
+      assert.deepEqual(await selected('rounds'), ['1'], 'Valid rounds remain selected while a price is incomplete.');
+      assert.equal(await evaluate("document.getElementById('loop-results').hidden && document.getElementById('loop-share').disabled"), true);
+      assert.equal(await evaluate("sessionStorage.getItem('teren-loop-draft-v1')"), saved);
+      await fill(id, '2000');
+      assert.deepEqual(await selected('price'), ['1']);
+    }
+    for (const rounds of ['', '1.5']) {
+      await fill('loop-rounds', rounds);
+      assert.deepEqual(await selected('rounds'), [], 'An incomplete or fractional round count cannot select an example.');
+      assert.deepEqual(await selected('price'), ['1']);
+      assert.equal(await evaluate("document.getElementById('loop-results').hidden && document.getElementById('loop-share').disabled"), true);
+      assert.equal(await evaluate("sessionStorage.getItem('teren-loop-draft-v1')"), saved, 'Invalid edits preserve the last valid loop draft.');
+    }
+    await fill('loop-rounds', '1');
+    assert.deepEqual(await selected('rounds'), ['1']);
+    assert.equal(await evaluate("document.getElementById('loop-results').hidden"), false);
+    await fill('loop-days', ''); await fill('loop-future', '1500'); await fill('loop-rounds', '3');
+    assert.deepEqual(await selected('price'), ['0.75']);
+    assert.deepEqual(await selected('rounds'), ['3'], 'Valid presets still update while elapsed time is incomplete.');
+    assert.equal(await evaluate("sessionStorage.getItem('teren-loop-draft-v1')"), saved);
+    await fill('loop-future', '2000'); await fill('loop-rounds', '1'); await fill('loop-days', '0');
+  };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
   const oldLoan = await evaluate("sessionStorage.getItem('teren-lending-draft-v1')");
   const oldLearning = await evaluate("localStorage.getItem('teren-lending-learning-v1')");
@@ -11,6 +41,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
   assert.equal(await evaluate("document.getElementById('lending-loops').hidden"), false);
   // Start this default-case check independently of preceding saved-draft checks.
   await click('loop-reset');
+  await checkPresetValidation();
   assert.equal(await text('loop-net'), '$9,985.00');
   assert.equal(await text('loop-debt'), '$5,000.00');
   assert.equal(await evaluate("document.querySelectorAll('#loop-ledger details[open]').length"), 0);
@@ -312,6 +343,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: true });
     await navigate(base + 'lending.html#loops');
     await click('loop-reset');
+    await checkPresetValidation();
     await click('loop-round-up');
     assert.equal(await evaluate("document.getElementById('loop-rounds').value"), '2');
     await click('loop-round-down');

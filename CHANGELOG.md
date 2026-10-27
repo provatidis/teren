@@ -1,5 +1,10 @@
 # Release history
 
+## 1.50.7 · 2026-10-27
+
+- Show one field error for invalid width-comparison inputs and replace stale setup summaries until the relevant inputs are valid. Preserve the last valid comparison and restore results after correction.
+- Clear lending and ETH/USDC-loop preset selections when their price or round inputs are invalid, and restore matching selections after correction. Add desktop and mobile checks for both validation fixes.
+
 ## 1.50.6 · 2026-10-27
 
 - Remove the ten optional number-entry exercises that asked learners to copy or round displayed results. Keep conceptual checks, worked examples, formulas, original sources and recorded accounting details in place.
