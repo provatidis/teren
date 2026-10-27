@@ -31,7 +31,7 @@
     <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
     <meta name="twitter:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
     <link rel="stylesheet" href="styles.css">
-    <script type="module" src="lending-main.js"></script>
+    <script type="module" src="lending-entry.js"></script>
   </head>
   <body class="lending-page">
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -41,11 +41,17 @@
       <nav class="site-nav" aria-label="Lending modes"><div class="product-nav"><a id="lending-nav-learn" href="#learn">Learn</a><a id="lending-nav-experiment" href="#experiment" aria-current="page">Experiment</a></div></nav>
     </header>
     <main id="main-content" tabindex="-1">
+    <section id="app-startup" class="notice app-startup" data-state="loading" aria-labelledby="app-startup-title">
+      <h1 id="app-startup-title">Opening this page…</h1>
+      <p id="app-startup-message" role="status">The interactive tools aren’t ready yet. If this message stays here, reload the page.</p>
+      <button id="app-reload" class="button secondary" type="button" hidden>Reload page</button>
       <noscript>
         <div class="notice">
           <p>Enable JavaScript to use the lending lab and lessons. <a href="methods.html">Read the methods →</a></p>
         </div>
       </noscript>
+    </section>
+    <div id="app-content" inert>
       <section class="intro lending-intro">
         <div>
           <p id="lending-evidence" class="eyebrow evidence-badge">AAVE V3-STYLE · HYPOTHETICAL</p>
@@ -68,8 +74,8 @@
           <p>This experiment link is incomplete or unsupported. Your current working setup is shown.</p>
         </div>
         <div id="loan-quick-result" class="lab-quick-result loan-quick-result" data-state="above">
-          <div class="quick-result-heading"><strong id="loan-quick-health" role="status">Health factor 1.60</strong><button id="loan-show-result" class="text-button" type="button">Full result ↓</button></div>
-          <p id="loan-quick-state">Above the liquidation boundary</p>
+          <div class="quick-result-heading"><strong id="loan-quick-health" role="status">Health factor —</strong><button id="loan-show-result" class="text-button" type="button">Full result ↓</button></div>
+          <p id="loan-quick-state">Not calculated</p>
         </div>
         <div class="loan-layout">
           <div>
@@ -126,7 +132,7 @@
             <section class="card loan-conditions" aria-labelledby="loan-conditions-title">
               <div class="card-heading">
                 <h2 id="loan-conditions-title">Change the conditions</h2>
-                <span id="loan-desktop-health" class="small-badge">Health factor 1.60</span>
+                <span id="loan-desktop-health" class="small-badge">Health factor —</span>
               </div>
               <div class="loan-condition-fields">
                 <div class="scenario-field">
@@ -174,10 +180,10 @@
               <section id="loan-risk" class="card loan-risk" data-state="above" aria-labelledby="loan-state" tabindex="-1">
                 <div>
                   <p class="eyebrow">HEALTH FACTOR</p>
-                  <h2 id="loan-state">Above the liquidation boundary</h2>
+                  <h2 id="loan-state">Not calculated</h2>
                   <p id="loan-health-note" class="body-copy"></p>
                 </div>
-                <strong id="loan-health" class="loan-health">1.60</strong>
+                <strong id="loan-health" class="loan-health">—</strong>
                 <p id="loan-boundary" class="loan-boundary"></p>
                 <p id="loan-boundary-distance" class="loan-boundary boundary-distance"></p>
                 <p id="loan-initial-health" class="fine-print"></p>
@@ -1047,7 +1053,8 @@
           </article>
         </div>
       </section>
-      <footer class="site-footer">
+      </div>
+    <footer class="site-footer">
         <p>Teren · Look closely.</p>
         <nav aria-label="Project information"><a href="methods.html">Methods →</a><a href="https://github.com/provatidis/teren" target="_blank" rel="noopener noreferrer">Source ↗</a><a href="about.html">About →</a><a href="mailto:hello@teren.sh?subject=Teren%20feedback">Email feedback</a><a href="https://github.com/provatidis/teren/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Report an issue ↗</a>
         </nav>

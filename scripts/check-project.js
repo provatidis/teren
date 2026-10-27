@@ -22,7 +22,10 @@ for (const file of files.filter(file => file.endsWith('.js'))) {
   dependencies.set(file, []);
   const path = relative(root, file).replaceAll('\\', '/');
   const layer = path.split('/')[0];
-  const imports = [...source.matchAll(/(?:import|export)\s+[^;]*?\sfrom\s*['"]([^'"]+)['"]/g)].map(match => match[1]);
+  const imports = [
+    ...source.matchAll(/(?:import|export)\s+[^;]*?\sfrom\s*['"]([^'"]+)['"]/g),
+    ...source.matchAll(/\bimport\s*\(\s*['"]([^'"]+)['"]\s*\)/g),
+  ].map(match => match[1]);
   for (const specifier of imports) {
     assert.ok(specifier.startsWith('.') && assetPath(specifier).endsWith('.js'), path + ': use local explicit module paths.');
     const target = resolve(dirname(file), assetPath(specifier));
@@ -92,9 +95,9 @@ for (const document of ['index.html', 'liquidity.html', 'learn.html', 'about.htm
   }
 }
 const scripts = [...html.matchAll(/<script[^>]+src="([^"]+)"[^>]*><\/script>/g)].map(match => match[1]);
-assert.deepEqual(scripts.map(assetPath), ['home-main.js'], 'Home has a lightweight entry point.');
+assert.deepEqual(scripts.map(assetPath), ['home-entry.js'], 'Home has a lightweight guarded entry point.');
 const liquidity = await readFile(resolve(root, 'liquidity.html'), 'utf8');
-assert.match(liquidity, /<script type="module" src="main.js">/);
+assert.match(liquidity, /<script type="module" src="liquidity-entry.js">/);
 const metadata = Object.fromEntries([...html.matchAll(/<meta (?:name|property)="([^"]+)" content="([^"]*)"/g)].map(match => [match[1], match[2]]));
 for (const field of ['description','og:title','og:description','og:image:alt','twitter:title','twitter:description','twitter:image:alt']) assert.ok(metadata[field]?.trim(), 'Missing identity metadata: ' + field);
 assert.equal(metadata['og:url'],canonical);
@@ -135,7 +138,7 @@ assert.match(html,/<a class="skip-link" href="#main-content">/);
 assert.match(html,/<main id="main-content" tabindex="-1">/);
 assert.match(html,/<noscript>/);
 const learn = await readFile(resolve(root, 'learn.html'), 'utf8');
-assert.match(learn, /<script type=\"module\" src=\"learn-main.js\">/);
+assert.match(learn, /<script type=\"module\" src=\"learn-entry.js\">/);
 assert.match(learn, /id=\"learn-lesson-list\"/);
 assert.match(learn, /href=\"learn.html\" aria-current=\"page\"/);
 assert.match(html, /href=\"learn.html#lesson=swap-impact\"/);

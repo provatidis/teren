@@ -42,7 +42,11 @@ For focused LST target-comparison checks, `BROWSER_CHECKS=lst-comparison npm run
 
 For a focused lesson check, `BROWSER_CHECKS=predictions npm run test:browser` exercises all twenty starting setups, prediction controls, keyboard skipping and progress restoration at desktop and mobile sizes. The full suite remains the release gate.
 
+For focused startup checks, `BROWSER_CHECKS=startup npm run test:browser` blocks application entries and nested dependencies, interrupts initialization, holds a dependency pending, and checks reload recovery, saved work, narrow layouts and JavaScript-disabled access. The full suite includes these checks. A successful normal load alone does not test this failure boundary.
+
 Run `npm run build` before publication. The dependency-free builder hashes every JS/CSS asset after rewriting its dependencies, flattens plain local CSS imports in cascade order with nested URL rebasing, then rewrites HTML entries and preloads each entry’s transitive module graph. Unsupported CSS import forms fail before output is replaced. Shared dependencies keep one URL and identity. Source imports remain canonical and have no release queries; the old hand-maintained stamper is removed. `dist/build-manifest.json` identifies the release and every output asset. Original source paths remain as compatibility aliases for previously cached entries. An old open tab may require a reload after deployment if its earlier hashed assets are no longer published. Hashes prevent mixing changed dependencies within the new build; this is not indefinite retention of older releases. Storage keys and model versions are independent of asset URLs.
+
+Each document has a small guarded entry that dynamically imports its composition root. The builder hashes and preloads literal local dynamic imports and rejects computed import paths. Lab and lesson content starts inert in HTML and visually hidden by the shared stylesheet, retaining its layout for native reading-position restoration. It is revealed only after initialization succeeds; a caught failure collapses it. A failed import or initialization leaves the explanation and reload control visible; if the guard itself cannot load, the HTML still explains that the page has not opened and suggests reloading. Home retains its static links. No timer treats a slow load as a failure, and the guard neither clears storage nor rewrites the URL. Page-specific data-loading errors remain the responsibility of their controllers.
 
 ## Focused workspaces and historical records
 
@@ -52,7 +56,7 @@ The period model lives in `public/models/fixed-position-period.js`; record valid
 
 ## Project structure
 
-- public/home-main.js, public/main.js, public/learn-main.js and public/lending-main.js: composition roots for Home, liquidity Experiment/Inspect, liquidity Learn and lending respectively. They initialize each document's controllers and inject the interfaces they need.
+- public/*-entry.js and public/lib/app-startup.js: guarded startup; public/home-main.js, public/main.js, public/learn-main.js and public/lending-main.js: composition roots for Home, liquidity Experiment/Inspect, liquidity Learn and lending respectively. They initialize each document's controllers and inject the interfaces they need.
 - public/ui/: explicit initializers for the sandbox, both labs, learning, pool/position snapshots, saved experiments, historical replay and navigation. Importing a controller does not start it.
 - public/models/: pure hypothetical calculations, lesson experiments and exact protocol/period arithmetic. They do not read the DOM, browser storage or network.
 - public/data/: deployment configuration, read-only Uniswap v2/v3 adapters, snapshot/period schemas, saved experiments, learning progress and temporary Learn-return storage.

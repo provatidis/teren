@@ -31,7 +31,7 @@
   <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
   <meta name="twitter:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
   <link rel="stylesheet" href="home.css">
-  <script type="module" src="home-main.js"></script>
+  <script type="module" src="home-entry.js"></script>
 </head>
 <body class="home-page">
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -78,6 +78,11 @@
     </section>
     <p class="home-reassurance">Every tool and lesson is open from the beginning. <a href="liquidity.html#saved-experiments">Your saved experiments →</a></p>
     <p class="home-methods">No wallet connection. Experiments use assumptions you can change; recorded liquidity cases are labelled separately. <a href="methods.html">How the results are made →</a></p>
+    <section id="app-startup" class="notice app-startup" data-state="loading" aria-labelledby="app-startup-title">
+      <h2 id="app-startup-title">Opening your saved shortcuts…</h2>
+      <p id="app-startup-message" role="status">You can use the links below. If your saved shortcuts don’t appear, reload the page.</p>
+      <button id="app-reload" class="button secondary" type="button" hidden>Reload page</button>
+    </section>
     <noscript><p class="notice">You can browse these pages without JavaScript. Interactive lessons and experiments need JavaScript enabled.</p></noscript>
     <footer class="site-footer">
       <span>Teren · Look closely.</span>

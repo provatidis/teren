@@ -27,7 +27,7 @@ export async function checkNavigation({evaluate,click,fill,navigate,base,nextEve
  await evaluate("if(!document.querySelector('.cl-fee-details').open)document.querySelector('.cl-fee-details>summary').click()");
  await fill('cl-future','2400');await fill('cl-fees','25');await click('lab-full-tab');await fill('scenario-future','3570');await fill('scenario-fees','172');await click('lab-range-tab');
  const learned=nextEvent('Page.loadEventFired');await evaluate("document.querySelector('.site-nav a[href=\"learn.html\"]').click()");await learned;
- assert.equal(await evaluate("document.querySelector('h1').textContent"),'Liquidity essentials');
+ assert.equal(await textHeading(evaluate), 'Liquidity essentials');
  await click('learn-resume');await targetClear(evaluate,'learn-lesson-title');
  const returned=nextEvent('Page.loadEventFired');await evaluate("document.querySelector('.product-nav a[href=\"liquidity.html#experiment\"]').click()");await returned;
  await settle(evaluate);assert.ok(await evaluate('scrollY<=1'));assert.equal(await evaluate("document.getElementById('lab-range-tab').getAttribute('aria-selected')"),'true');
@@ -52,6 +52,10 @@ export async function checkNavigation({evaluate,click,fill,navigate,base,nextEve
  }
  await navigate(base + 'liquidity.html#lp-lab');await click('scenario-reset');await click('lab-range-tab');await click('cl-reset');await click('lab-full-tab');
  console.log('PASS: primary navigation, sticky offsets, keyboard tabs, Learn-return drafts, explicit scenario precedence, browser history and deep links');
+}
+async function textHeading(evaluate) {
+ assert.equal(await evaluate("document.getElementById('learn-page-title').checkVisibility()"), true);
+ return evaluate("document.getElementById('learn-page-title').textContent");
 }
 export async function checkMobileNavigation({evaluate,click,navigate,base,call}){
  for(const [width,height] of [[390,844],[320,740]]){

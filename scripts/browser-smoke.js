@@ -41,6 +41,7 @@ import { checkSavedExperiments, checkMobileSavedExperiments } from './browser/sa
 // Optional real-browser smoke test, using Chromium's DevTools protocol and Node built-ins.
 import assert from 'node:assert/strict';
 import { checkEntry } from './browser/entry-checks.js';
+import { checkStartup } from './browser/startup-checks.js';
 import { spawn } from 'node:child_process';
 import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -97,7 +98,20 @@ const text = (id) => evaluate(`document.getElementById(${JSON.stringify(id)}).te
 const click = (id) => evaluate(`document.getElementById(${JSON.stringify(id)}).click()`);
 const fill = (id, value) => evaluate(`(() => { const el = document.getElementById(${JSON.stringify(id)}); el.value = ${JSON.stringify(value)}; el.dispatchEvent(new Event('input', { bubbles: true })); })()`);
 
-async function reload() {
+async function waitForStartup() {
+  await evaluate(`new Promise((resolve, reject) => {
+    const deadline = Date.now() + 10000;
+    const check = () => {
+      const notice = document.getElementById('app-startup');
+      if (!notice || notice.dataset.state === 'ready') return resolve();
+      if (notice.dataset.state === 'failed' || Date.now() > deadline) return reject(new Error(notice.textContent));
+      setTimeout(check, 20);
+    };
+    check();
+  })`);
+}
+
+async function reload({ startup = true } = {}) {
   const loaded = new Promise((resolve, reject) => {
     const timer = setTimeout(() => { socket.removeEventListener('message', listener); reject(new Error('Reload timed out')); }, 15000);
     const listener = ({ data }) => {
@@ -110,9 +124,10 @@ async function reload() {
   });
   await call('Page.reload');
   await loaded;
+  if (startup) await waitForStartup();
 }
 
-function nextEvent(method) {
+function nextEvent(method, { startup = true } = {}) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => { socket.removeEventListener('message', listener); reject(new Error(`Event timed out: ${method}`)); }, 15000);
     const listener = ({ data }) => {
@@ -120,19 +135,22 @@ function nextEvent(method) {
       if (message.method !== method) return;
       clearTimeout(timer);
       socket.removeEventListener('message', listener);
-      resolve(message.params);
+      if (method === 'Page.loadEventFired' && startup) {
+        waitForStartup().then(() => resolve(message.params), reject);
+      } else resolve(message.params);
     };
     socket.addEventListener('message', listener);
   });
 }
 
-async function navigate(url) {
+async function navigate(url, { startup = true } = {}) {
   // Reopen the link as a new document; changing just a fragment is not a page load.
   for (const destination of ['about:blank', url]) {
-    const loaded = nextEvent('Page.loadEventFired');
+    const loaded = nextEvent('Page.loadEventFired', { startup });
     await call('Page.navigate', { url: destination });
     await loaded;
   }
+  if (startup) await waitForStartup();
   // Lesson entry focuses its heading on the next animation frame. Let that
   // initial focus and measured header offsets finish before interacting or
   // positioning a touch target; otherwise they can undo the test's scroll.
@@ -187,6 +205,15 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'startup') {
+    await checkStartup({ evaluate, click, fill, text, navigate, base, call, nextEvent, waitForStartup });
+    assert.deepEqual(errors, [], 'Startup failures are handled without uncaught errors');
+    if (process.env.BROWSER_CHECKS === 'startup') {
+      await checkReviewPolish({ evaluate, click, fill, text, navigate, reload, base, call });
+      assert.deepEqual(errors, [], 'Normal lesson entry and reload remain intact');
+      return;
+    }
+  }
   if (process.env.BROWSER_CHECKS === 'recorded-lessons') {
     await navigate(base + 'liquidity.html');
     await checkAppliedLearning({ evaluate, click, fill, text, navigate, reload, base, call, nextEvent });
