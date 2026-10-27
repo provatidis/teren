@@ -56,6 +56,7 @@ let socket;
 let sequence = 0;
 const pending = new Map();
 const errors = [];
+const loadingFrames = new Set();
 
 function start(command, args, options, pattern) {
   const child = spawn(command, args, options);
@@ -99,16 +100,29 @@ const click = (id) => evaluate(`document.getElementById(${JSON.stringify(id)}).c
 const fill = (id, value) => evaluate(`(() => { const el = document.getElementById(${JSON.stringify(id)}); el.value = ${JSON.stringify(value)}; el.dispatchEvent(new Event('input', { bubbles: true })); })()`);
 
 async function waitForStartup() {
-  await evaluate(`new Promise((resolve, reject) => {
-    const deadline = Date.now() + 10000;
-    const check = () => {
-      const notice = document.getElementById('app-startup');
-      if (!notice || notice.dataset.state === 'ready') return resolve();
-      if (notice.dataset.state === 'failed' || Date.now() > deadline) return reject(new Error(notice.textContent));
-      setTimeout(check, 20);
-    };
-    check();
-  })`);
+  const deadline = Date.now() + 10000;
+  const inspect = () => evaluate(`(() => {
+    const notice = document.getElementById('app-startup');
+    return { url: location.href, loaded: document.readyState !== 'loading',
+      state: notice?.dataset.state || 'ready', message: notice?.textContent };
+  })()`);
+  // A saved setup can redirect between topics after the first document loads.
+  // Poll outside that document so replacing it cannot destroy the readiness wait.
+  while (Date.now() < deadline) {
+    try {
+      const page = await inspect();
+      if (page.state === 'failed') throw new Error(page.message);
+      if (page.loaded && page.state === 'ready' && !loadingFrames.size) {
+        await evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
+        const settled = await inspect();
+        if (settled.url === page.url && settled.loaded && settled.state === 'ready' && !loadingFrames.size) return;
+      }
+    } catch (error) {
+      if (!/Execution context was destroyed|Cannot find context with specified id|Inspected target navigated or closed/.test(error.message)) throw error;
+    }
+    await new Promise(resolve => setTimeout(resolve, 20));
+  }
+  throw new Error('Page did not finish starting after navigation.');
 }
 
 async function reload({ startup = true } = {}) {
@@ -191,6 +205,8 @@ try {
   await once(socket, 'open');
   socket.addEventListener('message', ({ data }) => {
     const message = JSON.parse(data);
+    if (message.method === 'Page.frameStartedLoading') loadingFrames.add(message.params.frameId);
+    if (['Page.frameStoppedLoading', 'Page.frameDetached'].includes(message.method)) loadingFrames.delete(message.params.frameId);
     if (message.method === 'Runtime.exceptionThrown') errors.push(message.params.exceptionDetails.text);
     const task = pending.get(message.id);
     if (task) {
