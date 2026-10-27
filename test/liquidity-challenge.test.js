@@ -54,7 +54,7 @@ test('question revisions preserve completion and clear only materially changed a
 
 test('checked task state survives reload independently from the worked question', () => {
   const id='final-challenge', inputs=lessonSetup(id), task=matchChallengeHolding(inputs,1500);
-  const value={version:1,completed:[id],lastLesson:id,drafts:{[id]:{variant:0,inputs,reason:'total',application:'relative-gap',reasonRevision:2,applicationRevision:2,task,taskChecked:true,ran:true}}};
+  const value={version:1,completed:[id],lastLesson:id,drafts:{[id]:{variant:0,inputs,reason:'total',application:'relative-gap',reasonRevision:essentialQuestionRevisions(id,0).reason,applicationRevision:essentialQuestionRevisions(id,0).application,task,taskChecked:true,ran:true}}};
   const clean=parseProgress(value);
   assert.deepEqual(clean.drafts[id].task,task); assert.equal(clean.drafts[id].taskChecked,true);
   assert.equal(clean.drafts[id].inputs.futurePrice,4000); assert.equal(clean.drafts[id].inputs.fees,100);

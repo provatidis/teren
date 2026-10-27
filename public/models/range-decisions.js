@@ -21,10 +21,27 @@ export function managementCase(id, variant = 0) {
   }
   if (id === 'fee-tiers') {
     // Supplied teaching facts, not an earnings estimate or observations from a real pool.
-    const rates = variant === 2 ? [.3,.05] : [.05,.3];
-    const fees = [12, 4];
-    const application = ['smaller-share', 'more-income', 'larger-share'][variant];
-    return {id, variant, rates, fees, prediction:'unknown', reason:'trades', application};
+    const rates = [.05, .3];
+    const volumes = [24000000, 2000000];
+    const activeShare = .001;
+    const poolFees = volumes.map((volume, index) => volume * rates[index] / 100);
+    const fees = poolFees.map(total => total * activeShare);
+    const competition = {
+      deposit: investment,
+      yesterday: {share: activeShare, income: fees[0], apr: fees[0] / investment * 365 * 100},
+      today: {share: activeShare / 2, income: fees[0] / 2},
+    };
+    const reinvestment = {
+      ownBefore: 100, othersBefore: 900,
+      ownAfter: 120, othersAfter: 1800,
+    };
+    reinvestment.shareBefore = reinvestment.ownBefore / (reinvestment.ownBefore + reinvestment.othersBefore);
+    reinvestment.shareAfter = reinvestment.ownAfter / (reinvestment.ownAfter + reinvestment.othersAfter);
+    const application = ['more-volume', 'smaller-share', 'competition-offset'][variant];
+    return {
+      id, variant, rates, volumes, activeShare, poolFees, fees, competition, reinvestment,
+      prediction: 'unknown', reason: 'trades', application,
+    };
   }
   const prices = [[1600,1400],[2400,2800],[1400,1600]][variant];
   const first=position(.1,prices[0]), second=position(.1,prices[1]), returned=position(.1,initialPrice);
@@ -32,11 +49,17 @@ export function managementCase(id, variant = 0) {
   // A supplied path for comparing two actions, not a historical replay or an
   // optimization rule. Both alternatives start with the same existing position.
   const cost = 15;
+  // Fund the moved position in whole cents. Any fraction left over stays in the
+  // wallet, so rounding never spends money the existing position does not own.
+  const available = first.lpBeforeFees - cost;
+  const movedInvestment = Math.floor(available * 100) / 100;
+  const cashRemainder = available - movedInvestment;
   const rebalance = variant === 2 ? {
     before: first,
     unchanged: returned,
     cost,
-    moved: calculateRange({investment:first.lpBeforeFees-cost,initialPrice:prices[0],futurePrice:initialPrice,
+    cashRemainder,
+    moved: calculateRange({investment:movedInvestment,initialPrice:prices[0],futurePrice:initialPrice,
       lowerPrice:1260,upperPrice:1540,fees:0,fullRangeFees:0}),
   } : null;
   return {

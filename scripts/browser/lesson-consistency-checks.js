@@ -18,9 +18,9 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
     await navigate(base + 'learn.html#lesson=token-balances');
     await fill('learn-input-futurePrice',price); await choose('learn-prediction',prediction); await click('learn-run');
     assert.ok((await text('learn-explanation')).includes(direction));
-    await choose('learn-application','original-mix'); await choose('learn-reason','mint'); await click('learn-check');
+    await choose('learn-application','original-mix'); await choose('learn-reason','automatic'); await click('learn-check');
     assert.equal(await text('learn-feedback-title'),'Review your answers.');
-    assert.match(await text('learn-reasons-feedback'),/does not create ETH or USDC/);
+    assert.match(await text('learn-reasons-feedback'),/Tokens change hands through trades/);
     assert.ok((await text('learn-reasons-feedback')).includes(direction));
     assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),true);
     if (price === '2000') {
@@ -62,7 +62,7 @@ export async function checkMobileLessonConsistency({ evaluate, click, fill, text
     await navigate(base + 'learn.html#lesson=token-balances');
     await fill('learn-input-futurePrice','4000');
     await evaluate("document.querySelector('input[name=learn-prediction][value=less]').click()"); await click('learn-run');
-    await evaluate("document.querySelector('input[name=learn-application][value=original-mix]').click()"); await evaluate("document.querySelector('input[name=learn-reason][value=mint]').click()"); await click('learn-check');
+    await evaluate("document.querySelector('input[name=learn-application][value=original-mix]').click()"); await evaluate("document.querySelector('input[name=learn-reason][value=automatic]').click()"); await click('learn-check');
     assert.match(await text('learn-reasons-feedback'),/less ETH and more USDC/);
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
   }

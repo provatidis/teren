@@ -65,7 +65,7 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
 
   const choose = (name, value) => evaluate(`document.querySelector('input[name="lend-${name}"][value="${value}"]').click()`);
   const cases = [
-    ['supply', 'neither', 'separate', 'enable', '5.10 ETH'],
+    ['supply', 'neither', 'separate', 'withdraw', '5.10 ETH'],
     ['borrow', 'more', 'liability', 'opening-limit', '$10,000.00'],
     ['conditions', 'same', 'interest', 'backing-faster', '$5,500.00'],
     ['respond', 'same', 'tradeoff', 'remaining-backing', '1.36'],

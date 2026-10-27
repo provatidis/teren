@@ -24,7 +24,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     ['swap-impact','less','18132','curve','quote-received'],
     ['pool-share','less','4.76','ownership','share-same'],
     ['token-balances','less','0.884','rebalance','original-mix'],
-    ['loss-vs-profit','gain','428.93','benchmark','holding-basket'],
+    ['loss-vs-profit','gain','428.93','traded-mix','holding-basket'],
     ['fee-break-even','short','428.93','assumption','gap-reopens'],
     ['range-boundaries','usdc','0','path','both-inside'],
     ['final-challenge','hold','328.93','total','relative-gap'],

@@ -73,7 +73,7 @@ test('range variations begin above, below and inside with matching direction-awa
 test('question migrations retire changed answers and keep completion plus compatible custom inputs', () => {
   for (const [id, variant, oldApplication, revision] of [['swap-impact', 0, 'deeper-less', 1], ['swap-impact', 1, 'deeper-more', 2], ['loss-vs-profit', 0, 'gap-unchanged', 3], ['loss-vs-profit', 2, 'gap-unchanged', 3]]) {
     const result = runLesson(id, lessonSetup(id, variant), variant);
-    const parsed = parseProgress({version: 1, completed: [id], drafts: {[id]: {variant, inputs: result.setup, prediction: result.prediction, reason: result.reason, application: oldApplication, applicationRevision: revision, ran: true}}});
+    const parsed = parseProgress({version: 1, completed: [id], drafts: {[id]: {variant, inputs: result.setup, prediction: result.prediction, reason: result.reason, reasonRevision: essentialQuestionRevisions(id, variant).reason, application: oldApplication, applicationRevision: revision, ran: true}}});
     assert.deepEqual(parsed.completed, [id]);
     assert.equal(parsed.drafts[id].application, '');
     assert.equal(parsed.drafts[id].prediction, result.prediction);

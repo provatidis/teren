@@ -13,7 +13,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     for (let i = 0; i < 3 && !(await text('learn-variation-label')).includes('1 of 3'); i++) await click('learn-variation');
   };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
-  for (const [id, reason, application] of [['loss-vs-profit', 'benchmark', 'holding-basket'], ['fee-break-even', 'assumption', 'gap-reopens'], ['final-challenge', 'total', 'relative-gap']]) {
+  for (const [id, reason, application] of [['loss-vs-profit', 'traded-mix', 'holding-basket'], ['fee-break-even', 'assumption', 'gap-reopens'], ['final-challenge', 'total', 'relative-gap']]) {
     await navigate(base + 'learn.html#lesson=' + id); await reset();
     assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false);
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
@@ -88,10 +88,10 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
         if (variant === 1) {
           assert.equal(await text('learn-application-label'), 'Withdrawing the position');
           assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), true);
-          await choose('learn-reason', 'benchmark'); await choose('learn-application', 'gap-unchanged'); await click('learn-check');
+          await choose('learn-reason', question.reason); await choose('learn-application', 'gap-unchanged'); await click('learn-check');
           assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
         } else if (variant === 2) {
-          await choose('learn-reason', 'benchmark'); await choose('learn-application', 'holding-basket'); await click('learn-check');
+          await choose('learn-reason', question.reason); await choose('learn-application', 'holding-basket'); await click('learn-check');
           assert.match(await text('learn-applications-feedback'), /48.47 ahead of holding/);
         }
       }

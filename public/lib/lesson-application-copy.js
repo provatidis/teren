@@ -64,7 +64,7 @@ export function lessonApplicationCopy(id, outcome) {
     },
     feedback: 'Your LP tokens still represent the same fraction of the pool. ETH enters and USDC leaves, so the token amounts behind that fraction change.'};
   if (id === 'token-balances' && outcome.variant === 1) return {...base,
-    label: 'More ETH, less dollar value',
+    label: 'After ETH falls',
     context: 'ETH falls to ' + usd(application.next.setup.futurePrice) + '. The model now shows more ETH in the LP, but a lower total dollar value. No fees are included.',
     question: 'How can it hold more ETH and still lose dollar value?',
     choices: [['more-eth-less-value', 'Swaps added ETH as its price fell; more units do not mean more dollars.'], ['earned-eth', 'The extra ETH is yield that will restore the original dollar value.'], ['withdraw-loss', 'The lower dollar value becomes a loss only after withdrawal.']],
@@ -174,7 +174,7 @@ export function lessonApplicationCopy(id, outcome) {
     label: 'Just inside the upper edge',
     context: 'Keep the ' + usd(outcome.result.lowerPrice) + '–' + usd(outcome.result.upperPrice) + ' range. ETH is now ' + usd(application.futurePrice) + ', just inside the upper bound.',
     question: 'What does the position hold, and can it take part in swaps here?',
-    choices: [['both-inside','Both tokens, mostly USDC by value; it is eligible to earn from swaps.'],['usdc-wait','Only USDC; it waits for price to reach the middle of the range.'],['both-paid','Both tokens; it earns fees simply by staying inside the range.']],
+    choices: [['both-inside','Both tokens, mostly USDC by value; swaps can still use its liquidity.'],['usdc-wait','Only USDC; it waits for price to reach the middle of the range.'],['both-paid','Both tokens; it earns fees simply by staying inside the range.']],
     hint: 'The last ETH is exchanged at the boundary. Inside it, swaps can still use the position.',
     feedbackByChoice: {
       'usdc-wait': 'Just inside the upper edge, some ETH remains. Swaps can use the position here without price returning to the middle.',
@@ -184,12 +184,12 @@ export function lessonApplicationCopy(id, outcome) {
   return {...base,
     label: 'Match holding while losing dollars',
     context: 'Use the starting ' + fmt(outcome.result.held.eth, 4) + ' ETH and ' + fmt(outcome.result.held.usdc, 2) + ' USDC. Find a price and fee assumption where LP matches holding, but both are below the starting capital.',
-    question: 'In that example, what have the assumed fees covered?',
+    question: 'In that example, what have the fees you entered covered?',
     choices: [['relative-gap','The shortfall against holding, while a dollar loss remains in both strategies.'],['capital-restored','The entire loss from the starting capital, because LP now matches holding.'],['earned-target','A recorded fee payment that proves this position can recover its loss.']],
     hint: 'Try a price below the start, then use Match holding. The bars keep both comparisons visible.',
     feedbackByChoice: {
       'capital-restored': 'Holding itself is below the starting budget in your example. Matching it closes the relative gap but leaves that dollar loss.',
-      'earned-target': 'The fees here are an assumption you chose. Matching holding shows what that amount would cover; it does not establish that any trades paid it.',
+      'earned-target': 'You chose the fees in this example. Matching holding shows what that amount would cover; it does not show that any trades paid it.',
     },
     feedback: 'Matching holding closes the relative gap. Holding itself can be below the starting capital, so both can still lose dollars. The fees in this task are an assumption, not recorded earnings.'};
 }

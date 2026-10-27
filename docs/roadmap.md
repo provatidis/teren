@@ -1,6 +1,6 @@
 # Next discussion
 
-Updated for 1.49.0. These are discussion priorities, not commitments to build every item.
+Updated for 1.50.0. These are discussion priorities, not commitments to build every item.
 
 ## Next lab iteration
 

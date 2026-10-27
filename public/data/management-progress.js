@@ -3,7 +3,7 @@ import { validChoiceSeed } from '../lib/learning-choices.js';
 export const MANAGEMENT_KEY = 'passiko-range-learning-v1';
 export const MANAGEMENT_QUESTION_REVISIONS = Object.freeze({
   'range-width': Object.freeze({prediction:1,reason:1,application:3}),
-  'fee-tiers': Object.freeze({prediction:1,reason:1,application:3}),
+  'fee-tiers': Object.freeze({prediction:1,reason:1,application:4}),
   'range-management': Object.freeze({prediction:1,reason:1,application:2}),
 });
 export function managementQuestionRevisions(id, variant) {

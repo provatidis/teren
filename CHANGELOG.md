@@ -1,5 +1,13 @@
 # Release history
 
+## 1.50.0 · 2026-10-27
+
+- Give loss-versus-profit checks different jobs: explain the token exchanges behind the holding gap, then interpret the comparison or a withdrawal. The explanation follows rising, falling and unchanged editable prices.
+- Ground fee-tier applications in three fictional situations: volume versus fee rate, an APR screenshot under changed competition, and reinvesting while other LPs add more liquidity. Supply the figures and fee shares so questions ask for explanations rather than calculations.
+- Put the recorded starting price and fixed range beside the placement question. Move the derived upward room into feedback, trim repeated answer previews and replace weak wrong answers across liquidity, lending and loops.
+- Distinguish withdrawing a supply from disabling collateral. Keep the borrowing headroom chart, simplify question wording, remove obsolete collection references and give the rebound handoff a cents-level investment with its remaining wallet cash accounted for separately.
+- Preserve completed lessons and compatible saved work while retiring answers to materially revised questions. Extend question, persistence and desktop/mobile checks. Core financial formulas and recorded blockchain evidence are unchanged.
+
 ## 1.49.0 · 2026-10-27
 
 - Compare two exact wstETH exposure targets inside Hold & stress. Both use the same original tokens, rates, time, prices, oracle, costs and exit destination. Show differences against holding, health, oracle-price headroom and after-exit outcomes together.

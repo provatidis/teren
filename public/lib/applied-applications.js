@@ -54,7 +54,7 @@ export function appliedApplication(id, question) {
   if (id === 'between-samples') {
     const {placement}=question;
     return {
-    expected: 'edge-placement', label: 'Wide, but near the upper edge',
+    expected: 'edge-placement', label: 'Width and placement',
     reasonEvidence: {
       title: 'Activity between the two observations',
       rows: [
@@ -67,26 +67,23 @@ export function appliedApplication(id, question) {
     },
     evidence: {
       title: 'Where this range started',
-      rows: [
-        ['Lower bound', usd(placement.range.lowerPrice)],
-        ['Starting ETH price', usd(placement.startPrice)],
-        ['Upper bound', usd(placement.range.upperPrice)],
-        ['Room for a rise at the start', fmt(placement.upwardRoomPercent,2)+'%'],
-      ],
-      note: 'The recorded counter shows '+fmt(100*placement.secondsInRange/placement.durationSeconds,1)+'% of the full '+periodDuration(placement.durationSeconds)+' period in range. It measures time; sampled prices do not reveal every move between checkpoints.',
+      priceRange: {
+        ...placement.range, startPrice: placement.startPrice,
+        markerDescription: 'The starting price marker is close to the upper bound, with most of the range below it.',
+      },
     },
-    context: 'This range stretches from '+usd(placement.range.lowerPrice)+' to '+usd(placement.range.upperPrice)+'. Yet ETH starts near its top. Consider the room it has in each direction.',
+    context: 'The owner keeps these bounds fixed. Consider a rise from the recorded starting price.',
     question: 'Why can a small ETH rise take this wide position out of range?',
     choices: [
       ['edge-placement','Most of the range lies below the starting price; little room remains above it.'],
       ['centered','The full width gives equal room for a price rise and a price fall.'],
-      ['follows-price','The wide range moves its bounds upward as ETH rises, keeping the same room.'],
+      ['both-bounds','Price must cross both bounds before the position becomes inactive.'],
     ],
     hint: 'Compare the starting price with each bound. Width and placement describe different parts of the setup.',
     feedback: 'A rise of just '+fmt(placement.upwardRoomPercent,2)+'% from the starting price reaches the upper bound. Most of the width is below it. A wide range can still be close to an exit; it depends where the price sits within the bounds.',
     feedbackByChoice: {
       centered: 'The range is not centered on its starting price. The lower bound is far away, while the upper bound is less than 1% above it.',
-      'follows-price': 'These bounds stay fixed throughout the record. They do not follow ETH; moving a range requires an action by its owner.',
+      'both-bounds': 'Crossing either boundary is enough to leave the active range. On a rise, the nearby upper bound is the one that matters.',
     },
   };
   }

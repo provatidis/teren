@@ -7,7 +7,7 @@ const cases = {
   respond: { future: 1500, budget: 1000 },
 };
 const answers = {
-  supply: ['earn', 'separate', 'enable'],
+  supply: ['earn', 'separate', 'withdraw'],
   borrow: ['same', 'liability', 'opening-limit'],
   conditions: ['lower', 'interest', 'backing-faster'],
   respond: ['repay', 'tradeoff', 'remaining-backing'],

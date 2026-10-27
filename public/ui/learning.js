@@ -23,14 +23,14 @@ import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
 import { resultCardBlob } from '../lib/result-card.js';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
-import { tokenBalanceNarration, rangeBoundaryNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding } from '../lib/lesson-narration.js';
+import { tokenBalanceNarration, lossProfitReasoning, rangeBoundaryNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding } from '../lib/lesson-narration.js';
 
 function finalReason(outcome) {
   const r = outcome.result;
-  if (Math.abs(r.difference) < 1e-8) return 'The assumed fees exactly cover the gap between principal and holding.';
+  if (Math.abs(r.difference) < 1e-8) return 'The fees you entered exactly cover the gap between principal and holding.';
   return r.difference > 0
-    ? 'The assumed fees more than cover the principal shortfall against holding.'
-    : 'The assumed fees do not cover the principal shortfall against holding.';
+    ? 'The fees you entered more than cover the principal shortfall against holding.'
+    : 'The fees you entered do not cover the principal shortfall against holding.';
 }
 
 export function initLearning() {
@@ -233,11 +233,12 @@ export function initLearning() {
     renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, outcome.prediction, lessonFinding(lesson.id, outcome));
     markPredictionRevealed(predictionField);
     const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
+    const lossCopy = lesson.id === 'loss-vs-profit' ? lossProfitReasoning(outcome) : null;
     $('learn-explanation').textContent = (tokenCopy ? tokenCopy.exchange + (tokenCopy.direction === 'same' ? '' : ' Trading to align pool and market prices is called arbitrage.') + ' Neither token is created by the pool.' : null)
       || (lesson.id === 'range-boundaries' ? rangeBoundaryNarration(outcome) : null)
       || benchmarkNarration(lesson.id, outcome) || lesson.explanation;
-    $('learn-reason-question').textContent = tokenCopy?.reasoning || lesson.reasoning;
-    const reasons = lesson.reasons.map(([id, copy]) => [id, tokenCopy && id === 'rebalance' ? tokenCopy.correctReason
+    $('learn-reason-question').textContent = lossCopy?.reasoning || tokenCopy?.reasoning || lesson.reasoning;
+    const reasons = lossCopy?.reasons || lesson.reasons.map(([id, copy]) => [id, tokenCopy && id === 'rebalance' ? tokenCopy.correctReason
       : lesson.id === 'final-challenge' && id === 'total' ? finalReason(outcome) : copy]);
     choices('learn-reasons', 'learn-reason', reasons, draft.reason);
     $('learn-application-context').textContent = applicationCopy.context;
@@ -356,7 +357,7 @@ export function initLearning() {
     const reasoningFeedback = lessonReasonFeedback(lesson.id, outcome, draft.reason, lesson.reasonFeedbackByChoice);
     const applicationFeedback = draft.application ? (applicationCopy.feedbackByChoice?.[draft.application] || applicationCopy.feedback) : 'Choose an answer. ' + applicationCopy.hint;
     renderUnderstandingFeedback('learn', [
-      { container: 'learn-reasons', selected: draft.reason, correct: check.reasoning, explanation: check.reasoning ? lesson.takeaway : reasoningFeedback },
+      { container: 'learn-reasons', selected: draft.reason, correct: check.reasoning, explanation: check.reasoning && lesson.id !== 'loss-vs-profit' ? lesson.takeaway : reasoningFeedback },
       { container: 'learn-applications', selected: draft.application, correct: check.application, explanation: applicationFeedback },
     ]);
     $('learn-feedback-copy').textContent = check.passed ? lesson.completion : 'Read the feedback beside the task or question, then try again.';
