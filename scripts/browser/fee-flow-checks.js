@@ -57,10 +57,55 @@ export async function checkFeeFlow({ evaluate, click, fill, text, navigate, relo
     await fill('fee-flow-volume', '123456.789');
     await fill('fee-flow-competition', '987654.321');
     const lastValid = await evaluate("localStorage.getItem('teren-width-comparison-v1')");
-    await fill('fee-flow-volume', '');
-    assert.equal(await evaluate("document.getElementById('width-share').disabled"), true);
+    const ledgerBefore = await text('fee-flow-batches');
+    for (const [field, invalidValues, restored, message, summary] of [
+      ['competition', ['', '0', '1000000000001'], '987654.321', 'Enter an amount from $1 to $1 trillion.', 'Check other LPs’ starting capital'],
+      ['volume', ['', '-1', '1000000001'], '123456.789', 'Enter an amount from $0 to $1 billion.', 'Check trading volume'],
+    ]) {
+      for (const invalid of invalidValues) {
+        await fill('fee-flow-' + field, invalid);
+        assert.equal(await text('fee-flow-' + field + '-error'), message);
+        assert.equal(await text('fee-flow-error'), '', 'The field error is not repeated by the model error.');
+        assert.equal(await text('width-save-status'), '', 'An invalid edit does not claim it was saved.');
+        assert.equal(await text('fee-flow-assumptions-summary'), summary);
+        assert.equal(await text('fee-flow-competitor-capital'), field === 'competition' ? 'Check starting capital' : 'Next batch unavailable');
+        assert.equal(await text('fee-flow-competitor-bounds'), '');
+        assert.equal(await evaluate("document.getElementById('fee-flow-competitor-capital').hasAttribute('title')"), false);
+        assert.equal(await evaluate("['fee-flow-quote','fee-flow-totals'].every(id=>document.getElementById(id).hidden)"), true);
+        assert.equal(await evaluate("['fee-flow-add','fee-flow-example','width-share'].every(id=>document.getElementById(id).disabled)"), true);
+        assert.equal(await evaluate("localStorage.getItem('teren-width-comparison-v1')"), lastValid, 'Invalid next-batch edits preserve the saved valid comparison.');
+        assert.equal(await text('fee-flow-batches'), ledgerBefore, 'Already added batches remain visible while the next batch is invalid.');
+        assert.equal(await text('fee-flow-ledger-count'), '(2)');
+        await click('fee-flow-add');
+        await click('width-share');
+        assert.equal(await evaluate("document.getElementById('width-share-result').hidden"), true);
+        assert.equal((await state()).flow.batches.length, 2);
+        await fill('fee-flow-' + field, restored);
+        assert.equal(await evaluate(`document.getElementById('fee-flow-${field}-error').hidden`), true);
+        assert.equal(await evaluate("document.getElementById('width-share').disabled"), false);
+      }
+    }
+    await fill('fee-flow-competition', '');
+    await click('fee-flow-full-range');
+    await fill('fee-flow-other-width', '40');
+    assert.equal(await text('fee-flow-width-value'), '40.00% total width');
+    assert.match(await text('width-bands-title'), /other LPs use 40\.00% width/);
+    assert.equal(await evaluate("document.getElementById('fee-flow-other-width').getAttribute('aria-valuetext')"), '40.00% total width');
+    await click('fee-flow-full-range');
+    assert.equal(await text('fee-flow-width-value'), 'Full range');
+    assert.match(await text('width-bands-title'), /other LPs use the full range/);
+    assert.equal(await evaluate("document.getElementById('fee-flow-other-width').disabled"), true);
     assert.equal(await evaluate("localStorage.getItem('teren-width-comparison-v1')"), lastValid);
-    await fill('fee-flow-volume', '123456.789');
+    await fill('fee-flow-competition', '987654.321');
+    assert.match(await text('fee-flow-assumptions-summary'), /Trading \$123\.5K · other LPs \$987\.7K/);
+    assert.equal(await evaluate("document.getElementById('fee-flow-totals').hidden"), false);
+    assert.equal(await text('fee-flow-batches'), ledgerBefore);
+    await fill('width-start', '');
+    assert.equal(await text('fee-flow-assumptions-summary'), 'Check the shared starting setup');
+    assert.equal(await evaluate("document.querySelectorAll('#fee-flow-batches li').length"), 2);
+    assert.equal(await evaluate("localStorage.getItem('teren-width-comparison-v1')"), lastValid);
+    await fill('width-start', '2000');
+    assert.equal(await text('fee-flow-batches'), ledgerBefore);
     await click('width-share');
     const shared = await value('width-share-url');
     const parsed = widthFlowFromHash(new URL(shared).hash);
@@ -125,6 +170,16 @@ export async function checkFeeFlow({ evaluate, click, fill, text, navigate, relo
       assert.equal(await value('width-price'), '2000');
       await click('fee-flow-example');
       assert.equal(await evaluate('document.activeElement.id'), 'fee-flow-add');
+      await openAssumptions();
+      await fill('fee-flow-competition', '1000000000001');
+      assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
+      assert.equal(await text('fee-flow-competition-error'), 'Enter an amount from $1 to $1 trillion.');
+      assert.equal(await text('fee-flow-error'), '');
+      assert.equal(await evaluate("document.querySelectorAll('#fee-flow-batches li').length"), 2);
+      const fields = await evaluate("['fee-flow-volume','fee-flow-competition'].map(id=>{const field=document.getElementById(id).parentElement,r=field.getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom,width:r.width,scroll:field.scrollWidth,client:field.clientWidth}})");
+      assert.ok(Math.abs(fields[0].x - fields[1].x) < 1 && fields[1].y >= fields[0].bottom, 'Mobile next-batch fields stack in reading order.');
+      assert.ok(fields.every(field => field.width > width * .6 && field.scroll <= field.client), 'Each field and its error fit a full-width mobile column.');
+      await fill('fee-flow-competition', '1000000');
       const layout = await evaluate("Array.from(document.querySelectorAll('#fee-flow-outcomes article')).map(el=>({y:el.getBoundingClientRect().y,w:el.getBoundingClientRect().width}))");
       assert.ok(Math.abs(layout[0].y - layout[1].y) < 1 && layout.every(card => card.w > 110));
       await evaluate("document.getElementById('fee-mechanics').open=true");

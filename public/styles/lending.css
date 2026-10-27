@@ -26,8 +26,9 @@
 .loan-conditions,.loan-risk,.loan-balances,.loan-responses,.loan-sharing{padding:26px}
 .loan-analysis h2{font-size:20px;letter-spacing:-.5px;line-height:1.4;margin:0 0 16px}
 .loan-conditions .card-heading h2{margin:0}
-.loan-condition-fields{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:20px}
-.loan-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.loan-condition-fields{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin:20px 0 24px}
+.loan-condition-fields .scenario-field{margin:0;min-width:0}
+.loan-presets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 0}
 .loan-presets button{min-height:44px;padding:8px;font-size:13px}
 #loan-slider,#loan-time-slider{width:100%;accent-color:var(--accent);margin:10px 0 0;min-height:44px}
 .loan-condition-fields .fine-print{font-size:13px;line-height:1.7;margin:0}
@@ -99,11 +100,10 @@
  .topic-switch{margin-bottom:18px;font-size:13px}.topic-switch a,.topic-current{padding:6px 16px}
  .loan-layout{grid-template-columns:1fr;gap:16px}.loan-model-label{font-size:13px}
  .loan-setup,.loan-conditions,.loan-risk,.loan-balances,.loan-responses,.loan-sharing,.loan-method{padding:20px}
- .loan-condition-fields{grid-template-columns:1fr}.loan-condition-fields .scenario-field{margin:0}
+ .loan-condition-fields{grid-template-columns:1fr}
  .loan-risk{gap:16px;grid-template-columns:1fr}.loan-health{grid-row:2;font-size:38px}
  .loan-balance-list>div{grid-template-columns:1fr;gap:6px}.loan-balance-list dd{font-size:24px}
  .loan-balance-list .loan-balance-note{grid-column:auto}.loan-response-grid{grid-template-columns:1fr}
- .loan-presets{grid-template-columns:repeat(2,minmax(0,1fr))}
  .lending-lesson h2{font-size:28px}.lending-lesson .learn-lesson-heading{flex-wrap:wrap}
  .lending-lesson .learn-metric{grid-template-columns:1fr}.lending-lesson .learn-metric strong{text-align:left;font-size:22px}
 }

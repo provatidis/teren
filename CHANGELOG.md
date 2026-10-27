@@ -1,5 +1,11 @@
 # Release history
 
+## 1.50.3 · 2026-10-27
+
+- Group lending price shortcuts beneath the price slider, separate from elapsed time on desktop and phones. Clarify the live-data provider notices in both liquidity import panels.
+- Use consistent negative dollar amounts across lab results, charts and tables, without displaying a negative zero.
+- Show concise field errors in Follow the fees, remove stale next-batch figures while inputs are invalid, and preserve existing batches and the last valid saved comparison. Stack batch inputs on narrow phones and extend validation and layout checks.
+
 ## 1.50.2 · 2026-10-27
 
 - Connect unwind feedback to the extra ETH sold in the walkthrough, distinguishing the hypothetical 4.07 USDC shortfall from the actual completed repayment. Label the assumed loss consistently as a swap loss.

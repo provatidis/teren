@@ -3,10 +3,30 @@ import assert from 'node:assert/strict';
 const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
 
 export async function checkLending({ evaluate, click, fill, text, navigate, base, call, nextEvent }) {
+  const checkPriceShortcuts = async mobile => {
+    assert.ok(await evaluate(`(() => {
+      const price = document.getElementById('loan-future').closest('.scenario-field');
+      const slider = document.getElementById('loan-slider').getBoundingClientRect();
+      const presets = document.querySelector('.loan-presets');
+      const box = presets.getBoundingClientRect();
+      const time = document.getElementById('loan-days').closest('.scenario-field').getBoundingClientRect();
+      return price.contains(presets) && box.top >= slider.bottom
+        && (${mobile} ? box.bottom <= time.top : box.right <= time.left)
+        && [...presets.querySelectorAll('button')].every(button => {
+          const rect = button.getBoundingClientRect();
+          return rect.height >= 44 && rect.left >= box.left && rect.right <= box.right
+            && button.scrollWidth <= button.clientWidth;
+        });
+    })()`), 'Price shortcuts sit below their slider, separate from time, with readable touch targets.');
+  };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await navigate(base + 'lending.html#experiment');
   assert.equal(await text('loan-health'), '1.60');
   assert.equal(await text('loan-net-assets'), '$10,000.00');
+  await checkPriceShortcuts(false);
+  await evaluate("document.querySelector('[data-loan-price=\"0.75\"]').click()");
+  assert.equal(await evaluate("document.getElementById('loan-future').value"), '1500');
+  assert.equal(await evaluate("document.getElementById('loan-days').value"), '0');
   await fill('loan-future', '1250');
   assert.equal(await text('loan-state'), 'At the liquidation boundary');
   await fill('loan-future', '1249.999');
@@ -122,6 +142,7 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
     await navigate(base + 'lending.html#experiment');
     assert.equal(await evaluate("document.getElementById('loan-setup').open"), false);
     await click('loan-reset');
+    await checkPriceShortcuts(true);
     assert.ok(await evaluate("document.getElementById('loan-future').getBoundingClientRect().bottom < innerHeight"), 'The first editable condition fits on the initial mobile screen.');
     await fill('loan-future', '1200');
     assert.equal(await text('loan-state'), 'Eligible for liquidation');

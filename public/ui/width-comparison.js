@@ -170,6 +170,7 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
       feeFlow.update(current);
       $('width-share').disabled = !feeFlow.isValid();
       $('width-fee-invalid').textContent = feeFlow.isValid() ? '' : 'Check the Follow the fees inputs before saving or sharing this comparison.';
+      if (!feeFlow.isValid()) $('width-save-status').textContent = '';
       if (persist && feeFlow.isValid()) {
         const flow = feeFlow.getState();
         const savedOK = saveWidthDraft(current, undefined, flow);
@@ -184,6 +185,7 @@ export function initWidthComparison({ rangeLab, feeFlow }) {
       }
     } catch (error) {
       current = null; $('width-inputs').open = true; feeFlow.update(null); $('width-error').textContent = error.message;
+      $('width-save-status').textContent = '';
       $('width-results').hidden = true; $('width-share').disabled = true;
       $('width-starting-tokens').textContent = 'Correct the highlighted inputs to compare the positions.';
       if (['width-capital', 'width-start'].some(id => $(id).getAttribute('aria-invalid') === 'true')) $('width-setup').open = true;
