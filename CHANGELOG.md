@@ -1,5 +1,10 @@
 # Release history
 
+## 1.50.6 · 2026-10-27
+
+- Remove the ten optional number-entry exercises that asked learners to copy or round displayed results. Keep conceptual checks, worked examples, formulas, original sources and recorded accounting details in place.
+- Preserve completed lessons, existing setups and compatible answers. Retire unused numeric grading and extend checks for read-only deeper explanations and restoration of older saved progress.
+
 ## 1.50.5 · 2026-10-27
 
 - Remove overlapping question sliders from the seven liquidity essentials lessons, retaining visual exploration, variations and the distinct range-width choice. Preserve existing custom lesson setups and saved completion.

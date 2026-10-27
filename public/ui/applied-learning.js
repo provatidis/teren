@@ -5,7 +5,7 @@ import { renderAppliedQuestionEvidence } from '../lib/applied-question-evidence.
 import { renderQuestionEvidence } from '../lib/lesson-question-evidence.js';
 import { saveLearningLocation } from '../data/learning-location.js';
 import { APPLIED_CHAPTER, APPLIED_LESSONS } from '../learning/applied-liquidity.js';
-import { appliedLessonFromHash, appliedQuestion, checkAppliedAnswer, appliedReasonFeedback } from '../lib/applied-lessons.js';
+import { appliedLessonFromHash, appliedQuestion, appliedReasonFeedback } from '../lib/applied-lessons.js';
 import { appliedApplication, appliedCostExample, checkAppliedUnderstanding } from '../lib/applied-applications.js';
 import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningPitfall, learningChapter, focusLearningFeedback, focusInitialLesson, renderPredictionFeedback, renderUnderstandingFeedback, clearUnderstandingFeedback } from '../lib/learning-elements.js';
@@ -205,14 +205,13 @@ export function initAppliedLearning() {
     document.title = lesson.short + ' · Teren Learn';
     $('applied-number').textContent = 'APPLIED ' + (APPLIED_LESSONS.indexOf(lesson) + 1) + ' OF 3';
     $('applied-title').textContent = lesson.title; $('applied-adds').textContent = 'Uniswap v3 · Recorded case · ' + lesson.adds; $('applied-intro').textContent = lesson.intro;
-    $('applied-question').textContent = lesson.question; $('applied-reason-question').textContent = lesson.reasoning;
-    $('applied-prediction-question').textContent = lesson.prediction; $('applied-calculation-hint').textContent = lesson.hint;
+    $('applied-reason-question').textContent = lesson.reasoning;
+    $('applied-prediction-question').textContent = lesson.prediction;
     learningPitfall($('applied-pitfall'),POOL_PITFALLS[lesson.id]);
     $('applied-takeaway').textContent = lesson.takeaway; $('applied-explanation').textContent = lesson.explanation;
-    $('applied-hint').open = false; $('applied-deeper').open = false; $('applied-calculation').open = false;
-    $('applied-calculation-feedback').textContent = ''; $('applied-answer').setAttribute('aria-invalid', 'false'); document.querySelector('.applied-primer').open = false;
+    $('applied-hint').open = false; $('applied-deeper').open = false;
+    document.querySelector('.applied-primer').open = false;
     $('applied-observe').hidden = true; $('applied-assessment').hidden = true; clearFeedback();
-    $('applied-answer').value = draft.answer;
     choices('applied-predictions', 'applied-prediction', lesson.predictions, draft.prediction, value => {
       draft.prediction = value;
       if (draft.revealed && question) refreshPrediction();
@@ -289,14 +288,6 @@ export function initAppliedLearning() {
   });
   $('applied-checkpoint').addEventListener('input', () => { if (!period) return; draft.checkpoint = Number($('applied-checkpoint').value); renderCheckpoint(); persist(); });
   $('applied-return-question').addEventListener('click', () => { draft.checkpoint = question.index; renderCheckpoint(); persist(); });
-  $('applied-answer').addEventListener('input', () => { draft.answer = $('applied-answer').value; $('applied-calculation-feedback').textContent = ''; $('applied-answer').setAttribute('aria-invalid', 'false'); persist(); });
-  $('applied-calculation-check').addEventListener('click', () => {
-    if (!question) return;
-    const numeric = checkAppliedAnswer(question, draft.answer, question.reason).numeric;
-    $('applied-answer').setAttribute('aria-invalid', String(!numeric));
-    $('applied-calculation-feedback').textContent = numeric ? 'Calculation matches. Lesson completion is unchanged.'
-      : 'Revisit the ' + (lesson.id === 'period-vs-holding' ? 'final comparison' : 'marked question') + ' checkpoint, units and requested rounding. This optional practice does not affect completion.';
-  });
   $('applied-assessment-form').addEventListener('submit', event => { event.preventDefault(); if (!draft?.revealed || !question) return; check(); });
   $('applied-restart').addEventListener('click', () => { progress.drafts[lesson.id] = fresh(); activate(true); });
   $('applied-topics').addEventListener('click', () => { $('learn-course').open = true; const summary = $('learn-course').querySelector('summary'); summary.focus({ preventScroll: true }); $('learn-course').scrollIntoView({ block: 'start', behavior: 'instant' }); });
