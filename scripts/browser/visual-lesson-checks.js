@@ -86,7 +86,7 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   await reload();
   assert.equal(await text('manage-feedback-title'),'Both answers are correct.','Current revision answers still restore.');
 
-  for (const [id, reason, application] of [['build', 'debt', 'supplied'], ['unwind', 'backing', 'repay-wallet']]) {
+  for (const [id, reason, application] of [['build', 'debt', 'supplied'], ['unwind', 'backing', 'debt-remains']]) {
     await navigate(base + 'lending.html#loop-lesson=' + id);
     await click('lend-reveal'); await click('lend-retry');
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), await text('lend-question'));

@@ -39,7 +39,7 @@ export const LESSONS = [
     predictions: [['less', 'Less ETH'], ['more', 'More ETH'], ['same', 'The same ETH']],
     question: 'How much ETH does the LP hold at the future price? Use three decimal places.',
     reasoning: 'How does this model arrive at the token mix for a new ETH price?',
-    reasons: [['rebalance', 'Traders exchange ETH and USDC as the market price changes.'], ['automatic', 'The pool adjusts the token mix automatically, without anyone trading.'], ['interest', 'The change in token amounts is yield earned by supplying liquidity.']],
+    reasons: [['rebalance', 'Traders exchange ETH and USDC as the market price changes.'], ['automatic', 'The pool adjusts the token mix automatically, without anyone trading.'], ['ownership-share', 'The price change alters your ownership share of the pool.']],
     hint: 'Final ETH = starting ETH ÷ square root of (future price ÷ starting price).',
     explanation: 'When ETH rises, arbitrage buys ETH from the pool: the LP holds less ETH and more USDC. When ETH falls, it holds more ETH and less USDC. This is an endpoint model with ideal arbitrage and no fees.',
     takeaway: 'Equal dollar weights do not mean fixed token quantities.',

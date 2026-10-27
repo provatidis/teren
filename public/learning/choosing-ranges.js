@@ -24,7 +24,7 @@ export const MANAGEMENT_LESSONS = Object.freeze([
     hint:'A larger fee per trade is only useful when trades use your active liquidity.',
     takeaway:'Read the fee rate, trade activity and your active share separately. Fee income is only part of profit.',
     accomplishment:'You explained how trading activity and competing liquidity change fee income.',
-    explanation:'A larger charge per swap does not mean larger earnings. Volume and the fee tier determine the pool’s fees; each position receives a share according to its active liquidity.',
+    explanation:'A larger charge per swap does not mean larger earnings.',
     pitfall:'Fee APR expresses fee income as a yearly rate. Check its observation period and what it excludes; it is not a promise of future profit.',
     reasonFeedback:{rate:'The rate and deposit matter, but trades must use the position’s active liquidity. Competing liquidity also affects its share.',clock:'Time alone creates no swap fees. Trades must use the position’s active liquidity.'},
     deeper:['Swap fees, protocol fees, network costs and external rewards are different items. An LP’s fee income is the part actually earned by that position, after any protocol share.', 'In native Uniswap v3, earned fee tokens stay separate from principal until collected or reinvested. An automatic manager may add its own behavior and costs. A high historical fee rate does not tell us whether those actions are worthwhile.'],sources:[fees,{title:'Teren: explore arbitrage and changing fee competition',url:'https://teren.sh/liquidity.html#fee-mechanics'},{title:'Revert: performance comparisons and omitted gas',url:'https://docs.revert.finance/revert/open-positions'}]},
@@ -167,7 +167,7 @@ export function managementApplication(result) {
             ['Starting deposit', usd(deposit)],
             ['Yesterday’s fee income', usd(yesterday.income)],
             ['Screenshot: fee APR', fmt(yesterday.apr, 1) + '% · one day annualized'],
-            ['Your active share', fmt(yesterday.share * 100, 2) + '% yesterday → ' + fmt(today.share * 100, 2) + '% today'],
+            ['Yesterday’s active share', fmt(yesterday.share * 100, 2) + '%'],
           ],
           note: 'A fictional fee-only APR, using 365 days with no compounding. It excludes token gains or losses and costs.',
         },
@@ -192,7 +192,7 @@ export function managementApplication(result) {
       context: 'First you collect earned fees into your wallet. Then you use them to increase your liquidity by 20% in the same range. During that time, other LPs double their active liquidity at the same prices. The fee tier and prices are unchanged.',
       evidence: {
         title: 'Your share of the next swap’s fees',
-        rows: [
+        steps: [
           ['Before collecting', fmt(shareBefore * 100, 2) + '%'],
           ['After collecting, before any deposits', fmt(shareBefore * 100, 2) + '%'],
           ['After your deposit and the other LPs’ deposits', fmt(shareAfter * 100, 2) + '%'],
@@ -225,7 +225,7 @@ export function managementApplication(result) {
           {label:'Original range left in place',value:unchanged.lpBeforeFees,detail:'$1,800–$2,200 range'},
           {label:'Moved range',value:moved.lpBeforeFees,detail:'$1,260–$1,540 range; '+usd(cost)+' cost included'},
         ]},
-        note:'Both start with the same existing position. Any amount below one cent left after funding stays in the wallet. These are calculated outcomes for this supplied price path, not a forecast.',
+        note:'Both start with the same existing position. These are calculated outcomes for this supplied price path, not a forecast.',
         explore:{href:'liquidity.html'+rangeHash({...moved,futurePrice:moved.initialPrice}),text:'Move ETH back to $2,000 in the lab ↗'},
       },
       question:'Why does moving the range recover less value on this rebound?',

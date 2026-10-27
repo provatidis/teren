@@ -264,7 +264,7 @@ test('loop storage and learning stay independent from existing single-loan draft
 });
 
 test('three conceptual lessons use the actual model and grade every answer combination', () => {
-  const expected = { build: ['debt', 'supplied'], stress: ['exposure', 'backing-not-profit'], unwind: ['backing', 'repay-wallet'] };
+  const expected = { build: ['debt', 'supplied'], stress: ['exposure', 'backing-not-profit'], unwind: ['backing', 'debt-remains'] };
   for (const lesson of LOOP_LESSONS) {
     const example = loopCase(lesson.id);
     assert.deepEqual(example.result, calculateLoop(example.input));

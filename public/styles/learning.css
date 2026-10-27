@@ -209,6 +209,11 @@
 .learn-question-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px 18px; margin: 0; }
 .learn-question-facts dt { font-size: 14px; line-height: 1.6; color: var(--muted); }
 .learn-question-facts dd { margin: 5px 0 0; font-size: 16px; font-weight: 600; line-height: 1.6; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.learn-question-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 28px; margin: 0; padding-inline-start: 22px; }
+.learn-question-steps li::marker { color: var(--accent); font-weight: 600; }
+.learn-question-steps li > span { display: block; font-size: 14px; line-height: 1.6; color: var(--muted); }
+.learn-question-steps strong { display: block; margin-top: 5px; font-size: 16px; line-height: 1.6; font-variant-numeric: tabular-nums; }
+@media (max-width: 750px) { .learn-question-steps { grid-template-columns: 1fr; } }
 .learn-question-evidence .learn-question-note { margin: 14px 0 0; font-size: 14px; line-height: 1.7; color: var(--muted); }
 .learn-application-setup .learn-question-evidence { margin: 14px 0 0; padding: 0; border: 0; background: none; }
 .learn-evidence-comparison, .learn-price-margin { margin: 20px 0 0; }

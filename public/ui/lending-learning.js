@@ -87,7 +87,6 @@ export function initLendingLearning() {
       { container: 'lend-application-choices', selected: draft.application, correct: result.application, explanation: application },
     ]);
     $('lend-feedback-copy').textContent = result.passed ? lesson.accomplishment : 'Read the feedback beside each question, then try again. You can change either answer.';
-    if (draft.application) applicationScene?.allowReveal();
     $('lend-continue').hidden = !result.passed;
     if (result.passed && !progress.completed.includes(lesson.id)) progress.completed.push(lesson.id);
     if (save) { persist(); focusLearningFeedback('lend'); }

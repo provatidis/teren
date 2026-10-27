@@ -3,7 +3,7 @@ import { usd } from './format.js';
 
 // Price markers, band edges and labelled ticks share one linear scale.
 // Stagger the boundary labels so even a narrow range is readable on a phone.
-export function createRangeGuide({ min, max, lower, upper, price, name = '', onBoundary, recorded = false }) {
+export function createRangeGuide({ min, max, lower, upper, price, name = '', onBoundary, recorded = false, showScaleEndpoints = true }) {
   const element = node('div', undefined, 'scene-range-guide');
   const at = value => (value - min) / (max - min) * 100;
   function boundary(edge, value) {
@@ -32,7 +32,8 @@ export function createRangeGuide({ min, max, lower, upper, price, name = '', onB
   const marker = node('span', undefined, 'scene-range-marker');
   track.append(band, marker);
   const scale = node('div', undefined, 'scene-range-scale');
-  scale.append(node('span', usd(min)), node('span', 'ETH price'), node('span', usd(max)));
+  scale.append(node('span', showScaleEndpoints ? usd(min) : ''), node('span', 'ETH price'),
+    node('span', showScaleEndpoints ? usd(max) : ''));
   element.append(boundary('lower', lower), track, boundary('upper', upper), scale);
   const showPrice = value => { marker.style.left = at(value) + '%'; };
   showPrice(price);
