@@ -2,6 +2,8 @@
 
 ## 1.50.8 · 2026-10-28
 
+- Synchronize the guide, review and roadmap with current lesson interactions, model versions and exports. Clarify About, Methods and in-app notes on hypothetical fee allocation, snapshot claims, correlated loops and APY. This documentation pass changes no calculations, lesson checks, saved formats or recorded evidence.
+
 - Keep lab and lesson controls and results unavailable until their page has initialized, and remove pre-rendered health verdicts. Missing scripts or startup errors now show a reload message instead of editable-looking defaults and stale risk verdicts. A static explanation remains if the startup guard itself cannot load; Home keeps its ordinary links available.
 - Preserve shared routes and saved work on reload. Extend content hashing and preloads to literal dynamic imports, and add desktop/mobile checks for missing entries and dependencies, interrupted initialization, delayed loading, recovery and JavaScript-disabled access.
 

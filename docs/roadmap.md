@@ -1,6 +1,6 @@
 # Next discussion
 
-Updated for 1.50.0. These are discussion priorities, not commitments to build every item.
+These are current discussion priorities, not commitments to build every item. See [the changelog](../CHANGELOG.md) for release history.
 
 ## Next lab iteration
 
@@ -10,7 +10,7 @@ Release 1.44.0 makes single-loan interest explicit and consistent across balance
 
 ## Learning depth
 
-Release 1.46.0 strengthens causal and changed-situation questions while keeping Predict → Observe → Check. Three applications combine earlier ideas: construct an example where matching holding still leaves a dollar loss, diagnose a missing repayment, and identify evidence needed for a later LP comparison. Next, use these tasks in the [observation plan](learning.md#observation-plan): ask learners to explain an unfamiliar variation and note which hints they need before extending the patterns.
+The lessons keep Predict → Observe → Check, with conceptual questions and optional worked calculations. Applications include constructing an example where matching holding still leaves a dollar loss, explaining why a sale cost leaves debt unpaid, and reasoning about a further price move from a recorded token mix. Next, use the [observation plan](learning.md#observation-plan): ask learners to explain an unfamiliar variation and note which hints they need before extending the patterns. [Learning design](learning.md) describes the current questions and visual interactions.
 
 Later candidates are a liquidation lesson that separates debt repaid, collateral removed and the bonus cost, and a correlated-asset looping chapter using the existing LST experiment. Keep the first lending lesson focused on supply before introducing existing-debt restrictions.
 
