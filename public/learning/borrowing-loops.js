@@ -5,6 +5,7 @@ const borrowing = { title: 'Aave: borrowing and debt', url: 'https://aave.com/he
 const health = { title: 'Aave: health factor and liquidations', url: 'https://aave.com/help/borrowing/liquidations' };
 const repayment = { title: 'Aave: repaying a loan', url: 'https://aave.com/help/borrowing/repay-tokens' };
 const withdrawal = { title: 'Aave: withdrawing supplied tokens', url: 'https://aave.com/help/supplying/withdraw-tokens' };
+const unwindSaleConnection = 'Selling about 0.6783 ETH would leave 4.07 USDC unpaid after the swap loss. That’s why the walkthrough sells about 0.6804 ETH in its last repayment pass.';
 
 export const LOOP_LESSONS = [
   {
@@ -78,7 +79,7 @@ export const LOOP_LESSONS = [
       'protected-value': 'The boundary concerns debt repayment, not preservation of your starting money. More ETH can lose more value while still leaving enough collateral to back the debt.',
       'no-liquidation-loss': 'At today’s price, the ETH is worth less while the USDC debt is unchanged. Assets minus debt has already fallen, even though no sale or liquidation has taken place.',
     },
-    hint: 'Check the amount of ETH exposed to the price, and the currency in which debt is owed.',
+    hint: 'Check two things separately: whether enough collateral still backs the loan, and how much the position is worth after subtracting debt.',
     deeper: ['All rounds are built at one starting price before the selected interest period. The price example has zero interest. The separate Time example holds ETH at $2,000, with 0% supply APR and 10% borrow APR using continuous compounding for up to one year. These chosen rates illustrate the changed situation; they are not live rates.', 'The lab can compare fixed simple interest with continuous compounding at the same entered APRs. Neither reproduces changing protocol rates or Aave’s reserve-index accounting.', 'A final price cannot establish that a position survived earlier prices. Eligible endpoints retain pre-liquidation balances rather than inventing a liquidation path. Holding means keeping the original ETH without supplying or borrowing; it earns no supply interest.'],
     sources: [borrowing, health],
   },
@@ -110,18 +111,18 @@ export const LOOP_LESSONS = [
           ['USDC still owed', formatTokenQuantity(sale.debt, 2) + ' USDC'],
           ['Sale proceeds without a cost', formatTokenQuantity(sale.proceedsWithoutCost, 2) + ' USDC'],
           ['ETH price', usd(sale.price)],
-          ['Cost added to the sale', sale.costPercent + '%'],
+          ['Swap loss on this sale', sale.costPercent + '%'],
         ],
         note: 'Keep the same loan, ETH price and amount of ETH sold. Change only the cost of this sale.',
       };
     },
     applicationQuestion: 'With this cost, what happens when you use all the sale proceeds to repay?',
     applications: [['debt-remains', 'Some debt remains because the sale raises less USDC.'], ['same-repayment', 'The debt is cleared because the ETH price is unchanged.'], ['retained-eth', 'The debt is cleared; the cost comes out of the ETH you keep.']],
-    applicationFeedback: 'The same ETH raises less USDC after a sale cost. Repaying all those proceeds still leaves some debt. Clearing it needs more sale proceeds or other USDC.',
+    applicationFeedback: 'The same ETH raises less USDC after a sale cost. Repaying all those proceeds still leaves some debt. ' + unwindSaleConnection,
     applicationFeedbackByChoice: {
-      'debt-remains': 'The cost reduces the USDC available to repay. Using all the proceeds leaves some debt, so clearing it needs more sale proceeds or other USDC.',
-      'same-repayment': 'The price is unchanged, but the cost reduces how much USDC reaches your wallet. Repayment can use only those proceeds, leaving some debt unpaid.',
-      'retained-eth': 'Here the cost reduces the USDC received for the ETH sold. It is not taken separately from the ETH you keep, so fewer proceeds reach the loan and some debt remains.',
+      'debt-remains': 'The cost reduces the USDC available to repay. Using all the proceeds leaves some debt. ' + unwindSaleConnection,
+      'same-repayment': 'The price is unchanged, but the cost reduces how much USDC reaches your wallet. Repayment can use only those proceeds. ' + unwindSaleConnection,
+      'retained-eth': 'Here the cost reduces the USDC received for the ETH sold. It is not taken separately from the ETH you keep. ' + unwindSaleConnection,
     },
     hint: 'Separate the value of the ETH sold from the USDC available after paying the sale cost.',
     deeper: ['The preview withdraws at most 95% of the value available above health factor 1. It keeps the intermediate health factor above 1, sells at the selected price less the assumed swap loss, then repays. This 95% is a numerical teaching convention, not an Aave withdrawal parameter or a safety recommendation.', 'Some tools use a flash loan to repay first, release collateral, sell it and repay the flash loan in one transaction. The whole transaction must succeed or revert. This preview separates the actions so you can follow the balances; it does not simulate atomic execution.', 'It uses no flash loan or outside funds. It caps the illustration at 64 steps and never silently writes off unpaid debt. Gas, oracle changes, caps, liquidity limits, collateral-specific restrictions and competing liquidations are excluded.'],

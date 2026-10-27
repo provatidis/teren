@@ -227,8 +227,11 @@ test('outside samples plus recorded active time require a return inside unchange
   assert.doesNotMatch(JSON.stringify(application.evidence), /0\.44%/);
   assert.match(application.feedback, /0\.44%/);
   assert.deepEqual(application.choices, [
-    ['edge-placement', 'A rise.'], ['lower-bound', 'A fall.'], ['centered', 'Equal room in either direction.'],
+    ['edge-placement', 'The upper boundary, reached by a rise.'],
+    ['lower-bound', 'The lower boundary, reached by a fall.'], ['centered', 'Both are equally close.'],
   ]);
+  const width = question.placement.range.upperPrice - question.placement.range.lowerPrice;
+  assert.ok(width > 1250 && width < 1300, 'The recorded range supports the almost $1,300 width in the question.');
   assert.ok(application.feedbackByChoice['lower-bound']);
   assert.ok(question.placement.range.upperPrice - question.placement.startPrice <
     question.placement.startPrice - question.placement.range.lowerPrice);
