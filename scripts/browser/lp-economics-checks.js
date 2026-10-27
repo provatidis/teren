@@ -50,6 +50,13 @@ export async function checkLPEconomics({ evaluate, click, fill, text, navigate, 
       const png = await readFile(await downloadFile('scenario-image-download'));
       assert.equal(png.readUInt32BE(20), 820);
     }
+    await mode('scenario', 'cash'); await fill('scenario-fees', '0');
+    await fill('scenario-investment', '100'); await fill('scenario-future', '2000');
+    await fill('scenario-closing-cost', '1100');
+    assert.equal(await text('scenario-lp-value'), '−$1,050.00');
+    assert.match(await text('scenario-chart-title'), /LP after fees and costs is −\$1,050\.00/);
+    assert.match(await text('scenario-comparisons'), /LP after costs−\$1,050\.00/);
+    assert.match(await text('scenario-y-zero'), /^−\$/);
     await click('lab-range-tab'); await click('cl-reset');
     await evaluate("document.getElementById('cl-setup-details').open=true;document.getElementById('cl-fee-details').open=true;document.getElementById('cl-cost-details').open=true");
     await mode('cl', 'apr'); await fill('cl-fee-apr', '12'); await fill('cl-fee-days', '365');
@@ -63,7 +70,9 @@ export async function checkLPEconomics({ evaluate, click, fill, text, navigate, 
     assert.equal(await value('cl-fee-apr'), '12'); assert.equal(await value('cl-closing-cost'), '30');
     await click('cl-match-fees'); assert.match(await text('cl-verdict'), /differ by less than half a cent/);
     await fill('cl-closing-cost', '100000');
-    assert.match(await text('cl-value'), /\$-/);
+    assert.match(await text('cl-value'), /^−\$/);
+    assert.match(await text('cl-chart-title'), /range LP is −\$/);
+    assert.match(await text('cl-comparisons'), /Your range LP−\$/);
     assert.equal(await evaluate("document.getElementById('cl-chart-range').getAttribute('d').includes('NaN')"), false);
     assert.equal(await evaluate("[...document.querySelectorAll('#cl-economics rect')].every(el=>Number(el.getAttribute('x'))>=0&&Number(el.getAttribute('width'))>=0)"), true);
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);

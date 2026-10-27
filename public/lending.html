@@ -135,18 +135,18 @@
                   <p id="loan-future-error" class="field-error" hidden></p>
                   <label class="sr-only" for="loan-slider">Explore the ETH valuation price</label>
                   <input id="loan-slider" type="range" min="500" max="3500" step="any" value="2000">
+                  <div class="scenario-presets loan-presets" aria-label="ETH price changes">
+                    <button type="button" data-loan-price="0.5" aria-pressed="false">−50%</button>
+                    <button type="button" data-loan-price="0.75" aria-pressed="false">−25%</button>
+                    <button type="button" data-loan-price="1" aria-pressed="true">Unchanged</button>
+                    <button type="button" data-loan-price="1.25" aria-pressed="false">+25%</button>
+                  </div>
                 </div>
                 <div class="scenario-field">
                   <label for="loan-days">Time elapsed <span>days</span></label>
                   <input id="loan-days" type="number" min="0" max="1825" step="any" value="0" aria-describedby="loan-days-error">
                   <p id="loan-days-error" class="field-error" hidden></p>
                 </div>
-              </div>
-              <div class="scenario-presets loan-presets" aria-label="ETH price changes">
-                <button type="button" data-loan-price="0.5" aria-pressed="false">−50%</button>
-                <button type="button" data-loan-price="0.75" aria-pressed="false">−25%</button>
-                <button type="button" data-loan-price="1" aria-pressed="true">Unchanged</button>
-                <button type="button" data-loan-price="1.25" aria-pressed="false">+25%</button>
               </div>
               <div class="scenario-field loan-interest-choice">
                 <label for="loan-interestMode">Interest calculation</label>

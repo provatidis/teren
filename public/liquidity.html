@@ -556,7 +556,7 @@
             <button id="pool-example" class="button secondary" type="button">Load recorded example</button>
             <label class="button secondary file-button" for="pool-file">Open snapshot file<input id="pool-file" type="file" accept=".json,application/json" aria-label="Open snapshot file"></label>
           </div>
-          <p class="fine-print">Fetching contacts PublicNode, with dRPC as a backup for public chain data. Saved files open locally. WETH is wrapped ETH; the calculator assumes USDC = $1.</p>
+          <p class="fine-print">Fetching live data uses PublicNode, with dRPC as a backup. Saved files open locally. WETH is wrapped ETH; the calculator assumes USDC = $1.</p>
           <p id="pool-status" class="pool-status" role="status"></p><button id="pool-clear-saved" class="button secondary snapshot-recovery" type="button" hidden>Discard unreadable saved pool snapshot</button>
         </div>
         <div>
@@ -596,7 +596,7 @@
             </form>
             <p id="position-id-help" class="fine-print position-help">Find the NFT ID in your Uniswap position or its NFT page. Enter its number, with or without a leading #. This release supports WETH/USDC positions; no wallet connection is needed.</p>
             <div class="pool-buttons"><button id="position-example-inside" class="button secondary" type="button">In-range example</button><button id="position-example" class="button secondary" type="button">Out-of-range example</button><button id="position-example-fees" class="button secondary" type="button">With fee accounting</button><label class="button secondary file-button" for="position-file">Open position file<input id="position-file" type="file" accept=".json,application/json" aria-label="Open position file"></label></div>
-            <p class="fine-print">Fetching contacts PublicNode, with dRPC as a backup for public Ethereum data. Position files open locally. Values assume USDC = $1.</p>
+            <p class="fine-print">Fetching live data uses PublicNode, with dRPC as a backup. Position files open locally. Values assume USDC = $1.</p>
             </div></details>
             <p id="position-status" class="pool-status" role="status"></p><button id="position-clear-saved" class="button secondary snapshot-recovery" type="button" hidden>Discard unreadable saved position</button>
           </div>

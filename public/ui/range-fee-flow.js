@@ -74,19 +74,20 @@ export function initRangeFeeFlow({ rangeLab, onChange, onStartingPrice }) {
       $('fee-flow-outcomes').append(outcome); outcomeRefs.push(refs);
     }
   }
-  function renderLedger() {
+  function renderLedger(calculatedBatches = []) {
     $('fee-flow-ledger-count').textContent = '(' + state.batches.length + ')';
-    $('fee-flow-batches').replaceChildren(...result.batches.map((batch, index) => {
+    $('fee-flow-batches').replaceChildren(...state.batches.map((batch, index) => {
+      const calculated = calculatedBatches[index];
       const item = node('li');
       item.append(node('strong', 'Batch ' + (index + 1) + ' · ETH ' + usd(batch.price)),
         node('p', usd(batch.volume) + ' trading · ' + usd(batch.competition) + ' other starting capital · '
           + fmt(batch.feeTier / 10000, 2) + '% trader fee · protocol '
           + (batch.protocolDivisor ? '1/' + batch.protocolDivisor : 'none')),
         node('p', batch.competitorWidth === null ? 'Other LPs: full range.'
-          : 'Other LPs: ' + fmt(batch.competitorWidth, 2) + '% width · '
-            + usd(batch.competitors.bounds.lowerPrice) + '–' + usd(batch.competitors.bounds.upperPrice)
-            + ' · ' + (batch.competitors.active ? 'active.' : 'outside their range.')));
-      for (const range of batch.ranges) item.append(node('p', range.id.toUpperCase() + ': '
+          : 'Other LPs: ' + fmt(batch.competitorWidth, 2) + '% width'
+            + (calculated ? ' · ' + usd(calculated.competitors.bounds.lowerPrice) + '–' + usd(calculated.competitors.bounds.upperPrice)
+              + ' · ' + (calculated.competitors.active ? 'active.' : 'outside their range.') : '.')));
+      for (const range of calculated?.ranges || []) item.append(node('p', range.id.toUpperCase() + ': '
         + formatTokenQuantity(range.tokens.eth, 6) + ' ETH + '
         + formatTokenQuantity(range.tokens.usdc, 2, 2) + ' USDC · ' + shareText(range.share) + ' of LP fees'));
       return item;
@@ -115,22 +116,31 @@ export function initRangeFeeFlow({ rangeLab, onChange, onStartingPrice }) {
     $('fee-flow-example').hidden = state.batches.length > 0;
     $('fee-flow-undo').disabled = $('fee-flow-clear').disabled = state.batches.length === 0;
     const next = nextInputs();
-    for (const [key, min, max] of [['volume', 0, 1e9], ['competition', 1, 1e12]]) {
+    const invalidFields = [];
+    for (const [key, min, max, message] of [
+      ['volume', 0, 1e9, 'Enter an amount from $0 to $1 billion.'],
+      ['competition', 1, 1e12, 'Enter an amount from $1 to $1 trillion.'],
+    ]) {
       const invalid = !Number.isFinite(next[key]) || next[key] < min || next[key] > max;
+      if (invalid) invalidFields.push(key);
       $(fields[key]).setAttribute('aria-invalid', String(invalid));
       $(fields[key] + '-error').hidden = !invalid;
-      $(fields[key] + '-error').textContent = invalid ? 'Enter a value from ' + usd(min) + ' to ' + usd(max) + '.' : '';
+      $(fields[key] + '-error').textContent = invalid ? message : '';
     }
+    const fullRange = next.competitorWidth === null;
+    $('fee-flow-other-width').disabled = fullRange;
+    $('fee-flow-width-value').textContent = fullRange ? 'Full range' : fmt(next.competitorWidth, 2) + '% total width';
+    $('fee-flow-other-width').setAttribute('aria-valuetext', $('fee-flow-width-value').textContent);
+    $('fee-flow-rate-summary').textContent = fmt(next.feeTier / 10000, 2) + '% · protocol '
+      + (next.protocolDivisor ? '1/' + next.protocolDivisor : 'none');
     try {
       if (!comparison) throw new Error('Correct the shared starting setup to explore fees.');
+      // Field-specific messages already explain how to fix these entries.
+      if (invalidFields.length) throw new Error('');
       result = calculateFeeFlow(comparison, { ...state, ...next }); valid = true;
       state = { ...state, ...next };
       $('fee-flow-assumptions-summary').textContent = 'Trading ' + compactUSD(next.volume) + ' · other LPs ' + compactUSD(next.competition);
       const { quote, ranges } = result;
-      const fullRange = next.competitorWidth === null;
-      $('fee-flow-other-width').disabled = fullRange;
-      $('fee-flow-width-value').textContent = fullRange ? 'Full range' : fmt(next.competitorWidth, 2) + '% total width';
-      $('fee-flow-other-width').setAttribute('aria-valuetext', $('fee-flow-width-value').textContent);
       $('fee-flow-competitor-capital').textContent = compactUSD(next.competition) + ' of starting capital';
       $('fee-flow-competitor-capital').title = usd(next.competition);
       $('fee-flow-competitor-bounds').textContent = fullRange
@@ -141,8 +151,6 @@ export function initRangeFeeFlow({ rangeLab, onChange, onStartingPrice }) {
       $('fee-flow-error').textContent = quote.atEdge
         ? 'The selected price is on a range edge. Move slightly inside or outside before adding a batch.'
         : quote.unavailable ? 'At least one alternative has no active LPs. Widen a range or move the price before adding trading.' : '';
-      $('fee-flow-rate-summary').textContent = fmt(next.feeTier / 10000, 2) + '% · protocol '
-        + (next.protocolDivisor ? '1/' + next.protocolDivisor : 'none');
       $('fee-flow-quote').hidden = quote.atEdge;
       $('fee-flow-source').hidden = quote.unavailable;
       $('fee-flow-totals').hidden = false;
@@ -192,15 +200,28 @@ export function initRangeFeeFlow({ rangeLab, onChange, onStartingPrice }) {
         refs.apply.disabled = range.feeValue > 1e9;
         refs.apply.title = range.feeValue > 1e9 ? 'This fee value exceeds the range lab’s supported input.' : '';
       });
-      renderLedger();
+      renderLedger(result.batches);
     } catch (error) {
       valid = false; result = null;
       $('fee-flow-error').textContent = error.message;
+      $('fee-flow-assumptions-summary').textContent = !comparison ? 'Check the shared starting setup'
+        : invalidFields.length === 1
+          ? invalidFields[0] === 'competition' ? 'Check other LPs’ starting capital' : 'Check trading volume'
+          : invalidFields.length ? 'Check the next batch inputs' : 'Check the shared ranges or saved batches';
+      $('fee-flow-competitor-capital').textContent = invalidFields.includes('competition')
+        ? 'Check starting capital' : 'Next batch unavailable';
+      $('fee-flow-competitor-capital').removeAttribute('title');
+      $('fee-flow-competitor-bounds').textContent = '';
       $('fee-flow-assumptions').open = true;
       $('fee-flow-quote').hidden = $('fee-flow-totals').hidden = true;
       $('fee-flow-add').disabled = $('fee-flow-example').disabled = true;
-      $('fee-flow-batches').replaceChildren();
       $('fee-flow-impact-a').textContent = $('fee-flow-impact-b').textContent = 'Check inputs';
+      // Next-batch edits must not erase the batches already added. Recalculate
+      // those using the shared setup; retain their inputs if that setup is invalid.
+      let calculatedBatches = [];
+      try { if (comparison) calculatedBatches = calculateFeeFlow(comparison, state).batches; }
+      catch { /* The saved batch inputs remain inspectable without stale results. */ }
+      renderLedger(calculatedBatches);
     }
   }
   function change() { touched = true; $('fee-flow-status').textContent = ''; onChange(); }

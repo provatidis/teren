@@ -1,8 +1,20 @@
 export const fmt = (value, digits = 2) => value.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
-export const usd = (value) => '$' + fmt(value);
-export const signedUSD = (value) => (value < -0.005 ? '−' : value > 0.005 ? '+' : '') + usd(Math.abs(value));
+export function usd(value) {
+  const amount = fmt(Math.abs(value));
+  return (value < 0 && amount !== '0.00' ? '−' : '') + '$' + amount;
+}
+
+export function signedUSD(value) {
+  const amount = usd(value);
+  return (value > 0 && amount !== '$0.00' ? '+' : '') + amount;
+}
+
 export const percent = (value) => (value < -0.005 ? '−' : value > 0.005 ? '+' : '') + fmt(Math.abs(value)) + '%';
-export const compactUSD = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', minimumFractionDigits: 0, maximumFractionDigits: 1 }).format(value);
+
+export function compactUSD(value) {
+  const amount = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', minimumFractionDigits: 0, maximumFractionDigits: 1 }).format(Math.abs(value));
+  return (value < 0 && amount !== '$0' ? '−' : '') + amount;
+}
 
 export function formatTokenQuantity(value, digits, minimumDigits = 0) {
   const threshold = 10 ** -digits;
