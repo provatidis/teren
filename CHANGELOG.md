@@ -1,5 +1,9 @@
 # Release history
 
+## 1.50.4 · 2026-10-27
+
+- Connect the range lab’s “Could fees cover this?” panel directly to Follow the fees, where changing competing liquidity shows its effect on fee share. Keep the recorded comparisons alongside this hypothetical experiment.
+
 ## 1.50.3 · 2026-10-27
 
 - Group lending price shortcuts beneath the price slider, separate from elapsed time on desktop and phones. Clarify the live-data provider notices in both liquidity import panels.
