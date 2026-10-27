@@ -26,7 +26,8 @@ export function renderRecordedLessonSetup(container, period, lesson, question) {
   const caption = node('figcaption', 'Starting pool price: ' + usd(start.price) + ' per ETH');
   const low = Math.min(lowerPrice, start.price), high = Math.max(upperPrice, start.price);
   const pad = (high - low) * .15;
-  const guide = createRangeGuide({ min: low - pad, max: high + pad, lower: lowerPrice, upper: upperPrice, price: start.price, recorded: true });
+  const guide = createRangeGuide({ min: low - pad, max: high + pad, lower: lowerPrice, upper: upperPrice,
+    price: start.price, recorded: true, showScaleEndpoints: false });
   const state = start.state === 'inside' ? 'Inside the range · both tokens'
     : start.state === 'above' ? 'Above the range · USDC principal' : 'Below the range · WETH principal';
   figure.append(caption, guide.element, node('p', state + '. Band = position range; marker = starting price.', 'applied-start-key'));

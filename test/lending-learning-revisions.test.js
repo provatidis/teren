@@ -201,14 +201,14 @@ test('loop application revisions preserve reasoning, predictions, scene state an
   assert.deepEqual(parsed.completed, legacy.completed);
   assert.equal(parsed.currentLesson, 'unwind');
   assert.deepEqual(parsed.drafts.build, legacy.drafts.build);
-  for (const [id, answer] of [['stress', 'backing-not-profit'], ['unwind', 'repay-wallet']]) {
+  for (const [id, answer] of [['stress', 'backing-not-profit'], ['unwind', 'debt-remains']]) {
     const draft = parsed.drafts[id];
     assert.equal(draft.reason, legacy.drafts[id].reason);
     assert.equal(draft.prediction, legacy.drafts[id].prediction);
     assert.equal(draft.revealed, true);
     assert.equal(draft.seed, legacy.drafts[id].seed);
     assert.equal(draft.application, '');
-    assert.deepEqual(draft.questionRevisions, { application: 1 });
+    assert.deepEqual(draft.questionRevisions, { application: 2 });
     assert.equal(checkLoopUnderstanding(id, draft.reason, draft.application).passed, false);
     draft.application = answer;
     assert.equal(checkLoopUnderstanding(id, draft.reason, draft.application).passed, true);
@@ -227,4 +227,29 @@ test('the stress transfer has enough collateral and a larger loss than holding a
   assert.equal(checkLoopUnderstanding('stress', 'exposure', 'loop-gain').passed, false);
   assert.equal(checkLoopUnderstanding('unwind', 'backing', 'blocked').passed, false);
   assert.equal(checkLendingUnderstanding('respond', 'debt', 'none').passed, false);
+});
+
+
+test('the sale-cost application retires the repayment answer without losing the loan or completion', () => {
+  const saved = {
+    version: 1, currentLesson: 'unwind', completed: ['build', 'stress', 'unwind'],
+    drafts: {
+      build: { prediction: 'same', reason: 'debt', application: 'supplied', revealed: true, seed: 2 },
+      stress: { prediction: 'loop', reason: 'exposure', application: 'debt-offset', revealed: true, seed: 3, questionRevisions: { application: 1 } },
+      unwind: { prediction: 'stages', reason: 'backing', application: 'repay-wallet', revealed: true, seed: 4, questionRevisions: { application: 1 } },
+    },
+  };
+  const storage = memory();
+  storage.setItem(LOOP_LEARNING_KEY, JSON.stringify(saved));
+  const parsed = readLoopProgress(() => storage).progress;
+  assert.deepEqual(parsed.completed, saved.completed);
+  assert.deepEqual(parsed.drafts.build, saved.drafts.build);
+  for (const id of ['stress', 'unwind']) {
+    assert.deepEqual(parsed.drafts[id], { ...saved.drafts[id], application: '', questionRevisions: { application: 2 } });
+  }
+  assert.equal(checkLoopUnderstanding('unwind', 'backing', 'repay-wallet').passed, false);
+  parsed.drafts.stress.application = 'backing-not-profit';
+  parsed.drafts.unwind.application = 'debt-remains';
+  assert.equal(saveLoopProgress(parsed, () => storage), true);
+  assert.deepEqual(readLoopProgress(() => storage).progress, parsed);
 });

@@ -50,7 +50,7 @@ function appendPriceRange(container, range) {
   const guide = createRangeGuide({
     min: low - pad, max: high + pad,
     lower: range.lowerPrice, upper: range.upperPrice,
-    price: range.startPrice, recorded: true,
+    price: range.startPrice, recorded: true, showScaleEndpoints: range.showScaleEndpoints,
   });
   figure.append(
     node('figcaption', 'Starting ETH price: ' + usd(range.startPrice)),
@@ -79,6 +79,15 @@ export function renderQuestionEvidence(container, evidence) {
   }
   container.append(title);
   if (facts.childElementCount) container.append(facts);
+  if (evidence.steps?.length) {
+    const steps = node('ol', undefined, 'learn-question-steps');
+    for (const [label, value] of evidence.steps) {
+      const step = node('li');
+      step.append(node('span', label), ' ', node('strong', value));
+      steps.append(step);
+    }
+    container.append(steps);
+  }
   if (evidence.comparison) appendQuestionComparison(container, evidence.comparison);
   if (evidence.priceMargin) appendPriceMargin(container, evidence.priceMargin);
   if (evidence.priceRange) appendPriceRange(container, evidence.priceRange);

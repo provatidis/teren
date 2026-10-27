@@ -165,7 +165,10 @@ test('the APR example distinguishes past annualization from income after active 
   assert.equal(today.income, yesterday.income / 2);
   assert.equal(today.income, result.poolFees[0] * today.share);
   assert.equal(result.application, 'smaller-share');
-  assert.match(managementApplication(result).feedback, /\$6.00 instead of \$12.00/);
+  const application = managementApplication(result);
+  assert.match(application.feedback, /\$6.00 instead of \$12.00/);
+  assert.deepEqual(application.evidence.rows.at(-1), ['Yesterday’s active share', '0.10%']);
+  assert.doesNotMatch(JSON.stringify(application.evidence), /0\.05%/);
 });
 
 test('reinvestment can add own liquidity while faster competing growth reduces fee share', () => {
@@ -180,6 +183,13 @@ test('reinvestment can add own liquidity while faster competing growth reduces f
   assert.equal(shareAfter, ownAfter / (ownAfter + othersAfter));
   assert.ok(shareAfter < shareBefore);
   assert.equal(shareAfter, .0625);
+  const evidence = managementApplication(result).evidence;
+  assert.deepEqual(evidence.steps, [
+    ['Before collecting', '10.00%'],
+    ['After collecting, before any deposits', '10.00%'],
+    ['After your deposit and the other LPs’ deposits', '6.25%'],
+  ]);
+  assert.equal(evidence.rows, undefined);
   assert.equal(result.application, 'competition-offset');
   assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'trades', 'competition-offset').passed, true);
   assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'trades', 'collection-reduced').passed, false);
@@ -225,7 +235,7 @@ test('moving a range after a fall changes exposure to the supplied rebound, with
   const linkedRebound = calculateRange({...link, futurePrice: 2000});
   assert.equal(linkedRebound.lpBeforeFees, application.evidence.comparison.rows[1].value);
   assert.equal(linkedRebound.lpBeforeFees.toFixed(2), '3667.48');
-  assert.match(application.evidence.note, /below one cent.*stays in the wallet/);
+  assert.match(application.evidence.comparison.caption, /^Position value/);
   assert.equal(managementPresentation(result).links[0].scenario,result.second,'Observe handoff still opens the original example.');
 });
 

@@ -81,7 +81,7 @@ export const LENDING_LESSONS = [
       explore: { href: loanHash(application.input), text: 'Try a lower loan amount in the lab ↗' },
     }),
     applicationQuestion: 'What does being allowed to borrow this amount tell you?',
-    applications: [['opening-limit', 'It meets the rule for opening the loan; a small ETH price fall can still bring it to liquidation.'], ['price-buffer', 'The borrowing limit leaves enough room for ETH’s usual price swings.'], ['full-value', 'Liquidation waits until the debt exceeds the full value of the ETH.']],
+    applications: [['opening-limit', 'It meets the opening rule, with little room for ETH to fall.'], ['price-buffer', 'The borrowing limit leaves enough room for ETH’s usual price swings.'], ['full-value', 'Liquidation waits until the debt exceeds the full value of the ETH.']],
     applicationFeedback: 'The maximum is the opening limit under today’s prices and rules. The separate liquidation threshold leaves only the price margin shown here.',
     applicationFeedbackByChoice: {
       'opening-limit': 'The maximum tells you what can be borrowed now. It does not promise protection from a price fall. Here the loan reaches its liquidation boundary after the small fall shown above.',

@@ -29,7 +29,8 @@ test('rising, falling and unchanged prices agree with the explanation and never 
     }
     assert.match(copy.explanation, /neither ETH nor USDC is created/);
     assert.equal(checkLesson('token-balances', input, variant, String(result.answer), 'automatic').passed, false);
-    assert.equal(checkLesson('token-balances', input, variant, String(result.answer), 'interest').passed, false);
+    assert.equal(checkLesson('token-balances', input, variant, String(result.answer), 'ownership-share').passed, false);
+    assert.match(lessonReasonFeedback('token-balances', result, 'ownership-share'), /ownership share stays fixed/);
     assert.match(lessonReasonFeedback('token-balances', result, 'automatic'), /Tokens change hands through trades/);
   }
 });

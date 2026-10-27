@@ -52,7 +52,8 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
         assert.match(await text('manage-applications-feedback'),/wider position.*ETH for USDC/i);
       }
       if(id==='fee-tiers'&&variant===1){
-        assert.match(await text('manage-application-evidence'),/87.6%.*0.10% yesterday.*0.05% today/s);
+        assert.match(await text('manage-application-evidence'),/87.6%.*Yesterday’s active share.*0.10%/s);
+        assert.doesNotMatch(await text('manage-application-evidence'),/0.05%/);
         assert.match(await text('manage-applications-feedback'),/\$6.00 instead of \$12.00/);
       }
       if(id==='fee-tiers'&&variant===2){
@@ -138,6 +139,15 @@ assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),
             return range.getClientRects().length === 1;
           });
         })`), true, 'Each currency amount stays on one line.');
+      }
+      if (variant === 2) {
+        assert.equal(await evaluate(`(() => {
+          const list = document.querySelector('#manage-application-evidence ol.learn-question-steps');
+          if (!list || list.children.length !== 3) return false;
+          const boxes = [...list.children].map(step => step.getBoundingClientRect());
+          return boxes.every((box, index) => Math.abs(box.left - boxes[0].left) < 1 &&
+            (index === 0 || box.top > boxes[index - 1].bottom));
+        })()`), true, 'The three chronological steps read top to bottom on phones.');
       }
       if (variant<2) await click('manage-variation');
     }

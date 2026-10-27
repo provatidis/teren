@@ -196,6 +196,27 @@ test('choice ordering is reproducible within a draft, varies across seeds and ne
   assert.deepEqual(choices,before); assert.equal(positions.size,3); assert.equal(validChoiceSeed(newChoiceSeed()),true);
   for (const invalid of [null,undefined,-1,2**32,.5,'1',NaN,Infinity]) assert.equal(validChoiceSeed(invalid),false);
 });
+test('the ownership-share revision retains completed work and compatible token-balance answers', () => {
+  for (let variant = 0; variant < VARIANTS; variant++) {
+    const inputs = lessonSetup('token-balances', variant);
+    const outcome = runLesson('token-balances', inputs, variant);
+    const application = lessonApplication('token-balances', outcome).expected;
+    const saved = { version: 1, completed: ['token-balances'], drafts: {
+      'token-balances': { variant, inputs, prediction: outcome.prediction, predictionRevision: 1,
+        reason: 'interest', reasonRevision: 2, application,
+        applicationRevision: essentialQuestionRevisions('token-balances', variant).application, ran: true },
+    } };
+    const restored = parseProgress(saved);
+    assert.deepEqual(restored.completed, saved.completed);
+    assert.equal(restored.drafts['token-balances'].reason, '');
+    assert.equal(restored.drafts['token-balances'].reasonRevision, 3);
+    assert.equal(restored.drafts['token-balances'].prediction, outcome.prediction);
+    assert.equal(restored.drafts['token-balances'].application, application);
+    assert.equal(restored.drafts['token-balances'].ran, true);
+    assert.deepEqual(parseProgress(restored), restored);
+  }
+});
+
 test('additive draft fields preserve legacy completion and calculations without inventing new answers', () => {
   const old={version:1,completed:['token-balances'],lastLesson:'token-balances',drafts:{'token-balances':{variant:1,inputs:lessonSetup('token-balances',1),prediction:'more',reason:'rebalance',answer:'1.414',ran:true}}};
   const migrated=parseProgress(old), draft=migrated.drafts['token-balances'];

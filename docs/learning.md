@@ -42,7 +42,7 @@ Direct lesson links open at the requested heading, below the primary navigation.
 
 The width and outside-value cases are calculated hypothetical endpoints from `cl-range-v1`. They do not reconstruct a trading path, predict fees or model native ticks. Equal budgets across widths use different initial token mixes, so each position has its own holding benchmark. Price inputs and bounds are visible before predicting.
 
-Fee-tier predictions start without earnings data, then reveal supplied fictional volumes, fee totals and equal active shares, with no protocol fee. The applications show calculated amounts and shares; learners explain the mechanism without annualizing income or calculating proportions. The APR screenshot uses a fictional past day, and the reinvestment case uses a separate fictional pool. These are teaching facts, never forecasts or independently checked history.
+Fee-tier predictions start without earnings data, then reveal supplied fictional volumes, fee totals and equal active shares, with no protocol fee. The APR application supplies yesterday's share and changed competition; learners infer the direction of fee income, with the calculated new share in feedback. Reinvestment uses an ordered sequence of supplied shares. No annualization or proportion calculation is required. The APR screenshot uses a fictional past day, and the reinvestment case uses a separate fictional pool. These are teaching facts, never forecasts or independently checked history.
 
 The three historical exercises continue to use the original two independently checked records. Their fixed question checkpoint or interval remains separate from exploration. Any changed setup is labelled a thought experiment.
 
@@ -84,9 +84,9 @@ Three directly accessible lessons follow lending essentials. They use `borrowing
 | --- | --- | --- |
 | Build one loop | Extra borrowed ETH is new wealth; spent USDC remains in the wallet. | Pause before supplying purchased ETH; distinguish wallet assets from collateral. |
 | Repeat and change conditions | A loan above its liquidation boundary has preserved its starting value. | Explain how the loan can still meet its collateral rule while losing more than holding. |
-| Explore unwinding | Selling collateral repays debt; wallet proceeds already free more collateral. | Pause after a sale, identify the missing repayment and compare the balances after it. |
+| Explore unwinding | Selling collateral repays debt; a sale cost leaves repayment unchanged. | Compare the same feasible sale with and without a cost; explain why selling the same ETH can leave debt unpaid. |
 
-The first lesson removes costs and interest to isolate matching debt. Its application shows the supplied ETH, wallet ETH and debt immediately after the purchase, before supplying the purchased tokens. The second compares the same original capital with more ETH exposure; no arithmetic is required from the learner. The last explains intermediate collateral constraints and labels the unwind as an assumed sequence, not guaranteed execution. Its application brings back the earlier distinction between wallet assets and debt. Automated checks cover answer combinations and numerical references.
+The first lesson removes costs and interest to isolate matching debt. Its application shows the supplied ETH, wallet ETH and debt immediately after the purchase, before supplying the purchased tokens. The second compares the same original capital with more ETH exposure; no arithmetic is required from the learner. The last explains intermediate collateral constraints and labels the unwind as an assumed sequence, not guaranteed execution. Its application keeps the same starting loan, price and ETH sold, changing only the sale cost. An optional recap retains the distinction between wallet sale proceeds and repayment. Automated checks cover answer combinations and numerical references.
 
 ## Visual lesson patterns
 

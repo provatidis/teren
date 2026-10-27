@@ -130,7 +130,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' });
     await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
   };
-  const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'backing-not-profit'], ['unwind', 'all', 'backing', 'repay-wallet']];
+  const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'backing-not-profit'], ['unwind', 'all', 'backing', 'debt-remains']];
   for (const [index, [id, prediction, reason, application]] of lessons.entries()) {
     await navigate(base + 'lending.html#loop-lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#lending-learn input[type=number]').length"), 0);
@@ -245,11 +245,15 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await choose('reason', reason); await choose('application', application); await click('lend-check');
     assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
     if (id === 'unwind') {
-      assert.equal(await text('lend-application-label'), 'After selling, before repaying');
+      assert.equal(await text('lend-application-label'), 'The same sale, with a cost');
+      assert.match(await text('lend-application-evidence'), /Before this sale/);
+      assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#lend-application-evidence dd')).map(value=>value.textContent)"), ['1,356.67 USDC', '1,356.67 USDC', '$2,000.00', '0.3%']);
+      assert.equal(await evaluate("document.getElementById('unwind-application-recap').open"), false, 'Completion does not require opening the repayment recap.');
+      await click('unwind-application-summary');
       assert.equal(await text('unwind-application-title'), 'Paused after Sell ETH');
       assert.match(await text('unwind-application-wallet'), /7,378.34 USDC/);
       assert.equal(await text('unwind-application-debt'), '8,735.01 USDC');
-      assert.equal(await evaluate("document.getElementById('unwind-application-contrast').hidden"), true, 'Completion does not require opening the visual answer.');
+      assert.equal(await evaluate("document.getElementById('unwind-application-contrast').hidden"), true, 'Opening the recap starts at the sale, before repayment.');
       const observed = await evaluate("document.getElementById('lend-money-flow').textContent");
       const saved = await evaluate("localStorage.getItem('teren-loop-learning-v1')");
       const handoff = await evaluate("document.getElementById('lend-explore').href");
@@ -267,12 +271,12 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       assert.equal(await evaluate("document.getElementById('lend-explore').href"), handoff);
       await click('unwind-application-show');
       assert.equal(await text('unwind-application-title'), 'Paused after Sell ETH');
-      await choose('application', 'keep-cash');
-      assert.equal(await evaluate("document.getElementById('unwind-application-show').hidden"), true);
+      await choose('application', 'same-repayment');
+      assert.equal(await evaluate("document.getElementById('unwind-application-show').hidden"), false, 'The repayment recap remains available before answering.');
       await click('lend-check');
       assert.equal(await text('lend-feedback-title'), 'Review your answers.');
-      assert.match(await text('lend-application-choices-feedback'), /same debt.*paid into the loan/);
-      assert.equal(await evaluate("document.getElementById('unwind-application-show').hidden"), false, 'A wrong answer can inspect the same repayment evidence.');
+      assert.match(await text('lend-application-choices-feedback'), /cost reduces.*USDC.*debt unpaid/);
+      assert.equal(await evaluate("document.getElementById('unwind-application-show').hidden"), false, 'A wrong answer retains access to the repayment recap.');
       await choose('application', application); await click('lend-check');
       assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
     }
@@ -367,10 +371,11 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
       assert.equal(await text('lend-progress'), progressBefore);
       assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
     } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
-    await choose('reason', 'backing'); await choose('application', 'repay-wallet'); await click('lend-check'); await settle(evaluate);
+    await choose('reason', 'backing'); await choose('application', 'debt-remains'); await click('lend-check'); await settle(evaluate);
     assert.equal(await evaluate('document.activeElement.id'), 'lend-feedback');
     assert.ok(await evaluate("document.getElementById('lend-next').getBoundingClientRect().bottom<=innerHeight"));
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);
+    await click('unwind-application-summary');
     await click('unwind-application-show');
     assert.equal(await text('unwind-application-title'), 'After Repay');
     assert.equal(await evaluate('document.documentElement.scrollWidth>innerWidth'), false);

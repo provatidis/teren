@@ -1,5 +1,13 @@
 # Release history
 
+## 1.50.1 · 2026-10-27
+
+- Refine lesson checks around ownership share, borrowing headroom and losses before liquidation. Preserve helpful explanations and replace repeated misconceptions with distinct ones.
+- Let learners infer how competition changes fee income, with the calculated share in feedback. Present collection and reinvestment as ordered steps, stacked on phones.
+- Ask which direction reaches a recorded range boundary first. Keep equivalent spatial evidence for screen readers and meaningful price labels; remove decorative axis prices and the rebound's sub-cent implementation note.
+- Compare the same feasible ETH sale with and without an exit cost, showing why some debt remains. Keep the sale-to-repayment illustration as an optional recap. Core financial formulas and recorded evidence are unchanged.
+- Preserve completed lessons and compatible drafts while retiring answers to revised questions. Extend accounting, progress and desktop/mobile checks.
+
 ## 1.50.0 · 2026-10-27
 
 - Give loss-versus-profit checks different jobs: explain the token exchanges behind the holding gap, then interpret the comparison or a withdrawal. The explanation follows rising, falling and unchanged editable prices.

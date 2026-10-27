@@ -4,7 +4,7 @@ import { formatTokenQuantity } from './format.js';
 import { sceneNode as node } from './lesson-scene.js';
 
 // Read the first sale and its repayment from the same ledger as Observe.
-// The application has its own display state and never moves that scene.
+// This optional recap has its own display state and never moves that scene.
 export function unwindApplicationStages(result) {
   const { stages } = loopFlowStages(result, 'unwind');
   const saleIndex = stages.findIndex(stage => stage.action === 'sell');
@@ -18,6 +18,11 @@ export function unwindApplicationStages(result) {
 export function createUnwindApplication(result) {
   const { sale, repayment } = unwindApplicationStages(result);
   const id = 'unwind-application';
+  const recap = node('details', undefined, 'model-details');
+  recap.id = id + '-recap';
+  const summary = node('summary', 'Revisit sale and repayment');
+  summary.id = id + '-summary';
+  const body = node('div');
   const element = node('figure', undefined, 'unwind-application');
   element.id = id;
   const heading = node('figcaption', 'Paused after Sell ETH', 'scene-figure-title');
@@ -25,7 +30,7 @@ export function createUnwindApplication(result) {
   const scope = node('p', 'First pass · same fixed price and swap costs as Observe.', 'fine-print');
   const diagram = createLoopFlowDiagram(id);
   const button = node('button', 'Show the repayment', 'button secondary');
-  button.id = id + '-show'; button.type = 'button'; button.hidden = true;
+  button.id = id + '-show'; button.type = 'button';
   button.setAttribute('aria-expanded', 'false');
   button.setAttribute('aria-controls', id + '-contrast');
   const contrast = node('div', undefined, 'unwind-application-contrast');
@@ -47,22 +52,22 @@ export function createUnwindApplication(result) {
   );
   element.append(heading, scope, diagram.element, button, contrast);
   diagram.show(sale, false);
+  body.append(element);
+  recap.append(summary, body);
   button.addEventListener('click', () => {
     const showRepayment = contrast.hidden;
     diagram.show(showRepayment ? repayment : sale, false);
     heading.textContent = showRepayment ? 'After Repay' : 'Paused after Sell ETH';
     contrast.hidden = !showRepayment;
-    button.textContent = showRepayment ? 'Back to the paused question' : 'Show the repayment';
+    button.textContent = showRepayment ? 'Back to the sale' : 'Show the repayment';
     button.setAttribute('aria-expanded', String(showRepayment));
   });
   return {
-    element,
-    allowReveal() { button.hidden = false; },
+    element: recap,
     reset() {
       diagram.show(sale, false);
       heading.textContent = 'Paused after Sell ETH';
       contrast.hidden = true;
-      button.hidden = true;
       button.textContent = 'Show the repayment';
       button.setAttribute('aria-expanded', 'false');
     },

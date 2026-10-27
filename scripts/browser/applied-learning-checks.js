@@ -15,6 +15,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"), true);
     assert.equal(await evaluate("document.getElementById('applied-reveal').disabled"), false);
     assert.equal(await evaluate("document.querySelector('#applied-setup .applied-start-track').checkVisibility()"), true, 'Starting price and range are introduced before the prediction');
+    assert.equal(await evaluate("document.querySelector('#applied-setup .scene-range-scale').textContent"), 'ETH price', 'The opening picture labels meaningful prices, not decorative padding.');
     assert.match(await text('applied-setup'), /WETH principal.*USDC principal/);
     assert.equal(await evaluate("document.querySelectorAll('#applied-prediction-home button').length"), 1, 'One reveal control');
     await choose('applied-prediction', prediction); await click('applied-reveal');
@@ -36,6 +37,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
       assert.match(await text('applied-application-evidence'), /Where this range started.*Starting ETH price.*Lower.*Upper/s);
       assert.doesNotMatch(await text('applied-application-evidence'), /0\.44%/);
       assert.equal(await evaluate("document.querySelector('#applied-application-evidence .scene-range-marker').checkVisibility()"), true);
+      assert.equal(await evaluate("document.querySelector('#applied-application-evidence .scene-range-scale').textContent"), 'ETH price', 'Padding endpoints are not presented as meaningful prices.');
       assert.match(await text('applied-application-evidence'), /starting price marker is close to the upper bound/);
       assert.equal(await evaluate("document.getElementById('applied-reason-evidence').checkVisibility()&&document.getElementById('applied-application-evidence').checkVisibility()"),true);
     }
@@ -205,6 +207,9 @@ export async function checkMobileAppliedLearning({ evaluate, click, fill, text, 
     assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
     await evaluate("document.querySelector('input[name=applied-prediction][value=possible]').click()"); await click('applied-reveal');
     const fixedEvidence=await text('applied-reason-evidence');
+    assert.equal(await evaluate("document.querySelector('#applied-application-evidence .scene-range-scale').textContent"), 'ETH price');
+    assert.match(await text('applied-application-evidence'), /Starting ETH price.*Lower.*Upper.*starting price marker is close to the upper bound/s);
+
     assert.match(fixedEvidence,/45m 24s/);
     for(const id of ['applied-reason-evidence','applied-application-evidence']) {
       assert.equal(await evaluate(`(()=>{const n=document.getElementById('${id}'),r=n.getBoundingClientRect();return n.checkVisibility()&&r.left>=0&&r.right<=innerWidth})()`),true);

@@ -79,7 +79,7 @@ export function lessonReasonFeedback(id, outcome, reason, feedbackByChoice = {})
   if (id === 'token-balances') {
     const copy = tokenBalanceNarration(outcome);
     if (reason === 'automatic') return 'Tokens change hands through trades. The pool does not move between token mixes on a timer or without a swap. ' + copy.exchange;
-    if (reason === 'interest') return 'This model includes no interest, earned fees or compounding. ' + copy.exchange;
+    if (reason === 'ownership-share') return 'Your ownership share stays fixed here: nobody adds or removes liquidity. Swaps change the tokens behind that share. ' + copy.exchange;
   }
   if (id === 'loss-vs-profit') {
     const copy = lossProfitReasoning(outcome);
