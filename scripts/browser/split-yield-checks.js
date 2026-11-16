@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { dragRangeToMax } from './touch-range.js';
+import { checkSplitExit, checkSplitExitOnPhone } from './split-yield-exit-checks.js';
 
 export async function checkSplitYield({ evaluate, click, fill, text, navigate, reload, base, call, nextEvent }) {
   await navigate(base);
@@ -66,6 +67,8 @@ export async function checkSplitYield({ evaluate, click, fill, text, navigate, r
     await click('split-reset');
     console.log('PASS: yield links, Home resume, input isolation, missing and invalid inputs, recovery and unattainable benchmark');
 
+    await checkSplitExit({ evaluate, click, fill, text, value, visible, navigate, reload, base }, sharedLink);
+
     for (const width of [390, 320]) {
       await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
       await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
@@ -82,6 +85,7 @@ export async function checkSplitYield({ evaluate, click, fill, text, navigate, r
       assert.equal(await value('split-switch'), '89');
       await click('yield-compare-link');
       assert.equal(await visible('strategy-hold-value'), true);
+      await checkSplitExitOnPhone({ evaluate, call, click, fill, value }, width);
       assert.ok(await evaluate("document.querySelector('[aria-label=\"DeFi topic\"]').getBoundingClientRect().right") <= width);
       for (const page of ['about.html', 'methods.html#split-yield', 'learn.html', 'lending.html#experiment', 'liquidity.html#experiment']) {
         await navigate(base + page);

@@ -1,0 +1,94 @@
+import assert from 'node:assert/strict';
+import { dragRangeToMax } from './touch-range.js';
+
+export async function checkSplitExit({ evaluate, click, fill, text, value, visible, navigate, reload, base }, maturityLink) {
+  const money = async id => {
+    const shown = await text(id);
+    assert.match(shown, /^[\d,.]+ USDC$/, id + ' must show a cash amount');
+    return Number(shown.replaceAll(',', '').replace(' USDC', ''));
+  };
+  const maturity = {};
+  for (const key of ['pt', 'yt', 'hold']) maturity[key] = await text('strategy-' + key + '-value');
+  await navigate(base + 'yield.html#early-exit');
+  assert.ok(await visible('split-exit-results'), 'Direct early exit link opens the comparison.');
+  assert.equal(await value('split-exit-day'), '45');
+  assert.equal(await value('split-exit-apy'), '10');
+  await fill('split-exit-day', '0');
+  assert.equal(await money('exit-yt-earned'), 0, 'Selling immediately leaves no past yield to collect.');
+  assert.equal(await money('exit-hold-value'), 1000);
+  await fill('split-exit-day', '45');
+  await evaluate("document.querySelector('[data-exit-rate=\"5\"]').click()");
+  assert.equal(await value('split-exit-apy'), '5');
+  const low = {};
+  for (const id of ['pt-value', 'yt-sale', 'yt-earned', 'hold-value']) low[id] = await money('exit-' + id);
+  await evaluate("document.querySelector('[data-exit-rate=\"15\"]').click()");
+  assert.equal(await value('split-exit-apy'), '15');
+  const highSale = await money('exit-yt-sale');
+  assert.ok(await money('exit-pt-value') < low['pt-value'], 'A higher exit yield discounts the remaining principal more.');
+  assert.ok(highSale > low['yt-sale'], 'A higher exit yield increases the resale value of future yield.');
+  assert.equal(await money('exit-yt-earned'), low['yt-earned'], 'Repricing cannot change income already earned.');
+  assert.equal(await money('exit-hold-value'), low['hold-value']);
+  assert.ok(Math.abs(await money('exit-yt-value') - highSale - low['yt-earned']) <= 0.011, 'YT exit proceeds include both the sale and past yield.');
+  await fill('split-exit-day', '90');
+  assert.equal(await money('exit-yt-sale'), 0);
+  for (const key of ['pt', 'yt', 'hold']) assert.equal(await text('exit-' + key + '-value'), maturity[key], 'Endpoint agrees with maturity for ' + key);
+  await fill('split-exit-day', '45');
+
+  await evaluate("Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async link => { window.copiedExitLink = link } } })");
+  await click('split-share');
+  const link = await evaluate('window.copiedExitLink');
+  const inputs = new URLSearchParams(new URL(link).hash.slice(1));
+  assert.equal(inputs.get('exitApy'), '15');
+  assert.equal(inputs.get('exitDay'), '45');
+  await evaluate("Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw new Error('Clipboard unavailable') } } })");
+  await click('split-share');
+  assert.ok(await visible('split-link'));
+  assert.equal(await value('split-link'), link);
+  await fill('split-exit-apy', '');
+  assert.equal(await visible('split-exit-results'), false);
+  assert.equal(await visible('yield-plot-panel'), true, 'An incomplete exit quote leaves the underlying yield path available.');
+  assert.ok(await evaluate("document.getElementById('split-share').disabled"));
+  await navigate(base + 'yield.html');
+  assert.ok(await visible('split-exit-results'), 'Local draft restores the last valid exit comparison.');
+  assert.equal(await value('split-exit-apy'), '15');
+  await navigate(base);
+  assert.equal(await evaluate("document.getElementById('home-experiment').href"), link);
+  await navigate(maturityLink);
+  assert.equal(await visible('split-exit-results'), false, 'Older shared scenarios still open at maturity, even with a saved exit draft.');
+  assert.equal(await value('split-budget'), '500');
+  assert.equal(await text('strategy-yt-value'), '771.54 USDC');
+  await navigate(link);
+  assert.equal(await value('split-exit-day'), '45');
+  assert.ok(await visible('split-exit-results'));
+  assert.equal(await money('exit-yt-sale'), highSale);
+  await fill('split-exit-day', '30');
+  assert.equal(await evaluate("new URLSearchParams(location.hash.slice(1)).get('exitDay')"), '30');
+  inputs.delete('exitApy');
+  await navigate(base + 'yield.html#' + inputs);
+  assert.match(await text('yield-notice'), /could not be read/);
+  assert.equal(await value('split-exit-apy'), '15', 'An incomplete exit link recovers the saved draft.');
+  await evaluate("document.getElementById('split-settings').open = true");
+  await fill('split-days', '20');
+  assert.equal(await evaluate("document.getElementById('split-exit-day').max"), '20');
+  assert.ok(Number(await value('split-exit-day')) <= 20);
+  assert.ok(await visible('split-exit-results'), 'A shorter term keeps the exit day within the new term.');
+  await fill('split-exit-apy', '');
+  await click('split-mode-maturity');
+  assert.ok(await visible('split-comparison-results'), 'A missing exit rate does not invalidate the maturity comparison.');
+  assert.equal(await evaluate("document.getElementById('split-share').disabled"), false);
+  await click('split-reset');
+  await reload();
+  assert.equal(await visible('split-exit-results'), false);
+  console.log('PASS: exit repricing, accrued income, expiry, draft and legacy link recovery, copy and share fallback');
+}
+
+export async function checkSplitExitOnPhone({ evaluate, call, click, fill, value }, width) {
+  await click('split-mode-exit');
+  assert.ok(await evaluate('document.documentElement.scrollWidth') <= width, 'Exit comparison fits ' + width + 'px.');
+  await dragRangeToMax({ evaluate, call, fill }, 'split-exit-day');
+  await evaluate("document.getElementById('split-exit-day').focus()");
+  await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'ArrowLeft', code: 'ArrowLeft', windowsVirtualKeyCode: 37 });
+  await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'ArrowLeft', code: 'ArrowLeft', windowsVirtualKeyCode: 37 });
+  assert.equal(await value('split-exit-day'), '89');
+  await click('split-mode-maturity');
+}

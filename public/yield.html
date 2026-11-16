@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://ethereum-rpc.publicnode.com https://eth.drpc.org; base-uri 'none'; object-src 'none'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101c27">
-  <meta name="description" content="Follow a Pendle-style split from purchase to maturity. Change when the underlying yield rises and compare PT, YT and holding with the same USDC budget.">
+  <meta name="description" content="Compare buying PT, buying YT and holding a yield-bearing asset. Hold to maturity or sell early at a different implied yield in this Pendle-style experiment.">
   <title>Split the yield · Pendle PT and YT · Teren</title>
   <meta name="application-name" content="Teren">
   <meta name="apple-mobile-web-app-title" content="Teren">
@@ -18,7 +18,7 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Teren">
   <meta property="og:title" content="Split the yield · Pendle PT and YT · Teren">
-  <meta property="og:description" content="Follow a Pendle-style split from purchase to maturity. Change when the underlying yield rises and compare PT, YT and holding with the same USDC budget.">
+  <meta property="og:description" content="Compare buying PT, buying YT and holding a yield-bearing asset. Hold to maturity or sell early at a different implied yield in this Pendle-style experiment.">
   <meta property="og:url" content="https://teren.sh/yield.html">
   <meta property="og:image" content="https://teren.sh/assets/social-preview.png">
   <meta property="og:image:type" content="image/png">
@@ -27,7 +27,7 @@
   <meta property="og:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Split the yield · Pendle PT and YT · Teren">
-  <meta name="twitter:description" content="Follow a Pendle-style split from purchase to maturity. Change when the underlying yield rises and compare PT, YT and holding with the same USDC budget.">
+  <meta name="twitter:description" content="Compare buying PT, buying YT and holding a yield-bearing asset. Hold to maturity or sell early at a different implied yield in this Pendle-style experiment.">
   <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
   <meta name="twitter:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
   <link rel="stylesheet" href="yield.css">
@@ -51,7 +51,7 @@
         <div><p class="eyebrow">PENDLE · HYPOTHETICAL EXPERIMENT</p><h1>Split the yield</h1>
           <p>How much would you pay today for the interest a deposit will earn before maturity?</p>
         </div>
-        <a href="#comparison" class="button secondary" id="yield-compare-link">Compare the same budget ↓</a>
+        <a href="#comparison" class="button secondary" id="yield-compare-link">Compare holding or selling ↓</a>
       </div>
       <p id="yield-notice" class="yield-notice" role="status" hidden></p>
       <div class="yield-workbench">
@@ -82,7 +82,7 @@
         <section class="yield-panel yield-path" aria-labelledby="path-title">
           <h2 id="path-title">Will the yield cover its price?</h2>
           <div class="yield-path-controls">
-            <div class="yield-slider-label"><label for="split-switch">Day the rate changes</label><output id="split-switch-value" for="split-switch">—</output></div>
+            <div class="yield-slider-label"><label for="split-switch">Day the underlying rate changes</label><output id="split-switch-value" for="split-switch">—</output></div>
             <input id="split-switch" class="touch-range" type="range" min="0" max="90" step="1" value="80" aria-describedby="split-rates">
             <p id="split-rates" class="yield-caption">—</p>
           </div>
@@ -109,11 +109,32 @@
       </div>
 
       <section class="yield-panel yield-comparison" id="comparison" aria-labelledby="comparison-title">
-        <div class="yield-comparison-head">
+        <div id="early-exit" class="yield-comparison-head">
           <div><h2 id="comparison-title" tabindex="-1">Compare the same budget</h2>
-            <p>Give each strategy its own starting budget and hold it to the same maturity.</p>
+            <p>Start with the same amount in PT, YT or the yield-bearing asset. When do you cash out?</p>
           </div>
           <label for="split-budget">Budget per strategy (USDC)<input id="split-budget" type="number" min="1" max="10000000" step="any" value="1000" aria-describedby="split-budget-error"><small id="split-budget-error" hidden></small></label>
+        </div>
+        <div class="yield-stages yield-modes" role="group" aria-label="When to compare strategies">
+          <button type="button" id="split-mode-maturity" aria-pressed="true">Hold to maturity</button>
+          <button type="button" id="split-mode-exit" aria-pressed="false">Sell early</button>
+        </div>
+        <div id="split-exit-controls" class="exit-controls" hidden>
+          <div>
+            <div class="yield-slider-label"><label for="split-exit-day">Exit day</label><output id="exit-day-label" for="split-exit-day">Day 45</output></div>
+            <input id="split-exit-day" class="touch-range" type="range" min="0" max="90" step="1" value="45" aria-describedby="exit-time-left">
+            <p id="exit-time-left" class="yield-caption"></p>
+          </div>
+          <div>
+            <label for="split-exit-apy">Market’s implied APY at exit (%)</label>
+            <div class="exit-rate-row">
+              <input id="split-exit-apy" type="number" min="0" step="any" value="10" aria-describedby="exit-rate-help split-exit-apy-error">
+              <button type="button" class="yield-text-button" data-exit-rate="5">Try 5%</button>
+              <button type="button" class="yield-text-button" data-exit-rate="15">Try 15%</button>
+            </div>
+            <small class="exit-error" id="split-exit-apy-error" hidden></small>
+            <p class="yield-caption" id="exit-rate-help">The annual yield a new PT buyer would lock in at the sale price, assuming full repayment. Changing it reprices the remaining claims.</p>
+          </div>
         </div>
         <div id="split-comparison-results">
           <div class="yield-strategies" aria-label="Amounts at maturity in USDC">
@@ -129,6 +150,39 @@
             <p id="split-benchmark-note"></p>
           </div>
         </div>
+        <div id="split-exit-results" hidden>
+          <div class="yield-strategies" aria-label="Strategy values on the exit day in USDC">
+            <div><h3>Buy PT</h3><p id="exit-pt-action">Sell the principal claim</p><strong id="exit-pt-value">—</strong><span id="exit-pt-change"></span></div>
+            <div><h3>Buy YT</h3><p>Sale plus earned interest</p><strong id="exit-yt-value">—</strong><span id="exit-yt-change"></span></div>
+            <div><h3>Hold the underlying</h3><p>Principal plus interest to date</p><strong id="exit-hold-value">—</strong><span id="exit-hold-change"></span></div>
+          </div>
+          <div class="exit-details">
+            <section aria-labelledby="exit-yt-title">
+              <h3 id="exit-yt-title">What you receive from YT</h3>
+              <svg class="exit-breakdown" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true">
+                <rect class="exit-track" width="100" height="6"></rect>
+                <rect id="exit-sale-bar" width="0" height="6"></rect>
+                <rect id="exit-earned-bar" width="0" height="6"></rect>
+              </svg>
+              <dl class="exit-receipt">
+                <div><dt>Sell the remaining yield</dt><dd id="exit-yt-sale">—</dd></div>
+                <div><dt>Keep interest already earned</dt><dd id="exit-yt-earned">—</dd></div>
+              </dl>
+            </section>
+            <section aria-labelledby="exit-marks-title">
+              <h3 id="exit-marks-title">What changed in the price?</h3>
+              <table class="exit-prices">
+                <caption id="exit-price-caption"></caption>
+                <thead><tr><th scope="col">Implied APY</th><th scope="col">1 PT</th><th scope="col">1 YT</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row" id="exit-entry-rate">Entry rate</th><td id="exit-flat-pt"></td><td id="exit-flat-yt"></td></tr>
+                  <tr><th scope="row" id="exit-scenario-rate">Exit rate</th><td id="exit-mark-pt"></td><td id="exit-mark-yt"></td></tr>
+                </tbody>
+              </table>
+            </section>
+          </div>
+          <p id="exit-reading" class="exit-reading" aria-live="polite"></p>
+        </div>
         <p id="split-comparison-error" class="yield-notice" hidden>Check the highlighted inputs to compare these strategies.</p>
       </section>
       <div class="yield-actions">
@@ -140,7 +194,7 @@
       <details class="yield-details yield-assumptions">
         <summary>How the comparison works</summary>
         <p>The entry prices of one PT and one YT add up to 1 USDC here. Interest compounds at the annual yields you choose. Holding keeps all the interest. YT keeps 95% of it, valued in USDC with the accrued yield left in the asset. At expiry the right to future yield ends and earned interest is still claimable.</p>
-        <p>This example assumes full principal redemption and nonnegative yields. On Pendle, a fall in the underlying exchange rate can reduce PT redemption. Values are in USDC. Points, rewards, gas, swap costs and early-sale prices are outside this comparison.</p>
+        <p>This example assumes full principal redemption and nonnegative yields. On Pendle, a fall in the underlying exchange rate can reduce PT redemption. The early-exit prices are hypothetical. The market’s implied APY sets the discount on PT for the days remaining. One YT is worth the rest of the 1 USDC pair. The seller keeps interest earned up to the exit day. Values exclude points, rewards, gas, trading fees and slippage.</p>
         <a href="methods.html#split-yield">Methods and Pendle sources →</a>
       </details>
     </div>
