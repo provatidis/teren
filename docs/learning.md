@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [User guide](guide.md) · [Current review](review.md) · [Observation plan](#observation-plan)
 
-Teren has twenty lessons across liquidity and lending. The visible method is **Predict → Observe → Check**. Check combines an explanation with an application to another situation; predictions are ungraded and questions do not ask the learner to calculate or round a result. Go deeper retains worked examples, formulas and original sources. The separate wstETH/WETH experiment has no dedicated lesson chapter yet; its interpretation tasks are included in the observation plan.
+Teren has 24 lessons across liquidity, lending and yield trading. The visible method is **Predict → Observe → Check**. Check combines an explanation with an application to another situation; predictions are ungraded and questions do not ask the learner to calculate or round a result. Go deeper retains worked examples, formulas and original sources. The separate wstETH/WETH experiment has no dedicated lesson chapter yet; its interpretation tasks are included in the observation plan.
 
 ## What the research establishes
 
@@ -45,6 +45,19 @@ The width and outside-value cases are calculated hypothetical endpoints from `cl
 Fee-tier predictions start without earnings data, then reveal supplied fictional volumes, fee totals and equal active shares, with no protocol fee. The APR application supplies yesterday's share and changed competition; learners infer the direction of fee income, with the calculated new share in feedback. Reinvestment uses an ordered sequence of supplied shares. No annualization or proportion calculation is required. The APR screenshot uses a fictional past day, and the reinvestment case uses a separate fictional pool. These are teaching facts, never forecasts or independently checked history.
 
 The three historical exercises continue to use the original two independently checked records. Their fixed question checkpoint or interval remains separate from exploration. Any changed setup is labelled a thought experiment.
+
+## Yield trading
+
+[Four lessons](https://teren.sh/yield-learn.html) follow a 1,000 USDC deposit over 90 days using the same assumptions as [Split the yield](models.md#split-the-yield). Start with the depositor. A buyer hands over money today for the right to future interest. Only after the rights have names do the lessons introduce buying at a discount, the timing of interest and a market price for the remaining yield.
+
+| Lesson | Distinction to look for |
+| --- | --- |
+| What gets split? | Trace the original deposit, the buyer’s payment and the interest to their owners. |
+| Why buy PT or YT? | Explain why paying less than the principal can give PT a return, and what YT’s buyer receives for the upfront payment. |
+| When does the interest arrive? | Two deposits can finish at the same annual rate and earn different amounts over the term. |
+| Selling before maturity | A YT sale price describes what the buyer pays for future interest. The seller also keeps the interest they already earned. |
+
+To observe understanding, ask a learner to explain an early sale from the seller’s point of view using their own example. A useful follow-up is what else they would need to know after seeing only the sale price.
 
 ## Lending foundations
 
@@ -92,7 +105,7 @@ The first lesson removes costs and interest to isolate matching debt. Its applic
 
 Review each lesson as one flow: move its explorer far enough to reverse the outcome, then open the explanation, answer, follow the lab handoff and revisit saved work. Each statement must identify the situation it describes. Open optional controls too: two individually correct controls may still duplicate one learning purpose. Preserve deliberately different application situations and their local evidence.
 
-Fifteen lessons use the visual patterns: swaps, providing liquidity, changing token balances, loss versus profit, break-even fees, the final challenge, range-boundary token composition, narrow versus wide ranges, supplying, borrowing, prices/interest/time, repayment versus collateral, and building, stressing and unwinding a loop. All twenty lessons put a readable starting setup before the prediction choices: balances or supplied facts, the action being tested, and decisive assumptions. **See what happens** follows a selected expectation; **Not sure — show me** opens the same outcome without inventing an answer. Feedback explicitly names a match or a different result, with a self-contained finding beside it. Matching predictions are green, differing predictions amber and skipped predictions neutral. A selected option is neutral until checked. Each explanation/application answer receives local feedback on the first check; focus goes to the first answer needing attention while keeping its question and selected answer in view. The focused feedback also names its question for assistive technology. There is no mandatory failed retry or first-attempt score. The interface does not repeat scoring disclaimers.
+In liquidity and lending, fifteen lessons use the visual patterns: swaps, providing liquidity, changing token balances, loss versus profit, break-even fees, the final challenge, range-boundary token composition, narrow versus wide ranges, supplying, borrowing, prices/interest/time, repayment versus collateral, and building, stressing and unwinding a loop. The lessons put a readable starting setup before the prediction choices: balances or supplied facts, the action being tested, and decisive assumptions. **See what happens** follows a selected expectation; **Not sure — show me** opens the same outcome without inventing an answer. Feedback explicitly names a match or a different result, with a self-contained finding beside it. Matching predictions are green, differing predictions amber and skipped predictions neutral. A selected option is neutral until checked. Each explanation/application answer receives local feedback on the first check; focus goes to the first answer needing attention while keeping its question and selected answer in view. The focused feedback also names its question for assistive technology. There is no mandatory failed retry or first-attempt score. The interface does not repeat scoring disclaimers.
 
 In visual lessons, the setup and prediction come before the interactive diagram, keeping the diagram beside its controls on phones. The action restores the question’s diagram and brings it into view. After reveal, **Show the outcome again** returns to that outcome, **Replay action** repeats a selected step’s visual cue, and the explanation button names the question outcome and opens its explanation without changing the explored diagram. Exploration remains available before choosing, and watching every step is never required. The sequence is **starting setup → prediction invitation → exploration → explanation → changed situation**. The conceptual checks still determine completion, with no arithmetic or rounding task. The build-loop setup defines one loop as borrowing USDC, spending it on ETH and supplying that ETH; the question refers to all three actions.
 

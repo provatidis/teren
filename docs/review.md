@@ -1,6 +1,6 @@
 # Review status, evidence gaps and limitations
 
-Assessed against **Teren 1.52.0, 16 November 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. Lesson questions separate causal explanations from applications; deeper explanations retain worked calculations and sources without numeric-entry exercises. Yield trading compares holding through maturity with selling PT or YT earlier.
+Assessed against **Teren 1.53.0, 16 November 2026**. This maintainer assessment draws on the implementation, committed records and automated checks. Lesson questions separate causal explanations from applications; deeper explanations retain worked calculations and sources without numeric-entry exercises. Yield trading now includes four guided lessons alongside the maturity and early-sale comparisons.
 
 [Project overview](../README.md) · [Models](models.md) · [Learning and observation plan](learning.md) · [Roadmap](roadmap.md) · [Historical reviews](review-history.md)
 

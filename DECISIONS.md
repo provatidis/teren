@@ -4,7 +4,7 @@ These are durable working choices. Revisit them when evidence or the owner's dir
 
 ## Product and access
 
-- Teren helps people understand DeFi mechanisms and test assumptions. Guided learning and direct exploration belong in one app, with direct access by topic. Liquidity and Lending also have guided lessons. Yield trading opens directly in the experiment.
+- Teren helps people understand DeFi mechanisms and test assumptions. Guided learning and direct exploration belong in one app, with direct access by topic. Every topic offers both an experiment and a guided path. The yield lessons begin with the depositor and introduce implied yield when the learner chooses to sell early.
 - Teren takes its name from Pontic Greek τέρεν, “look.” Keep the creator's heritage to a short About explanation. Use the custom wordmark as the main identity and the separate open-t symbol for compact uses.
 - Home orients visitors by topic before mode. Experimentation and guided learning have equal standing; mode navigation stays within its named topic. Recorded Inspect remains scoped to liquidity.
 - Complexity increases predictably across examples. Advanced cases, every lesson and repeatable personal work remain directly accessible. Saved assumptions, variations, comparisons and return visits must work without completing lessons.

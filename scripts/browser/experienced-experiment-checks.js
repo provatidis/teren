@@ -123,7 +123,13 @@ export async function checkExperiencedExperiments({ evaluate, click, fill, text,
       await navigate(base);
       await evaluate("localStorage.setItem('teren-learning-location-v1','lending.html#lesson=borrow');dispatchEvent(new Event('storage'))");
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
-      assert.deepEqual(await evaluate("[...document.querySelectorAll('.home-topic-actions')].map(group => group.querySelectorAll('.button').length)"), [2, 2, 1], 'Liquidity and Lending offer both entry modes. Yield trading opens its experiment directly.');
+      const destinations = await evaluate(`Array.from(document.querySelectorAll('.home-topic-actions'),
+        group => Array.from(group.querySelectorAll('a'), link => link.getAttribute('href')))`);
+      assert.deepEqual(destinations, [
+        ['liquidity.html#experiment', 'learn.html#lesson=swap-impact'],
+        ['lending.html#experiment', 'lending.html#lesson=supply'],
+        ['yield.html', 'yield-learn.html#lesson=split'],
+      ], 'Each Home topic opens its lab or its first lesson.');
       const returnLinks = await evaluate("['home-experiment','home-continue'].map(id=>{const link=document.getElementById(id),title=link.querySelector('strong').getBoundingClientRect(),arrow=link.lastElementChild.getBoundingClientRect();return {shown:!link.hidden,titleRight:title.right,titleBottom:title.bottom,arrowLeft:arrow.left,arrowTop:arrow.top}})");
       assert.ok(returnLinks.every(link => link.shown && link.arrowLeft >= link.titleRight + 8 && link.arrowTop < link.titleBottom), 'Return-link arrows stay beside their destinations, including a long lesson title.');
     }

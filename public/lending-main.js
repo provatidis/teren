@@ -52,6 +52,7 @@ function route(scroll = false) {
     ? loops ? 'Build a loop, change conditions, then explore unwinding. No calculations required.' : 'Supply, borrow, change conditions and compare responses. Open any lesson; no calculations required.'
     : lst ? 'Build a wstETH/WETH loop. Test its carry, collateral value and exit.' : loops ? 'Follow borrowed money into more ETH. Test price, interest and unwinding.' : 'Supply ETH, borrow USDC, then change price or time.';
   document.getElementById('lending-evidence').textContent = lesson ? 'LEARN BY DOING · LENDING' : lst ? 'CORRELATED ASSETS · HYPOTHETICAL' : 'AAVE V3-STYLE · HYPOTHETICAL';
+  document.getElementById('topic-yield').href = lesson ? 'yield-learn.html' : 'yield.html';
   document.getElementById('topic-liquidity').href = lesson ? 'learn.html' : 'liquidity.html#experiment';
   document.getElementById('lending-start').hidden = !!lesson;
   document.getElementById('lending-start').href = loops || lst ? '#loop-lesson=build' : '#learn';

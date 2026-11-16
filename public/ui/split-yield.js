@@ -45,6 +45,7 @@ function showDeposit(input, stage) {
 }
 
 export function initSplitYield() {
+  const lessonExample = new URLSearchParams(location.search).get('from') === 'lesson';
   const slider = $('split-switch');
   const exitDay = $('split-exit-day');
   const exitApy = $('split-exit-apy');
@@ -127,11 +128,12 @@ export function initSplitYield() {
     $('split-link-label').hidden = true;
     setText('split-action-status', '');
     if (!shareable) return;
-    const saved = saveSplitDraft(shareable);
-    saveExperimentLocation(SPLIT_MODEL, shareable);
     if (location.hash === '#early-exit' || new URLSearchParams(location.hash.slice(1)).has('yield')) {
       history.replaceState(null, '', shareable);
     }
+    if (lessonExample) return;
+    const saved = saveSplitDraft(shareable);
+    saveExperimentLocation(SPLIT_MODEL, shareable);
     notice(saved ? '' : 'This browser could not save your changes. Copy the setup link to keep them.');
   }
 
@@ -149,7 +151,7 @@ export function initSplitYield() {
         inputs = shared.inputs;
         exit = shared.exit;
         jumpToExit = Boolean(exit);
-        message = 'Shared yield setup loaded.';
+        message = lessonExample ? 'Lesson example. Explore in this tab, or copy a setup link to keep your changes.' : 'Shared yield setup loaded.';
       }
     } catch {
       message = 'This yield setup link could not be read. Showing ' + (draft.inputs ? 'your last saved setup.' : 'the original example.');

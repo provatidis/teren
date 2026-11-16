@@ -8,6 +8,7 @@ import { APPLIED_IDS } from '../public/lib/applied-lessons.js';
 import { LENDING_LESSON_IDS } from '../public/data/lending-state.js';
 import { LOOP_LESSON_IDS } from '../public/data/loop-state.js';
 import { LENDING_LESSONS } from '../public/learning/lending-essentials.js';
+import { YIELD_LESSONS } from '../public/learning/yield-lessons.js';
 import { LOOP_LESSONS } from '../public/learning/borrowing-loops.js';
 
 test('home recognises existing liquidity links while retaining home anchors', () => {
@@ -23,10 +24,12 @@ test('resume routes cover all current lessons without importing their models on 
     ...MANAGEMENT_IDS.map(id => 'learn.html#manage=' + id),
     ...APPLIED_IDS.map(id => 'learn.html#applied=' + id),
     ...LENDING_LESSON_IDS.map(id => 'lending.html#lesson=' + id),
+    ...YIELD_LESSONS.map(lesson => 'yield-learn.html#lesson=' + lesson.id),
     ...LOOP_LESSON_IDS.map(id => 'lending.html#loop-lesson=' + id),
   ];
   assert.deepEqual(Object.keys(LEARNING_ROUTES).sort(), routes.sort());
   for (const lesson of LENDING_LESSONS) assert.equal(LEARNING_ROUTES['lending.html#lesson=' + lesson.id], lesson.short);
+  for (const lesson of YIELD_LESSONS) assert.equal(LEARNING_ROUTES['yield-learn.html#lesson=' + lesson.id], lesson.short);
   for (const lesson of LOOP_LESSONS) assert.equal(LEARNING_ROUTES['lending.html#loop-lesson=' + lesson.id], lesson.short);
 });
 

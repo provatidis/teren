@@ -1,0 +1,78 @@
+@import url("./foundation.css");
+@import url("./components.css");
+@import url("./learning.css");
+@import url("./readability.css");
+@import url("./workspaces.css");
+@import url("./lesson-scenes.css");
+@import url("./navigation.css");
+
+.yield-learning-page .learn-course { padding: 18px; }
+.yield-learning-page .learn-course > summary { min-height: 44px; }
+#yl-title { margin: 12px 0; font-size: clamp(26px, 3vw, 34px); line-height: 1.2; letter-spacing: -.8px; }
+#yl-title:focus { outline: none; }
+#yl-scene-title, #yl-check-title { font-size: 20px; line-height: 1.4; letter-spacing: -.4px; }
+#yl-scene { margin: 0; }
+#yl-stage-controls { margin: 16px 0 12px; }
+#yl-stage-controls button { flex: 1 1 0; }
+#yl-scene-caption { margin: 12px 0 0; font-size: 15px; line-height: 1.65; color: var(--text); }
+#yl-observe { margin-top: 16px; }
+#yl-explore { display: inline-flex; align-items: center; min-height: 44px; }
+#yl-deeper { margin-top: 8px; padding-top: 12px; }
+#yl-deeper .learn-deeper-icon { margin-left: auto; }
+#yl-sources { padding-left: 20px; }
+#yl-sources a { display: inline-flex; min-height: 44px; align-items: center; color: var(--accent); }
+#yl-hint summary { min-height: 44px; display: list-item; }
+.yl-claims { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(156px, 100%), 1fr)); gap: 10px; margin: 0; }
+.yl-claim { --claim-color: var(--border-strong); padding: 14px; background: var(--surface); border: 1px solid var(--border); border-top: 3px solid var(--claim-color); border-radius: 9px; min-width: 0; }
+.yl-claim[data-role=pt], .yl-bar[data-role=pt] { --claim-color: var(--accent); }
+.yl-claim[data-role=yt], .yl-bar[data-role=yt] { --claim-color: #dec18a; }
+.yl-claim[data-role=cash], .yl-bar[data-role=cash] { --claim-color: var(--allocation-stripe); }
+.yl-bar[data-role=sale] { --claim-color: var(--accent); }
+.yl-bar[data-role=earned] { --claim-color: #dec18a; }
+.yl-claim dt { font-size: 14px; color: var(--muted); line-height: 1.45; }
+.yl-claim dd { font-size: clamp(16px, 2vw, 20px); margin: 6px 0 0; font-weight: 600; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.yl-bars { margin: 12px 0 0; padding: 14px; background: var(--surface); border-radius: 9px; }
+.yl-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 6px 12px; }
+.yl-bar + .yl-bar { margin-top: 12px; }
+.yl-bar dt { color: var(--muted); }
+.yl-bar dd { margin: 0; font-variant-numeric: tabular-nums; }
+.yl-bar-track { grid-column: 1 / -1; }
+.yl-bar progress { display: block; appearance: none; width: 100%; height: 9px; overflow: hidden; border: 0; border-radius: 3px; background: var(--border); color: var(--claim-color, var(--accent)); }
+.yl-bar progress::-webkit-progress-bar { background: var(--border); }
+.yl-bar progress::-webkit-progress-value { background: var(--claim-color, var(--accent)); }
+.yl-bar progress::-moz-progress-bar { background: var(--claim-color, var(--accent)); }
+@media (prefers-reduced-motion: no-preference) {
+  .yl-changed { animation: yl-arrive 220ms ease-out; }
+  @keyframes yl-arrive { from { transform: translateY(3px); opacity: .65; } }
+}
+@media (min-width: 751px) { #yl-all { display: none; } }
+@media (max-width: 750px) {
+  .yield-learning-page .card { padding: 18px; }
+  #yl-stage-controls { flex-wrap: nowrap; gap: 4px; }
+  #yl-stage-controls button { min-width: 0; padding: 7px 4px; line-height: 1.35; overflow-wrap: break-word; }
+  .yl-claims { grid-template-columns: 1fr; gap: 6px; }
+  .yl-claim { padding: 9px 12px; border-top: 1px solid var(--border); border-left: 3px solid var(--claim-color); }
+  .yl-claim dd { margin-top: 3px; }
+}
+.yl-origin { text-align: center; width: fit-content; max-width: 100%; margin: 4px auto 0; padding: 8px 16px; border: 1px solid var(--border-strong); border-radius: 8px; font-size: 15px; font-weight: 600; }
+.yl-branches { position: relative; grid-template-columns: repeat(2, minmax(0, 1fr)); padding-top: 24px; }
+.yl-branches::before, .yl-branches::after { content: ''; position: absolute; border-color: var(--border-strong); border-style: solid; }
+.yl-branches::before { height: 12px; left: 50%; top: 0; border-width: 0 0 0 1px; }
+.yl-branches::after { top: 12px; height: 11px; left: 25%; right: 25%; border-width: 1px 1px 0; border-radius: 3px 3px 0 0; }
+.yl-transfer { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 4px 12px; margin-top: 10px; padding: 12px 14px; border: 1px dashed var(--border-strong); border-radius: 8px; }
+.yl-transfer > :first-child { grid-column: 1 / -1; color: var(--muted); }
+.yl-transfer > :last-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
+@media (max-width: 750px) {
+  .yl-branches .yl-claim { padding: 10px; border-top: 3px solid var(--claim-color); border-left: 1px solid var(--border); }
+}
+.yl-time-path { margin-top: 16px; }
+.yl-time-path svg { display: block; width: 100%; height: 14px; margin: 8px 0 4px; border-radius: 3px; }
+.yl-time-labels, .yl-time-axis { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
+.yl-time-labels { font-weight: 550; }
+.yl-time-labels span::before { display: inline-block; content: ''; width: 9px; height: 9px; margin-right: 6px; background: var(--time-color); }
+.yl-time-labels .yl-time-later::before { border-radius: 50%; }
+.yl-time-first { --time-color: #abc9de; fill: var(--time-color); }
+.yl-time-later { --time-color: #dec18a; fill: var(--time-color); }
+.yl-time-axis { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.yl-retained { margin: 10px 0 0; padding: 10px 14px; border-left: 3px solid var(--allocation-stripe); background: var(--surface); font-size: 14px; line-height: 1.6; }
+.yl-retained strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
