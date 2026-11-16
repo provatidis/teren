@@ -42,7 +42,7 @@
 .yield-path-controls { margin: 18px 0; }
 .yield-slider-label, .yield-axis { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .yield-slider-label output { color: var(--accent); font-variant-numeric: tabular-nums; }
-.yield-path input[type=range] { display: block; height: 44px; margin: 0; }
+.yield-path input[type=range] { touch-action: pan-y; }
 .yield-caption { margin: 0; }
 .yield-legend { display: flex; flex-wrap: wrap; gap: 2px 18px; }
 .yield-legend span { display: inline-flex; gap: 7px; align-items: center; }

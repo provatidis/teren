@@ -70,7 +70,7 @@ export async function checkSplitYield({ evaluate, click, fill, text, navigate, r
       await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
       await navigate(base + 'yield.html');
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
-      await dragRangeToMax({ evaluate, call, fill }, 'split-switch', { inset: 7 });
+      await dragRangeToMax({ evaluate, call, fill }, 'split-switch');
       assert.match(await text('split-rates'), /5% APY for 90 days/);
       await evaluate("document.getElementById('split-switch').focus()");
       await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'ArrowLeft', code: 'ArrowLeft', windowsVirtualKeyCode: 37 });

@@ -405,7 +405,7 @@
           </figure>
           <div class="width-price-controls">
             <label for="width-price-slider">Move the same price for both ranges</label>
-            <input id="width-price-slider" type="range" min="0" max="1000" step="1" value="500">
+            <input id="width-price-slider" class="touch-range" type="range" min="0" max="1000" step="1" value="500">
             <p id="width-current" class="width-current" aria-live="polite"></p>
             <details class="width-edges"><summary>Choose a range edge or return to the start</summary><div id="width-price-shortcuts" class="width-shortcuts" role="group" aria-label="Compare at a range boundary">
               <button type="button" data-width-price="start">Starting price</button><button type="button" data-width-price="a-lower">A lower edge</button><button type="button" data-width-price="a-upper">A upper edge</button><button type="button" data-width-price="b-lower">B lower edge</button><button type="button" data-width-price="b-upper">B upper edge</button>
@@ -452,7 +452,7 @@
               <h3 id="fee-flow-competition-title">The other LPs’ range</h3>
               <p id="fee-flow-competitor-capital" class="body-copy"></p>
               <label for="fee-flow-other-width">Other LPs’ range width <output id="fee-flow-width-value" for="fee-flow-other-width"></output></label>
-              <input id="fee-flow-other-width" type="range" min="1" max="400" step="any" value="100" aria-describedby="fee-flow-competitor-bounds fee-flow-concentration-help">
+              <input id="fee-flow-other-width" class="touch-range" type="range" min="1" max="400" step="any" value="100" aria-describedby="fee-flow-competitor-bounds fee-flow-concentration-help">
               <div class="fee-flow-slider-ends" aria-hidden="true"><span>Tighter range</span><span>Wider range</span></div>
               <label class="fee-flow-full-range"><input id="fee-flow-full-range" type="checkbox"> Spread their capital across all prices (full range)</label>
               <div class="fee-flow-impact" aria-live="polite"><p>Your share of the next batch’s LP fees</p><div><span>A <strong id="fee-flow-impact-a"></strong></span><span>B <strong id="fee-flow-impact-b"></strong></span></div></div>
