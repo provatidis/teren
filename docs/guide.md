@@ -6,7 +6,9 @@ Jump to [Split the yield](#split-the-yield), [single loans](#lending-supply-borr
 
 ## Split the yield
 
-Start with the two buyers of one 1,000 USDC deposit. One buys the principal claim (PT) and one buys the remaining interest (YT). Move **Day the underlying rate changes** from day 80 to day 10. The same 15% annual yield then applies for 80 days instead of ten. Use the points beneath the chart to inspect interest at purchase, at the change or at maturity. The maturity results cover the whole term.
+New to PT and YT? [Start with the deposit](https://teren.sh/yield-learn.html#lesson=split). The four lessons follow its owners from the first split to an early sale. Each opens its example in Experiment in a separate tab.
+
+In Experiment, start with the two buyers of one 1,000 USDC deposit. One buys the principal claim (PT) and one buys the remaining interest (YT). Move **Day the underlying rate changes** from day 80 to day 10. The same 15% annual yield then applies for 80 days instead of ten. Use the points beneath the chart to inspect interest at purchase, at the change or at maturity. The maturity results cover the whole term.
 
 Open **Edit entry price, term and rates** for your own assumptions. Changing the term keeps the switch at approximately the same fraction of the term. **Compare the same budget** shows how many units each buyer can afford and what each receives at maturity. The two targets are gross interest on the original 1,000 USDC deposit. Earning enough to recover the YT price can still leave it behind holding.
 
@@ -24,9 +26,9 @@ The optional V2-style reference in the range lab keeps its own cash fees and use
 
 ## Start from Home
 
-Home introduces Liquidity, Lending and Yield trading. Liquidity and Lending offer **Open the lab** and **Learn step by step**. Yield trading opens **Split the yield** directly. **Continue experimenting** restores the last valid assumptions edited or saved in this browser, independently of lesson progress. Its local bookmark contains inputs, not recorded provenance; use named saves to retain a source snapshot. **Your saved experiments** opens the shared library. Phones have a shortcut to each topic above the cards. The Teren logo returns Home, and **Continue learning** reopens the most recently visited lesson in this browser after it has been opened in this release. It is a navigation bookmark, not a completion mark.
+Home introduces Liquidity, Lending and Yield trading. Each topic offers a direct experiment and **Learn step by step**. **Continue experimenting** restores the last valid assumptions edited or saved in this browser, independently of lesson progress. Its local bookmark contains inputs, not recorded provenance; use named saves to retain a source snapshot. **Your saved experiments** opens the shared library. Phones have a shortcut to each topic above the cards. The Teren logo returns Home, and **Continue learning** reopens the most recently visited lesson in this browser after it has been opened in this release. It is a navigation bookmark, not a completion mark.
 
-Inside a topic, the mode links stay within it: Liquidity has Learn, Experiment and Inspect; Lending has Learn and Experiment. Yield trading has a single experiment. Switch topics in the header. Valid liquidity drafts survive a same-tab visit to Home, Learn or Lending. An explicit shared scenario takes precedence when reopening the lab.
+All three topics have Learn and Experiment. Liquidity also has Inspect. Switch topics in the header. Valid liquidity drafts survive a same-tab visit to Home, Learn or Lending. An explicit shared scenario takes precedence when reopening the lab.
 
 The liquidity lab now lives at `liquidity.html`. Existing links such as `/#scenario=...`, `/#inspect` and `/#historical-case` still open the corresponding liquidity view and preserve their fragment. Home links and lesson links remain directly shareable.
 
@@ -41,7 +43,7 @@ Choose **Liquidity**, **Lending** or **Yield trading** in the topic switch. Expe
 | --- | --- | --- |
 | Liquidity | [Full-range and price-range labs](https://teren.sh/liquidity.html#experiment) | [Foundations, range choices and recorded cases](https://teren.sh/learn.html) |
 | Lending | [Collateralized-loan lab](https://teren.sh/lending.html#experiment) | [Supply, borrow, change conditions and respond](https://teren.sh/lending.html#learn) |
-| Yield trading | [Split the yield](https://teren.sh/yield.html) | — |
+| Yield trading | [Split the yield](https://teren.sh/yield.html) | [From one deposit to an early sale](https://teren.sh/yield-learn.html) |
 
 The top navigation stays visible while scrolling. **Experiment** opens the chosen topic’s calculator workspace; **Learn** opens its lessons. **Inspect** opens liquidity’s pool/position workspace. Within Liquidity, the tool links follow the current workspace: calculator tools in Experiment, snapshot sources in Inspect, and a return to experiments from recorded history or Pool mechanics. Historical cases belong to Inspect and remain directly accessible from Experiment. Existing tool and shared-scenario links still open their targets directly.
 
@@ -197,7 +199,7 @@ Open [Learn](https://teren.sh/learn.html) for six independent foundation lessons
 
 **Changing token balances** and **Narrow and wide ranges** begin with interactive diagrams. Move the price slider to compare both token amounts or both ranges; use **Question** to return to the prediction price. Exploration does not change the assessed setup or Experiment link. Range boundary buttons show the difference between an exact edge and a price inside or outside. Earned fees are not inferred from these diagrams.
 
-All twenty lessons introduce the starting situation, the change being tested and its key assumptions before the prediction choices. Choose an expectation, then **See what happens**, or use **Not sure — show me**. Feedback states whether your prediction matched and explains the finding. Visual lessons bring the question’s diagram into view beside that feedback. You can also explore or read the explanation directly; the explanation and application checks determine completion.
+The lessons introduce the starting situation, the change being tested and its key assumptions before the prediction choices. Choose an expectation, then **See what happens**, or use **Not sure — show me**. Feedback states whether your prediction matched and explains the finding. Visual lessons bring the question’s diagram into view beside that feedback. You can also explore or read the explanation directly; the explanation and application checks determine completion.
 
 The lessons cover swap impact, proportional pool ownership, changing token balances, impermanent loss versus dollar profit, fee break-even, and concentrated range boundaries. Fresh range-boundary variations finish above, below and inside the range; saved custom inputs remain intact. The final challenge brings the comparisons together: find a setup where the LP matches holding but both are below the starting capital, then explain why those statements can coexist. The controls supply the values; no exact price or manual fee calculation is required. The optional worked example still distinguishes additional fees from the total break-even target.
 

@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { LEARNING_ROUTES } from '../../public/lib/entry-links.js';
+import { checkSkippedYieldPrediction } from './yield-learning-checks.js';
 
 export async function checkPredictions({ evaluate, click, text, navigate, reload, base, call }) {
   const keys = ['degenerator-learning-liquidity-v1', 'passiko-range-learning-v1',
-    'passiko-applied-liquidity-v1', 'teren-lending-learning-v1', 'teren-loop-learning-v1'];
+    'passiko-applied-liquidity-v1', 'teren-lending-learning-v1', 'teren-loop-learning-v1', 'teren-yield-learning-v1'];
   const saved = await evaluate(`Object.fromEntries(${JSON.stringify(keys)}.map(key => [key, localStorage.getItem(key)]))`);
   const ready = () => evaluate(`new Promise((resolve, reject) => {
     const end = Date.now() + 5000;
@@ -25,6 +26,11 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
       await call('Emulation.setDeviceMetricsOverride', { width, height: 1000, deviceScaleFactor: 1, mobile: width < 750 });
       await evaluate(`${JSON.stringify(keys)}.forEach(key => localStorage.removeItem(key))`);
       for (const route of Object.keys(LEARNING_ROUTES)) {
+        if (route.startsWith('yield-learn.html')) {
+          await navigate(base + route);
+          await checkSkippedYieldPrediction({ evaluate, call, reload, text });
+          continue;
+        }
         const id = route.split('=')[1];
         const prefix = route.startsWith('lending') ? 'lend' : route.includes('#manage=') ? 'manage' : route.includes('#applied=') ? 'applied' : 'learn';
         const result = prefix === 'learn' ? 'learn-results' : prefix + '-observe';
@@ -88,5 +94,5 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
   } finally {
     await evaluate(`Object.entries(${JSON.stringify(saved)}).forEach(([key, value]) => value === null ? localStorage.removeItem(key) : localStorage.setItem(key, value))`);
   }
-  console.log('PASS: visible predictions in all 20 lessons at desktop/mobile sizes, keyboard skip, no fabricated guesses, conceptual completion and restored progress');
+  console.log('PASS: visible predictions across all lesson routes at desktop/mobile sizes, keyboard skip, no fabricated guesses and restored progress');
 }

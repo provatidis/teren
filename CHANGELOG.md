@@ -1,5 +1,10 @@
 # Release history
 
+## 1.53.0 · 2026-11-16
+
+- Add four step-by-step yield trading lessons. Follow the owner of one deposit, compare the principal and yield buyers, change when interest is earned, then price a sale before maturity.
+- Open any yield lesson directly, return to it from Home, or explore its assumptions in Split the yield.
+
 ## 1.52.0 · 2026-11-16
 
 - Extend **Split the yield** with an early-sale comparison. Choose a sale day and market implied APY to see how the same remaining term prices PT and YT.

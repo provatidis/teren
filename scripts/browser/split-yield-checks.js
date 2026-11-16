@@ -89,7 +89,8 @@ export async function checkSplitYield({ evaluate, click, fill, text, navigate, r
       assert.ok(await evaluate("document.querySelector('[aria-label=\"DeFi topic\"]').getBoundingClientRect().right") <= width);
       for (const page of ['about.html', 'methods.html#split-yield', 'learn.html', 'lending.html#experiment', 'liquidity.html#experiment']) {
         await navigate(base + page);
-        assert.ok(await evaluate("document.querySelector('.topic-nav a[href=\"yield.html\"]').getBoundingClientRect().right") <= width, 'Topic link fits ' + page + ' at ' + width + 'px');
+        const target = page === 'learn.html' ? 'yield-learn.html' : 'yield.html';
+        assert.ok(await evaluate("document.querySelector('.topic-nav a[href=\"" + target + "\"]').getBoundingClientRect().right") <= width, 'Topic link fits ' + page + ' at ' + width + 'px');
       }
     }
     await fill('scenario-future', '3571');

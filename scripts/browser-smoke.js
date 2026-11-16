@@ -42,6 +42,7 @@ import { checkSavedExperiments, checkMobileSavedExperiments } from './browser/sa
 import assert from 'node:assert/strict';
 import { checkEntry } from './browser/entry-checks.js';
 import { checkSplitYield } from './browser/split-yield-checks.js';
+import { checkYieldLearning } from './browser/yield-learning-checks.js';
 import { checkStartup } from './browser/startup-checks.js';
 import { spawn } from 'node:child_process';
 import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises';
@@ -223,6 +224,11 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'yield-learning') {
+    await checkYieldLearning({ evaluate, click, text, navigate, reload, base, call, nextEvent });
+    assert.deepEqual(errors, [], 'No uncaught errors in the yield lessons');
+    if (process.env.BROWSER_CHECKS === 'yield-learning') return;
+  }
   if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'yield') {
     await checkSplitYield({ evaluate, click, fill, text, navigate, reload, base, call, nextEvent });
     assert.deepEqual(errors, [], 'No uncaught errors in the yield experiment');

@@ -1,9 +1,12 @@
 @import url("./styles/foundation.css");
 @import url("./styles/components.css");
+@import url("./styles/mode-navigation.css");
 @import url("./styles/navigation.css");
 
 .yield-page { line-height: 1.55; }
-.yield-page .topbar { position: sticky; top: 0; z-index: 4; background: var(--bg); }
+.yield-page .product-nav a { font-size: 14px; }
+.yield-page .topbar { position: sticky; z-index: 4; background: var(--bg); }
+@media (min-width: 751px) { .yield-page .topbar { top: 0; } }
 .yield-page main { max-width: 1180px; }
 .yield-intro, .yield-comparison-head {
   display: flex; align-items: center; justify-content: space-between; gap: 16px 28px;

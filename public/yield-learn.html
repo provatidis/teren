@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://ethereum-rpc.publicnode.com https://eth.drpc.org; base-uri 'none'; object-src 'none'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101c27">
+  <meta name="description" content="Follow one deposit through four Pendle-style lessons. See who owns its principal and interest, when buying the yield pays off, and what changes if you sell before maturity.">
+  <meta name="application-name" content="Teren">
+  <meta name="apple-mobile-web-app-title" content="Teren">
+  <title>Yield trading lessons · Teren</title>
+  <link rel="canonical" href="https://teren.sh/yield-learn.html">
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Teren">
+  <meta property="og:title" content="Yield trading lessons · Teren">
+  <meta property="og:description" content="Follow one deposit through four Pendle-style lessons. See who owns its principal and interest, when buying the yield pays off, and what changes if you sell before maturity.">
+  <meta property="og:url" content="https://teren.sh/yield-learn.html">
+  <meta property="og:image" content="https://teren.sh/assets/social-preview.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
+  <meta name="twitter:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Yield trading lessons · Teren">
+  <meta name="twitter:description" content="Follow one deposit through four Pendle-style lessons. See who owns its principal and interest, when buying the yield pays off, and what changes if you sell before maturity.">
+  <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
+  <link rel="stylesheet" href="styles/yield-learning.css">
+  <script type="module" src="yield-learn-entry.js"></script>
+</head>
+<body class="learning-page yield-learning-page">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Teren home"><img class="brand-logo" src="assets/teren-logo.svg" width="145" height="40" alt=""></a>
+    <nav class="topic-nav" aria-label="DeFi topic"><a href="learn.html">Liquidity</a><a href="lending.html#learn">Lending</a><span class="topic-current" aria-current="true">Yield trading</span></nav>
+    <nav class="site-nav" aria-label="Yield trading modes"><div class="product-nav"><a href="yield-learn.html" aria-current="page">Learn</a><a href="yield.html">Experiment</a></div></nav>
+  </header>
+  <main id="main-content" tabindex="-1">
+    <section id="app-startup" class="notice app-startup" data-state="loading" aria-labelledby="app-startup-title">
+      <h1 id="app-startup-title">Opening this page…</h1>
+      <p id="app-startup-message" role="status">The interactive tools aren’t ready yet. If this message stays here, reload the page.</p>
+      <button id="app-reload" class="button secondary" type="button" hidden>Reload page</button>
+      <noscript><div class="notice"><p>JavaScript is needed for the interactive lessons and progress. Enable it to follow the deposit through each example.</p></div></noscript>
+    </section>
+    <div id="app-content" inert>
+      <section class="intro learn-intro" aria-labelledby="yl-page-title">
+        <div><p class="eyebrow">LEARN BY DOING</p><h1 id="yl-page-title">Yield trading essentials</h1>
+          <p class="subtitle">Follow the principal and interest on one deposit, from the split to a sale.</p>
+        </div>
+      </section>
+      <div class="learn-meta"><span>Four lessons · Open any step</span> <span id="yl-storage">Progress saves in this browser.</span></div>
+      <p id="yl-route-note" class="notice" role="status" hidden>That lesson link could not be opened. Choose a step from the lesson list.</p>
+      <div class="learn-workspace">
+        <aside class="learn-sidebar">
+          <details id="yl-course" class="card learn-course" open>
+            <summary><span>All lessons</span><strong id="yl-progress">0 of 4 checked</strong><span class="learn-course-chevron" aria-hidden="true">⌄</span></summary>
+            <nav aria-label="Yield trading lessons"><ol id="learn-lesson-list"></ol></nav>
+            <a class="learn-sidebar-link" href="yield.html">Open the yield experiment →</a>
+          </details>
+        </aside>
+        <article id="yl-lesson" class="learn-lesson" aria-labelledby="yl-title">
+          <div class="learn-lesson-heading">
+            <p id="yl-number" class="eyebrow"></p>
+            <button id="yl-all" class="learn-text-button" type="button">All lessons ↑</button>
+          </div>
+          <h2 id="yl-title" tabindex="-1"></h2>
+          <p id="yl-intro" class="learn-reading"></p>
+          <section id="yl-activity" class="card learn-experiment" aria-labelledby="yl-scene-title">
+            <h3 id="yl-scene-title"></h3>
+            <div id="yl-setup" class="learn-setup"></div>
+            <div id="yl-prompt">
+              <fieldset id="yl-prediction-field" class="learn-fieldset">
+                <legend id="yl-prediction-question"></legend><div id="yl-prediction-choices" class="learn-choices"></div>
+              </fieldset>
+              <button id="yl-reveal" type="button"></button>
+              <p id="yl-prediction-feedback" class="learn-prediction-feedback" role="status"></p>
+            </div>
+            <div id="yl-stage-controls" class="scene-shortcuts" role="group" aria-label="Explore the example"></div>
+            <figure id="yl-scene" aria-labelledby="yl-scene-caption">
+              <div id="yl-scene-drawing"></div>
+              <figcaption id="yl-scene-caption"></figcaption>
+            </figure>
+            <div id="yl-observe" hidden>
+              <a id="yl-explore" class="learn-explore" href="yield.html" target="_blank" rel="noopener noreferrer">Explore this question in Experiment ↗</a>
+              <details id="yl-deeper" class="learn-deeper">
+                <summary><span><strong>Go deeper</strong> <span class="learn-deeper-subtitle">Mechanics and sources</span></span> <span class="learn-deeper-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" focusable="false"><path d="M6 1v10M1 6h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span></summary>
+                <div class="learn-deeper-content"><div id="yl-reading"></div><ul id="yl-sources"></ul></div>
+              </details>
+            </div>
+          </section>
+          <section id="yl-assessment" class="card learn-assessment" aria-labelledby="yl-check-title" hidden>
+            <h3 id="yl-check-title">Check your understanding</h3>
+            <form id="yl-form" novalidate>
+              <fieldset class="learn-fieldset"><legend id="yl-reason-question"></legend><div id="yl-reason-choices" class="learn-choices"></div></fieldset>
+              <div class="learn-application-setup"><p class="eyebrow">Another situation</p><p id="yl-application-context"></p></div>
+              <fieldset class="learn-fieldset"><legend id="yl-application-question"></legend><div id="yl-application-choices" class="learn-choices"></div></fieldset>
+              <details id="yl-hint" class="learn-hint"><summary>Need a hint?</summary><p id="yl-hint-text"></p></details>
+              <button id="yl-check" class="button primary" type="submit">Check answers →</button>
+            </form>
+            <div id="yl-feedback" class="learn-feedback" tabindex="-1" aria-labelledby="yl-feedback-title" hidden>
+              <div role="status"><strong id="yl-feedback-title"></strong><p id="yl-feedback-copy"></p></div>
+              <div id="yl-continue" class="learn-continue" hidden>
+                <a id="yl-next" class="button primary" href="yield.html">Continue →</a>
+                <button id="yl-retry" class="learn-text-button" type="button">Try this lesson again ↻</button>
+              </div>
+            </div>
+          </section>
+        </article>
+      </div>
+    </div>
+    <footer class="site-footer">
+      <span>Teren · Look closely.</span>
+      <nav aria-label="Project information">
+        <a href="methods.html" target="_blank" rel="noopener noreferrer">Methods ↗</a>
+        <a href="https://github.com/provatidis/teren" target="_blank" rel="noopener noreferrer">Source ↗</a>
+        <a href="about.html" target="_blank" rel="noopener noreferrer">About ↗</a>
+        <a href="mailto:hello@teren.sh?subject=Teren%20feedback">Email feedback</a><a href="https://github.com/provatidis/teren/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Report an issue ↗</a>
+      </nav>
+    </footer>
+  </main>
+
+</body>
+</html>

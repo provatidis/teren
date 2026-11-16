@@ -51,13 +51,14 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
     await navigate(base + 'lending.html#experiment');
     await fill('loan-future', '1750');
     const saved = await storage();
-    for (const [route, entry] of [
+    for (const [route, entry, dependency = 'lib/format'] of [
       ['lending.html?review=startup#loops', 'lending-main'],
       ['liquidity.html#range-lab', 'main'],
       ['learn.html#applied=fees-over-time', 'learn-main'],
       ['yield.html', 'yield-main'],
+      ['yield-learn.html#lesson=exit', 'yield-learn-main', 'learning/yield-lessons'],
     ]) {
-      for (const pattern of ['*/' + entry + '*.js', '*/lib/format*.js']) {
+      for (const pattern of ['*/' + entry + '*.js', '*/' + dependency + '*.js']) {
         await intercept(route, pattern);
         await waitForFailure();
         await unavailable();
@@ -76,6 +77,7 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
       ['liquidity.html#saved-experiments', 'liquidity-entry'],
       ['learn.html#applied=fees-over-time', 'lib/app-startup'],
       ['yield.html#comparison', 'yield-entry'],
+      ['yield-learn.html#lesson=split', 'yield-learn-entry'],
     ]) {
       await intercept(route, '*/' + entry + '*.js');
       assert.equal(await state(), 'loading');
@@ -141,7 +143,7 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
     console.log('PASS: Home keeps its ordinary links; failure notices and reload work at desktop and phone sizes');
 
     await call('Emulation.setScriptExecutionDisabled', { value: true });
-    for (const route of ['liquidity.html#lp-lab', 'learn.html#lesson=swap-impact', 'lending.html#lst-loops', 'yield.html#comparison']) {
+    for (const route of ['liquidity.html#lp-lab', 'learn.html#lesson=swap-impact', 'lending.html#lst-loops', 'yield.html#comparison', 'yield-learn.html#lesson=buyers']) {
       const loaded = nextEvent('Page.loadEventFired', { startup: false });
       await call('Page.navigate', { url: base + route });
       await loaded;

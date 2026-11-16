@@ -1,7 +1,5 @@
 /* Learning shares calculation models and visual primitives with the playground. */
-.product-nav{display:flex;align-items:center;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
-.product-nav a{padding:8px 12px;border-radius:6px;color:var(--muted);font-weight:600;font-size:12px}
-.product-nav a[aria-current=page]{background:var(--accent);color:var(--accent-ink)}
+@import url("./mode-navigation.css");
 .learn-intro{margin-bottom:16px}
 .learn-meta{display:flex;flex-wrap:wrap;gap:10px 24px;color:var(--muted);font-size:11px;margin:0 0 32px}
 .learn-meta>span+span:before{content:"· ";margin-right:20px;color:var(--muted)}
