@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { YIELD_LESSONS } from '../public/learning/yield-lessons.js';
 import { readSplitSetup } from '../public/data/split-yield-state.js';
+import { splitDeposit } from '../public/models/split-yield-v1.js';
 
 function handoff(lesson) {
   const url = new URL(lesson.experimentHref, 'https://teren.sh/');
@@ -44,6 +45,8 @@ test('timing shows opposite YT outcomes on one scale and sends the earlier rise 
   assert.deepEqual(money(late), ['20.00', '13.90']);
   assert.deepEqual(money(early), ['20.00', '30.86']);
   assert.equal(lesson.scene.stages[lesson.scene.outcome].bars, early);
+  const reversed = splitDeposit({ ...inputs, firstApy: 15, secondApy: 5, switchDay: 10 });
+  assert.equal(reversed.netInterest.toFixed(2), money(late)[1], 'Ten high-rate days earn the same total at either end of the term.');
 });
 
 test('both day-45 offers keep the seller’s earned yield; the question opens the higher quote', () => {

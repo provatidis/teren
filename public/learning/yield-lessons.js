@@ -6,6 +6,7 @@ import { splitAtExit } from '../models/split-yield-exit-v1.js';
 const academy = { title: 'Pendle Academy · How a deposit splits', url: 'https://docs.pendle.finance/pendle-academy/pendle-101/chapter-2-yield-tokenization-basics' };
 const glossary = { title: 'Pendle · Principal, yield and implied APY', url: 'https://docs.pendle.finance/pendle-v2/ProtocolMechanics/Glossary' };
 const fees = { title: 'Pendle · Fees on yield and trades', url: 'https://docs.pendle.finance/pendle-v2/ProtocolMechanics/Mechanisms/Fees' };
+const claims = { title: 'Pendle · Claiming yield after maturity', url: 'https://docs.pendle.finance/pendle-v2/ProtocolMechanics/YieldTokenization/YT#claiming-yt-yield' };
 const accounting = { title: 'Pendle · How earned interest is tracked', url: 'https://docs.pendle.finance/pendle-v2-dev/Contracts/YieldTokenization' };
 
 const original = SPLIT_DEFAULTS;
@@ -36,7 +37,7 @@ function timingStage(label, caption, input) {
 function saleStage(label, quote) {
   return {
     label,
-    caption: 'The YT buyer can sell the remaining 45 days of interest. Their total also includes the interest they have already earned. Both sales are shown before trading costs.',
+    caption: 'The offer buys the interest still to come. The seller keeps the interest earned before day 45. Both sales are shown before trading costs.',
     rows: [
       ['PT buyer can sell for', cash(quote.ptSale), 'pt'],
       ['YT buyer takes home in total', cash(quote.ytTotal), 'yt'],
@@ -83,7 +84,7 @@ export const YIELD_LESSONS = [
       { label: 'Reach maturity', caption: 'Day 90 arrives. The YT stops earning new interest.',
         retainedPayment: { label: 'Already in your wallet from selling YT', value: cash(lateDeposit.ytCost) }, rows: [
         ['You can redeem', cash(DEPOSIT) + ' of principal', 'pt'],
-        ['The buyer has earned', cash(lateDeposit.netInterest) + ' after the yield fee', 'yt'],
+        ['Earned and ready for the buyer to claim', cash(lateDeposit.netInterest) + ' after the yield fee', 'yt'],
       ] },
     ] },
     reason: {
@@ -96,7 +97,7 @@ export const YIELD_LESSONS = [
         refill: 'You sold your YT to another person. Nothing was withdrawn from the 1,000 USDC deposit.',
       },
     },
-    applicationContext: 'Your YT buyer holds it through day 90 and forgets to collect the interest. They open their wallet the next day.',
+    applicationContext: 'The day after maturity, the buyer’s wallet shows that the YT itself is worth zero. They haven’t claimed any interest yet.',
     application: {
       question: 'What can they still collect?',
       choices: [['past', 'The interest earned while they held the YT.'], ['principal', 'The original deposit now that the YT has expired.'], ['nothing', 'Nothing, because they missed the maturity date.']],
@@ -107,13 +108,13 @@ export const YIELD_LESSONS = [
         nothing: 'The final day is a cutoff for earning interest. It is not a deadline to collect what has already accrued.',
       },
     },
-    hint: 'Follow the two transfers on the first day. Who sent the 20 USDC, and which token did they receive?',
+    hint: 'For the first question, follow the 20 USDC from the buyer’s wallet. For the second, look at what the buyer had already earned by day 90.',
     accomplishment: 'You followed the original deposit, the buyer’s payment and the interest to their owners.',
     deeper: [
       'The two boxes represent all the tokens from this deposit. In this USDC example the split produces 1,000 PT and 1,000 YT. Each PT represents one unit of principal, and each YT receives the interest on one unit until expiry.',
       'The buyer can collect interest as it accrues. We leave it in the earning asset, value it in USDC and deduct the 5% fee on YT interest. The original deposit and the buyer’s upfront payment are separate.',
     ],
-    sources: [academy, fees], experimentHref: experiment(original),
+    sources: [academy, claims, fees], experimentHref: experiment(original),
   },
   {
     id: 'buyers', short: 'Why buy PT or YT?', title: 'Why buy either part?',
@@ -155,14 +156,15 @@ export const YIELD_LESSONS = [
         interest: 'The PT paid no separate interest. Paying less than the redemption amount gave Mina her gain.',
       },
     },
-    applicationContext: 'In another deposit, Leo pays the same 20 USDC for the YT. This time he collects 12 USDC of interest over the term and holds the YT through maturity.',
+    applicationContext: 'On another deposit, Leo pays 20 USDC for YT and holds it to maturity. He collects 12 USDC in interest after fees.',
     application: {
-      question: 'What happens to the 20 USDC Leo paid?',
-      choices: [['refund', 'It is refunded when the YT matures.'], ['cost', 'It was the purchase price, so he ends with a loss.'], ['top-up', 'The PT holder covers the part his interest didn’t earn.']],
+      revision: 2,
+      question: 'Who, if anyone, owes Leo the remaining 8 USDC?',
+      choices: [['refund', 'The seller who received his 20 USDC.'], ['cost', 'Nobody owes him a payment.'], ['top-up', 'The PT holder who redeems the principal.']],
       correct: 'cost',
       feedback: {
-        refund: 'The purchase payment went to the seller. YT pays Leo the earned interest, with no separate refund at maturity.',
-        cost: 'He bought the right to an uncertain amount. Receiving 12 USDC leaves him 8 USDC short of what he spent.',
+        refund: 'The seller delivered the YT when Leo paid. They never promised to buy it back or cover a shortfall.',
+        cost: 'The 12 USDC is real income. Leo still lost 8 USDC on the purchase.',
         'top-up': 'The PT holder redeems the principal. They owe Leo no payment if the interest falls short.',
       },
     },
@@ -176,7 +178,7 @@ export const YIELD_LESSONS = [
   },
   {
     id: 'timing', short: 'When does the interest arrive?', title: 'The same rate rise, earlier or later',
-    intro: 'A YT buyer pays 20 USDC for the interest on a 1,000 USDC deposit. Compare two ways those 90 days could unfold.',
+    intro: 'A YT buyer pays 20 USDC for the interest on a 1,000 USDC deposit and leaves the interest there until day 90. Compare two ways those days could unfold.',
     setup: {
       facts: [
         ['In both cases', 'The annual percentage yield (APY) starts at 5% and finishes at 15%. These are rates for a full year.'],
@@ -186,12 +188,12 @@ export const YIELD_LESSONS = [
     },
     prediction: {
       question: 'What does moving the rate rise earlier do to the interest the buyer collects?',
-      choices: [['same', 'It stays the same because both deposits finish at 15%.'], ['more', 'It grows because the deposit spends longer at 15%.'], ['earlier', 'The buyer receives the same amount sooner.']],
+      revision: 2,
+      choices: [['more', 'They earn more interest by day 90.'], ['earlier', 'They earn the same total, only sooner.']],
       correct: 'more',
       feedback: {
-        same: 'The closing rate describes the last day. Much more of the term earns the higher rate when it rises on day 10.',
-        more: 'With an earlier rise, the higher rate applies to 80 days of the deposit’s life.',
-        earlier: 'Moving the rise changes the rate applied to many days. That changes the total the buyer earns by maturity.',
+        more: 'The deposit earns 15% for 80 days instead of ten. That gives the buyer enough interest to cover the 20 USDC they paid.',
+        earlier: 'The buyer gets 70 extra days at the higher rate. By day 90 the interest covers the 20 USDC purchase only in the earlier-rise example.',
       },
     },
     finding: 'A rise on day 80 leaves the buyer short of the 20 USDC they paid. A rise on day 10 gives the same buyer enough time to make a gain.',
@@ -200,28 +202,30 @@ export const YIELD_LESSONS = [
       timingStage('Rise on day 10', 'The deposit now earns the higher rate for 80 days. The buyer paid the same price on day one.', early),
     ] },
     reason: {
-      question: 'Why can’t the 15% rate at maturity tell you whether the YT paid for itself?',
-      choices: [['annual', 'You also need the interest rate on the day the buyer bought YT.'], ['principal', 'The answer also depends on what PT sold for at maturity.'], ['path', 'You need the interest earned over the whole term and the price paid for YT.']],
-      correct: 'path',
+      revision: 2,
+      question: 'Reverse the day-80 example. Ten days at 15% come first, then 80 days at 5%. The YT earns the same ' + cash(lateDeposit.netInterest) + ' either way. Why?',
+      choices: [['duration', 'Each rate applies for the same number of days in both runs.'], ['price', 'The buyer paid the same 20 USDC for YT in both runs.'], ['average', 'Both deposits earn 10% APY, halfway between the two rates.']],
+      correct: 'duration',
       feedback: {
-        annual: 'Both deposits started at 5%. Even knowing both rates leaves out how long each applied.',
-        principal: 'The YT buyer purchased the interest. They can compare what it paid with their purchase price without selling PT.',
-        path: 'Identical final rates can come after very different months. Compare the full period’s net interest with the buyer’s upfront cost.',
+        duration: 'The balance grows through the same two periods in either order. In the chart, moving the rise to day 10 gave the deposit 80 high-rate days instead of ten.',
+        price: 'The purchase price tells you what the buyer needs to recover. The deposit would earn the same interest even if someone paid a different price for that YT.',
+        average: 'A simple average gives both rates equal weight. Here the deposit spends 80 days at 5% and only ten at 15%, whichever period comes first.',
       },
     },
-    applicationContext: 'A trader paid 20 USDC for the yield on a 1,000 USDC deposit. The interest covered the price of the YT. Now they want to know if they did better than keeping their money deposited.',
+    applicationContext: 'You have 20 USDC. You buy YT on a 1,000 USDC deposit and receive exactly 20 USDC in interest after fees by maturity. You could also have put your 20 USDC into that interest-earning deposit.',
     application: {
-      question: 'Which comparison would answer the trader’s question?',
-      choices: [['whole', 'Compare with keeping the full 1,000 USDC deposited for those 90 days.'], ['cash', 'Compare with leaving 20 USDC unspent in their wallet for those 90 days.'], ['equal', 'Compare with keeping their 20 USDC deposited for those same 90 days.']],
-      correct: 'equal',
+      revision: 2,
+      question: 'Which choice would have left you with more money on day 90?',
+      choices: [['notional', 'Buying YT. It earned the interest on a much larger deposit.'], ['tie', 'They would tie. The YT earned back its whole purchase price.'], ['deposit', 'Depositing the 20 USDC. I’d still have it and the interest it earned.']],
+      correct: 'deposit',
       feedback: {
-        whole: 'The 1,000 USDC was the deposit behind the YT. This trader had 20 USDC to put to work.',
-        cash: 'Idle cash can tell the trader whether they recovered their cost. It leaves out the interest they could have earned on a deposit.',
-        equal: 'Both choices start with the same money on the same day. Covering the YT price can still leave the trader behind a deposit that earned interest.',
+        notional: 'The 1,000 USDC belongs to the principal holder. Your YT gave you its interest, which in this case just covered your purchase.',
+        tie: 'You finish the YT trade with the 20 USDC you started with. A direct deposit would also have paid interest on your 20 USDC.',
+        deposit: 'The YT purchase broke even. Depositing the same money would have left you with your 20 USDC plus interest.',
       },
     },
-    hint: 'Compare the time each deposit spent earning 15%. Then ask what the same starting money could have earned elsewhere.',
-    accomplishment: 'You distinguished earning interest, recovering the price of YT and keeping up with the original deposit.',
+    hint: 'Look at how long each rate lasts. For the 20 USDC decision, follow what you would own at maturity in each case.',
+    accomplishment: 'You explained why the time spent at each rate matters and how a YT purchase can break even while a deposit earns more.',
     deeper: [
       'The 5% and 15% are annual rates. The lab compounds each rate only for the days it actually applies and deducts a 5% fee from the interest paid to YT.',
       'A quoted rate gives you a starting point. To judge a purchase held to maturity, compare the actual after-fee interest with the price paid. To judge the alternative, track what the same budget would have earned in the unsplit asset.',
@@ -230,22 +234,23 @@ export const YIELD_LESSONS = [
   },
   {
     id: 'exit', short: 'Selling before maturity', title: 'What do you sell when you exit early?',
-    intro: 'You can sell PT or YT before day 90. The market’s implied APY is the annual return a new PT buyer would get by paying today’s price and holding to maturity, assuming full repayment.',
+    intro: 'Each PT in this example repays 1 USDC on day 90. A buyer who pays less today earns a higher annual return if they hold until then. That return is the market’s implied APY.',
     setup: {
       facts: [
-        ['At purchase', 'Two buyers each spend 1,000 USDC. The YT buyer can afford the interest from many deposits.'],
-        ['On day 45', 'Compare two offers on that same day. Both have 45 days left until maturity.'],
+        ['At purchase', 'Two traders spend 1,000 USDC each. One buys PT. The other buys the interest on fifty 1,000 USDC deposits through YT.'],
+        ['On day 45', 'In this example, one PT and its matching YT together cost 1 USDC. They still have 45 days until maturity.'],
       ],
-      action: 'Change the market’s implied APY from 5% to 15%. The deposit has earned the same interest up to the sale.',
+      action: 'The first quote is at 5% implied APY. The second quote on the same day is at 15%, so a buyer offers less for PT.',
     },
     prediction: {
-      question: 'At the higher implied APY, which part of the YT seller’s money changes?',
-      choices: [['earned', 'The interest already earned increases.'], ['remaining', 'The offer for the remaining 45 days of interest increases.'], ['both', 'The sale offer and the interest already earned both increase.']],
-      correct: 'remaining',
+      revision: 2,
+      question: 'If PT gets cheaper, what would you expect someone to offer for its matching YT?',
+      choices: [['higher', 'More at 15% than at 5%.'], ['lower', 'Less, just as they offer less for PT.'], ['unchanged', 'The same until the deposit earns more interest.']],
+      correct: 'higher',
       feedback: {
-        earned: 'Both offers are on the same day, after the same interest has accrued. It is the sale price that changes.',
-        remaining: 'A buyer pays more for the remaining yield. Everything earned before the sale still belongs to the seller.',
-        both: 'The offer changes immediately. The deposit has had no extra time or higher past rate to earn more interest.',
+        higher: 'The pair still costs 1 USDC. Paying less for the principal leaves a higher price for the remaining interest.',
+        lower: 'If both prices fell, the pair would cost less than 1 USDC. Here the lower PT offer goes with a higher YT offer.',
+        unchanged: 'A new buyer can offer more for the remaining interest today. The market price can change before the deposit earns another cent.',
       },
     },
     finding: 'The higher implied APY raises the YT offer and lowers the PT offer. The YT seller keeps the same interest earned before day 45.',
@@ -253,24 +258,26 @@ export const YIELD_LESSONS = [
       saleStage('5% implied APY', lowQuote), saleStage('15% implied APY', highQuote),
     ] },
     reason: {
-      question: 'Why does a new buyer pay less for PT in the 15% offer?',
-      choices: [['discount', 'A lower price gives a higher return on the same day-90 repayment.'], ['smaller', 'The higher rate reduces how much principal PT repays on day 90.'], ['term', 'The higher rate moves the repayment further into the future.']],
-      correct: 'discount',
+      revision: 2,
+      question: 'What does the higher YT offer buy for the new owner?',
+      choices: [['fixed-rate', 'Interest at 15% APY from the sale until day 90.'], ['future-income', 'Whatever interest the deposit earns from the sale until day 90.'], ['unclaimed', 'The remaining interest plus any the seller hasn’t claimed yet.']],
+      correct: 'future-income',
       feedback: {
-        discount: 'The repayment and its date stay fixed. Paying less today increases the return between purchase and redemption.',
-        smaller: 'In both offers the PT redeems for the same principal. The change is in what a buyer pays on day 45.',
-        term: 'Both offers have the same 45 days left. The price changes when the buyer requires a different annual return.',
+        'fixed-rate': 'The 15% comes from the market price for PT. The interest the new YT owner receives depends on what the deposit actually earns during the remaining 45 days.',
+        'future-income': 'What the buyer pays is known on day 45. How much interest those next 45 days will bring is still open.',
+        unclaimed: 'Interest belongs to whoever held the YT when it was earned. Waiting to claim it leaves it with the seller.',
       },
     },
     applicationContext: 'For a different trade, your wallet shows two swaps. You paid 200 USDC for YT and later sold it for 170 USDC. Trading costs are zero in this example.',
     application: {
+      revision: 2,
       question: 'Which other amount would tell you whether you lost money on the trade?',
-      choices: [['new-owner', 'The interest the next owner received after your sale.'], ['pt-value', 'The amount the matching PT redeemed for at maturity.'], ['your-income', 'The interest you earned while the YT was yours.']],
+      choices: [['full-term', 'The interest on your YT for the full 90-day term.'], ['projection', 'The interest projected when you first bought the YT.'], ['your-income', 'The interest your YT earned between your two swaps.']],
       correct: 'your-income',
       feedback: {
-        'new-owner': 'Your buyer paid for the yield that came after the sale. That belongs on their side of the trade.',
-        'pt-value': 'Your wallet held YT. The principal payment belongs to whoever held PT at maturity.',
-        'your-income': 'The sale brought in 30 USDC less than you spent. More than 30 USDC in interest during your ownership would turn that into a gain.',
+        'full-term': 'A full-term total can include interest earned by other owners. Add only the interest from the days the YT was yours to what you received on the sale.',
+        projection: 'The original quote was an estimate. To add up the trade, use the interest you actually earned while you held the YT.',
+        'your-income': 'Include that interest even if you haven’t claimed it yet. With 30 USDC after fees you broke even. Anything above 30 was a gain.',
       },
     },
     hint: 'Keep the sale day fixed. Trace what the old owner earned before day 45 and what the new owner is buying after it.',

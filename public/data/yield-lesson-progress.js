@@ -2,8 +2,15 @@ import { newChoiceSeed, validChoiceSeed } from '../lib/learning-choices.js';
 
 export const YIELD_LEARNING_KEY = 'teren-yield-learning-v1';
 
-export function freshYieldDraft() {
-  return { seed: newChoiceSeed(), prediction: '', reason: '', application: '', revealed: false, checked: false };
+export function freshYieldDraft(lesson) {
+  return {
+    seed: newChoiceSeed(), prediction: '', reason: '', application: '', revealed: false, checked: false,
+    questionRevisions: {
+      prediction: lesson.prediction.revision ?? 1,
+      reason: lesson.reason.revision ?? 1,
+      application: lesson.application.revision ?? 1,
+    },
+  };
 }
 
 function emptyProgress() {
@@ -18,15 +25,19 @@ export function parseYieldProgress(record, lessons) {
     if (Array.isArray(record.completed) && record.completed.includes(lesson.id)) progress.completed.push(lesson.id);
     const saved = record.drafts?.[lesson.id];
     if (!saved || typeof saved !== 'object') continue;
-    const draft = freshYieldDraft();
+    const draft = freshYieldDraft(lesson);
     if (validChoiceSeed(saved.seed)) draft.seed = saved.seed;
     draft.revealed = saved.revealed === true;
+    draft.checked = draft.revealed && saved.checked === true;
     for (const key of ['prediction', 'reason', 'application']) {
+      if ((saved.questionRevisions?.[key] ?? 1) !== draft.questionRevisions[key]) {
+        if (key !== 'prediction') draft.checked = false;
+        continue;
+      }
       if ((draft.revealed || key === 'prediction') && lesson[key].choices.some(([id]) => saved[key] === id)) {
         draft[key] = saved[key];
       }
     }
-    draft.checked = draft.revealed && saved.checked === true;
     progress.drafts[lesson.id] = draft;
   }
   return progress;

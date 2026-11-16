@@ -1,5 +1,9 @@
 # Release history
 
+## 1.53.1 · 2026-11-16
+
+- Refine the four yield lessons’ questions and feedback. Compare how long a rate lasts, who bears a YT shortfall, and what an early-sale quote buys. Preserve completed lessons and answers to unchanged questions.
+
 ## 1.53.0 · 2026-11-16
 
 - Add four step-by-step yield trading lessons. Follow the owner of one deposit, compare the principal and yield buyers, change when interest is earned, then price a sale before maturity.

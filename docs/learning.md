@@ -52,10 +52,10 @@ The three historical exercises continue to use the original two independently ch
 
 | Lesson | Distinction to look for |
 | --- | --- |
-| What gets split? | Trace the original deposit, the buyer’s payment and the interest to their owners. |
-| Why buy PT or YT? | Explain why paying less than the principal can give PT a return, and what YT’s buyer receives for the upfront payment. |
-| When does the interest arrive? | Two deposits can finish at the same annual rate and earn different amounts over the term. |
-| Selling before maturity | A YT sale price describes what the buyer pays for future interest. The seller also keeps the interest they already earned. |
+| What gets split? | Trace the principal and the buyer’s payment. Explain what the buyer can still claim after the YT expires. |
+| Why buy PT or YT? | Find the source of a PT buyer’s gain when the deposit pays no interest. Explain who bears the shortfall when YT earns less than its price. |
+| When does the interest arrive? | Distinguish spending more days at a higher rate from putting the same ten high-rate days first or last. Compare breaking even on YT with depositing the same money. |
+| Selling before maturity | Explain what a higher YT offer buys and which interest belongs to each owner. Identify the missing amount in a wallet’s buy and sale history. |
 
 To observe understanding, ask a learner to explain an early sale from the seller’s point of view using their own example. A useful follow-up is what else they would need to know after seeing only the sale price.
 
