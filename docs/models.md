@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [User guide](guide.md) · [Current review](review.md) · [Product decisions](../DECISIONS.md)
 
-Teren has two topics: liquidity and lending. Both provide hypothetical experiments and lessons. On-chain snapshots and historical records currently cover liquidity only.
+Teren provides hypothetical experiments in liquidity, lending and yield trading. Liquidity and lending also offer lessons. On-chain snapshots and historical records currently cover liquidity only.
 
 ## Protocol names and calculation versions
 
@@ -19,6 +19,14 @@ The single-loan and ETH/USDC loop labs use Aave v3-style collateral concepts wit
 - **Verified historical accounting:** the shipped fixed-position cases compare multiple recorded checkpoints, with unchanged-position evidence and independent fee checks. It calculates earned fee tokens and cumulative time in range for that recorded period.
 
 Applying a snapshot or replay checkpoint to a lab starts a new hypothetical comparison. The source data remains recorded evidence; subsequent prices and cash fees are model assumptions. [Snapshot validation](data.md) and [historical verification](replay.md) describe the separate checks.
+
+## Split the yield
+
+The hypothetical `pendle-split-v1` market uses USDC as its accounting asset. The reference deposit has a face amount of 1,000 USDC. One PT redeems for one USDC worth of the asset at maturity. One YT receives the interest attributable to one unit of face amount up to expiry. Issuance of equal token counts leaves the initial economic value of the deposit intact. The assumed entry prices are `q` USDC per YT and `1 − q` per PT. The model assumes full redemption and excludes points, other rewards, gas, swap costs and early-sale prices. Negative yield can impair real PT redemption. [Pendle token accounting](https://docs.pendle.finance/pendle-v2-dev/Contracts/YieldTokenization) · [Negative yield](https://docs.pendle.finance/pendle-v2/ProtocolMechanics/NegativeYield)
+
+For annual effective interest rates `a` and `b` expressed as fractions and elapsed days `d₁` and `d₂` in each phase, gross period growth is `g = (1+a)^(d₁/365) × (1+b)^(d₂/365) − 1`. The same formula values interest at any displayed day. Accrued interest stays in the yield-bearing asset. YT keeps `f = 0.95` of this interest after Pendle’s 5% fee. The unsplit holding retains all its interest. The displayed timeline measures accrued yield in USDC. [Pendle APY calculation](https://docs.pendle.finance/pendle-v2/ProtocolMechanics/PendleMarketAPYCalculation) · [Yield fees](https://docs.pendle.finance/pendle-v2/ProtocolMechanics/Mechanisms/Fees)
+
+With starting budget `B`, maturity values in USDC are `B/(1−q)` for PT, `B × f × g/q` for YT and `B × (1+g)` for holding. The gross interest needed on the 1,000 USDC reference deposit to recover the YT purchase price is `1000 × q/f`. Matching holding requires `1000 × q/(f−q)` when `q < f`. At or above `f`, no finite nonnegative yield catches holding. At the default price of 0.02 USDC per YT, the two targets round to 21.05 and 21.51 USDC. Amounts are rounded only for display.
 
 ## Concentrated-liquidity range lab
 

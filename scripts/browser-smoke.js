@@ -41,6 +41,7 @@ import { checkSavedExperiments, checkMobileSavedExperiments } from './browser/sa
 // Optional real-browser smoke test, using Chromium's DevTools protocol and Node built-ins.
 import assert from 'node:assert/strict';
 import { checkEntry } from './browser/entry-checks.js';
+import { checkSplitYield } from './browser/split-yield-checks.js';
 import { checkStartup } from './browser/startup-checks.js';
 import { spawn } from 'node:child_process';
 import { mkdtemp, rm, writeFile, readFile } from 'node:fs/promises';
@@ -222,6 +223,11 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'yield') {
+    await checkSplitYield({ evaluate, click, fill, text, navigate, reload, base, call, nextEvent });
+    assert.deepEqual(errors, [], 'No uncaught errors in the yield experiment');
+    if (process.env.BROWSER_CHECKS === 'yield') return;
+  }
   if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'startup') {
     await checkStartup({ evaluate, click, fill, text, navigate, base, call, nextEvent, waitForStartup });
     assert.deepEqual(errors, [], 'Startup failures are handled without uncaught errors');

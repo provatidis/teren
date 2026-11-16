@@ -8,6 +8,10 @@ The lab-risk release added the ETH/USDC loop liquidation event, visible price bo
 
 Release 1.44.0 makes single-loan interest explicit and consistent across balances, health, responses and liquidation, with a time visual and preserved legacy simple-interest setups. Release 1.45.0 adds optional LP costs, an assumed **position** fee APR and duration, and a principal → fees → costs comparison with holding. It never multiplies a pool APR by concentration; trading activity and competing liquidity remain unestimated. Next, test whether these controls help users distinguish a required fee target from attainable earnings. An atomic ETH/USDC exit and fee-aware sandbox arbitrage are later candidates.
 
+## Yield trading
+
+[Split the yield](https://teren.sh/yield.html) covers purchase through maturity. Ask people to change when the rate rises and explain a YT result against both its purchase price and holding. A later early-sale experiment would need an explicit exit price or implied rate and separate accounting for accrued and remaining yield. PT-backed borrowing is a separate potential link to the lending labs.
+
 ## Learning depth
 
 The lessons keep Predict → Observe → Check, with conceptual questions and optional worked calculations. Applications include constructing an example where matching holding still leaves a dollar loss, explaining why a sale cost leaves debt unpaid, and reasoning about a further price move from a recorded token mix. Next, use the [observation plan](learning.md#observation-plan): ask learners to explain an unfamiliar variation and note which hints they need before extending the patterns. [Learning design](learning.md) describes the current questions and visual interactions.

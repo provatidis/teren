@@ -1,5 +1,10 @@
 # Release history
 
+## 1.51.0 · 2026-11-16
+
+- Add **Split the yield**, a hypothetical Pendle-style market. Follow the principal and yield buyers of one USDC-denominated deposit, move a rate change through the term and inspect the interest earned by each milestone.
+- Compare PT, YT and holding with equal starting budgets. Show the separate yields needed to recover the YT purchase cost and to match holding, including cases where matching is impossible. Add direct topic navigation, local draft recovery and shareable inputs.
+
 ## 1.50.8 · 2026-10-28
 
 - Synchronize the guide, review and roadmap with current lesson interactions, model versions and exports. Clarify About, Methods and in-app notes on hypothetical fee allocation, snapshot claims, correlated loops and APY. This documentation pass changes no calculations, lesson checks, saved formats or recorded evidence.

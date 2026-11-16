@@ -21,3 +21,10 @@
 .skip-link:focus { transform: translateY(0); }
 /* Navigation focuses headings as reading destinations, not interactive controls. */
 :is(h1, h2, h3)[tabindex="-1"]:focus { outline: none; }
+
+/* The thumb stays clear of edge gestures and fits a native touch drag. */
+input.touch-range[type=range] { display: block; appearance: none; -webkit-appearance: none; width: 100%; height: 48px; padding: 0 12px; margin: 4px 0 8px; border: 0; background: transparent; }
+input.touch-range[type=range]::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--border-strong); }
+input.touch-range[type=range]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--border-strong); }
+input.touch-range[type=range]::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 28px; height: 28px; margin-top: -11px; border: 3px solid var(--text); border-radius: 50%; background: var(--accent-ink); }
+input.touch-range[type=range]::-moz-range-thumb { width: 22px; height: 22px; border: 3px solid var(--text); border-radius: 50%; background: var(--accent-ink); }

@@ -55,6 +55,7 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
       ['lending.html?review=startup#loops', 'lending-main'],
       ['liquidity.html#range-lab', 'main'],
       ['learn.html#applied=fees-over-time', 'learn-main'],
+      ['yield.html', 'yield-main'],
     ]) {
       for (const pattern of ['*/' + entry + '*.js', '*/lib/format*.js']) {
         await intercept(route, pattern);
@@ -74,6 +75,7 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
       ['lending.html#lst-loops', 'lending-entry'],
       ['liquidity.html#saved-experiments', 'liquidity-entry'],
       ['learn.html#applied=fees-over-time', 'lib/app-startup'],
+      ['yield.html#comparison', 'yield-entry'],
     ]) {
       await intercept(route, '*/' + entry + '*.js');
       assert.equal(await state(), 'loading');
@@ -139,7 +141,7 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
     console.log('PASS: Home keeps its ordinary links; failure notices and reload work at desktop and phone sizes');
 
     await call('Emulation.setScriptExecutionDisabled', { value: true });
-    for (const route of ['liquidity.html#lp-lab', 'learn.html#lesson=swap-impact', 'lending.html#lst-loops']) {
+    for (const route of ['liquidity.html#lp-lab', 'learn.html#lesson=swap-impact', 'lending.html#lst-loops', 'yield.html#comparison']) {
       const loaded = nextEvent('Page.loadEventFired', { startup: false });
       await call('Page.navigate', { url: base + route });
       await loaded;

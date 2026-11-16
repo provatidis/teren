@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Teren · Look closely",
   "short_name": "Teren",
-  "description": "Learn and experiment with DeFi liquidity and lending, and inspect recorded liquidity evidence.",
+  "description": "Learn and experiment with DeFi liquidity, lending and yield trading, and inspect recorded liquidity evidence.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
