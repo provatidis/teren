@@ -87,7 +87,7 @@ export function initYieldLearning() {
 
   function activate(entry) {
     lesson = entry;
-    draft = progress.drafts[entry.id] || freshYieldDraft();
+    draft = progress.drafts[entry.id] || freshYieldDraft(entry);
     saveLearningLocation('yield-learn.html' + route(entry.id));
     const index = YIELD_LESSONS.indexOf(entry);
     document.title = entry.short + ' · Yield trading lessons · Teren';
@@ -178,7 +178,7 @@ export function initYieldLearning() {
     focusLearningFeedback('yl');
   });
   el('retry').addEventListener('click', () => {
-    progress.drafts[lesson.id] = freshYieldDraft();
+    progress.drafts[lesson.id] = freshYieldDraft(lesson);
     activate(lesson);
     save();
     focusLesson();
