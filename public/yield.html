@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://ethereum-rpc.publicnode.com https://eth.drpc.org; base-uri 'none'; object-src 'none'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101c27">
+  <meta name="description" content="Follow a Pendle-style split from purchase to maturity. Change when the underlying yield rises and compare PT, YT and holding with the same USDC budget.">
+  <title>Split the yield · Pendle PT and YT · Teren</title>
+  <meta name="application-name" content="Teren">
+  <meta name="apple-mobile-web-app-title" content="Teren">
+  <meta name="color-scheme" content="dark">
+  <link rel="canonical" href="https://teren.sh/yield.html">
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180">
+  <link rel="manifest" href="site.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Teren">
+  <meta property="og:title" content="Split the yield · Pendle PT and YT · Teren">
+  <meta property="og:description" content="Follow a Pendle-style split from purchase to maturity. Change when the underlying yield rises and compare PT, YT and holding with the same USDC budget.">
+  <meta property="og:url" content="https://teren.sh/yield.html">
+  <meta property="og:image" content="https://teren.sh/assets/social-preview.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Split the yield · Pendle PT and YT · Teren">
+  <meta name="twitter:description" content="Follow a Pendle-style split from purchase to maturity. Change when the underlying yield rises and compare PT, YT and holding with the same USDC budget.">
+  <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
+  <meta name="twitter:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
+  <link rel="stylesheet" href="yield.css">
+  <script type="module" src="yield-entry.js"></script>
+</head>
+<body class="yield-page">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Teren home"><img class="brand-logo" src="assets/teren-logo.svg" width="145" height="40" alt=""></a>
+    <nav class="topic-nav" aria-label="DeFi topic"><a href="liquidity.html#experiment">Liquidity</a><a href="lending.html#experiment">Lending</a><span class="topic-current" aria-current="page">Yield trading</span></nav>
+  </header>
+  <main id="main-content" tabindex="-1">
+    <section id="app-startup" class="notice app-startup" data-state="loading" aria-labelledby="app-startup-title">
+      <h1 id="app-startup-title">Opening this page…</h1>
+      <p id="app-startup-message" role="status">The interactive tools aren’t ready yet. If this message stays here, reload the page.</p>
+      <button id="app-reload" class="button secondary" type="button" hidden>Reload page</button>
+    </section>
+    <noscript><p class="notice">Enable JavaScript to explore the yield experiment.</p></noscript>
+    <div id="app-content" inert>
+      <div class="yield-intro">
+        <div><p class="eyebrow">PENDLE · HYPOTHETICAL EXPERIMENT</p><h1>Split the yield</h1>
+          <p>How much would you pay today for the interest a deposit will earn before maturity?</p>
+        </div>
+        <a href="#comparison" class="button secondary" id="yield-compare-link">Compare the same budget ↓</a>
+      </div>
+      <p id="yield-notice" class="yield-notice" role="status" hidden></p>
+      <div class="yield-workbench">
+        <section class="yield-panel" aria-labelledby="split-title">
+          <h2 id="split-title">One deposit, two buyers</h2>
+          <div class="yield-origin"><strong>1,000 USDC</strong><span>in a yield-bearing asset</span></div>
+          <div class="yield-branches">
+            <div><h3><abbr title="Principal token">PT</abbr> Principal token</h3>
+              <p>Buyer pays <strong id="split-pt-cost">—</strong></p>
+              <p>Redeems the principal at maturity, assuming full repayment.</p>
+            </div>
+            <div><h3><abbr title="Yield token">YT</abbr> Yield token</h3>
+              <p>Buyer pays <strong id="split-yt-cost">—</strong></p>
+              <p>Earns the deposit’s interest until maturity, less a 5% fee on the interest.</p>
+            </div>
+          </div>
+          <details id="split-settings" class="yield-details">
+            <summary>Edit entry price, term and rates</summary>
+            <div class="yield-fields">
+              <label for="split-price">Price per YT (USDC)<input id="split-price" type="number" min="0.0001" max="0.9999" step="any" value="0.02" aria-describedby="split-price-error"><small id="split-price-error" hidden></small></label>
+              <label for="split-days">Days until maturity<input id="split-days" type="number" min="1" max="730" step="1" value="90" aria-describedby="split-days-error"><small id="split-days-error" hidden></small></label>
+              <label for="split-first">Starting APY (%)<input id="split-first" type="number" min="0" max="100" step="any" value="5" aria-describedby="split-first-error"><small id="split-first-error" hidden></small></label>
+              <label for="split-second">Later APY (%)<input id="split-second" type="number" min="0" max="100" step="any" value="15" aria-describedby="split-second-error"><small id="split-second-error" hidden></small></label>
+            </div>
+          </details>
+        </section>
+
+        <section class="yield-panel yield-path" aria-labelledby="path-title">
+          <h2 id="path-title">Will the yield cover its price?</h2>
+          <div class="yield-path-controls">
+            <div class="yield-slider-label"><label for="split-switch">Day the rate changes</label><output id="split-switch-value" for="split-switch">—</output></div>
+            <input id="split-switch" type="range" min="0" max="90" step="1" value="80" aria-describedby="split-rates">
+            <p id="split-rates" class="yield-caption">—</p>
+          </div>
+          <div id="yield-plot-panel">
+            <div class="yield-legend"><span class="yield-earned-key">Yield earned after fees</span><span class="yield-cost-key" id="split-cost-label">YT cost</span></div>
+            <svg id="yield-plot" viewBox="0 0 480 130" preserveAspectRatio="none" role="img" aria-labelledby="yield-chart-title yield-chart-description">
+              <title id="yield-chart-title">Interest accruing on the 1,000 USDC deposit</title><desc id="yield-chart-description"></desc>
+              <line class="plot-baseline" x1="3" x2="477" y1="122" y2="122"></line>
+              <line id="plot-switch" class="plot-switch" y1="8" y2="122"></line>
+              <line id="plot-cost" class="plot-cost" x1="3" x2="477"></line>
+              <path id="plot-full" class="plot-full"></path><path id="plot-earned" class="plot-earned"></path>
+              <circle id="plot-cursor" r="4"></circle>
+            </svg>
+            <div class="yield-axis"><span>Purchase</span><span id="split-end-label">Maturity</span></div>
+            <div class="yield-stages" role="group" aria-label="Inspect a point on the timeline">
+              <button type="button" data-stage="purchase" aria-pressed="false">At purchase</button>
+              <button type="button" data-stage="change" aria-pressed="false">At rate change</button>
+              <button type="button" data-stage="maturity" aria-pressed="true">At maturity</button>
+            </div>
+            <p id="split-reading" class="yield-reading" aria-live="polite"></p>
+          </div>
+          <p id="yield-path-error" class="yield-notice" hidden>Check the highlighted setup fields to see the yield path.</p>
+        </section>
+      </div>
+
+      <section class="yield-panel yield-comparison" id="comparison" aria-labelledby="comparison-title">
+        <div class="yield-comparison-head">
+          <div><h2 id="comparison-title" tabindex="-1">Compare the same budget</h2>
+            <p>Give each strategy its own starting budget and hold it to the same maturity.</p>
+          </div>
+          <label for="split-budget">Budget per strategy (USDC)<input id="split-budget" type="number" min="1" max="10000000" step="any" value="1000" aria-describedby="split-budget-error"><small id="split-budget-error" hidden></small></label>
+        </div>
+        <div id="split-comparison-results">
+          <div class="yield-strategies" aria-label="Amounts at maturity in USDC">
+            <div><h3>Buy PT</h3><p id="strategy-pt-quantity"></p><strong id="strategy-pt-value">—</strong><span id="strategy-pt-change"></span></div>
+            <div><h3>Buy YT</h3><p id="strategy-yt-quantity"></p><strong id="strategy-yt-value">—</strong><span id="strategy-yt-change"></span></div>
+            <div><h3>Hold the underlying</h3><p>Keep the principal and interest</p><strong id="strategy-hold-value">—</strong><span id="strategy-hold-change"></span></div>
+          </div>
+          <div class="yield-targets">
+            <h3>How much yield does YT need?</h3>
+            <p>Gross interest on the original 1,000 USDC deposit over the whole term, before the 5% yield fee.</p>
+            <dl><div><dt>Recover the YT purchase price</dt><dd id="split-recover">—</dd></div>
+              <div><dt>Match holding the underlying</dt><dd id="split-match">—</dd></div></dl>
+            <p id="split-benchmark-note"></p>
+          </div>
+        </div>
+        <p id="split-comparison-error" class="yield-notice" hidden>Check the highlighted inputs to compare these strategies.</p>
+      </section>
+      <div class="yield-actions">
+        <button type="button" id="split-share" class="button secondary">Copy setup link</button>
+        <button type="button" id="split-reset" class="yield-text-button">Reset example</button>
+        <span id="split-action-status" role="status"></span>
+        <label hidden id="split-link-label" for="split-link">Setup link<input id="split-link" type="url" readonly></label>
+      </div>
+      <details class="yield-details yield-assumptions">
+        <summary>How the comparison works</summary>
+        <p>The entry prices of one PT and one YT add up to 1 USDC here. Interest compounds at the annual yields you choose. Holding keeps all the interest. YT keeps 95% of it, valued in USDC with the accrued yield left in the asset. At expiry the right to future yield ends and earned interest is still claimable.</p>
+        <p>This example assumes full principal redemption and nonnegative yields. On Pendle, a fall in the underlying exchange rate can reduce PT redemption. Values are in USDC. Points, rewards, gas, swap costs and early-sale prices are outside this comparison.</p>
+        <a href="methods.html#split-yield">Methods and Pendle sources →</a>
+      </details>
+    </div>
+    <footer class="site-footer">
+      <span>Teren · Look closely.</span>
+      <nav aria-label="Project information">
+        <a href="methods.html" target="_blank" rel="noopener noreferrer">Methods ↗</a>
+        <a href="https://github.com/provatidis/teren" target="_blank" rel="noopener noreferrer">Source ↗</a>
+        <a href="about.html" target="_blank" rel="noopener noreferrer">About ↗</a>
+        <a href="mailto:hello@teren.sh?subject=Teren%20feedback">Email feedback</a><a href="https://github.com/provatidis/teren/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Report an issue ↗</a>
+      </nav>
+    </footer>
+  </main>
+
+</body>
+</html>

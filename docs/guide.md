@@ -2,7 +2,15 @@
 
 [Project overview](../README.md) · [Model assumptions](models.md) · [Current review](review.md)
 
-Jump to [single loans](#lending-supply-borrow-change-conditions-respond), [ETH/USDC loops](#borrowing-loops-build-change-conditions-unwind), [LST loops](#correlated-asset-loops), [controlled widths](#compare-widths-with-a-common-starting-mix), [fee flow](#follow-the-fees), [recorded cases](#historical-cases-fees-through-a-recorded-period), [lessons](#learn-liquidity-essentials) or [saved experiments](#saved-experiments). Each tool is available directly.
+Jump to [Split the yield](#split-the-yield), [single loans](#lending-supply-borrow-change-conditions-respond), [ETH/USDC loops](#borrowing-loops-build-change-conditions-unwind), [LST loops](#correlated-asset-loops), [controlled widths](#compare-widths-with-a-common-starting-mix), [fee flow](#follow-the-fees), [recorded cases](#historical-cases-fees-through-a-recorded-period), [lessons](#learn-liquidity-essentials) or [saved experiments](#saved-experiments). Each tool is available directly.
+
+## Split the yield
+
+Start with the two buyers of one 1,000 USDC deposit. One buys the principal claim (PT) and one buys the remaining interest (YT). Move **Day the rate changes** from day 80 to day 10. The same 15% annual yield then applies for 80 days instead of ten. Use the points beneath the chart to inspect interest at purchase, at the change or at maturity. The equal-budget results always cover the whole term.
+
+Open **Edit entry price, term and rates** for your own assumptions. Changing the term keeps the switch at approximately the same fraction of the term. **Compare the same budget** shows how many units each buyer can afford and what each receives at maturity. The two targets are gross interest on the original 1,000 USDC deposit. Earning enough to recover the YT price can still leave it behind holding.
+
+Valid edits are kept in this browser and appear under **Continue experimenting** on Home. **Copy setup link** preserves the assumptions and opens at maturity. **Reset example** restores the 90-day case. See [the model](models.md#split-the-yield) for the yield fee, benchmark and full-redemption assumption.
 
 ## Fees, time and costs in liquidity labs
 
@@ -14,9 +22,9 @@ The optional V2-style reference in the range lab keeps its own cash fees and use
 
 ## Start from Home
 
-Home introduces Liquidity and Lending. **Open the lab** and **Learn step by step** have equal prominence; every lesson and tool stays directly accessible. **Continue experimenting** restores the last valid assumptions edited or saved in this browser, independently of lesson progress. Its local bookmark contains inputs, not recorded provenance; use named saves to retain a source snapshot. **Your saved experiments** opens the shared library. Phones have a shortcut to each topic above the cards. The Teren logo returns Home, and **Continue learning** reopens the most recently visited lesson in this browser after it has been opened in this release. It is a navigation bookmark, not a completion mark.
+Home introduces Liquidity, Lending and Yield trading. Liquidity and Lending offer **Open the lab** and **Learn step by step**. Yield trading opens **Split the yield** directly. **Continue experimenting** restores the last valid assumptions edited or saved in this browser, independently of lesson progress. Its local bookmark contains inputs, not recorded provenance; use named saves to retain a source snapshot. **Your saved experiments** opens the shared library. Phones have a shortcut to each topic above the cards. The Teren logo returns Home, and **Continue learning** reopens the most recently visited lesson in this browser after it has been opened in this release. It is a navigation bookmark, not a completion mark.
 
-Inside a topic, the mode links stay within it: Liquidity has Learn, Experiment and Inspect; Lending has Learn and Experiment. Switch topics in the header. Valid liquidity drafts survive a same-tab visit to Home, Learn or Lending. An explicit shared scenario takes precedence when reopening the lab.
+Inside a topic, the mode links stay within it: Liquidity has Learn, Experiment and Inspect; Lending has Learn and Experiment. Yield trading has a single experiment. Switch topics in the header. Valid liquidity drafts survive a same-tab visit to Home, Learn or Lending. An explicit shared scenario takes precedence when reopening the lab.
 
 The liquidity lab now lives at `liquidity.html`. Existing links such as `/#scenario=...`, `/#inspect` and `/#historical-case` still open the corresponding liquidity view and preserve their fragment. Home links and lesson links remain directly shareable.
 
@@ -25,12 +33,13 @@ The liquidity lab now lives at `liquidity.html`. Existing links such as `/#scena
 
 ## Finding a tool and returning to your setup
 
-Choose **Liquidity** or **Lending** in the topic switch. Experiment and Learn follow the chosen topic. Inspect currently contains liquidity snapshots and historical cases; lending has no live or recorded position imports yet.
+Choose **Liquidity**, **Lending** or **Yield trading** in the topic switch. Experiment and Learn follow the chosen topic. Inspect currently contains liquidity snapshots and historical cases; lending has no live or recorded position imports yet.
 
 | Topic | Experiment | Learn |
 | --- | --- | --- |
 | Liquidity | [Full-range and price-range labs](https://teren.sh/liquidity.html#experiment) | [Foundations, range choices and recorded cases](https://teren.sh/learn.html) |
 | Lending | [Collateralized-loan lab](https://teren.sh/lending.html#experiment) | [Supply, borrow, change conditions and respond](https://teren.sh/lending.html#learn) |
+| Yield trading | [Split the yield](https://teren.sh/yield.html) | — |
 
 The top navigation stays visible while scrolling. **Experiment** opens the chosen topic’s calculator workspace; **Learn** opens its lessons. **Inspect** opens liquidity’s pool/position workspace. Within Liquidity, the tool links follow the current workspace: calculator tools in Experiment, snapshot sources in Inspect, and a return to experiments from recorded history or Pool mechanics. Historical cases belong to Inspect and remain directly accessible from Experiment. Existing tool and shared-scenario links still open their targets directly.
 

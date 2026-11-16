@@ -30,7 +30,7 @@ Open http://127.0.0.1:3000/ in your browser. The hypothetical labs, lessons and 
 npm test
 ```
 
-Tests cover the sandbox and hypothetical liquidity and lending models, versioned links and exports, v2/v3 snapshot validation, exact v3 fee accounting, fixed-position period accounting and continuity evidence, essential and applied learning assessments, saved comparisons, Learn-return drafts and storage failures. The bundled historical records are checked locally without RPC calls; `npm run check:replay` separately recaptures and verifies chain history through public providers.
+Tests cover the sandbox and hypothetical liquidity, lending and yield models, versioned links and exports, v2/v3 snapshot validation, exact v3 fee accounting, fixed-position period accounting and continuity evidence, essential and applied learning assessments, saved comparisons, Learn-return drafts and storage failures. The bundled historical records are checked locally without RPC calls; `npm run check:replay` separately recaptures and verifies chain history through public providers.
 
 For a local browser smoke test, install Chromium or set `CHROMIUM_BIN` to its executable, then run `npm run test:browser`. It starts temporary servers and checks actual page interactions at desktop and mobile sizes, including calculators, learning, snapshot imports, saved comparisons, the historical checkpoint slider, downloads and persistence. Navigation checks cover sticky-header offsets, direct tool fragments, browser history and returning from Learn. The same suite runs in CI before deployment. Its mobile routing checks use touch events as well as keyboard and mouse input. The test runner launches Chromium with its browser sandbox disabled; serving the app itself requires no browser installation.
 
@@ -41,6 +41,8 @@ For focused lab-risk checks, `BROWSER_CHECKS=risk npm run test:browser` covers l
 For focused LST target-comparison checks, `BROWSER_CHECKS=lst-comparison npm run test:browser` covers shared conditions, unavailable targets, boundary recovery, both exits, persistence and narrow layouts. The full suite includes these checks.
 
 For a focused lesson check, `BROWSER_CHECKS=predictions npm run test:browser` exercises all twenty starting setups, prediction controls, keyboard skipping and progress restoration at desktop and mobile sizes. The full suite remains the release gate.
+
+For focused yield trading checks, `BROWSER_CHECKS=yield npm run test:browser` covers direct entry, the two rate timings, equal-budget results, valid and invalid edits, shared links, local restoration and narrow screens. The full suite includes these checks.
 
 For focused startup checks, `BROWSER_CHECKS=startup npm run test:browser` blocks application entries and nested dependencies, interrupts initialization, holds a dependency pending, and checks reload recovery, saved work, narrow layouts and JavaScript-disabled access. The full suite includes these checks. A successful normal load alone does not test this failure boundary.
 
@@ -56,7 +58,7 @@ The period model lives in `public/models/fixed-position-period.js`; record valid
 
 ## Project structure
 
-- public/*-entry.js and public/lib/app-startup.js: guarded startup; public/home-main.js, public/main.js, public/learn-main.js and public/lending-main.js: composition roots for Home, liquidity Experiment/Inspect, liquidity Learn and lending respectively. They initialize each document's controllers and inject the interfaces they need.
+- public/*-entry.js and public/lib/app-startup.js: guarded startup; public/home-main.js, public/main.js, public/learn-main.js, public/lending-main.js and public/yield-main.js: composition roots for Home, liquidity Experiment/Inspect, liquidity Learn, lending and yield trading respectively. They initialize each document's controllers and inject the interfaces they need.
 - public/ui/: explicit initializers for the sandbox, both labs, learning, pool/position snapshots, saved experiments, historical replay and navigation. Importing a controller does not start it.
 - public/models/: pure hypothetical calculations, lesson experiments and exact protocol/period arithmetic. They do not read the DOM, browser storage or network.
 - public/data/: deployment configuration, read-only Uniswap v2/v3 adapters, snapshot/period schemas, saved experiments, learning progress and temporary Learn-return storage.
@@ -253,7 +255,7 @@ The token-balance and range-width pilot checks repeat fresh-page drags three tim
 
 `data/learning-location.js` stores only an allowlisted lesson route in `teren-learning-location-v1`; it cannot alter answers or completion. Blocked/corrupt storage leaves Home usable. Existing lesson progress remains in its original keys. The small route catalogue is checked against all five lesson chapters in unit tests. Returning through Home uses the existing per-tab liquidity draft handoff, with explicit scenarios taking precedence.
 
-`styles/navigation.css` places topic choice before the topic's available modes. Current topics are non-actionable; only the other topic is a link. `styles.css` and `home.css` remain readable import lists in source; each production entry points at a flattened content-hashed stylesheet. Nested CSS URLs are rebased relative to the receiving stylesheet. The builder preserves canonical source aliases for previously cached entries.
+`styles/navigation.css` places topic choice before the topic's available modes. The active topic is labelled and the other topics are links. `styles.css` and `home.css` remain readable import lists in source; each production entry points at a flattened content-hashed stylesheet. Nested CSS URLs are rebased relative to the receiving stylesheet. The builder preserves canonical source aliases for previously cached entries.
 
 
 ## Personal experiments

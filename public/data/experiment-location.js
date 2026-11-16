@@ -1,6 +1,7 @@
 // Lightweight navigation metadata. The destination validates the model inputs.
 export const EXPERIMENT_LOCATION_KEY = 'teren-experiment-location-v1';
 const destinations = {
+  'pendle-split-v1': { page: 'yield.html', prefix: '#yield=pendle-split-v1&', title: 'Yield trading · split the yield' },
   'cp50-v2': { page: 'liquidity.html', prefix: '#scenario=cp50-v2&', title: 'Liquidity · full range' },
   'cl-range-v2': { page: 'liquidity.html', prefix: '#scenario=cl-range-v2&', title: 'Liquidity · price range' },
   'cp50-v1': { page: 'liquidity.html', prefix: '#scenario=cp50-v1&', title: 'Liquidity · full range' },

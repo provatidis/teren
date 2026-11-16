@@ -2,7 +2,7 @@
 
 *Look closely.*
 
-A place to test DeFi assumptions and understand the mechanisms behind them, through experiments, recorded evidence and short lessons. Teren currently covers **liquidity** and **lending**: how token balances change, what fees mean, how debt grows and what makes liquidation possible.
+A place to test DeFi assumptions and understand the mechanisms behind them, through experiments, recorded evidence and short lessons. Explore **liquidity**, **lending** and **yield trading**. Follow changes in token balances, debt and the interest a deposit earns.
 
 [Open Teren](https://teren.sh/) · [Liquidity lessons](https://teren.sh/learn.html) · [Lending lessons](https://teren.sh/lending.html#learn) · [About](https://teren.sh/about.html)
 
@@ -12,7 +12,7 @@ Visual lessons let you follow swaps, pool ownership, supplying, borrowing and lo
 
 Try [Follow the fees](https://teren.sh/liquidity.html#follow-fees) to see how hypothetical trading batches divide fees between active ranges and other LPs, then keep those fee tokens through a range exit. Tighten the other LPs’ range without adding capital and watch your share change. Optional illustrations explain arbitrage and temporary fee competition.
 
-## Two topics
+## Explore a topic
 
 **[Liquidity](https://teren.sh/liquidity.html#experiment)** compares full-range and concentrated-liquidity positions with holding their starting tokens. Change prices, bounds and assumed cash fees, save comparisons, or try virtual swaps and deposits. Learn has six foundation lessons and a final challenge, followed by three range-choice exercises and three exercises using recorded historical cases.
 
@@ -22,6 +22,8 @@ Both liquidity endpoint labs accept total cash fees or an assumed average positi
 
 The **[correlated-asset loop lab](https://teren.sh/lending.html#lst-loops)** follows wstETH collateral against WETH debt. Choose a target holding or build in rounds, compare staking growth with borrowing costs, then stress the market discount and oracle assumptions. Compare exiting into WETH with repaying debt and keeping unsold wstETH; follow either route's balances and costs. Compare two exposure targets under shared conditions, or save named variations with their own assumptions. This is a separate hypothetical model from the ETH/USDC loop, with no live Aave or Morpho settings.
 
+**[Yield trading · Split the yield](https://teren.sh/yield.html)** follows two buyers who split a hypothetical interest-bearing deposit. Move the same rate change earlier or later, then compare buying PT, buying YT and keeping the underlying with equal starting budgets. Enter your own price and term to see what YT needs to recover its cost and to match holding. Each setup assumes full principal redemption at maturity and can be shared by link.
+
 ## Models and recorded evidence
 
 - **Hypothetical experiments:** prices, assumed cash fees and lending rates/rules are inputs. Follow the fees instead calculates token fees from chosen trading batches and competing liquidity. Outcomes describe those assumptions; they are not live quotes or forecasts.
@@ -30,7 +32,7 @@ The **[correlated-asset loop lab](https://teren.sh/lending.html#lst-loops)** fol
 - **[Historical liquidity cases](https://teren.sh/liquidity.html#historical-case):** three unchanged v3 positions over about 83 minutes, 33 hours and one week, with earned fee tokens, time in range and a comparison with holding the exact starting principal tokens. Chain reads, event queries and independent collection simulations checked the records at capture. The browser validates the bundled arithmetic without re-querying Ethereum. These are fixed-position records, not an arbitrary-range backtester.
 - **[Two ranges, the same week](https://teren.sh/liquidity.html#fee-comparison):** compare narrower and wider real positions selected before inspecting earnings. Both started active in the same pool. A shared timeline separates fees, performance against each position’s own holding basket, and dollar change. Collections remain in the accounting; earlier claims are excluded. This pair illustrates one week, rather than typical earnings or the effect of width alone.
 
-Recorded evidence currently covers liquidity only. Lending has no live position imports or verified historical records. Loop construction and unwinding are hypothetical sequences, not protocol execution plans. See [Methods](https://teren.sh/methods.html) for what each kind of result can establish.
+Recorded evidence currently covers liquidity only. Lending and yield trading use hypothetical models. Loop construction and unwinding are hypothetical sequences, not protocol execution plans. See [Methods](https://teren.sh/methods.html) for what each kind of result can establish.
 
 No wallet connection or transactions. The static site runs on GitHub Pages. Working drafts and learning progress stay in your browser; links and exports let you keep or share supported setups. Feedback is welcome at [hello@teren.sh](mailto:hello@teren.sh) or through [GitHub issues](https://github.com/provatidis/teren/issues).
 

@@ -16,6 +16,10 @@
   border-radius: 8px;
   color: var(--muted);
   font-size: 14px;
+  white-space: nowrap;
+}
+@media (min-width: 361px) and (max-width: 430px) {
+  .topbar .topic-nav a, .topbar .topic-nav .topic-current { padding-inline: 5px; }
 }
 .topic-nav [aria-current] { color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
 .topic-nav a:hover { color: var(--accent); background: var(--surface); }
@@ -41,5 +45,5 @@
 @media (max-width: 360px) {
   .topbar { padding-inline: 12px; gap: 8px; }
   .topbar .brand-logo { width: 96px; height: 27px; }
-  .topic-nav a, .topic-nav .topic-current { padding-inline: 8px; }
+  .topic-nav a, .topic-nav .topic-current { padding-inline: 4px; }
 }
