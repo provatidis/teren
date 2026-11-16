@@ -42,7 +42,7 @@ For focused LST target-comparison checks, `BROWSER_CHECKS=lst-comparison npm run
 
 For a focused lesson check, `BROWSER_CHECKS=predictions npm run test:browser` exercises all twenty starting setups, prediction controls, keyboard skipping and progress restoration at desktop and mobile sizes. The full suite remains the release gate.
 
-For focused yield trading checks, `BROWSER_CHECKS=yield npm run test:browser` covers direct entry, the two rate timings, equal-budget results, valid and invalid edits, shared links, local restoration and narrow screens. The full suite includes these checks.
+For focused yield trading checks, `BROWSER_CHECKS=yield npm run test:browser` covers direct entry, the two rate timings, maturity and early-sale comparisons, valid and invalid edits, shared links, local restoration and narrow screens. The full suite includes these checks.
 
 For focused startup checks, `BROWSER_CHECKS=startup npm run test:browser` blocks application entries and nested dependencies, interrupts initialization, holds a dependency pending, and checks reload recovery, saved work, narrow layouts and JavaScript-disabled access. The full suite includes these checks. A successful normal load alone does not test this failure boundary.
 

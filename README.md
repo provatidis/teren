@@ -22,7 +22,7 @@ Both liquidity endpoint labs accept total cash fees or an assumed average positi
 
 The **[correlated-asset loop lab](https://teren.sh/lending.html#lst-loops)** follows wstETH collateral against WETH debt. Choose a target holding or build in rounds, compare staking growth with borrowing costs, then stress the market discount and oracle assumptions. Compare exiting into WETH with repaying debt and keeping unsold wstETH; follow either route's balances and costs. Compare two exposure targets under shared conditions, or save named variations with their own assumptions. This is a separate hypothetical model from the ETH/USDC loop, with no live Aave or Morpho settings.
 
-**[Yield trading · Split the yield](https://teren.sh/yield.html)** follows two buyers who split a hypothetical interest-bearing deposit. Move the same rate change earlier or later, then compare buying PT, buying YT and keeping the underlying with equal starting budgets. Enter your own price and term to see what YT needs to recover its cost and to match holding. Each setup assumes full principal redemption at maturity and can be shared by link.
+**[Yield trading · Split the yield](https://teren.sh/yield.html)** follows two buyers who split a hypothetical interest-bearing deposit. Compare buying PT, buying YT and keeping the underlying with equal starting budgets. Hold through maturity to see how much interest YT needs to match holding, or choose an earlier sale day and change the market’s implied APY. YT shows both the sale value of its remaining claim and the interest the seller has already earned. Each setup assumes full principal redemption at maturity and can be shared by link.
 
 ## Models and recorded evidence
 

@@ -1,7 +1,9 @@
-import { DEPOSIT, SPLIT_DEFAULTS, SPLIT_MODEL, splitAtMaturity, splitDeposit, splitInputErrors } from '../models/split-yield-v1.js';
-import { readSplitDraft, readSplitHash, saveSplitDraft, splitHash } from '../data/split-yield-state.js';
+import { DEPOSIT, SPLIT_DEFAULTS, SPLIT_MODEL, splitDeposit, splitInputErrors } from '../models/split-yield-v1.js';
+import { readSplitDraft, readSplitSetup, saveSplitDraft, splitHash } from '../data/split-yield-state.js';
 import { saveExperimentLocation } from '../data/experiment-location.js';
 import { fmt } from '../lib/format.js';
+import { defaultYieldExit, yieldExitErrors } from '../models/split-yield-exit-v1.js';
+import { showMaturity, showExit } from '../lib/split-yield-results.js';
 import { drawYieldPath } from '../lib/split-yield-chart.js';
 
 const fields = { ytPrice: 'split-price', days: 'split-days', firstApy: 'split-first', secondApy: 'split-second', budget: 'split-budget' };
@@ -42,35 +44,15 @@ function showDeposit(input, stage) {
   setText('split-reading', reading);
 }
 
-function showComparison(input) {
-  const result = splitAtMaturity(input);
-  setText('strategy-pt-quantity', fmt(result.ptUnits) + ' PT bought');
-  setText('strategy-yt-quantity', fmt(result.ytUnits) + ' YT bought');
-  for (const key of ['pt', 'yt', 'hold']) {
-    const value = result[key + 'Final'];
-    const change = value - input.budget;
-    setText('strategy-' + key + '-value', cash(value));
-    const node = $('strategy-' + key + '-change');
-    const tied = Math.abs(change) < 0.005;
-    node.dataset.direction = tied ? 'flat' : change > 0 ? 'gain' : 'loss';
-    node.textContent = tied ? 'Even with the starting budget' : (change > 0 ? 'Gain of ' : 'Loss of ') + cash(Math.abs(change));
-  }
-  setText('split-recover', cash(result.recoverGross));
-  setText('split-match', result.matchGross === null ? 'No finite yield' : cash(result.matchGross));
-  const interpretation = result.matchGross === null
-    ? 'At this entry price, holding stays ahead at every nonnegative yield.'
-    : Math.abs(result.grossInterest - result.matchGross) < 1e-10 ? 'YT matches holding at maturity.'
-    : result.grossInterest > result.matchGross ? 'YT recovers its cost and finishes ahead of holding.'
-    : result.grossInterest >= result.recoverGross ? 'YT recovers its cost. Holding still finishes ahead.'
-    : 'YT finishes below its purchase price.';
-  setText('split-benchmark-note', 'The deposit earns ' + cash(result.grossInterest) + ' before fees. ' + interpretation);
-}
-
 export function initSplitYield() {
   const slider = $('split-switch');
+  const exitDay = $('split-exit-day');
+  const exitApy = $('split-exit-apy');
   const stages = [...document.querySelectorAll('[data-stage]')];
   let stage = 'maturity';
   let switchFraction;
+  let exitFraction;
+  let selling = false;
   let shareable = '';
   let copyRequest = 0;
 
@@ -82,17 +64,30 @@ export function initSplitYield() {
     stage = next;
     for (const button of stages) button.setAttribute('aria-pressed', String(button.dataset.stage === stage));
   }
-  function fill(input) {
+  function setSelling(selected) {
+    selling = selected;
+    $('split-mode-exit').setAttribute('aria-pressed', String(selling));
+    $('split-mode-maturity').setAttribute('aria-pressed', String(!selling));
+    $('split-exit-controls').hidden = !selling;
+  }
+  function fill(input, exit = null) {
     for (const [key, id] of Object.entries(fields)) $(id).value = input[key];
     slider.max = input.days;
     slider.value = input.switchDay;
     switchFraction = input.switchDay / input.days;
+    const setup = exit ?? defaultYieldExit(input.days);
+    exitDay.max = input.days;
+    exitDay.value = setup.exitDay;
+    exitApy.value = setup.exitApy;
+    exitFraction = setup.exitDay / input.days;
+    setSelling(Boolean(exit));
     setStage('maturity');
   }
   function render({ edited = false } = {}) {
     const input = {};
     for (const [key, id] of Object.entries(fields)) input[key] = $(id).valueAsNumber;
     input.switchDay = slider.valueAsNumber;
+    const exit = selling ? { exitDay: exitDay.valueAsNumber, exitApy: exitApy.valueAsNumber } : null;
     const errors = splitInputErrors(input);
     const marketInvalid = Object.keys(errors).some(key => key !== 'budget');
     for (const [key, id] of Object.entries(fields)) {
@@ -103,8 +98,19 @@ export function initSplitYield() {
     slider.disabled = marketInvalid;
     $('yield-plot-panel').hidden = marketInvalid;
     $('yield-path-error').hidden = !marketInvalid;
-    const invalid = marketInvalid || Boolean(errors.budget);
-    $('split-comparison-results').hidden = invalid;
+    const exitErrors = selling ? yieldExitErrors(input, exit) : {};
+    exitDay.disabled = Boolean(errors.days);
+    exitApy.setAttribute('aria-invalid', String(Boolean(exitErrors.exitApy)));
+    setText('split-exit-apy-error', exitErrors.exitApy || '');
+    $('split-exit-apy-error').hidden = !exitErrors.exitApy;
+    if (selling) {
+      setText('exit-day-label', errors.days ? '—' : 'Day ' + exit.exitDay);
+      setText('exit-time-left', errors.days ? 'Check the term above.' : dayCount(input.days - exit.exitDay) + ' until maturity.');
+      exitDay.setAttribute('aria-valuetext', 'Day ' + exit.exitDay + ' of ' + exitDay.max);
+    }
+    const invalid = marketInvalid || Boolean(errors.budget) || Object.keys(exitErrors).length > 0;
+    $('split-comparison-results').hidden = invalid || selling;
+    $('split-exit-results').hidden = invalid || !selling;
     $('split-comparison-error').hidden = !invalid;
     $('split-share').disabled = invalid;
     if (marketInvalid) {
@@ -112,8 +118,9 @@ export function initSplitYield() {
     } else showDeposit(input, stage);
     shareable = '';
     if (!invalid) {
-      showComparison(input);
-      shareable = splitHash(input);
+      if (selling) showExit(input, exit);
+      else showMaturity(input);
+      shareable = splitHash(input, exit);
     }
     if (!edited) return;
     copyRequest++;
@@ -122,37 +129,63 @@ export function initSplitYield() {
     if (!shareable) return;
     const saved = saveSplitDraft(shareable);
     saveExperimentLocation(SPLIT_MODEL, shareable);
-    if (new URLSearchParams(location.hash.slice(1)).has('yield')) history.replaceState(null, '', shareable);
+    if (location.hash === '#early-exit' || new URLSearchParams(location.hash.slice(1)).has('yield')) {
+      history.replaceState(null, '', shareable);
+    }
     notice(saved ? '' : 'This browser could not save your changes. Copy the setup link to keep them.');
   }
 
   function restore() {
     const draft = readSplitDraft();
     let inputs = draft.inputs || SPLIT_DEFAULTS;
+    let exit = draft.exit ?? null;
+    let jumpToExit = location.hash === '#early-exit';
+    if (jumpToExit) exit ??= defaultYieldExit(inputs.days);
     let message = draft.status === 'invalid' ? 'Your previous setup could not be read. Showing the original example.'
       : draft.status === 'unavailable' ? 'Local saving is unavailable. You can explore and copy a setup link.' : '';
     try {
-      const shared = readSplitHash(location.hash);
-      if (shared) { inputs = shared; message = 'Shared yield setup loaded.'; }
+      const shared = readSplitSetup(location.hash);
+      if (shared) {
+        inputs = shared.inputs;
+        exit = shared.exit;
+        jumpToExit = Boolean(exit);
+        message = 'Shared yield setup loaded.';
+      }
     } catch {
       message = 'This yield setup link could not be read. Showing ' + (draft.inputs ? 'your last saved setup.' : 'the original example.');
     }
-    fill(inputs);
+    fill(inputs, exit);
     copyRequest++;
     $('split-link-label').hidden = true;
     setText('split-action-status', '');
     notice(message);
     render();
+    if (jumpToExit) requestAnimationFrame(() => $('comparison').scrollIntoView({ block: 'start' }));
   }
   for (const id of Object.values(fields)) $(id).addEventListener('input', () => {
     if (id === 'split-days' && $(id).validity.valid && Number.isInteger($(id).valueAsNumber)) {
       slider.max = $(id).value;
       slider.value = Math.round($(id).valueAsNumber * switchFraction);
+      exitDay.max = $(id).value;
+      exitDay.value = Math.round($(id).valueAsNumber * exitFraction);
     }
     render({ edited: true });
   });
   slider.addEventListener('input', () => {
     switchFraction = slider.valueAsNumber / Number(slider.max);
+    render({ edited: true });
+  });
+  exitDay.addEventListener('input', () => {
+    exitFraction = exitDay.valueAsNumber / Number(exitDay.max);
+    render({ edited: true });
+  });
+  exitApy.addEventListener('input', () => render({ edited: true }));
+  for (const button of document.querySelectorAll('[data-exit-rate]')) button.addEventListener('click', () => {
+    exitApy.value = button.dataset.exitRate;
+    render({ edited: true });
+  });
+  for (const mode of ['maturity', 'exit']) $('split-mode-' + mode).addEventListener('click', () => {
+    setSelling(mode === 'exit');
     render({ edited: true });
   });
   for (const button of stages) button.addEventListener('click', () => {

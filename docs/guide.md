@@ -6,11 +6,13 @@ Jump to [Split the yield](#split-the-yield), [single loans](#lending-supply-borr
 
 ## Split the yield
 
-Start with the two buyers of one 1,000 USDC deposit. One buys the principal claim (PT) and one buys the remaining interest (YT). Move **Day the rate changes** from day 80 to day 10. The same 15% annual yield then applies for 80 days instead of ten. Use the points beneath the chart to inspect interest at purchase, at the change or at maturity. The equal-budget results always cover the whole term.
+Start with the two buyers of one 1,000 USDC deposit. One buys the principal claim (PT) and one buys the remaining interest (YT). Move **Day the underlying rate changes** from day 80 to day 10. The same 15% annual yield then applies for 80 days instead of ten. Use the points beneath the chart to inspect interest at purchase, at the change or at maturity. The maturity results cover the whole term.
 
 Open **Edit entry price, term and rates** for your own assumptions. Changing the term keeps the switch at approximately the same fraction of the term. **Compare the same budget** shows how many units each buyer can afford and what each receives at maturity. The two targets are gross interest on the original 1,000 USDC deposit. Earning enough to recover the YT price can still leave it behind holding.
 
-Valid edits are kept in this browser and appear under **Continue experimenting** on Home. **Copy setup link** preserves the assumptions and opens at maturity. **Reset example** restores the 90-day case. See [the model](models.md#split-the-yield) for the yield fee, benchmark and full-redemption assumption.
+In the [early-sale comparison](https://teren.sh/yield.html#early-exit), choose a sale day and an implied APY. Keep the day fixed and try a higher rate. PT sells for less, and YT’s claim on the remaining interest sells for more. Look at the interest the YT seller already earned. Changing the price of the remaining claim leaves that interest intact. Compare both buyers with the value of the unsplit deposit on the sale day.
+
+Valid edits are kept in this browser and appear under **Continue experimenting** on Home. Use **Copy setup link** to share the selected comparison and its assumptions. Earlier links still open at maturity. **Reset example** restores the 90-day case. See [the model](models.md#split-the-yield) for the yield fee, benchmark and full-redemption assumption.
 
 ## Fees, time and costs in liquidity labs
 

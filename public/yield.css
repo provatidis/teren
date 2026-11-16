@@ -63,6 +63,7 @@
 .yield-stages button[aria-pressed=true] { color: var(--text); border-color: var(--accent); background: var(--highlight); }
 .yield-reading { margin: 12px 0 0; min-height: 3.2em; font-size: 15px; }
 .yield-comparison { margin-top: 18px; scroll-margin-top: calc(var(--header-height, 85px) + 10px); }
+#early-exit { scroll-margin-top: calc(var(--header-height, 85px) + 24px); }
 .yield-comparison-head label { width: min(100%, 210px); flex-shrink: 0; }
 .yield-strategies { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 20px 0; }
 .yield-strategies > div { min-width: 0; padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 9px; }
@@ -83,8 +84,34 @@
 .yield-notice { color: var(--text); padding: 10px 14px; border-left: 3px solid var(--border-strong); }
 .yield-assumptions p { max-width: 80ch; }
 .yield-assumptions a { color: var(--accent); text-decoration: underline; }
+.yield-modes { max-width: 336px; margin-top: 16px; }
+.exit-controls, .exit-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 32px; }
+.exit-controls { margin: 20px 0 0; padding: 16px 0; border-block: 1px solid var(--border); }
+.exit-controls[hidden] { display: none; }
+.exit-controls input[type=range] { touch-action: pan-y; }
+.exit-rate-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 4px; }
+.exit-rate-row input[type=number] { max-width: 120px; min-width: 60px; }
+.exit-rate-row button { white-space: nowrap; }
+.exit-rate-row button:hover { background: var(--hover); }
+.exit-error { color: var(--error); }
+.exit-details { padding-top: 16px; border-top: 1px solid var(--border); }
+.exit-breakdown { display: block; width: 100%; height: 12px; margin: 12px 0; border-radius: 3px; }
+.exit-track { fill: var(--border); }
+#exit-sale-bar { fill: var(--accent); }
+#exit-earned-bar { fill: #dec18a; }
+.exit-receipt { margin: 0; }
+.exit-receipt div { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-top: 6px; }
+.exit-receipt dt::before { content: ''; display: inline-block; width: .65em; height: .65em; margin-right: 6px; background: var(--accent); }
+.exit-receipt div + div dt::before { border-radius: 50%; background: #dec18a; }
+.exit-receipt dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.exit-prices { width: 100%; margin-top: 4px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.exit-prices caption { text-align: left; color: var(--muted); }
+.exit-prices th, .exit-prices td { padding: 4px 0 4px 8px; text-align: right; border-bottom: 1px solid var(--border); }
+.exit-prices th:first-child { padding-left: 0; text-align: left; }
+.exit-prices tbody th { font-weight: 400; }
+.exit-reading { margin: 18px 0 0; padding-left: 12px; border-left: 3px solid var(--accent); font-size: 15px; }
 @media (max-width: 780px) {
-  .yield-workbench { grid-template-columns: minmax(0, 1fr); }
+  .yield-workbench, .exit-controls, .exit-details { grid-template-columns: minmax(0, 1fr); }
   .yield-intro, .yield-comparison-head { align-items: flex-start; flex-direction: column; }
   .yield-page main { padding: 24px 16px; }
   .yield-panel { padding: 17px; }

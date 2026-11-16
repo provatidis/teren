@@ -1,5 +1,10 @@
 # Release history
 
+## 1.52.0 · 2026-11-16
+
+- Extend **Split the yield** with an early-sale comparison. Choose a sale day and market implied APY to see how the same remaining term prices PT and YT.
+- Compare both sellers with holding the underlying on the same day. Show the YT seller’s sale proceeds and previously earned interest separately.
+
 ## 1.51.0 · 2026-11-16
 
 - Add **Split the yield**, a hypothetical Pendle-style market. Follow the principal and yield buyers of one USDC-denominated deposit, move a rate change through the term and inspect the interest earned by each milestone.

@@ -10,7 +10,7 @@ Release 1.44.0 makes single-loan interest explicit and consistent across balance
 
 ## Yield trading
 
-[Split the yield](https://teren.sh/yield.html) covers purchase through maturity. Ask people to change when the rate rises and explain a YT result against both its purchase price and holding. A later early-sale experiment would need an explicit exit price or implied rate and separate accounting for accrued and remaining yield. PT-backed borrowing is a separate potential link to the lending labs.
+[Split the yield](https://teren.sh/yield.html) covers both a sale before expiry and holding to maturity. Ask people to change the sale-day implied APY and explain which part of the YT seller’s proceeds moved. At maturity, can they explain why recovering the purchase price and matching holding are separate targets? PT-backed borrowing is a separate potential link to the lending labs.
 
 ## Learning depth
 

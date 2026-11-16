@@ -1,10 +1,24 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { DEPOSIT, SPLIT_DEFAULTS, SPLIT_MODEL, YT_FEE, grossYieldAt, splitAtMaturity } from '../public/models/split-yield-v1.js';
-import { readSplitDraft, readSplitHash, saveSplitDraft, splitHash } from '../public/data/split-yield-state.js';
+import { readSplitDraft, readSplitHash, readSplitSetup, saveSplitDraft, splitHash } from '../public/data/split-yield-state.js';
 import { readExperimentLocation, saveExperimentLocation } from '../public/data/experiment-location.js';
 
 const model = overrides => splitAtMaturity({ ...SPLIT_DEFAULTS, ...overrides });
+
+test('early-exit links preserve both assumptions and reject ambiguous or partial settings', () => {
+  const exit = { exitDay: 0, exitApy: 137.25 };
+  const maturity = splitHash(SPLIT_DEFAULTS);
+  const hash = splitHash(SPLIT_DEFAULTS, exit);
+  assert.equal(hash, maturity + '&exitDay=0&exitApy=137.25');
+  assert.deepEqual(readSplitSetup(hash), { inputs: SPLIT_DEFAULTS, exit });
+  assert.deepEqual(readSplitSetup(maturity), { inputs: SPLIT_DEFAULTS, exit: null });
+  for (const suffix of ['&exitApy=0', '&exitDay=0&exitApy=', '&exitDay=90&exitDay=90',
+    '&exitDay=91&exitApy=10', '&exitDay=45&exitApy=-3', '&exitDay=45&exitApy=Infinity']) {
+    assert.throws(() => readSplitSetup(maturity + suffix));
+  }
+});
+
 function close(actual, expected) {
   assert.ok(Math.abs(actual - expected) <= 1e-10 * Math.max(1, Math.abs(expected)), actual + ' ≠ ' + expected);
 }
