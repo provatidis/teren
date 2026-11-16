@@ -7,11 +7,12 @@ const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFram
 export async function dragRangeToMax({ evaluate, call, fill }, id, { inset = 26 } = {}) {
   const selector = JSON.stringify(id);
   let gestureStarted = false;
+  let box;
   await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
   try {
     await fill(id, await evaluate(`document.getElementById(${selector}).min`));
     await evaluate(`document.getElementById(${selector}).scrollIntoView({block:'center',behavior:'instant'})`);
-    const box = await evaluate(`new Promise((resolve,reject)=>{
+    box = await evaluate(`new Promise((resolve,reject)=>{
       const input=document.getElementById(${selector}), deadline=performance.now()+5000;
       let previous='', stable=0;
       const check=()=>{
@@ -20,7 +21,7 @@ export async function dragRangeToMax({ evaluate, call, fill }, id, { inset = 26 
         stable=frame===previous?stable+1:0; previous=frame;
         if(stable>=3 && document.elementFromPoint(x,y)===input && r.top>=0 && r.bottom<=innerHeight){
           const events=[];
-          const record=event=>{if(events.length<80)events.push({type:event.type,target:event.target.id,trusted:event.isTrusted,pointer:event.pointerType,value:input.value});};
+          const record=event=>{if(events.length<80)events.push({type:event.type,target:event.target.id,trusted:event.isTrusted,pointer:event.pointerType,x:event.clientX,y:event.clientY,value:input.value});};
           const types=['pointerdown','pointermove','pointerup','pointercancel','input'];
           types.forEach(type=>document.addEventListener(type,record,true));
           window.touchRangeTrace={events,remove:()=>types.forEach(type=>document.removeEventListener(type,record,true))};
@@ -30,6 +31,9 @@ export async function dragRangeToMax({ evaluate, call, fill }, id, { inset = 26 
       }; requestAnimationFrame(check);
     })`);
     assert.ok(box.height >= 44, id + ': touch target height');
+    // A settled layout can still be ahead of the frame used for native input
+    // hit-testing in headless Chrome. Wait for the scrolled frame to be drawn.
+    await call('Page.captureScreenshot', { format: 'jpeg', quality: 10, captureBeyondViewport: false });
     const point = fraction => ({ x: box.left + inset + (box.width - 2 * inset) * fraction, y: box.top + box.height / 2, id: 0 });
     await call('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point(0)] });
     gestureStarted = true;
@@ -50,7 +54,8 @@ export async function dragRangeToMax({ evaluate, call, fill }, id, { inset = 26 
     assert.equal(result.value, result.max, trace);
   } catch (error) {
     const trace = await evaluate('window.touchRangeTrace?.events || []');
-    error.message += '\nTouch event trace: ' + JSON.stringify(trace);
+    const metrics = await call('Page.getLayoutMetrics');
+    error.message += '\nTouch event trace: ' + JSON.stringify({ id, box, viewport: metrics.cssVisualViewport, trace });
     throw error;
   } finally {
     if (gestureStarted) await call('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });

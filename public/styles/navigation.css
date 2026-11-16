@@ -44,6 +44,7 @@
 }
 @media (max-width: 360px) {
   .topbar { padding-inline: 12px; gap: 8px; }
-  .topbar .brand-logo { width: 96px; height: 27px; }
+  .topbar:has(.topic-nav) { padding-inline: 8px; column-gap: 5px; }
+  .topbar .brand-logo { width: 84px; height: 24px; }
   .topic-nav a, .topic-nav .topic-current { padding-inline: 4px; }
 }

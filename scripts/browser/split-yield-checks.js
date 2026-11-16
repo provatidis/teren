@@ -68,8 +68,12 @@ export async function checkSplitYield({ evaluate, click, fill, text, navigate, r
 
     for (const width of [390, 320]) {
       await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
+      await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
       await navigate(base + 'yield.html');
-      assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
+      const layout = await evaluate(`({page:document.documentElement.scrollWidth, width:innerWidth, scale:visualViewport.scale,
+        outside:[...document.querySelectorAll('body *')].filter(el=>el.getBoundingClientRect().right>${width}+1)
+          .slice(0,8).map(el=>el.id||el.className||el.tagName)})`);
+      assert.ok(layout.page <= width, 'Yield layout exceeds the phone width: ' + JSON.stringify({ expectedWidth: width, ...layout }));
       await dragRangeToMax({ evaluate, call, fill }, 'split-switch');
       assert.match(await text('split-rates'), /5% APY for 90 days/);
       await evaluate("document.getElementById('split-switch').focus()");
@@ -78,10 +82,10 @@ export async function checkSplitYield({ evaluate, click, fill, text, navigate, r
       assert.equal(await value('split-switch'), '89');
       await click('yield-compare-link');
       assert.equal(await visible('strategy-hold-value'), true);
-      assert.equal(await evaluate("document.querySelector('[aria-label=\"DeFi topic\"]').getBoundingClientRect().right <= innerWidth"), true);
+      assert.ok(await evaluate("document.querySelector('[aria-label=\"DeFi topic\"]').getBoundingClientRect().right") <= width);
       for (const page of ['about.html', 'methods.html#split-yield', 'learn.html', 'lending.html#experiment', 'liquidity.html#experiment']) {
         await navigate(base + page);
-        assert.equal(await evaluate("document.querySelector('.topic-nav a[href=\"yield.html\"]').getBoundingClientRect().right <= innerWidth"), true, 'Topic link fits ' + page + ' at ' + width + 'px');
+        assert.ok(await evaluate("document.querySelector('.topic-nav a[href=\"yield.html\"]').getBoundingClientRect().right") <= width, 'Topic link fits ' + page + ' at ' + width + 'px');
       }
     }
     await fill('scenario-future', '3571');
@@ -94,6 +98,7 @@ export async function checkSplitYield({ evaluate, click, fill, text, navigate, r
     assert.equal(await value('scenario-future'), '3571', 'Visiting Yield preserves the liquidity draft.');
     console.log('PASS: yield topic entry, keyboard and touch interaction at 390/320px and return to an edited liquidity lab');
   } finally {
+    await call('Emulation.setTouchEmulationEnabled', { enabled: false });
     await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
     await navigate(base);
     await evaluate('localStorage.clear();sessionStorage.clear();Object.assign(localStorage,' + JSON.stringify(before.local)
