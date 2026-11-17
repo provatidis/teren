@@ -9,7 +9,7 @@ export function essentialQuestionRevisions(id, variant) {
     || (['swap-impact', 'token-balances'].includes(id) && variant === 1)
     || (['pool-share', 'range-boundaries'].includes(id) && variant > 0);
   return {
-    prediction: id === 'range-boundaries' && variant > 0 ? 2 : 1,
+    prediction: ['fee-break-even', 'final-challenge'].includes(id) || (id === 'range-boundaries' && variant > 0) ? 2 : 1,
     reason: ['final-challenge', 'token-balances'].includes(id) ? 3 : id === 'loss-vs-profit' ? 2 : 1,
     application: id === 'swap-impact' ? 3 : id === 'loss-vs-profit' && variant !== 1 ? 4
       : ['loss-vs-profit', 'fee-break-even'].includes(id) ? 3 : changed ? 2 : 1,

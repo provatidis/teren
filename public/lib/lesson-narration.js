@@ -12,8 +12,8 @@ export function lessonFinding(id, outcome) {
   if (id === 'loss-vs-profit') return r.lpBeforeFees === s.investment
     ? 'At the unchanged price, LP principal matches the starting budget and holding.'
     : 'LP principal ' + (r.lpBeforeFees > s.investment ? 'grew' : 'fell') + ' in dollar value. It still trails holding the same starting tokens by ' + usd(r.breakEvenFees) + ' before fees.';
-  if (id === 'fee-break-even') return 'Assumed fees of ' + usd(s.fees) + (outcome.prediction === 'enough' ? ' cover' : ' do not cover') + ' the ' + usd(r.breakEvenFees) + ' principal shortfall against holding.';
-  return 'LP principal plus assumed fees finishes ' + (r.difference >= 0 ? usd(r.difference) + ' ahead of' : usd(-r.difference) + ' behind') + ' holding the same starting tokens, before costs.';
+  if (id === 'fee-break-even') return 'At this ETH price, the fee target stays at ' + usd(r.breakEvenFees) + '. Counting ' + usd(s.fees) + ' in fees leaves ' + usd(Math.max(0, r.breakEvenFees - s.fees)) + ' still to earn to match holding.';
+  return 'A lower ETH price makes the original ETH and USDC worth less in dollars. Matching that basket with fees can leave both strategies below the starting budget.';
 }
 
 export function tokenBalanceNarration(outcome) {

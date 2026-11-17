@@ -34,7 +34,7 @@ test('fee tiers alone never establish earnings, including supplied totals that r
   assert.deepEqual(managementCase('fee-tiers',0).fees,[12,6]);
   for(let variant=0;variant<3;variant++){
     const result=managementCase('fee-tiers',variant),presentation=managementPresentation(result);
-    assert.equal(result.prediction,'unknown');assert.equal(result.application,['more-volume','smaller-share','competition-offset'][variant]);
+    assert.equal(result.prediction,'active-volume');assert.equal(result.application,['more-volume','smaller-share','competition-offset'][variant]);
     assert.match(presentation.note,/supplied teaching facts/);assert.equal(presentation.links.length,0);
     if(variant===1)assert.ok(result.fees[0]>result.fees[1]&&result.rates[0]<result.rates[1]);
   }
@@ -116,8 +116,8 @@ test('range question revisions retire only changed draft answers and preserve co
   assert.deepEqual(migrated.completed, MANAGEMENT_IDS);
   for (const id of ['range-width','fee-tiers']) {
     assert.equal(migrated.drafts[id].application, '');
-    assert.equal(migrated.drafts[id].prediction, old.drafts[id].prediction);
-    assert.equal(migrated.drafts[id].reason, old.drafts[id].reason);
+    assert.equal(migrated.drafts[id].prediction, id === 'fee-tiers' ? '' : old.drafts[id].prediction);
+    assert.equal(migrated.drafts[id].reason, id === 'fee-tiers' ? '' : old.drafts[id].reason);
     assert.equal(migrated.drafts[id].revealed, true);
     assert.equal(migrated.drafts[id].variant, old.drafts[id].variant);
   }
@@ -154,7 +154,7 @@ test('fictional fee evidence balances volume, fee tiers and each position’s ac
   const application = managementApplication(result);
   assert.deepEqual(application.evidence.comparison.rows.map(row => row.value), result.fees);
   assert.equal(result.application, 'more-volume');
-  assert.equal(checkManagementUnderstanding('fee-tiers', 0, 'trades', 'bigger-share').passed, false);
+  assert.equal(checkManagementUnderstanding('fee-tiers', 0, 'active-swaps', 'bigger-share').passed, false);
 });
 
 test('the APR example distinguishes past annualization from income after active liquidity doubles', () => {
@@ -191,8 +191,8 @@ test('reinvestment can add own liquidity while faster competing growth reduces f
   ]);
   assert.equal(evidence.rows, undefined);
   assert.equal(result.application, 'competition-offset');
-  assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'trades', 'competition-offset').passed, true);
-  assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'trades', 'collection-reduced').passed, false);
+  assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'active-swaps', 'competition-offset').passed, true);
+  assert.equal(checkManagementUnderstanding('fee-tiers', 2, 'active-swaps', 'collection-reduced').passed, false);
 });
 
 test('the second range-application revision clears replaced answers without losing completed situations', () => {
@@ -205,7 +205,9 @@ test('the second range-application revision clears replaced answers without losi
   for (const id of old.completed) {
     assert.equal(migrated.drafts[id].application, '');
     assert.equal(migrated.drafts[id].questionRevisions.application, id === 'fee-tiers' ? 4 : 3);
-    for (const key of ['prediction','reason','revealed','choiceSeed','variant']) assert.equal(migrated.drafts[id][key], old.drafts[id][key]);
+    assert.equal(migrated.drafts[id].prediction, id === 'fee-tiers' ? '' : old.drafts[id].prediction);
+    assert.equal(migrated.drafts[id].reason, id === 'fee-tiers' ? '' : old.drafts[id].reason);
+    for (const key of ['revealed','choiceSeed','variant']) assert.equal(migrated.drafts[id][key], old.drafts[id][key]);
   }
   migrated.drafts['range-width'].application = 'wide-mix';
   migrated.drafts['fee-tiers'].application = 'competition-offset';
@@ -267,7 +269,9 @@ test('the concrete fee questions retire older applications while keeping learnin
     assert.deepEqual(migrated.completed, ['fee-tiers']);
     assert.equal(draft.application, '');
     assert.equal(draft.questionRevisions.application, 4);
-    for (const key of ['prediction', 'reason', 'revealed', 'choiceSeed', 'variant']) assert.equal(draft[key], previous[key]);
+    assert.equal(draft.prediction, '');
+    assert.equal(draft.reason, '');
+    for (const key of ['revealed', 'choiceSeed', 'variant']) assert.equal(draft[key], previous[key]);
     draft.application = managementCase('fee-tiers', variant).application;
     assert.deepEqual(parseManagementProgress(migrated), migrated);
   }

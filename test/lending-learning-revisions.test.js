@@ -186,7 +186,7 @@ test('each lending application responds to the selected misconception with its o
   }
 });
 
-test('loop application revisions preserve reasoning, predictions, scene state and every completion', () => {
+test('legacy loop drafts drop retired questions and preserve other answers and every completion', () => {
   const legacy = {
     version: 1, currentLesson: 'unwind', completed: ['build', 'stress', 'unwind'],
     drafts: {
@@ -200,15 +200,15 @@ test('loop application revisions preserve reasoning, predictions, scene state an
   const parsed = readLoopProgress(() => storage).progress;
   assert.deepEqual(parsed.completed, legacy.completed);
   assert.equal(parsed.currentLesson, 'unwind');
-  assert.deepEqual(parsed.drafts.build, legacy.drafts.build);
+  assert.deepEqual(parsed.drafts.build, { ...legacy.drafts.build, reason: '', questionRevisions: { reason: 1 } });
   for (const [id, answer] of [['stress', 'backing-not-profit'], ['unwind', 'debt-remains']]) {
     const draft = parsed.drafts[id];
     assert.equal(draft.reason, legacy.drafts[id].reason);
-    assert.equal(draft.prediction, legacy.drafts[id].prediction);
+    assert.equal(draft.prediction, id === 'unwind' ? '' : legacy.drafts[id].prediction);
     assert.equal(draft.revealed, true);
     assert.equal(draft.seed, legacy.drafts[id].seed);
     assert.equal(draft.application, '');
-    assert.deepEqual(draft.questionRevisions, { application: 2 });
+    assert.deepEqual(draft.questionRevisions, id === 'unwind' ? { prediction: 1, application: 2 } : { application: 2 });
     assert.equal(checkLoopUnderstanding(id, draft.reason, draft.application).passed, false);
     draft.application = answer;
     assert.equal(checkLoopUnderstanding(id, draft.reason, draft.application).passed, true);
@@ -230,26 +230,25 @@ test('the stress transfer has enough collateral and a larger loss than holding a
 });
 
 
-test('the sale-cost application retires the repayment answer without losing the loan or completion', () => {
+test('revised loop questions retain the answered sale-cost application, revealed frame and completion', () => {
   const saved = {
     version: 1, currentLesson: 'unwind', completed: ['build', 'stress', 'unwind'],
     drafts: {
       build: { prediction: 'same', reason: 'debt', application: 'supplied', revealed: true, seed: 2 },
-      stress: { prediction: 'loop', reason: 'exposure', application: 'debt-offset', revealed: true, seed: 3, questionRevisions: { application: 1 } },
-      unwind: { prediction: 'stages', reason: 'backing', application: 'repay-wallet', revealed: true, seed: 4, questionRevisions: { application: 1 } },
+      stress: { prediction: 'loop', reason: 'exposure', application: 'backing-not-profit', revealed: true, seed: 3, questionRevisions: { application: 2 } },
+      unwind: { prediction: 'stages', reason: 'backing', application: 'debt-remains', revealed: true, seed: 4, questionRevisions: { application: 2 } },
     },
   };
   const storage = memory();
   storage.setItem(LOOP_LEARNING_KEY, JSON.stringify(saved));
   const parsed = readLoopProgress(() => storage).progress;
   assert.deepEqual(parsed.completed, saved.completed);
-  assert.deepEqual(parsed.drafts.build, saved.drafts.build);
-  for (const id of ['stress', 'unwind']) {
-    assert.deepEqual(parsed.drafts[id], { ...saved.drafts[id], application: '', questionRevisions: { application: 2 } });
-  }
+  assert.deepEqual(parsed.drafts.build, { ...saved.drafts.build, reason: '', questionRevisions: { reason: 1 } });
+  assert.deepEqual(parsed.drafts.stress, saved.drafts.stress);
+  assert.deepEqual(parsed.drafts.unwind, { ...saved.drafts.unwind, prediction: '', questionRevisions: { prediction: 1, application: 2 } });
   assert.equal(checkLoopUnderstanding('unwind', 'backing', 'repay-wallet').passed, false);
-  parsed.drafts.stress.application = 'backing-not-profit';
-  parsed.drafts.unwind.application = 'debt-remains';
+  parsed.drafts.build.reason = 'buy-eth';
+  parsed.drafts.unwind.prediction = 'repay';
   assert.equal(saveLoopProgress(parsed, () => storage), true);
   assert.deepEqual(readLoopProgress(() => storage).progress, parsed);
 });

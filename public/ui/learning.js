@@ -113,17 +113,35 @@ export function initLearning() {
     return 'ETH at ' + usd(s.futurePrice) + (['fee-break-even', 'final-challenge'].includes(lesson.id) ? ' · ' + usd(s.fees) + ' in fees' : '');
   }
   function explanationLabel() {
+    if (lesson.id === 'final-challenge') return 'Compare with the worked example ↓';
     const s = draft.inputs;
     return 'Explain the ' + (foundationLesson() ? questionLabel() : usd(s.futurePrice) + ' outcome') + ' ↓';
   }
   function renderPrediction() {
     renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, outcome.prediction,
-      questionLabel() + ': ' + lessonFinding(lesson.id, outcome));
+      (lesson.id === 'final-challenge' ? '' : questionLabel() + ': ') + lessonFinding(lesson.id, outcome));
     markPredictionRevealed(predictionField);
+  }
+  function prepareChallenge(input) {
+    applicationScene = createLiquidityApplication(input, draft.task, value => {
+      draft.task = value; draft.taskChecked = false;
+      clearUnderstandingFeedback('learn');
+      $('learn-feedback').hidden = true; $('learn-continue').hidden = true; $('learn-share').hidden = true;
+      clearCard(); persist();
+    });
+    draft.task = applicationScene.value();
+    $('learn-application-task').replaceChildren(applicationScene.element);
   }
   function updateSetup() {
     const s = draft.inputs;
     renderLessonSetup($('learn-setup'), liquidityLessonSetup(lesson.id, s));
+    const hasTask = lesson.id === 'final-challenge';
+    $('learn-application-task').hidden = !hasTask;
+    $('learn-worked-comparison').hidden = !hasTask;
+    $('learn-worked-comparison').open = false;
+    $('learn-worked-scene').replaceChildren();
+    if (hasTask) prepareChallenge(s);
+    else { applicationScene = null; $('learn-application-task').replaceChildren(); }
     $('learn-variation-label').textContent = 'Variation ' + (draft.variant + 1) + ' of ' + VARIANTS;
     const model = lesson.protocol + (lesson.id === 'range-boundaries' ? ' · Price range' : ['swap-impact', 'pool-share'].includes(lesson.id) ? ' · Virtual pool' : ' · Full-range 50/50');
     $('learn-model').textContent = model + ' · Illustrative inputs · USDC = $1';
@@ -134,11 +152,14 @@ export function initLearning() {
         : 'If ETH moves to ' + usd(s.futurePrice) + ', will your liquidity hold less, more, or the same ETH?';
       const prediction = createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) });
       lessonScene = foundationLesson() ? createFoundationScene(lesson.id, s, draft.variant, prediction)
-        : comparisonLesson() ? createComparisonScene(lesson.id, s, prediction)
+        : comparisonLesson() ? createComparisonScene(lesson.id, s, hasTask ? null : prediction)
         : lesson.id === 'range-boundaries' ? createRangeBoundaryScene(s, prediction)
         : createTokenBalanceScene(s, prediction);
       $('learn-prediction-home').replaceChildren();
-      $('learn-scene').replaceChildren(lessonScene.element);
+      if (hasTask) {
+        $('learn-scene').replaceChildren(prediction);
+        $('learn-worked-scene').replaceChildren(lessonScene.element);
+      } else $('learn-scene').replaceChildren(lessonScene.element);
       $('learn-run').textContent = explanationLabel();
     } else {
       $('learn-prediction-home').replaceChildren(createPredictionPrompt(predictionField, { selected: draft.prediction, onShow: () => showResult() }));
@@ -222,7 +243,7 @@ export function initLearning() {
       if (s.fees) visual.push(bar('LP + ' + usd(s.fees) + ' assumed fees', r.lpValue / max * 100, usd(r.lpValue)));
     }
     $('learn-metrics').replaceChildren(...metrics); $('learn-visual').replaceChildren(...visual);
-    $('learn-results-title').textContent = questionLabel();
+    $('learn-results-title').textContent = lesson.id === 'final-challenge' ? 'A worked comparison · ' + questionLabel() : questionLabel();
     renderPrediction();
     const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
     const lossCopy = lesson.id === 'loss-vs-profit' ? lossProfitReasoning(outcome) : null;
@@ -234,23 +255,14 @@ export function initLearning() {
       : lesson.id === 'final-challenge' && id === 'total' ? finalReason(outcome) : copy]);
     choices('learn-reasons', 'learn-reason', reasons, draft.reason);
     $('learn-application-context').textContent = applicationCopy.context;
-    $('learn-reason-context').textContent = applicationCopy.reasonContext || '';
-    $('learn-reason-context').hidden = !applicationCopy.reasonContext;
+    $('learn-reason-context').textContent = lesson.id === 'final-challenge'
+      ? 'In the worked example, the position has ' + usd(s.fees) + ' in fees against a gap of ' + usd(r.breakEvenFees) + ' before fees.'
+      : applicationCopy.reasonContext || '';
+    $('learn-reason-context').hidden = !$('learn-reason-context').textContent;
     renderQuestionEvidence($('learn-application-evidence'), applicationCopy.evidence);
     const hasTask = lesson.id === 'final-challenge';
-    $('learn-application-task').hidden = !hasTask;
     $('learn-application-label').textContent = applicationCopy.label || 'Build an example';
     $('learn-check').textContent = hasTask ? 'Check this setup and answers →' : 'Check answers →';
-    if (hasTask) {
-      applicationScene = createLiquidityApplication(s, draft.task, value => {
-        draft.task = value; draft.taskChecked = false;
-        clearUnderstandingFeedback('learn');
-        $('learn-feedback').hidden = true; $('learn-continue').hidden = true; $('learn-share').hidden = true;
-        clearCard(); persist();
-      });
-      draft.task = applicationScene.value();
-      $('learn-application-task').replaceChildren(applicationScene.element);
-    } else { applicationScene = null; $('learn-application-task').replaceChildren(); }
     $('learn-application-question').textContent = applicationCopy.question;
     if (!applicationCopy.choices.some(([id]) => id === draft.application)) draft.application = '';
     choices('learn-applications', 'learn-application', applicationCopy.choices, draft.application);
@@ -269,6 +281,10 @@ export function initLearning() {
     $('learn-explore-note').textContent = r ? 'Opens the question’s price, starting tokens and fees in a new tab.' : 'Opens your independent swap sandbox in a new tab; its existing virtual balances are preserved.';
     if (lesson.id === 'swap-impact') $('learn-explore-note').textContent = 'In your independent sandbox, compare two trade sizes before executing either. Watch how price impact changes.';
     else if (lesson.id === 'loss-vs-profit') $('learn-explore-note').textContent = 'Try adding fees in Experiment. Find a positive dollar return that still trails holding the starting tokens.';
+    else if (lesson.id === 'final-challenge') {
+      $('learn-explore').textContent = 'Explore the worked example in Experiment ↗';
+      $('learn-explore-note').textContent = 'Opens the ' + usd(s.futurePrice) + ' ETH example with ' + usd(s.fees) + ' in fees.';
+    }
     else if (lesson.id === 'range-boundaries') $('learn-explore-note').textContent = 'Move ETH below, inside and above the bounds. Watch which token remains and when swaps can use the position.';
     if (r && lesson.id === 'final-challenge') $('learn-share-url').value = home.href;
   }
@@ -315,7 +331,7 @@ export function initLearning() {
     $('learn-metrics').hidden = visualLesson(); $('learn-visual').hidden = visualLesson();
     $('learn-experiment-title').textContent = {
       'swap-impact': 'Follow the swap', 'pool-share': 'Watch your pool share', 'token-balances': 'Watch the token mix',
-      'loss-vs-profit': 'Profit compared with what?', 'fee-break-even': 'Watch fees close the gap', 'final-challenge': 'Bring the comparison together', 'range-boundaries': 'Watch the price cross your range',
+      'loss-vs-profit': 'Profit compared with what?', 'fee-break-even': 'Fees and the holding benchmark', 'final-challenge': 'Start with the same tokens', 'range-boundaries': 'Watch the price cross your range',
     }[lesson.id] || 'Your experiment';
     $('learn-results-title').after(predictionFeedbackElement);
     if (lesson.id === 'range-boundaries') {
@@ -369,7 +385,7 @@ export function initLearning() {
     if (!draft.ran) { draft.ran = true; renderResults(); }
     else renderPrediction();
     persist();
-    if (sceneFirst && visualLesson()) { focusSceneOutcome(lessonScene.element); return; }
+    if (sceneFirst && visualLesson()) { focusSceneOutcome($('learn-scene')); return; }
     const title = $('learn-results-title');
     title.tabIndex = -1; title.focus({ preventScroll: true });
     title.scrollIntoView({ block: 'start', behavior: 'instant' });

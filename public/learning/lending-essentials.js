@@ -16,7 +16,7 @@ export const LENDING_LESSONS = [
     question: 'With collateral off, what changes over the year?',
     finding: 'The supplied ETH grows with interest. With collateral off, it provides no borrowing capacity, and no debt has been taken out.',
     predictions: [['earn', 'It earns interest without increasing your borrowing capacity.'], ['capacity', 'It increases your borrowing capacity without earning interest.'], ['neither', 'Its token balance and your borrowing capacity stay unchanged.']],
-    takeaway: 'A supply can earn interest without backing a loan. Borrowing creates a separate obligation.',
+    takeaway: 'Borrowers pay interest to use ETH from the pool. As a supplier, you receive part of that interest.',
     accomplishment: 'You separated earning interest, enabling collateral and taking a loan.',
     explanation: 'Interest adds to the supplied ETH. Enabling collateral can make borrowing possible, but it does not take out a loan. With no debt, there is no loan liquidation boundary; ETH’s price can still change.',
     pitfall: 'Even without debt, the token’s price can fall, the protocol can have problems, or funds may be unavailable when you want to withdraw.',

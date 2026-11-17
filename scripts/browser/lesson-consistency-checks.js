@@ -66,7 +66,7 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   }
   await restoreQuestion(evaluate,'fee-break-even',{futurePrice:4000,fees:100});
   await navigate(base + 'learn.html#lesson=fee-break-even');
-  await choose('learn-prediction','short'); await click('learn-run');
+  await choose('learn-prediction','toward-target'); await click('learn-run');
   assert.match(await text('learn-explanation'),/total fee target is \$428.93[\s\S]*\$328.93 additional/);
   await choose('learn-reason','assumption'); await choose('learn-application','gap-reopens'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
@@ -84,7 +84,7 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   await navigate(base + 'learn.html#applied=period-vs-holding');
   await evaluate("new Promise(resolve=>{const check=()=>document.getElementById('learn-applied').getAttribute('aria-busy')==='false'?resolve():setTimeout(check,25);check()})");
-  await choose('applied-prediction','can-trail'); await click('applied-reveal'); await fill('applied-checkpoint','8');
+  await choose('applied-prediction','two-values'); await click('applied-reveal'); await fill('applied-checkpoint','8');
   assert.match(await text('applied-metrics'),/−\$0.01/);
   assert.match(await text('applied-explanation'),/earlier checkpoint[\s\S]*principal plus earned fees still trails holding[\s\S]*final checkpoint/);
   assert.match(await text('applied-prediction-feedback'),/checkpoint 7.*\$0.23.*trails holding by \$0.51.*\$0.17 ahead, before costs/);

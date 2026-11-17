@@ -61,12 +61,12 @@ test('a rally gives dollar profit while still losing to holding the starting tok
 test('total break-even target differs from additional fees and assumptions never change principal', () => {
   const r = runLesson('fee-break-even', { futurePrice: 4000, fees: 100 });
   close(r.result.breakEvenFees, 428.932188134524);
-  assert.equal(r.prediction, 'short');
+  assert.equal(r.prediction, 'toward-target');
   const final = runLesson('final-challenge', { futurePrice: 4000, fees: 100 });
   close(final.result.difference, -328.932188134524);
   const covered = runLesson('final-challenge', { futurePrice: 4000, fees: 600 });
   assert.ok(covered.result.difference > 0);
-  assert.equal(covered.prediction, 'lp');
+  assert.equal(covered.prediction, 'lower-price');
   assert.deepEqual(covered.result.pooled, r.result.pooled);
 });
 test('range exercise labels exact boundaries and does not infer earlier fees', () => {

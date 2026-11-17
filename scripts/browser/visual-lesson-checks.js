@@ -90,7 +90,7 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   await reload();
   assert.equal(await text('manage-feedback-title'),'Both answers are correct.','Current revision answers still restore.');
 
-  for (const [id, reason, application] of [['build', 'debt', 'supplied'], ['unwind', 'backing', 'debt-remains']]) {
+  for (const [id, reason, application] of [['build', 'buy-eth', 'supplied'], ['unwind', 'backing', 'debt-remains']]) {
     await navigate(base + 'lending.html#loop-lesson=' + id);
     await click('lend-reveal'); await click('lend-retry');
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), await text('lend-question'));
@@ -105,11 +105,11 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
     await click('lend-reveal');
     assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), '1', 'Explanation preserves the selected action.');
     await evaluate("document.querySelector('.scene-prediction-show').click()");
-    assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), id === 'build' ? '3' : '7');
+    assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), '3');
     await choose('lend-reason', reason); await choose('lend-application', application); await click('lend-check');
     await reload();
     assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
-    assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), id === 'build' ? '3' : '7');
+    assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), '3');
     if (id === 'unwind') assert.equal(await evaluate("document.getElementById('loop-flow-health').checkVisibility()"), true);
   }
   console.log('PASS: four visual pilots, optional predictions, fixed question scope, exact handoffs, independent exploration, replay and restored completion');

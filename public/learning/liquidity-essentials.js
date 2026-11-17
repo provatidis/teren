@@ -50,9 +50,9 @@ export const LESSONS = [
   },
   {
     id: 'fee-break-even', completion: 'You separated an assumed fee amount from fees actually earned.', protocol: 'Uniswap v2-style', title: 'Fees needed to match holding', short: 'Fees & break-even', concept: 'Fee income', skill: 'Distinguish a fee target from assumed and earned fees.',
-    intro: 'How much would fees need to add for LP to match holding? Explore different fee totals and watch the gap close.',
-    prediction: 'Do the fees in this example cover the gap to holding at this future price?',
-    predictions: [['enough', 'They match or exceed the gap'], ['short', 'The LP still trails holding']],
+    intro: 'You could have kept the same ETH and USDC in your wallet. See how trading fees change the comparison with providing liquidity.',
+    prediction: 'At a fixed ETH price, how do fees count toward catching up with holding?',
+    predictions: [['toward-target', 'They reduce any remaining shortfall. The original fee target stays the same.'], ['lower-target', 'They lower the original fee target as well as reducing any shortfall.'], ['both-earn', 'They add the same value to the position and to holding.']],
     reasoning: 'What does the break-even fee target describe?',
     reasons: [['assumption', 'The fee income needed to match the starting holding basket.'], ['guarantee', 'The fee income estimated from this particular price change.'], ['compound', 'The fee income available to collect after this price change.']],
     reasonFeedbackByChoice: {
@@ -76,10 +76,10 @@ export const LESSONS = [
     takeaway: 'The final price tells you which tokens remain. Past fees need records of earlier activity.',
   },
   {
-    id: 'final-challenge', completion: 'You built an example where matching holding still leaves a dollar loss.', protocol: 'Uniswap v2-style', title: 'Compare liquidity with holding', short: 'Final challenge', concept: 'Apply what you learned', skill: 'Compare an LP with holding and justify the conclusion.',
-    intro: 'Use the same starting tokens to compare holding with LP. Change the price or fees you enter, then explain what drives the result.',
-    prediction: 'With your selected price and fees, which has the higher final dollar value?',
-    predictions: [['hold', 'Holding the starting tokens'], ['lp', 'The LP, including fees — or a tie']],
+    id: 'final-challenge', completion: 'You built an example where matching holding still leaves a dollar loss.', protocol: 'Uniswap v2-style', title: 'Can you match holding and still lose dollars?', short: 'Final challenge', concept: 'Apply what you learned', skill: 'Build your own example.',
+    intro: 'Start with the same ETH and USDC in the pool and in your wallet. Find a price and fee amount that leave the two strategies tied, each worth less than you started with.',
+    prediction: 'Which change in the ETH price would you try first?',
+    predictions: [['lower-price', 'A fall in ETH.'], ['higher-price', 'A rise in ETH.'], ['same-price', 'Leave ETH at its starting price.']],
     reasoning: 'How do fees affect this comparison with holding?',
     reasons: [['total', 'Compare the fee contribution with the principal shortfall against holding.'], ['fees', 'Any fee income puts the LP ahead of its original holding basket.'], ['deposit-loss', 'Compare fees with the LP’s dollar loss from the original deposit.']],
     reasonFeedbackByChoice: {

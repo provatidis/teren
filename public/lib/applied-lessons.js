@@ -23,8 +23,8 @@ export function appliedQuestion(period, id) {
       durationSeconds:end.durationSeconds,secondsInRange:end.secondsInRange};
     return { index, view, interval, placement, prediction: 'possible', reason: 'returned' };
   }
-  // A named teaching checkpoint in this fixed record, not a search for its worst
-  // return. Keep the final period endpoint as the assessed result and handoff.
+  // The prediction uses a fixed checkpoint. The follow-up compares its result
+  // with the end of the record.
   const contrastIndex = 6, contrast = periodPointView(period, contrastIndex);
   if (!(contrast.feesUSD > 0 && contrast.gapUSD < 0 && view.gapUSD > 0)) throw new Error('The recorded comparison checkpoints no longer match this lesson.');
   if (contrast.state!=='above'||view.state!=='above'||contrast.principal.amount1!==0n||view.principal.amount1!==0n
@@ -33,7 +33,7 @@ export function appliedQuestion(period, id) {
   }
   const recovery={principalImprovement:view.principalGapUSD-contrast.principalGapUSD,
     feeValueChange:view.feesUSD-contrast.feesUSD,gapChange:view.gapUSD-contrast.gapUSD};
-  return { index, view, interval, contrastIndex, contrast, recovery, prediction: 'can-trail', reason: 'price-returned' };
+  return { index, view, interval, contrastIndex, contrast, recovery, prediction: 'two-values', reason: 'price-returned' };
 }
 export function appliedReasonFeedback(id, reason) {
   const feedback = {

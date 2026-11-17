@@ -161,7 +161,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     await call('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' });
     await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
   };
-  const lessons = [['build', 'more', 'debt', 'supplied'], ['stress', 'same', 'exposure', 'backing-not-profit'], ['unwind', 'all', 'backing', 'debt-remains']];
+  const lessons = [['build', 'more', 'buy-eth', 'supplied'], ['stress', 'same', 'exposure', 'backing-not-profit'], ['unwind', 'sell', 'backing', 'debt-remains']];
   for (const [index, [id, prediction, reason, application]] of lessons.entries()) {
     await navigate(base + 'lending.html#loop-lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#lending-learn input[type=number]').length"), 0);
@@ -180,7 +180,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     assert.match(await text('lend-prediction-feedback'), /^The result differs from your prediction\./);
     assert.equal(await evaluate("document.getElementById('lend-money-flow').hidden"), false);
     if (id !== 'stress') {
-      assert.equal(await flowIndex(), id === 'build' ? '3' : '7');
+      assert.equal(await flowIndex(), '3');
       await moveFlow('Home');
     }
     if (id === 'build') {

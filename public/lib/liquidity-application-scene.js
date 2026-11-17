@@ -9,7 +9,7 @@ export function createLiquidityApplication(input, saved, onChange) {
   const element = node('section', undefined, 'lesson-scene learning-application-scene');
   element.setAttribute('aria-labelledby', 'liquidity-task-heading');
   const title = node('h4', 'Your challenge'); title.id = 'liquidity-task-heading';
-  const scope = node('p', 'This task has its own controls. The worked example and its Experiment link stay as shown above.', 'scene-question-scope');
+  const scope = node('p', 'Choose an ETH price. Use Match holding to see how much fee income closes the gap at that price.', 'scene-question-scope');
   const bars = createComparisonBars(input, { prefix: 'liquidity-task' });
   const finding = node('p', '', 'scene-consequence'); finding.id = 'liquidity-task-finding';
   const feedback = node('p', '', 'learn-answer-feedback'); feedback.id = 'liquidity-task-feedback';
@@ -20,7 +20,7 @@ export function createLiquidityApplication(input, saved, onChange) {
   const actions = node('div', undefined, 'scene-shortcuts');
   const match = node('button', 'Match holding', 'scene-shortcut'); match.type = 'button'; match.id = 'liquidity-task-match';
   const example = node('button', 'Show an example', 'scene-shortcut'); example.type = 'button'; example.id = 'liquidity-task-example';
-  const reset = node('button', 'Reset task', 'scene-shortcut'); reset.type = 'button'; reset.id = 'liquidity-task-reset';
+  const reset = node('button', 'Start again', 'scene-shortcut'); reset.type = 'button'; reset.id = 'liquidity-task-reset';
   actions.append(match, example, reset);
   function draw(notify = false) {
     const state = comparisonSceneState(input, current.price, current.fees);
@@ -36,7 +36,7 @@ export function createLiquidityApplication(input, saved, onChange) {
   const price = createSceneExplorer({
     id: 'liquidity-task-price', min: input.initialPrice / 2, max: input.initialPrice * 2,
     step: input.initialPrice / 100, start: current.price, target: input.initialPrice, format: usd,
-    labelText: 'Choose the task’s ETH price', valueText: value => usd(value) + ' per ETH',
+    labelText: 'Choose an ETH price', valueText: value => usd(value) + ' per ETH',
     scopeText: () => 'Changing price keeps the chosen fee amount. Use Match holding again if needed.',
     shortcuts: [{ label: 'Lower price', value: input.initialPrice * .75 }, { label: 'Starting price', value: input.initialPrice }, { label: 'Higher price', value: input.initialPrice * 1.5 }],
     onChange: value => { current.price = value; return draw(ready); },
@@ -54,7 +54,7 @@ export function createLiquidityApplication(input, saved, onChange) {
       const result = checkLiquidityChallenge(input, current);
       feedback.dataset.state = result.passed ? 'match' : 'different';
       feedbackCopy.textContent = result.passed
-        ? 'This setup meets both conditions: LP matches holding, and both are below the starting capital. Now connect it to your explanation.'
+        ? 'Your position and the starting tokens are worth the same amount. Both have lost dollars.'
         : !result.belowStart ? 'Find a price where both end below the starting capital. Matching holding at the starting price does not meet that part of the task.'
           : 'Both are below the starting capital. Adjust the fee assumption with Match holding to close their remaining gap.';
       feedback.hidden = false;

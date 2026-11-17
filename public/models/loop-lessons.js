@@ -6,9 +6,9 @@ const cases = {
   unwind: { rounds: 3 },
 };
 const answers = {
-  build: ['same', 'debt', 'supplied'],
+  build: ['same', 'buy-eth', 'supplied'],
   stress: ['loop', 'exposure', 'backing-not-profit'],
-  unwind: ['stages', 'backing', 'debt-remains'],
+  unwind: ['repay', 'backing', 'debt-remains'],
 };
 
 export function loopCase(id) {

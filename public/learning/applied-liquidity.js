@@ -28,10 +28,14 @@ export const APPLIED_LESSONS = Object.freeze([
   },
   {
     id: 'period-vs-holding', caseId: 'range-return', title: 'Explain the period’s result', short: 'Compare with holding',
-    adds: 'Combine principal, period fees and the original holding basket.',
-    intro: 'Start with the position shown below. Consider what earning fees tells us, then examine the record to compare principal plus new fees with holding the same starting tokens.',
-    prediction: 'Could this position earn fees and still finish below holding its starting tokens?',
-    predictions: [['can-trail', 'Yes — its total value could still be lower'], ['fees-win', 'No — earning fees would put its total value ahead']],
+    adds: 'Follow the same starting tokens through two choices.',
+    intro: 'The owner supplied WETH and USDC to this pool. Imagine keeping those tokens in your wallet over the same 33 hours.',
+    prediction: 'At checkpoint 7, what would you compare to see whether holding would have left you with more?',
+    predictions: [
+      ['two-values', 'The position plus its fees versus the original tokens at the checkpoint price.'],
+      ['start-dollars', 'The position plus its fees versus the dollar value of the original deposit.'],
+      ['principal-only', 'The position without its uncollected fees versus the original tokens at the checkpoint price.'],
+    ],
     reasoning: 'Why did the shortfall before fees shrink as ETH fell?',
     reasonFinding: 'At both compared checkpoints, principal is the same USDC amount. Holding’s ETH loses value as ETH falls, shrinking the principal shortfall. The increase in fee value helps separately. Neither collection nor reinvestment caused this recovery.',
     reasons: [

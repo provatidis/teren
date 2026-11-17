@@ -61,8 +61,8 @@ export function runLesson(id, input, variant = 0) {
   const conclusions = {
     'token-balances': { prediction: result.pooled.eth < result.held.eth ? 'less' : result.pooled.eth > result.held.eth ? 'more' : 'same', reason: 'rebalance' },
     'loss-vs-profit': { prediction: result.lpReturn >= 0 ? 'gain' : 'loss', reason: 'traded-mix' },
-    'fee-break-even': { prediction: result.difference >= -1e-8 ? 'enough' : 'short', reason: 'assumption' },
-    'final-challenge': { prediction: result.difference >= -1e-8 ? 'lp' : 'hold', reason: 'total' },
+    'fee-break-even': { prediction: 'toward-target', reason: 'assumption' },
+    'final-challenge': { prediction: 'lower-price', reason: 'total' },
   };
   return { setup, variant, result, ...conclusions[id] };
 }

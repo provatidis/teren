@@ -1,5 +1,12 @@
 # Release history
 
+## 1.55.2 · 2026-11-17
+
+- Start the liquidity final challenge by building a position that matches holding while both lose dollar value. Explore how additional fees change the amount still needed to match holding.
+- Use checkpoint 7 to examine what fee earnings tell a liquidity provider. Give the fee-tier lesson a pool choice and name the next range scenario before opening it.
+- Follow who pays lending interest, when buying ETH increases a loop’s price exposure and when repayment reduces its debt.
+- Show the day-45 yield sale from the YT holder’s perspective, with separate amounts for the sale and interest already earned.
+
 ## 1.55.1 · 2026-11-17
 
 - Return from lending lessons to the last lending experiment, including wstETH/WETH loops.

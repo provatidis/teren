@@ -7,7 +7,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   const hidden = id => evaluate(`document.getElementById('${id}').hidden`);
   const taskPrice = () => evaluate("document.getElementById('liquidity-task-price').value");
   const handoff = () => evaluate("document.getElementById('learn-explore').href");
-  const observed = () => evaluate("document.getElementById('learn-scene').textContent");
+  const observed = () => evaluate("document.getElementById('learn-worked-scene').textContent");
   const isolated = () => evaluate(`[
     localStorage.getItem('defi-sandbox-v1'),
     localStorage.getItem('degenerator-pool-snapshot-v1'),
@@ -38,7 +38,14 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   // Reset this exercise through its UI without removing any earlier completion.
   await click('learn-variation');
   for (let i = 0; i < 3 && !(await text('learn-variation-label')).includes('1 of 3'); i++) await click('learn-variation');
+  assert.equal(await evaluate("document.getElementById('liquidity-task-price').checkVisibility()"), true, 'Start with the construction task.');
+  assert.equal(await evaluate("document.getElementById('comparison-profit').checkVisibility()"), false, 'The worked verdict does not answer the opening prediction.');
+  await fill('liquidity-task-price', '1300');
+  await reload();
+  assert.equal(await taskPrice(), '1300', 'An unrevealed construction survives reopening the lesson.');
   await click('learn-run');
+  assert.equal(await taskPrice(), '1300', 'Opening the worked example preserves the learner’s selected price.');
+  await click('liquidity-task-reset');
   const original = await draft();
   const completedBefore = (await progress()).completed;
   const working = await isolated();

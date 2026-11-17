@@ -17,9 +17,10 @@ export function renderRecordedLessonSetup(container, period, lesson, question) {
       ['USDC principal', fmt(Number(formatUnits(start.principal.amount0, 6)), 2) + ' USDC', 'usdc'],
       ['Recorded period', periodDuration(period.validation.durationSeconds)],
     ],
-    actionLabel: lesson.id === 'fees-over-time' ? 'Owner activity' : undefined,
+    actionLabel: lesson.id === 'fees-over-time' ? 'Owner activity'
+      : question.contrast ? 'Checkpoint ' + (question.contrastIndex + 1) : undefined,
     action: lesson.id === 'fees-over-time' ? 'The owner leaves the position open and collects nothing.'
-      : lesson.id === 'period-vs-holding' ? 'Compare the position, including new fees, with holding these exact starting tokens.'
+      : question.contrast ? 'Fees earned since the start are worth ' + usd(question.contrast.feesUSD) + ' at this checkpoint’s price.'
       : undefined,
     assumptions: 'Liquidity and range stay unchanged throughout the record. WETH is wrapped ETH; values use USDC = $1.',
   });

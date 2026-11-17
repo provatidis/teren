@@ -6,7 +6,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
   const choose = (name, value) => evaluate(`document.querySelector('input[name="${name}"][value="${value}"]').click()`);
   const savedAnswer = id => evaluate(`JSON.parse(localStorage.getItem('passiko-applied-liquidity-v1')).drafts['${id}'].answer`);
   const ready = () => evaluate("new Promise((resolve,reject)=>{const end=Date.now()+5000;const check=()=>{if(document.getElementById('learn-applied').getAttribute('aria-busy')==='false')resolve();else if(Date.now()>end)reject(new Error('Applied record did not load'));else setTimeout(check,25)};check()})");
-  const cases = [['fees-over-time', 'earned', '2.36', 'growth', 'in-range', 'same'], ['between-samples', 'possible', '2724', 'returned', 'range-return', 'edge-placement'], ['period-vs-holding', 'can-trail', '0.17', 'price-returned', 'range-return', 'smaller-lead']];
+  const cases = [['fees-over-time', 'earned', '2.36', 'growth', 'in-range', 'same'], ['between-samples', 'possible', '2724', 'returned', 'range-return', 'edge-placement'], ['period-vs-holding', 'two-values', '0.17', 'price-returned', 'range-return', 'smaller-lead']];
   for (const [id, prediction, legacyAnswer, reason, record, application] of cases) {
     await navigate(base + 'learn.html#applied=' + id); await ready();
     assert.equal(await evaluate("document.getElementById('learn-essential').hidden"), true);
@@ -20,6 +20,10 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     assert.match(await text('applied-setup'), /WETH principal.*USDC principal/);
     if (id === 'fees-over-time') {
       assert.match(await text('applied-setup'), /owner leaves the position open and collects nothing/i);
+    }
+    if (id === 'period-vs-holding') {
+      assert.match(await text('applied-setup'), /Checkpoint 7.*\$0\.23/s);
+      assert.match(await text('applied-prediction-question'), /at checkpoint 7/i);
     }
     if (id === 'between-samples') {
       assert.match(await text('applied-setup'), /Upper bound · \$2,675\.81.*Block 26084375 · \$2,677\.18.*Block 26085000 · \$2,687\.83/s);
@@ -59,7 +63,13 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
       assert.equal(await evaluate("document.getElementById('applied-reason-evidence').checkVisibility()&&document.getElementById('applied-application-evidence').checkVisibility()"),true);
     }
     if (id === 'period-vs-holding') {
-      assert.match(await text('applied-metrics'), /\+\$0.17/);
+      assert.match(await text('applied-metrics'), /−\$0\.51/);
+      assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"), '6', 'The fresh reveal opens the checkpoint in the prediction.');
+      await evaluate("document.querySelector('#applied-milestones [data-index=\"16\"]').click()");
+      assert.match(await text('applied-metrics'), /\+\$0\.17/);
+      await reload(); await ready();
+      assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"), '16', 'Reopening preserves the chosen final checkpoint.');
+      await click('applied-return-question');
       assert.equal(await evaluate("document.getElementById('applied-cost-example').hidden"),false);
       assert.match(await text('applied-cost-example'),/hypothetical \$1.00 LP-only cost/);
       assert.match(await text('applied-cost-example'),/historical record is unchanged/);
@@ -79,8 +89,8 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
         const panel = document.getElementById(id); return document.getElementById(panel.getAttribute('aria-labelledby'))?.textContent;
       })`), ['Why the comparison improved', 'If ETH rises from here']);
       assert.equal(await evaluate("document.getElementById('applied-assessment-scope')"), null, 'Each question presents its evidence instead of explaining internal lesson state.');
-      assert.match(await text('applied-question-window'), /Final comparison checkpoint: block 26090000/);
-      assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"), '16', 'The observation still opens at the fixed final checkpoint.');
+      assert.match(await text('applied-question-window'), /checkpoint 7.*end of the record at checkpoint 17/);
+      assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"), '6');
     } else {
       assert.equal(await evaluate("document.getElementById('applied-cost-example').hidden"),true);
       assert.equal(await evaluate("document.getElementById('applied-collection-evidence').hidden && document.getElementById('applied-price-evidence').hidden"), true);
@@ -94,7 +104,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     assert.equal(await text('applied-application-context'), question, 'Checkpoint exploration keeps the assessment fixed.');
     assert.deepEqual(await Promise.all(localIds.map(text)), evidence, 'Each question keeps its own evidence while the chart is explored.');
     assert.equal(await evaluate("document.getElementById('applied-return-question').hidden"), false);
-    if (id === 'period-vs-holding') assert.equal(await text('applied-return-question'), 'Return to the final comparison checkpoint →');
+    if (id === 'period-vs-holding') assert.equal(await text('applied-return-question'), 'Return to checkpoint 7 →');
     assert.equal(await evaluate("document.querySelectorAll('#applied-assessment-form input[type=number]').length"),0);
     const exploredHandoff = await evaluate("document.getElementById('applied-explore').href");
     await choose('applied-reason', reason); await choose('applied-application', application);
@@ -182,7 +192,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
   assert.equal(await evaluate("document.getElementById('applied-continue').hidden"),true);
   assert.equal(await text('applied-progress-count'),'3 of 3 checked');
   assert.equal(await savedAnswer('period-vs-holding'),'0.17');
-  assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('passiko-applied-liquidity-v1')).drafts['period-vs-holding'].questionRevisions"), {prediction:1,reason:4,application:3});
+  assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('passiko-applied-liquidity-v1')).drafts['period-vs-holding'].questionRevisions"), {prediction:2,reason:4,application:3});
   await evaluate(`(() => {const key='passiko-applied-liquidity-v1', progress=JSON.parse(localStorage.getItem(key));
     progress.drafts['between-samples']={prediction:'possible',reason:'counters',application:'fee-records',answer:'2724',revealed:true,checkpoint:3,choiceSeed:12,questionRevisions:{prediction:1,reason:1,application:2}};
     localStorage.setItem(key,JSON.stringify(progress));})()`);

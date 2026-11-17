@@ -53,7 +53,7 @@ test('benchmark explanations follow actual profit, total targets and additional 
     if (factor === 1) assert.equal(loss.result.breakEvenFees, 0);
     const fees = runLesson('fee-break-even', {futurePrice: price, fees: 0}, variant);
     const covered = runLesson('final-challenge', {futurePrice: price, fees: Math.min(base.investment / 2, fees.result.breakEvenFees + 1)}, variant);
-    assert.equal(covered.prediction, 'lp'); assert.ok(covered.result.difference >= 0);
+    assert.equal(covered.prediction, 'lower-price'); assert.ok(covered.result.difference >= 0);
     assert.match(benchmarkNarration('fee-break-even', fees), /total target/);
     assert.match(benchmarkNarration('final-challenge', covered), /conditional on/);
   }

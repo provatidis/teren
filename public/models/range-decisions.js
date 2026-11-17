@@ -40,7 +40,7 @@ export function managementCase(id, variant = 0) {
     const application = ['more-volume', 'smaller-share', 'competition-offset'][variant];
     return {
       id, variant, rates, volumes, activeShare, poolFees, fees, competition, reinvestment,
-      prediction: 'unknown', reason: 'trades', application,
+      prediction: 'active-volume', reason: 'active-swaps', application,
     };
   }
   const prices = [[1600,1400],[2400,2800],[1400,1600]][variant];

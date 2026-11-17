@@ -18,6 +18,10 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false);
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
     assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0, 'Comparison exploration has no duplicate question sliders.');
+    if (id === 'final-challenge') {
+      await click('learn-run');
+      await evaluate("document.querySelector('#learn-worked-comparison > summary').click()");
+    }
     const before = await saved();
     if (id !== 'fee-break-even') {
       await fill('comparison-price', '1000');
@@ -29,10 +33,10 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     }
     if (id !== 'loss-vs-profit') {
       if (id === 'final-challenge') await mode('Assumed fees');
-      const principal = await evaluate("document.querySelector('[data-comparison=lp] .comparison-principal').style.width");
+      const principal = await evaluate("document.querySelector('.comparison-scene [data-comparison=lp] .comparison-principal').style.width");
       await click('comparison-match');
       assert.equal(await text('comparison-holding'), 'LP + fees matches holding.');
-      assert.equal(await evaluate("document.querySelector('[data-comparison=lp] .comparison-principal').style.width"), principal);
+      assert.equal(await evaluate("document.querySelector('.comparison-scene [data-comparison=lp] .comparison-principal').style.width"), principal);
       await fill('comparison-fees', '2500');
       assert.match(await text('comparison-holding'), /above holding/);
       if (id === 'final-challenge') {
@@ -75,7 +79,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
     const task = await evaluate("JSON.stringify(JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['final-challenge']?.task)");
     const taskFeedback = id === 'final-challenge' ? await text('liquidity-task-feedback') : null;
-    await choose('learn-prediction', id === 'loss-vs-profit' ? 'gain' : id === 'fee-break-even' ? 'short' : 'hold');
+    await choose('learn-prediction', id === 'loss-vs-profit' ? 'gain' : id === 'fee-break-even' ? 'toward-target' : 'lower-price');
     assert.equal(await evaluate("document.querySelector('input[name=learn-reason]:checked').value"), reason);
     assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked').value"), application);
     assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), false);
@@ -100,7 +104,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
     if (id !== 'fee-break-even') assert.equal(await evaluate("document.getElementById('comparison-price').value"), '4000');
     if (id !== 'loss-vs-profit') assert.equal(await evaluate("document.getElementById('comparison-fees').value"), '100');
-    assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked').value"), id === 'loss-vs-profit' ? 'gain' : id === 'fee-break-even' ? 'short' : 'hold');
+    assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked').value"), id === 'loss-vs-profit' ? 'gain' : id === 'fee-break-even' ? 'toward-target' : 'lower-price');
     for (let variant = 0; variant < 3; variant++) {
       if (variant) { await click('learn-variation'); await evaluate("document.querySelector('.scene-prediction-show').click()"); }
       const question = runLesson(id, lessonSetup(id, variant), variant);
@@ -137,10 +141,14 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     await call('Emulation.setDeviceMetricsOverride', { width, height: 740, deviceScaleFactor: 1, mobile: true });
     for (const id of ['loss-vs-profit', 'fee-break-even', 'final-challenge']) {
       await navigate(base + 'learn.html#lesson=' + id); await reset();
-      if (id === 'final-challenge') await mode('Assumed fees');
+      if (id === 'final-challenge') {
+        await click('learn-run');
+        await evaluate("document.querySelector('#learn-worked-comparison > summary').click()");
+        await mode('Assumed fees');
+      }
       const slider = id === 'loss-vs-profit' ? 'comparison-price' : 'comparison-fees';
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      const fit = await evaluate(`({height:document.getElementById('${slider}').getBoundingClientRect().bottom-document.querySelector('.comparison-figure').getBoundingClientRect().top,available:innerHeight-document.querySelector('.topbar').getBoundingClientRect().height})`);
+      const fit = await evaluate(`({height:document.getElementById('${slider}').getBoundingClientRect().bottom-document.querySelector('.comparison-scene .comparison-figure').getBoundingClientRect().top,available:innerHeight-document.querySelector('.topbar').getBoundingClientRect().height})`);
       assert.ok(fit.height <= fit.available, `${id} at ${width}px: figure/control height ${fit.height} must fit in ${fit.available}px.`);
       await evaluate(`document.getElementById('${slider}').focus()`);
       for (const key of ['End', 'Home']) {
