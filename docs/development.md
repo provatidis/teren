@@ -38,7 +38,7 @@ Set `TEST_BASE_URL` to a deployed site or a local server with a project subpath 
 
 For focused lab-risk checks, `BROWSER_CHECKS=risk npm run test:browser` covers loop liquidation, draft/link recovery, boundary distances, visible mobile tools and whole figures at 390px/320px. The full suite includes these checks.
 
-Run `BROWSER_CHECKS=lst-lesson npm run test:browser` to exercise the optional discount lesson, the change of oracle and both directions between Learn and the lab.
+Run `BROWSER_CHECKS=lst-lesson npm run test:browser` to check the wstETH discount lesson, the oracle change, the optional liquidation and both liquidation examples’ links to the lab.
 
 For focused LST target-comparison checks, `BROWSER_CHECKS=lst-comparison npm run test:browser` covers shared conditions, unavailable targets, boundary recovery, both exits, persistence and narrow layouts. The full suite includes these checks.
 

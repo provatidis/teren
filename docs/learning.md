@@ -95,6 +95,8 @@ In the [optional correlated-loop lesson](https://teren.sh/lending.html#lst-lesso
 
 The follow-up keeps the discount, balances, costs and elapsed time fixed. Using the market price to value collateral takes health factor to 0.99 under the example’s 82.5% threshold. The loan becomes eligible for liquidation. The quoted sale value and debt are unchanged. The experiment link opens the displayed stage in Hold & stress, and the learner’s working lab remains available on return.
 
+An optional walkthrough follows one liquidator who repays half the debt, or 1.875 WETH. Market and oracle prices both stay at 1.125 WETH per wstETH. With a 3% bonus the liquidator receives collateral worth 1.93125 WETH. The borrower’s collateral value minus debt falls from 0.75 to 0.69375 WETH. Replaying the same repayment with zero bonus leaves the borrower with fewer wstETH and the same 0.75 WETH of equity. Each version opens its liquidation details in the lab.
+
 ## Borrowing-loop chapter
 
 Three directly accessible lessons follow lending essentials. They use `borrowing-loop-v1` and connect prediction, observation, explanation and application. All three use the visual patterns described below. Loop drafts and completion have their own storage key, preserving earlier lending progress. The scenario handoff carries all loop assumptions into a separate Experiment tab.

@@ -42,3 +42,28 @@
 .discount-amount progress::-moz-progress-bar { background: var(--bar); }
 .discount-figure .condition-health { margin-top: 12px; }
 .discount-figure[data-state=eligible] .condition-health strong { color: var(--error); }
+
+.liquidation-walk { padding: 0 16px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); color: var(--text); }
+.liquidation-walk[open] { padding-bottom: 14px; }
+.liquidation-walk > summary { min-height: 48px; padding: 11px 0; font-size: 15px; font-weight: 600; line-height: 1.65; cursor: pointer; }
+.liquidation-walk p { font-size: 14px; line-height: 1.65; color: var(--text); }
+.liquidation-transfers { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 10px; margin: 16px 0; }
+.liquidation-transfers > div { padding: 10px 12px; border-inline-start: 3px solid var(--allocation-eth); background: var(--card); }
+.liquidation-transfers > div:first-child { border-inline-start: 3px dashed #e5bd85; }
+.liquidation-transfers dt, .liquidation-ledger thead { color: var(--muted); font-size: 13px; line-height: 1.5; }
+.liquidation-transfers dd { margin: 4px 0 0; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.liquidation-ledger { width: 100%; margin: 12px 0; border-collapse: collapse; font-size: 14px; line-height: 1.45; font-variant-numeric: tabular-nums; }
+.liquidation-ledger :is(th, td) { padding: 8px 0 8px 6px; text-align: end; border-bottom: 1px solid var(--border); }
+.liquidation-ledger th:first-child { padding-inline-start: 0; text-align: start; }
+.liquidation-ledger th { font-weight: 500; }
+.liquidation-ledger small { display: block; color: var(--muted); font-size: 12px; }
+.liquidation-ledger [data-balance=equity] { font-weight: 600; }
+.liquidation-walk .learn-explore { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; }
+.liquidation-walk .learn-fieldset { min-width: 0; margin: 16px 0 10px; }
+.liquidation-walk legend { color: var(--text); font-size: 15px; }
+.liquidation-walk .learn-choice { min-height: 44px; padding: 9px 12px; font-size: 14px; }
+.liquidation-walk .button { white-space: normal; line-height: 1.5; }
+.liquidation-walk .learn-prediction-feedback[data-state=skipped] > strong { color: var(--text); }
+@media (max-width: 450px) {
+  .liquidation-walk { margin-inline: -9px; padding-inline: 10px; }
+}
