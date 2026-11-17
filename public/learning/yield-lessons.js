@@ -52,15 +52,15 @@ function saleStage(label, quote) {
 export const YIELD_LESSONS = [
   {
     id: 'split', short: 'What gets split?', title: 'One deposit, two things you can own',
-    intro: 'You put 1,000 USDC into a deposit that earns interest. The amount you put in is the principal. The extra it earns over time is interest. Here, 1 USDC is worth $1.',
+    intro: 'You put 1,000 USDC into a deposit that earns interest. The 1,000 USDC you put in is your principal. The extra money it earns is interest. You can split the right to get your principal back from the right to collect the interest.',
     setup: {
-      title: 'Meet your deposit',
+      title: 'What you receive when you split your deposit',
       facts: [
-        ['Your principal tokens (PT)', 'Together they let you redeem the original 1,000 USDC on day 90.'],
-        ['Your yield tokens (YT)', 'Together they give you the interest that deposit earns over the 90 days.'],
+        ['1,000 principal tokens (PT)', 'Each PT lets you redeem 1 USDC on day 90. With all 1,000 PT, you can redeem your full 1,000 USDC.'],
+        ['1,000 yield tokens (YT)', 'Each YT lets you collect the interest on 1 USDC while you hold it, up to day 90. Your 1,000 YT cover the interest on the whole deposit.'],
       ],
-      action: 'You keep all your PT. A buyer pays you 20 USDC for all your YT at the start.',
-      assumptions: 'Day 90 is the maturity date. The deposit repays its principal in full in this example.',
+      action: 'On day one, a buyer pays you 20 USDC for all 1,000 YT. You keep all 1,000 PT.',
+      assumptions: 'Day 90 is the maturity date. In this example, the deposit repays the principal in full and 1 USDC is worth $1.',
     },
     prediction: {
       question: 'After the sale, the deposit earns interest. Who can collect it?',
@@ -74,12 +74,12 @@ export const YIELD_LESSONS = [
     },
     finding: 'You keep the 20 USDC the buyer paid. They receive the interest, and you can redeem the principal on day 90.',
     scene: { title: 'Follow your deposit', origin: 'Your 1,000 USDC deposit', outcome: 2, stages: [
-      { label: 'Split the deposit', caption: 'At first you own both parts of the same deposit.', rows: [
-        ['You hold the PT', 'The original 1,000 USDC', 'pt'], ['You hold the YT', 'The next 90 days of interest', 'yt'],
+      { label: 'Split the deposit', caption: 'At first, you own both rights for every USDC in your deposit.', rows: [
+        ['Your 1,000 PT', 'Redeem 1,000 USDC on day 90', 'pt'], ['Your 1,000 YT', 'Collect the interest on 1,000 USDC until day 90', 'yt'],
       ] },
       { label: 'Sell the YT', caption: 'The buyer sends you money today for the interest the deposit will earn.',
         transfer: { from: 'YT buyer', to: 'Your wallet', value: cash(lateDeposit.ytCost) }, rows: [
-        ['You keep', 'PT for the principal', 'pt'], ['The buyer gets', 'YT for the interest', 'yt'],
+        ['You keep', '1,000 PT for the principal', 'pt'], ['The buyer gets', '1,000 YT for the interest', 'yt'],
       ] },
       { label: 'Reach maturity', caption: 'Day 90 arrives. The YT stops earning new interest.',
         retainedPayment: { label: 'Already in your wallet from selling YT', value: cash(lateDeposit.ytCost) }, rows: [
@@ -111,7 +111,7 @@ export const YIELD_LESSONS = [
     hint: 'For the first question, follow the 20 USDC from the buyer’s wallet. For the second, look at what the buyer had already earned by day 90.',
     accomplishment: 'You followed the original deposit, the buyer’s payment and the interest to their owners.',
     deeper: [
-      'The two boxes represent all the tokens from this deposit. In this USDC example the split produces 1,000 PT and 1,000 YT. Each PT represents one unit of principal, and each YT receives the interest on one unit until expiry.',
+      'What if you sold only 100 YT on day one? The buyer would receive the interest on 100 USDC. You would keep 900 YT for the interest on the other 900 USDC, and all 1,000 PT to redeem the principal on day 90.',
       'The buyer can collect interest as it accrues. We leave it in the earning asset, value it in USDC and deduct the 5% fee on YT interest. The original deposit and the buyer’s upfront payment are separate.',
     ],
     sources: [academy, claims, fees], experimentHref: experiment(original),
