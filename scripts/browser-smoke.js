@@ -41,6 +41,7 @@ import { checkSavedExperiments, checkMobileSavedExperiments } from './browser/sa
 // Optional real-browser smoke test, using Chromium's DevTools protocol and Node built-ins.
 import assert from 'node:assert/strict';
 import { checkEntry } from './browser/entry-checks.js';
+import { checkSdaiCase } from './browser/sdai-case-checks.js';
 import { checkSplitYield } from './browser/split-yield-checks.js';
 import { checkYieldLearning } from './browser/yield-learning-checks.js';
 import { checkStartup } from './browser/startup-checks.js';
@@ -224,6 +225,11 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'yield-inspect') {
+    await checkSdaiCase({ evaluate, fill, navigate, reload, base, call, nextEvent });
+    assert.deepEqual(errors, [], 'No uncaught errors in the historical yield case');
+    if (process.env.BROWSER_CHECKS === 'yield-inspect') return;
+  }
   if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'yield-learning') {
     await checkYieldLearning({ evaluate, click, text, navigate, reload, base, call, nextEvent });
     assert.deepEqual(errors, [], 'No uncaught errors in the yield lessons');

@@ -33,8 +33,9 @@ The [yield trading lessons](https://teren.sh/yield-learn.html#lesson=split) star
 - **[Snapshots](https://teren.sh/liquidity.html#inspect):** Inspect reads Ethereum mainnet WETH/USDC Uniswap v2 pools and v3 NFT positions at a recorded block. It shows principal, fee accounting where available and exportable JSON. A snapshot does not establish lifetime profit.
 - **[Historical liquidity cases](https://teren.sh/liquidity.html#historical-case):** three unchanged v3 positions over about 83 minutes, 33 hours and one week, with earned fee tokens, time in range and a comparison with holding the exact starting principal tokens. Chain reads, event queries and independent collection simulations checked the records at capture. The browser validates the bundled arithmetic without re-querying Ethereum. These are fixed-position records, not an arbitrary-range backtester.
 - **[Two ranges, the same week](https://teren.sh/liquidity.html#fee-comparison):** compare narrower and wider real positions selected before inspecting earnings. Both started active in the same pool. A shared timeline separates fees, performance against each position’s own holding basket, and dollar change. Collections remain in the accounting; earlier claims are excluded. This pair illustrates one week, rather than typical earnings or the effect of width alone.
+- **[A month of sDAI on Pendle](https://teren.sh/yield-inspect.html)** follows a market where the 1,000 DAI budget exceeded the pool’s direct YT trade limit. Compare three simulated 100 DAI entries against the same historical state. Actual PT and YT receipts check the settlement calculation.
 
-Recorded evidence currently covers liquidity only. Lending and yield trading use hypothetical models. Loop construction and unwinding are hypothetical sequences, not protocol execution plans. See [Methods](https://teren.sh/methods.html) for what each kind of result can establish.
+Lending and loop scenarios use hypothetical inputs. [Methods](https://teren.sh/methods.html) explains how the experiments, snapshots and recorded comparisons are checked.
 
 No wallet connection or transactions. The static site runs on GitHub Pages. Working drafts and learning progress stay in your browser; links and exports let you keep or share supported setups. Feedback is welcome at [hello@teren.sh](mailto:hello@teren.sh) or through [GitHub issues](https://github.com/provatidis/teren/issues).
 
@@ -58,7 +59,7 @@ Open http://127.0.0.1:3000/ after starting the development server. `npm run buil
 | Using a lab, lesson, recorded case or saved setup | [User guide](docs/guide.md) |
 | Lesson goals, misconceptions and observation tasks | [Learning design](docs/learning.md) |
 | Formulas, benchmarks and model assumptions | [Calculation models](docs/models.md), with [LST-loop accounting](docs/lst-loops.md) |
-| Historical selection, capture evidence and reproduction | [Historical cases](docs/replay.md) |
+| Historical selection, capture evidence and reproduction | [Liquidity cases](docs/replay.md) · [sDAI case methods](https://teren.sh/methods.html#sdai-case) |
 | Live reads, fee accounting and snapshot-file validation | [Chain data](docs/data.md) |
 | Architecture, local checks, releases and documentation upkeep | [Development](docs/development.md) |
 | Domain configuration and the completed repository cutover | [Domain setup](docs/domain-setup.md) |

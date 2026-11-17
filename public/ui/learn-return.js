@@ -20,7 +20,8 @@ export function initLearnReturn({ fullRangeLab, rangeLab, navigation }) {
     const home = new URL('./', location.href);
     const lending = new URL('lending.html', location.href);
     const yieldLab = new URL('yield.html', location.href);
-    if (url.origin !== learn.origin || ![learn.pathname, lending.pathname, yieldLab.pathname, home.pathname, home.pathname + 'index.html'].includes(url.pathname)) return;
+    const yieldInspect = new URL('yield-inspect.html', location.href);
+    if (url.origin !== learn.origin || ![learn.pathname, lending.pathname, yieldLab.pathname, yieldInspect.pathname, home.pathname, home.pathname + 'index.html'].includes(url.pathname)) return;
     const drafts = [...new Set(Object.values(labs))].map(lab => lab.getExperimentDraft()).filter(Boolean);
     if (drafts.length) {
       const selected = navigation.getSelectedLab() === 'range' ? 'cl-range-v2' : 'cp50-v2';

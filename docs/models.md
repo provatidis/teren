@@ -2,11 +2,11 @@
 
 [Project overview](../README.md) · [User guide](guide.md) · [Current review](review.md) · [Product decisions](../DECISIONS.md)
 
-Teren provides hypothetical experiments in liquidity, lending and yield trading. Liquidity and lending also offer lessons. On-chain snapshots and historical records currently cover liquidity only.
+Liquidity, lending and yield trading each offer hypothetical experiments and guided lessons. Liquidity Inspect has on-chain snapshots and fixed-position records. Yield trading Inspect has a historical sDAI comparison.
 
 ## Protocol names and calculation versions
 
-The full-range lab and virtual pool use Uniswap v2-style mechanics. The price-range lab uses simplified Uniswap v3-style concentrated liquidity math, without native tick constraints or on-chain rounding. V3 also allows full-range positions; these names identify Teren’s models rather than an exclusive division between protocols. Inspect reads real Uniswap v2 pools or v3 positions, and the recorded historical cases are v3.
+The full-range lab and virtual pool use Uniswap v2-style mechanics. The price-range lab uses simplified Uniswap v3-style concentrated liquidity math, without native tick constraints or on-chain rounding. V3 also allows full-range positions; these names identify Teren’s models rather than an exclusive division between protocols. Liquidity Inspect reads the Uniswap v2 WETH/USDC pool or supported v3 positions. Its historical cases follow v3 positions.
 
 The single-loan and ETH/USDC loop labs use Aave v3-style collateral concepts with editable teaching assumptions. The separate wstETH/WETH lab explores correlated assets with its own rate and oracle assumptions. None reproduces a live protocol account or current market rules.
 
@@ -16,7 +16,7 @@ The single-loan and ETH/USDC loop labs use Aave v3-style collateral concepts wit
 
 - **Hypothetical models:** the endpoint liquidity labs use assumed USD cash fees or average position fee APR, plus optional costs; Follow the fees calculates token allocation from chosen trading batches. Single loans and ETH/USDC loops offer fixed simple interest or continuous compounding, and wstETH/WETH loops separate staking APY from continuously compounded borrow APR with one optional rate change. All use editable assumptions rather than forecasts.
 - **Recorded snapshots:** Inspect shows v2 reserves/quotes or v3 principal from exact contract integers at one block. Version-2 v3 snapshots also include fee accounting; older files without fee-growth data show it as unavailable. A snapshot alone does not establish fees earned over a chosen period or lifetime PnL.
-- **Verified historical accounting:** the shipped fixed-position cases compare multiple recorded checkpoints, with unchanged-position evidence and independent fee checks. It calculates earned fee tokens and cumulative time in range for that recorded period.
+- **Verified historical accounting:** the liquidity cases use recorded checkpoints to calculate earned fee tokens and cumulative time in range. The sDAI case uses historical contract calls to simulate alternative purchases. Separate PT and YT receipts check the settlement arithmetic against actual payments.
 
 Applying a snapshot or replay checkpoint to a lab starts a new hypothetical comparison. The source data remains recorded evidence; subsequent prices and cash fees are model assumptions. [Snapshot validation](data.md) and [historical verification](replay.md) describe the separate checks.
 
@@ -24,7 +24,7 @@ Applying a snapshot or replay checkpoint to a lab starts a new hypothetical comp
 
 The hypothetical `pendle-split-v1` market uses USDC as its accounting asset. The reference deposit has a face amount of 1,000 USDC. One PT redeems for one USDC worth of the asset at maturity. One YT receives the interest attributable to one unit of face amount up to expiry. Issuance of equal token counts leaves the initial economic value of the deposit intact. The assumed entry prices are `q` USDC per YT and `1 − q` per PT. The model assumes full redemption and excludes points, other rewards, gas, swap fees and price impact. Negative yield can impair real PT redemption. [Pendle token accounting](https://docs.pendle.finance/pendle-v2-dev/Contracts/YieldTokenization) · [Negative yield](https://docs.pendle.finance/pendle-v2/ProtocolMechanics/NegativeYield)
 
-For annual effective interest rates `a` and `b` expressed as fractions and elapsed days `d₁` and `d₂` in each phase, gross period growth is `g = (1+a)^(d₁/365) × (1+b)^(d₂/365) − 1`. The same formula values interest at any displayed day. Accrued interest stays in the yield-bearing asset. YT keeps `f = 0.95` of this interest after Pendle’s 5% fee. The unsplit holding retains all its interest. The displayed timeline measures accrued yield in USDC. [Pendle APY calculation](https://docs.pendle.finance/pendle-v2/ProtocolMechanics/PendleMarketAPYCalculation) · [Yield fees](https://docs.pendle.finance/pendle-v2/ProtocolMechanics/Mechanisms/Fees)
+For annual effective interest rates `a` and `b` expressed as fractions and elapsed days `d₁` and `d₂` in each phase, gross period growth is `g = (1+a)^(d₁/365) × (1+b)^(d₂/365) − 1`. The same formula values interest at any displayed day. Accrued interest stays in the yield-bearing asset. The experiment deducts a 5% fee on YT interest, leaving `f = 0.95` for the buyer. The unsplit holding retains all its interest. The displayed timeline measures accrued yield in USDC. [Pendle APY calculation](https://docs.pendle.finance/pendle-v2/ProtocolMechanics/PendleMarketAPYCalculation) · [Yield fees](https://docs.pendle.finance/pendle-v2/ProtocolMechanics/Mechanisms/Fees)
 
 With starting budget `B`, maturity values in USDC are `B/(1−q)` for PT, `B × f × g/q` for YT and `B × (1+g)` for holding. The gross interest needed on the 1,000 USDC reference deposit to recover the YT purchase price is `1000 × q/f`. Matching holding requires `1000 × q/(f−q)` when `q < f`. At or above `f`, no finite nonnegative yield catches holding. At the default price of 0.02 USDC per YT, the two targets round to 21.05 and 21.51 USDC. Amounts are rounded only for display.
 
@@ -33,6 +33,8 @@ The maturity comparison expresses each period return `x` as an effective annual 
 For a sale with `D` days left, the entered market implied APY `r` (as a fraction) gives the price of one PT as `p = (1+r)^(−D/365)` USDC. One YT’s remaining claim is worth `1−p` USDC. Before maturity, a matching PT and YT can be redeemed together for one accounting unit’s worth of the deposit in this fully backed example. To isolate a change in implied APY from time passing, the comparison also prices PT at the original implied rate on the same sale day using `p = (1−q)^(D/termDays)`. On a fixed sale day, a higher implied APY shifts more of that unit to YT. As expiry approaches at a fixed positive implied APY, PT approaches one USDC and the remaining claim approaches zero. [Pendle’s implied APY formula](https://docs.pendle.finance/pendle-v2/ProtocolMechanics/Glossary#implied-apy)
 
 Evaluate `g` through the sale day. The PT buyer receives `B × p/(1−q)`. The YT buyer receives sale proceeds of `B × (1−p)/q` and keeps `B × f × g/q` of already accrued interest. The holding comparison is worth `B × (1+g)` that day. The 5% interest fee applies only to accrued yield. Exit prices assume the entire position can trade at the chosen rate.
+
+The [March 2024 sDAI case](https://teren.sh/yield-inspect.html) uses its own historical contracts and DAI accounting. The purchases include pool fees and the effect of trade size. At settlement the historical fee on YT interest was 3%. The PT redemption and YT claim are checked in standardized yield (SY) units before valuing the modeled holdings in DAI. [Case methods and reproduction](https://teren.sh/methods.html#sdai-case)
 
 ## Concentrated-liquidity range lab
 

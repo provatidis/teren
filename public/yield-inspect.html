@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://ethereum-rpc.publicnode.com https://eth.drpc.org; base-uri 'none'; object-src 'none'; form-action 'self'">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101c27">
+  <meta name="description" content="Inspect a matured Pendle sDAI market. See what 1,000 DAI could buy at entry, how the savings rate changed and what each strategy paid at settlement.">
+  <title>A month of sDAI · Pendle market case · Teren</title>
+  <meta name="application-name" content="Teren">
+  <meta name="apple-mobile-web-app-title" content="Teren">
+  <meta name="color-scheme" content="dark">
+  <link rel="canonical" href="https://teren.sh/yield-inspect.html">
+  <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" sizes="180x180">
+  <link rel="manifest" href="site.webmanifest">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Teren">
+  <meta property="og:title" content="A month of sDAI · Pendle market case · Teren">
+  <meta property="og:description" content="Inspect a matured Pendle sDAI market. See what 1,000 DAI could buy at entry, how the savings rate changed and what each strategy paid at settlement.">
+  <meta property="og:url" content="https://teren.sh/yield-inspect.html">
+  <meta property="og:image" content="https://teren.sh/assets/social-preview.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="A month of sDAI · Pendle market case · Teren">
+  <meta name="twitter:description" content="Inspect a matured Pendle sDAI market. See what 1,000 DAI could buy at entry, how the savings rate changed and what each strategy paid at settlement.">
+  <meta name="twitter:image" content="https://teren.sh/assets/social-preview.png">
+  <meta name="twitter:image:alt" content="Teren. Liquidity and lending lessons and experiments, with a hypothetical range comparison.">
+  <link rel="stylesheet" href="styles/yield-inspect.css">
+  <script type="module" src="yield-inspect-entry.js"></script>
+</head>
+<body class="yield-inspect-page">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Teren home"><img class="brand-logo" src="assets/teren-logo.svg" width="145" height="40" alt=""></a>
+    <nav class="topic-nav" aria-label="DeFi topic"><a href="liquidity.html#inspect">Liquidity</a><a href="lending.html#experiment">Lending</a><span class="topic-current" aria-current="true">Yield trading</span></nav>
+    <nav class="site-nav" aria-label="Yield trading modes"><div class="product-nav"><a href="yield-learn.html">Learn</a><a href="yield.html">Experiment</a><a href="yield-inspect.html" aria-current="page">Inspect</a></div></nav>
+  </header>
+  <main id="main-content" tabindex="-1">
+    <section id="app-startup" class="notice app-startup" data-state="loading" aria-labelledby="app-startup-title">
+      <h1 id="app-startup-title">Opening the recorded case…</h1>
+      <p id="app-startup-message" role="status">If the case does not appear, reload this page or open the evidence below.</p>
+      <button id="app-reload" class="button secondary" type="button" hidden>Reload page</button>
+      <p class="case-source-links"><a href="examples/pendle-sdai-march-2024.zip" download>Download evidence and reproduction script (ZIP)</a> · <a href="examples/pendle-sdai-march-2024.json" download>Raw capture (JSON)</a></p>
+      <noscript><p>Enable JavaScript to explore the case here.</p></noscript>
+    </section>
+    <div id="app-content" inert>
+      <header class="case-intro">
+        <p class="eyebrow">Pendle · Historical case</p>
+        <h1>A month of sDAI</h1>
+        <p>One Ethereum market, from entry on February 27 to maturity on March 28, 2024.</p>
+      </header>
+      <nav class="case-navigation" aria-label="Explore the sDAI case">
+        <a href="#entry" aria-current="step">Entry</a><a href="#size">Order size</a><a href="#results">Results</a><a href="#evidence">Evidence</a>
+      </nav>
+
+      <section id="entry" class="case-panel" aria-labelledby="entry-title">
+        <p class="case-date">February 27 · 30 days to maturity</p>
+        <h2 id="entry-title" tabindex="-1">What would you do with 1,000 DAI?</h2>
+        <dl class="case-rates">
+          <div><dt>Dai Savings Rate</dt><dd><strong data-value="entrySavingsApy">—</strong><span>The annual rate the deposit was earning that day. Maker governance could change it.</span></dd></div>
+          <div><dt>Market’s implied APY</dt><dd><strong data-value="entryImpliedApy">—</strong><span>The annualized rate implied by the price of PT before accounting for trade size and fees.</span></dd></div>
+        </dl>
+        <p>You could hold savings DAI (sDAI) to earn the savings rate. On Pendle you could buy the principal token (PT) at a discount and redeem its principal at maturity. Or you could buy the yield token (YT) for the interest the deposit would earn that month.</p>
+        <a class="button primary case-next" href="#size">See what the budget could buy →</a>
+      </section>
+
+      <section id="size" class="case-panel" aria-labelledby="size-title" hidden>
+        <p class="case-date">February 27 · Same entry block</p>
+        <h2 id="size-title" tabindex="-1">Could the pool fill a 1,000 DAI order?</h2>
+        <p>The historical contracts could fill the PT purchase and accept the full savings deposit. A single YT purchase ran into the pool’s trading limit.</p>
+        <figure class="case-capacity">
+          <figcaption>Largest direct YT purchase at entry</figcaption>
+          <strong data-value="maximumYtDai">—</strong>
+          <meter id="case-capacity-meter" min="0" max="1000" value="0" aria-label="YT purchase capacity out of the 1,000 DAI budget"></meter>
+          <div class="case-scale"><span>0 DAI</span><span>1,000 DAI budget</span></div>
+        </figure>
+        <div class="case-reading"><h3>Try the same choice with 100 DAI</h3>
+          <p>At this size, all three trades could go through. The simulated YT purchase bought the interest on about <strong data-value="ytUnits">—</strong> of principal for the remaining month.</p>
+        </div>
+        <a class="button primary case-next" href="#results">See what the deposit earned →</a>
+      </section>
+
+      <section id="results" class="case-panel" aria-labelledby="results-title" hidden>
+        <p class="case-date">March 10 · While the positions were open</p>
+        <h2 id="results-title" tabindex="-1">Maker raised the savings rate</h2>
+        <ol class="case-rate-path" aria-label="Dai Savings Rate changes">
+          <li><span>February 27 · Entry</span><strong data-value="entrySavingsApy">—</strong></li>
+          <li><span>March 10 · Rate change</span><strong data-value="changedSavingsApy">—</strong></li>
+        </ol>
+        <p>The deposit earned <strong data-value="periodYieldPercent">—</strong> over the 30 days, equivalent to <span data-value="annualizedYieldPercent">—</span> annualized. On entry day, the March vote was still ahead.</p>
+        <h3 class="case-table-title" id="balances-title">What each budget was worth at settlement</h3>
+        <table class="case-balances" aria-labelledby="balances-title" aria-describedby="balances-note">
+          <thead><tr><th scope="col">Strategy</th><th scope="col">From 1,000 DAI</th><th scope="col">From 100 DAI</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Buy PT</th><td data-value="original.pt">—</td><td data-value="small.pt">—</td></tr>
+            <tr><th scope="row">Buy YT</th><td>Above pool limit</td><td data-value="small.yt">—</td></tr>
+            <tr><th scope="row">Hold sDAI</th><td data-value="original.hold">—</td><td data-value="small.hold">—</td></tr>
+          </tbody>
+        </table>
+        <p id="balances-note" class="case-caption">Simulated purchases, valued in DAI at the first actual settlement. Includes trading fees and the market’s <span data-value="feePercent">—</span> fee on YT interest. Excludes gas and points.</p>
+        <div class="case-reading"><h3>If the rate had stayed at <span data-value="entrySavingsApy">—</span></h3>
+          <p>The same 100 DAI purchase would have paid about <strong data-value="flatYtDai">—</strong> at scheduled maturity. The buyer paid up front for interest on about <span data-value="ytUnits">—</span> of principal. That made the rate change matter much more to YT than to someone holding 100 DAI in savings.</p>
+        </div>
+        <div class="case-actions"><a class="button primary case-next" href="#evidence">Inspect the evidence →</a><a class="case-link" href="yield.html">Try other rates in the yield lab →</a></div>
+      </section>
+
+      <section id="evidence" class="case-panel" aria-labelledby="evidence-title" hidden>
+        <p class="case-date">Ethereum mainnet · Historical contract reads and receipts</p>
+        <h2 id="evidence-title" tabindex="-1">Trace the comparison</h2>
+        <p>The entry purchases were simulated separately against the same pool state. Two actual transactions let us check the payout calculation against what the contracts sent to holders.</p>
+        <ul class="case-receipts">
+          <li><a href="https://etherscan.io/tx/0x3813f5216294922de90b79982a9e0ca897cc0aea0eb3a20d2dd1692f275ea8ad#eventlog" target="_blank" rel="noopener noreferrer">PT redemption ↗</a><span>The first settlement locked the final interest index. The calculation reproduces the amount of the deposit wrapper (SY) the redeemer received.</span></li>
+          <li><a href="https://etherscan.io/tx/0x45367012f6706ce0c0c407cc67b89d1154106e5ec699338109c38e3046204224#eventlog" target="_blank" rel="noopener noreferrer">YT interest claim ↗</a><span>Using the holder’s prior balance and accrued interest reproduces the payments to the holder and the treasury to the smallest unit.</span></li>
+        </ul>
+        <details class="case-details"><summary>Entry, rate change and settlement blocks</summary>
+          <p>Entry was fixed at the first block at or after 30 days before expiry. The 1,000 DAI budget was chosen before calculating returns. The separate 100 DAI comparison was chosen after the large YT order failed and before calculating outcomes.</p>
+          <ul class="case-blocks">
+            <li><span>February 27 · Entry, 00:00:11 UTC</span><a href="https://etherscan.io/block/19315170" target="_blank" rel="noopener noreferrer">Block 19,315,170 ↗</a></li>
+            <li><span>March 10 · New savings rate, 19:56:23 UTC</span><a href="https://etherscan.io/tx/0xe240a729ad47657367fa85cb28bb1aed25588394f80464c78bdcd1c95c6d89ca" target="_blank" rel="noopener noreferrer">Governance execution ↗</a></li>
+            <li><span>March 28 · First block after midnight expiry, 00:00:11 UTC</span><a href="https://etherscan.io/block/19528924" target="_blank" rel="noopener noreferrer">Block 19,528,924 ↗</a></li>
+            <li><span>March 28 · First settlement, 01:36:47 UTC</span><a href="https://etherscan.io/block/19529386" target="_blank" rel="noopener noreferrer">Block 19,529,386 ↗</a></li>
+          </ul>
+          <p>The contract locked the final interest index 96 minutes and 47 seconds after scheduled expiry, when someone first settled. All three outcomes use that block. Settling in the first expiry block would have paid <span data-value="expiryYtDai">—</span> on the 100 DAI YT purchase.</p>
+        </details>
+        <details class="case-details"><summary>Trade size, fees and rewards</summary>
+          <p>For each simulated purchase, a test account received DAI and permission to spend it. Pendle’s router used the pool as it stood at the entry block. The 1,000 DAI YT order exceeded this pool’s limit for a single direct swap. Other venues and later prices are outside this case.</p>
+          <p>The simulation includes trading fees and the effect of trade size. This market charged <span data-value="feePercent">—</span> on YT interest in 2024. The hypothetical yield lab uses 5%. The comparison keeps accrued interest in the yield-bearing asset until settlement, before gas. The recorded SY and YT contracts listed no reward tokens. No points or offchain incentives are valued.</p>
+        </details>
+        <div class="case-downloads"><h3>Reproduce the figures</h3>
+          <p>The capture includes the block hashes, contract returns and receipts. The Python script repeats the historical reads on an Ethereum archive node. The capture matched on dRPC and Nodies.</p>
+          <div class="case-actions"><a class="button secondary" href="examples/pendle-sdai-march-2024.zip" download>Evidence and script (ZIP) ↓</a><a class="case-link" href="examples/pendle-sdai-march-2024.json" download>Raw capture (JSON) ↓</a></div>
+          <a class="case-link" href="methods.html#sdai-case">Read the case methods →</a>
+        </div>
+      </section>
+    </div>
+    <footer class="site-footer">
+      <span>Teren · Look closely.</span>
+      <nav aria-label="Project information">
+        <a href="methods.html" target="_blank" rel="noopener noreferrer">Methods ↗</a>
+        <a href="https://github.com/provatidis/teren" target="_blank" rel="noopener noreferrer">Source ↗</a>
+        <a href="about.html" target="_blank" rel="noopener noreferrer">About ↗</a>
+        <a href="mailto:hello@teren.sh?subject=Teren%20feedback">Email feedback</a><a href="https://github.com/provatidis/teren/issues/new?title=Feedback%3A%20&amp;body=Topic%20or%20page%3A%0A%0AWhat%20felt%20unclear%20or%20unexpected%3F%0A%0AWhat%20were%20you%20trying%20to%20understand%3F%0A" target="_blank" rel="noopener noreferrer">Report an issue ↗</a>
+      </nav>
+    </footer>
+  </main>
+
+</body>
+</html>

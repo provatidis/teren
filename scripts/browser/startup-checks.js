@@ -22,7 +22,7 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
   async function noticeInView() {
     assert.equal(await evaluate("(() => { const rect = document.getElementById('app-startup').getBoundingClientRect(); return rect.top >= 0 && rect.bottom <= innerHeight; })()"), true, 'Deep links must not scroll past the startup explanation.');
   }
-  async function intercept(route, pattern, response = null) {
+  async function intercept(route, pattern, response = null, contentType = 'text/javascript') {
     if (response === null) {
       // Block both a preload and any later import retry of the same asset.
       await call('Network.setBlockedURLs', { urls: [pattern] });
@@ -35,7 +35,7 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
     const request = await paused;
     await call('Fetch.fulfillRequest', {
       requestId: request.requestId, responseCode: 200,
-      responseHeaders: [{ name: 'Content-Type', value: 'text/javascript' }],
+      responseHeaders: [{ name: 'Content-Type', value: contentType }],
       body: Buffer.from(response).toString('base64'),
     });
     await opening;
@@ -56,6 +56,7 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
       ['liquidity.html#range-lab', 'main'],
       ['learn.html#applied=fees-over-time', 'learn-main'],
       ['yield.html', 'yield-main'],
+      ['yield-inspect.html#results', 'yield-inspect-main', 'data/sdai-case'],
       ['yield-learn.html#lesson=exit', 'yield-learn-main', 'learning/yield-lessons'],
     ]) {
       for (const pattern of ['*/' + entry + '*.js', '*/' + dependency + '*.js']) {
@@ -69,6 +70,11 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
         await clearFault();
       }
     }
+    await intercept('yield-inspect.html#results', '*/examples/pendle-sdai-march-2024.json', '{}', 'application/json');
+    await waitForFailure();
+    await unavailable();
+    assert.equal(await evaluate("document.querySelector('#app-startup a[href$=\".zip\"]').checkVisibility()"), true);
+    await clearFault();
     console.log('PASS: missing application entries and nested dependencies fail visibly across labs and lessons');
 
     // Even failure of the guard itself leaves the HTML fallback and locked content.
@@ -77,13 +83,14 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
       ['liquidity.html#saved-experiments', 'liquidity-entry'],
       ['learn.html#applied=fees-over-time', 'lib/app-startup'],
       ['yield.html#comparison', 'yield-entry'],
+      ['yield-inspect.html#results', 'yield-inspect-entry'],
       ['yield-learn.html#lesson=split', 'yield-learn-entry'],
     ]) {
       await intercept(route, '*/' + entry + '*.js');
       assert.equal(await state(), 'loading');
       await unavailable();
       await noticeInView();
-      assert.match(await text('app-startup-message'), /reload the page/);
+      assert.match(await text('app-startup-message'), /reload (the|this) page/i);
       assert.equal(await storage(), saved);
       await clearFault();
     }
@@ -143,7 +150,7 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
     console.log('PASS: Home keeps its ordinary links; failure notices and reload work at desktop and phone sizes');
 
     await call('Emulation.setScriptExecutionDisabled', { value: true });
-    for (const route of ['liquidity.html#lp-lab', 'learn.html#lesson=swap-impact', 'lending.html#lst-loops', 'yield.html#comparison', 'yield-learn.html#lesson=buyers']) {
+    for (const route of ['liquidity.html#lp-lab', 'learn.html#lesson=swap-impact', 'lending.html#lst-loops', 'yield.html#comparison', 'yield-learn.html#lesson=buyers', 'yield-inspect.html#evidence']) {
       const loaded = nextEvent('Page.loadEventFired', { startup: false });
       await call('Page.navigate', { url: base + route });
       await loaded;

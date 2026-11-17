@@ -40,6 +40,7 @@ export function initWorkspaces() {
       if (key === name || (name === 'experiment' && ['mechanics', 'width'].includes(key)) || (name === 'inspect' && key === 'replay')) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     }
+    document.getElementById('topic-yield').href = ['inspect', 'replay'].includes(key) ? 'yield-inspect.html' : 'yield.html';
     const tools = document.querySelector('.workspace-links');
     toolMenu.hidden = key === 'mechanics';
     tools.hidden = key === 'mechanics';
