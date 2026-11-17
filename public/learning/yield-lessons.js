@@ -37,7 +37,7 @@ function timingStage(label, caption, input) {
 function saleStage(label, quote) {
   return {
     label,
-    caption: 'The offer buys the interest still to come. The seller keeps the interest earned before day 45. Both sales are shown before trading costs.',
+    caption: 'A buyer who expects more interest over the next 45 days may offer more for YT. The seller keeps the interest earned before day 45. Both sales are shown before trading costs.',
     rows: [
       ['PT buyer can sell for', cash(quote.ptSale), 'pt'],
       ['YT buyer takes home in total', cash(quote.ytTotal), 'yt'],
@@ -81,7 +81,7 @@ export const YIELD_LESSONS = [
         transfer: { from: 'YT buyer', to: 'Your wallet', value: cash(lateDeposit.ytCost) }, rows: [
         ['You keep', 'PT for the principal', 'pt'], ['The buyer gets', 'YT for the interest', 'yt'],
       ] },
-      { label: 'Reach maturity', caption: 'Day 90 arrives. The YT stops earning new interest.',
+      { label: 'Reach maturity', caption: 'The YT stops earning on day 90. By selling it, you chose 20 USDC up front over whatever interest these 90 days would bring.',
         retainedPayment: { label: 'Already in your wallet from selling YT', value: cash(lateDeposit.ytCost) }, rows: [
         ['You can redeem', cash(DEPOSIT) + ' of principal', 'pt'],
         ['Earned and ready for the buyer to claim', cash(lateDeposit.netInterest) + ' after the yield fee', 'yt'],
@@ -111,8 +111,8 @@ export const YIELD_LESSONS = [
     hint: 'For the first question, follow the 20 USDC from the buyer’s wallet. For the second, look at what the buyer had already earned by day 90.',
     accomplishment: 'You followed the original deposit, the buyer’s payment and the interest to their owners.',
     deeper: [
-      'The two boxes represent all the tokens from this deposit. In this USDC example the split produces 1,000 PT and 1,000 YT. Each PT represents one unit of principal, and each YT receives the interest on one unit until expiry.',
-      'The buyer can collect interest as it accrues. We leave it in the earning asset, value it in USDC and deduct the 5% fee on YT interest. The original deposit and the buyer’s upfront payment are separate.',
+      'The split produces 1,000 PT and 1,000 YT. Each PT represents one unit of principal. You can still redeem your PT after day 90. Waiting earns you no extra interest.',
+      'Each YT receives the interest on one unit until expiry. The buyer can collect it as it accrues. Here the interest stays in the earning asset. We value it in USDC after the 5% fee on YT interest.',
     ],
     sources: [academy, claims, fees], experimentHref: experiment(original),
   },
@@ -207,7 +207,7 @@ export const YIELD_LESSONS = [
       choices: [['duration', 'Each rate applies for the same number of days in both runs.'], ['price', 'The buyer paid the same 20 USDC for YT in both runs.'], ['average', 'Both deposits earn 10% APY, halfway between the two rates.']],
       correct: 'duration',
       feedback: {
-        duration: 'The balance grows through the same two periods in either order. In the chart, moving the rise to day 10 gave the deposit 80 high-rate days instead of ten.',
+        duration: 'If you hold YT to maturity and leave the interest invested, the deposit grows through both periods in either order. A day-45 seller would have earned ten days at 15% in one run and none in the other.',
         price: 'The purchase price tells you what the buyer needs to recover. The deposit would earn the same interest even if someone paid a different price for that YT.',
         average: 'A simple average gives both rates equal weight. Here the deposit spends 80 days at 5% and only ten at 15%, whichever period comes first.',
       },
@@ -238,7 +238,7 @@ export const YIELD_LESSONS = [
     setup: {
       facts: [
         ['At purchase', 'Two traders spend 1,000 USDC each. One buys PT. The other buys the interest on fifty 1,000 USDC deposits through YT.'],
-        ['On day 45', 'In this example, one PT and its matching YT together cost 1 USDC. They still have 45 days until maturity.'],
+        ['On day 45', 'You can redeem one PT and its matching YT together for 1 USDC worth of the deposit. That’s why the pair costs 1 USDC in this example.'],
       ],
       action: 'The first quote is at 5% implied APY. The second quote on the same day is at 15%, so a buyer offers less for PT.',
     },
@@ -283,7 +283,7 @@ export const YIELD_LESSONS = [
     hint: 'Keep the sale day fixed. Trace what the old owner earned before day 45 and what the new owner is buying after it.',
     accomplishment: 'You accounted for both the resale value of YT and the interest earned before the sale.',
     deeper: [
-      'In this fully backed example, one PT and its matching YT together are priced at one USDC. With the maturity date fixed, a higher implied APY lowers the PT price. More of the pair’s value then goes to the remaining YT claim.',
+      'Before maturity, redemption takes equal numbers of PT and YT from the same market. After maturity, PT alone redeems the principal. Interest earned while holding YT can be claimed separately.',
       'These are hypothetical offers before trading costs. A real sale also depends on available liquidity, the trading fee and price impact. Real YT can include rewards or points. This example follows interest alone.',
     ],
     sources: [glossary, accounting], experimentHref: experiment(original, highExit),

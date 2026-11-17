@@ -22,13 +22,16 @@
 .yield-origin strong, .yield-origin span { display: block; }
 .yield-origin strong { font-size: 23px; font-variant-numeric: tabular-nums; }
 .yield-origin span, .yield-caption, .yield-legend, .yield-axis { color: var(--muted); font-size: 14px; }
-.yield-branches { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 23px; position: relative; }
+.yield-branches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 12px; padding-top: 23px; position: relative; container-type: inline-size; }
 .yield-branches::before, .yield-branches::after { content: ''; position: absolute; border-color: var(--border-strong); border-style: solid; }
 .yield-branches::before { top: 2px; height: 11px; left: 50%; border-width: 0 0 0 1px; }
 .yield-branches::after { top: 12px; height: 10px; left: 24%; right: 24%; border-width: 1px 1px 0; border-radius: 3px 3px 0 0; }
-.yield-branches > div { border: 1px solid var(--border); border-radius: 9px; padding: 13px; background: var(--bg); }
+.yield-branches > div { display: grid; grid-row: span 3; grid-template-rows: subgrid; border: 1px solid var(--border); border-radius: 9px; padding: 13px; background: var(--bg); }
 .yield-branches h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 7px; }
 .yield-branches abbr { color: var(--accent); font-size: 13px; text-decoration: none; }
+@container (max-width: 24rem) {
+  .yield-branches h3, .yield-branches abbr { display: block; }
+}
 .yield-branches p { margin: 8px 0 0; color: var(--muted); }
 .yield-branches strong { display: block; color: var(--text); white-space: nowrap; }
 .yield-details { margin-top: 16px; border-top: 1px solid var(--border); }
@@ -73,13 +76,17 @@
 .yield-strategies p { margin: 3px 0 12px; color: var(--muted); }
 .yield-strategies strong { display: block; font-size: clamp(18px, 2.1vw, 25px); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .yield-strategies span { color: var(--muted); font-size: 14px; }
+.yield-strategies small { display: block; grid-column: 1 / -1; margin-top: 6px; font-size: 14px; color: var(--muted); }
 .yield-strategies [data-direction=gain] { color: var(--accent); }
 .yield-strategies [data-direction=loss] { color: #edc99e; }
 .yield-targets { border-top: 1px solid var(--border); padding-top: 16px; }
 .yield-targets p, .yield-assumptions p { color: var(--muted); margin: 4px 0 8px; }
-.yield-targets dl { display: flex; flex-wrap: wrap; gap: 12px 40px; margin: 12px 0; }
-.yield-targets dt { color: var(--muted); }
-.yield-targets dd { font-size: 18px; font-weight: 600; margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.yield-targets table { width: 100%; max-width: 46rem; table-layout: fixed; border-collapse: collapse; margin: 12px 0; font-variant-numeric: tabular-nums; }
+.yield-targets th, .yield-targets td { padding: 7px 0 7px 8px; border-bottom: 1px solid var(--border); text-align: right; overflow-wrap: anywhere; }
+.yield-targets th:first-child { width: 42%; padding-left: 0; text-align: left; }
+.yield-targets thead th { font-weight: 550; color: var(--muted); }
+.yield-targets tbody th { font-weight: 450; }
+.yield-targets td:last-child { font-weight: 600; }
 .yield-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; margin: 16px 0; }
 .yield-text-button { border: 0; padding: 8px; color: var(--accent); background: transparent; }
 .yield-text-button:hover { background: var(--surface); }
@@ -126,7 +133,7 @@
 }
 @media (max-width: 390px) {
   .yield-panel { padding: 14px; }
-  .yield-branches { gap: 8px; }
+  .yield-branches { column-gap: 8px; }
   .yield-branches > div { padding: 10px; }
   .yield-stages button { font-size: 13px; }
 }

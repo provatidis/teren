@@ -3,6 +3,7 @@ import test from 'node:test';
 import { DEPOSIT, SPLIT_DEFAULTS, SPLIT_MODEL, YT_FEE, grossYieldAt, splitAtMaturity } from '../public/models/split-yield-v1.js';
 import { readSplitDraft, readSplitHash, readSplitSetup, saveSplitDraft, splitHash } from '../public/data/split-yield-state.js';
 import { readExperimentLocation, saveExperimentLocation } from '../public/data/experiment-location.js';
+import { YIELD_LESSONS } from '../public/learning/yield-lessons.js';
 
 const model = overrides => splitAtMaturity({ ...SPLIT_DEFAULTS, ...overrides });
 
@@ -17,6 +18,26 @@ test('early-exit links preserve both assumptions and reject ambiguous or partial
     '&exitDay=91&exitApy=10', '&exitDay=45&exitApy=-3', '&exitDay=45&exitApy=Infinity']) {
     assert.throws(() => readSplitSetup(maturity + suffix));
   }
+});
+
+test('lesson links and saved exit setups restore on browsers without URLSearchParams.size', t => {
+  const links = YIELD_LESSONS.map(lesson => new URL(lesson.experimentHref, 'https://teren.sh/'));
+  const expected = links.map(link => readSplitSetup(link.hash));
+  const size = Object.getOwnPropertyDescriptor(URLSearchParams.prototype, 'size');
+  t.after(() => Object.defineProperty(URLSearchParams.prototype, 'size', size));
+  delete URLSearchParams.prototype.size;
+
+  for (const [index, link] of links.entries()) {
+    assert.deepEqual(readSplitSetup(link.hash), expected[index], link.href);
+    assert.throws(() => readSplitSetup(link.hash + '&days=90'));
+    assert.throws(() => readSplitSetup(link.hash + '&extra=0'));
+  }
+  const inputs = { ...SPLIT_DEFAULTS, budget: 555, switchDay: 10 };
+  const exit = { exitDay: 22, exitApy: 11 };
+  const stored = new Map();
+  const storage = () => ({ getItem: key => stored.get(key) ?? null, setItem: (key, value) => stored.set(key, value) });
+  assert.equal(saveSplitDraft(splitHash(inputs, exit), storage), true);
+  assert.deepEqual(readSplitDraft(storage), { status: 'saved', inputs, exit });
 });
 
 function close(actual, expected) {
@@ -71,6 +92,38 @@ test('the two gross interest targets solve different equal-budget equalities', (
     assert.equal(high.matchGross, null);
     assert.ok(high.ytFinal < high.holdFinal);
   }
+});
+
+test('maturity APYs explain all three equal-budget comparisons over the selected term', () => {
+  const r = model({});
+  close(r.scenarioApy, 6.06671951738105);
+  close(r.entryImpliedApy, 8.538330586413794);
+  close(r.recoverApy, 8.816609419028476);
+  close(r.matchApy, 9.012424009117995);
+  close(r.ptMatchGross, 20.40816326530612);
+  const flat = apy => model({ firstApy: apy, secondApy: apy });
+  for (const [rate, strategy] of [[r.entryImpliedApy, 'ptFinal'], [r.matchApy, 'ytFinal']]) {
+    const atTarget = flat(rate);
+    close(atTarget.holdFinal, atTarget[strategy]);
+  }
+  close(flat(r.recoverApy).ytFinal, SPLIT_DEFAULTS.budget);
+  const between = flat(8.9);
+  close(between.scenarioApy, 8.9);
+  assert.ok(between.ytFinal > SPLIT_DEFAULTS.budget);
+  assert.ok(between.holdFinal > between.ptFinal && between.holdFinal > between.ytFinal);
+});
+
+test('an overflowing annual rate still has a finite interest target when matching is possible', () => {
+  const short = { days: 1, switchDay: 0, firstApy: 100, secondApy: 0 };
+  const expensive = model({ ...short, ytPrice: 0.94999999 });
+  assert.equal(expensive.scenarioApy, 0);
+  assert.equal(expensive.entryImpliedApy, null);
+  assert.equal(expensive.matchApy, null);
+  assert.ok(expensive.matchGross > 0 && Number.isFinite(expensive.matchGross));
+  assert.ok(expensive.recoverApy > 0 && Number.isFinite(expensive.recoverApy));
+  const unreachable = model({ ...short, ytPrice: 0.95 });
+  assert.equal(unreachable.matchApy, null);
+  assert.equal(unreachable.matchGross, null);
 });
 
 test('budget scales every strategy equally and zero underlying yield pays YT nothing', () => {
