@@ -852,6 +852,7 @@
                 <p class="fine-print">Leave additional lending yield at zero if the collateral earns none. Staking growth is already counted in the conversion rate.</p>
               </details>
               <p id="lst-oracle-summary" class="lst-inline-result"></p>
+              <a class="learn-explore" href="#lst-lesson=discount">Explore a market discount step by step →</a>
               <details id="lst-oracle-settings"><summary>Oracle and dollar price</summary>
                 <div class="scenario-field"><label for="lst-oracleMode">How the lender values wstETH</label>
                   <select id="lst-oracleMode" aria-describedby="lst-oracle-help lst-oracleMode-error"><option value="rate">Track the conversion rate</option><option value="market">Follow the market discount</option></select>
@@ -959,7 +960,7 @@
           <aside class="learn-sidebar">
             <details id="lend-course" class="card learn-course" open>
               <summary><span>Lessons and chapters</span><strong id="lend-progress">0 of 4 checked</strong><span class="learn-course-chevron">⌄</span></summary>
-              <nav class="lending-chapters" aria-label="Lending chapters"><a id="lend-chapter-essentials" href="#lesson=supply">1 · Lending essentials</a><a id="lend-chapter-loops" href="#loop-lesson=build">2 · Borrowing loops</a></nav>
+              <nav class="lending-chapters" aria-label="Lending chapters"><a id="lend-chapter-essentials" href="#lesson=supply">1 · Lending essentials</a><a id="lend-chapter-loops" href="#loop-lesson=build">2 · Borrowing loops</a><a id="lend-chapter-lst" href="#lst-lesson=discount">Optional · wstETH discounts</a></nav>
               <nav aria-label="Lending lessons">
                 <ol id="lend-lesson-list" class="lending-lesson-list">
                 </ol>
@@ -1006,7 +1007,7 @@
                 <p id="lend-pitfall"></p>
               </aside>
               <a id="lend-explore" class="learn-explore" href="#experiment" target="_blank" rel="noopener noreferrer">Explore the question setup in Experiment ↗</a>
-              <p class="fine-print">Opens the question’s starting balances and conditions in a separate tab. All rates and collateral rules are teaching assumptions.</p>
+              <p id="lend-explore-note" class="fine-print">Opens the question’s starting balances and conditions in a separate tab. All rates and collateral rules are teaching assumptions.</p>
               <details id="lend-deeper" class="applied-deeper">
                 <summary>Go deeper: mechanics and sources</summary>
                 <div id="lend-deeper-copy">
@@ -1045,6 +1046,7 @@
                 <div role="status"><strong id="lend-feedback-title"></strong>
                   <p id="lend-feedback-copy"></p>
                 </div>
+                <div id="lst-lesson-followup" class="learn-question-evidence" hidden></div>
                 <div id="lend-continue" class="learn-continue" hidden><a id="lend-next" class="button primary" href="#experiment">Continue →</a>
                   <button id="lend-retry" class="learn-text-button" type="button">Try this lesson again ↻</button>
                 </div>

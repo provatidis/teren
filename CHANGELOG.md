@@ -1,5 +1,10 @@
 # Release history
 
+## 1.56.0 · 2026-11-17
+
+- Add an optional wstETH/WETH lesson. Follow what happens to a loop’s sale value, debt and health factor when wstETH trades at a discount, then change the price the lender uses.
+- Open the lesson from the correlated-loop lab and explore the same position and pricing assumptions in Experiment.
+
 ## 1.55.2 · 2026-11-17
 
 - Start the liquidity final challenge by building a position that matches holding while both lose dollar value. Explore how additional fees change the amount still needed to match holding.

@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [User guide](guide.md) · [Current review](review.md) · [Observation plan](#observation-plan)
 
-Teren has 24 lessons across liquidity, lending and yield trading. The visible method is **Predict → Observe → Check**. Check combines an explanation with an application to another situation; predictions are ungraded and questions do not ask the learner to calculate or round a result. Go deeper retains worked examples, formulas and original sources. The separate wstETH/WETH experiment has no dedicated lesson chapter yet; its interpretation tasks are included in the observation plan.
+Teren has 25 lessons across liquidity, lending and yield trading. The visible method is **Predict → Observe → Check**. Check combines an explanation with an application to another situation; predictions are ungraded and questions do not ask the learner to calculate or round a result. Go deeper retains worked examples, formulas and original sources. The wstETH/WETH lab has an optional advanced lesson that can be opened directly.
 
 ## What the research establishes
 
@@ -88,6 +88,12 @@ The four lending foundation lessons use hypothetical cases with fixed simple int
 - [Revert: performance comparisons](https://docs.revert.finance/revert/open-positions): benchmark definitions, omitted gas and exceptional results.
 - [Circle: USDC risk disclosures](https://www.circle.com/fr/legal/mica-usdc-whitepaper): secondary-market price dislocation; the $1 setting remains an assumption.
 - [Milionis et al., Automated Market Making and Loss-Versus-Rebalancing](https://arxiv.org/abs/2208.06046): holding and rebalancing compare different strategies. Teren's endpoint holding gap is not an LVR estimate, and the two metrics should not be added as independent penalties.
+
+## wstETH discounts and the lender’s price
+
+In the [optional correlated-loop lesson](https://teren.sh/lending.html#lst-lesson=discount), a borrower starts with 1 wstETH and builds a position of 4 wstETH against 3.75 WETH of debt. The position initially sells for 5 WETH in the model. A 10% market discount takes that value to 4.5 WETH. Under the conversion-rate oracle, the health factor stays at 1.10. The modeled full sale and repayment would leave 0.75 WETH, down from 1.25.
+
+The follow-up keeps the discount, balances, costs and elapsed time fixed. Using the market price to value collateral takes health factor to 0.99 under the example’s 82.5% threshold. The loan becomes eligible for liquidation. The quoted sale value and debt are unchanged. The experiment link opens the displayed stage in Hold & stress, and the learner’s working lab remains available on return.
 
 ## Borrowing-loop chapter
 

@@ -4,7 +4,7 @@ import { checkSkippedYieldPrediction } from './yield-learning-checks.js';
 
 export async function checkPredictions({ evaluate, click, text, navigate, reload, base, call }) {
   const keys = ['degenerator-learning-liquidity-v1', 'passiko-range-learning-v1',
-    'passiko-applied-liquidity-v1', 'teren-lending-learning-v1', 'teren-loop-learning-v1', 'teren-yield-learning-v1'];
+    'passiko-applied-liquidity-v1', 'teren-lending-learning-v1', 'teren-loop-learning-v1', 'teren-lst-learning-v1', 'teren-yield-learning-v1'];
   const saved = await evaluate(`Object.fromEntries(${JSON.stringify(keys)}.map(key => [key, localStorage.getItem(key)]))`);
   const ready = () => evaluate(`new Promise((resolve, reject) => {
     const end = Date.now() + 5000;

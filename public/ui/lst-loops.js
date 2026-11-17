@@ -16,6 +16,7 @@ export function initLSTLoops() {
   const $ = id => document.getElementById(id);
   const exactControls = { days: { unit: 'days', step: 1 }, discount: { unit: '% discount', step: 0.1 } };
   const inputField = key => $('lst-' + key + (Object.hasOwn(exactControls, key) ? '-input' : ''));
+  const lessonExample = new URLSearchParams(location.search).get('from') === 'lesson';
   const stored = readLSTDraft();
   let view = stored.view, current = null, firstInvalid = null, revision = 0;
   let comparison = null, comparisonError = null, showingComparison = false;
@@ -108,13 +109,17 @@ export function initLSTLoops() {
     }
   }
   function persist(input) {
-    const saved = saveLSTDraft(input, view, undefined, comparison);
-    $('lst-storage').textContent = saved ? 'Working setup kept in this browser. Save a named experiment or copy its link to keep a variation.' : 'Browser saving is unavailable. Copy the link to keep this setup.';
     if (active()) {
       const hash = lstHash(input, view, comparison);
-      history.replaceState(null, '', location.pathname + location.search + hash);
-      saveExperimentLocation(LST_MODEL, hash);
+      history.replaceState(history.state, '', location.pathname + location.search + hash);
+      if (!lessonExample) saveExperimentLocation(LST_MODEL, hash);
     }
+    if (lessonExample) {
+      $('lst-storage').textContent = 'Lesson setup. Explore here, or copy a link to keep your changes.';
+      return;
+    }
+    const saved = saveLSTDraft(input, view, undefined, comparison);
+    $('lst-storage').textContent = saved ? 'Working setup kept in this browser. Save a named experiment or copy its link to keep a variation.' : 'Browser saving is unavailable. Copy the link to keep this setup.';
   }
   function chart(result) {
     const { input, end } = result;
@@ -356,6 +361,7 @@ export function initLSTLoops() {
   $('lst-share').addEventListener('click', async () => {
     if (!current || comparisonError) return;
     const currentRevision = revision, url = new URL(location.href);
+    if (lessonExample) url.searchParams.delete('from');
     url.hash = lstHash(current.input, view, comparison);
     try {
       await navigator.clipboard.writeText(url.href);

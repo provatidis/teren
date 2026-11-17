@@ -4,7 +4,8 @@ import { lstHash, readLSTHash } from '../../public/lib/lst-links.js';
 import { dragRangeToMax } from './touch-range.js';
 
 export async function checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call }) {
-  const keys = ['teren-lst-loop-draft-v1', 'teren-experiment-location-v1', 'degenerator-experiments-v1', 'teren-loop-learning-v1', 'teren-learning-location-v1'];
+  const keys = ['teren-lst-loop-draft-v1', 'teren-experiment-location-v1', 'degenerator-experiments-v1', 'teren-lst-learning-v1', 'teren-learning-location-v1'];
+  await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   await navigate(base + 'lending.html#lst-loops');
   const saved = await evaluate(`${JSON.stringify(keys)}.map(key=>[key,localStorage.getItem(key)])`);
   const legacy = await evaluate("sessionStorage.getItem('teren-loop-draft-v1')");
@@ -18,11 +19,15 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
   })`);
   async function checkReturnFromLearn(linkId) {
     const draft = await state();
+    assert.ok(await evaluate(`document.getElementById('${linkId}').checkVisibility()`));
     await followLink(linkId);
     assert.equal(await evaluate('document.body.dataset.lendingView'), 'learn');
+    assert.equal(await evaluate('location.hash'), '#lst-lesson=discount');
     await reload();
     assert.equal(await evaluate("document.getElementById('lending-nav-experiment').hash"), '#lst-loops');
-    assert.match(await evaluate("document.getElementById('lend-explore').hash"), /^#loop=borrowing-loop-v1&/);
+    const href = await evaluate("document.getElementById('lend-explore').href");
+    assert.equal(new URL(href).searchParams.get('from'), 'lesson');
+    assert.equal(readLSTHash(new URL(href).hash).view, 'hold');
     await followLink('lending-nav-experiment');
     assert.equal(await evaluate('document.body.dataset.lendingView'), 'lst');
     assert.equal(await visible('lst-' + draft.view), true);
@@ -78,7 +83,7 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
     assert.deepEqual(readLSTHash(new URL(link).hash).input, (await state()).input);
     assert.equal(await evaluate("sessionStorage.getItem('teren-loop-draft-v1')"), legacy);
     console.log('PASS: dollar prices, market discounts, oracle rules and two-phase borrowing costs remain distinct and survive reload');
-    await checkReturnFromLearn('lending-nav-learn');
+    await checkReturnFromLearn('lending-start');
 
     await click('lst-reset'); await click('lst-view-hold');
     await fill('lst-days-input', '7.25');
@@ -225,7 +230,7 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
       await fill('lst-discount-input', '0.5');
       assert.equal((await state()).input.days, 7);
       assert.equal((await state()).input.discount, 0.5);
-      await checkReturnFromLearn('lending-start');
+      await checkReturnFromLearn('lending-nav-learn');
       for (const id of ['lst-days-input', 'lst-discount-input']) {
         const bounds = await evaluate(`(() => { const r=document.getElementById('${id}').getBoundingClientRect(); return { width:r.width, height:r.height, left:r.left, right:r.right }; })()`);
         assert.ok(bounds.height >= 44 && bounds.width >= 60 && bounds.left >= 0 && bounds.right <= width, `${width}px ${id}: exact entry remains reachable`);

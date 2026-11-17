@@ -30,6 +30,7 @@ export const LEARNING_ROUTES = Object.freeze({
   'lending.html#loop-lesson=build': 'Build one loop',
   'lending.html#loop-lesson=stress': 'Repeat and change conditions',
   'lending.html#loop-lesson=unwind': 'Explore unwinding',
+  'lending.html#lst-lesson=discount': 'A discount on wstETH',
   'yield-learn.html#lesson=split': 'What gets split?',
   'yield-learn.html#lesson=buyers': 'Why buy PT or YT?',
   'yield-learn.html#lesson=timing': 'When does the interest arrive?',
