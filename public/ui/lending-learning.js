@@ -3,6 +3,8 @@ import { renderLessonSetup, lendingLessonSetup } from '../lib/lesson-setup.js';
 import { renderQuestionEvidence } from '../lib/lesson-question-evidence.js';
 import { LENDING_LESSONS } from '../learning/lending-essentials.js';
 import { LOOP_LESSONS } from '../learning/borrowing-loops.js';
+import { LST_DISCOUNT_LESSON, lstDiscountCase, checkLSTDiscountUnderstanding } from '../learning/lst-discount-lesson.js';
+import { readLSTLessonProgress, saveLSTLessonProgress } from '../data/lst-lesson-progress.js';
 import { lendingCase, checkLendingUnderstanding } from '../models/lending-lessons.js';
 import { loopCase, checkLoopUnderstanding } from '../models/loop-lessons.js';
 import { readLendingProgress, saveLendingProgress, LENDING_QUESTION_REVISIONS } from '../data/lending-state.js';
@@ -17,6 +19,7 @@ import { createLendingScene } from '../lib/lending-lesson-scenes.js';
 import { createLoanConditionScene } from '../lib/loan-condition-scene.js';
 import { createLoanResponseScene } from '../lib/loan-response-scene.js';
 import { createLoopStressScene } from '../lib/loop-stress-scene.js';
+import { createLSTDiscountScene, renderLSTMarketFollowup } from '../lib/lst-discount-scene.js';
 import { focusSceneOutcome, createPredictionPrompt, markPredictionRevealed } from '../lib/lesson-scene.js';
 import { newChoiceSeed } from '../lib/learning-choices.js';
 import { learningChoices, learningMetric, learningSources, focusLearningFeedback, renderPredictionFeedback, renderUnderstandingFeedback, clearUnderstandingFeedback } from '../lib/learning-elements.js';
@@ -32,16 +35,20 @@ export function initLendingLearning() {
     loops: { lessons: LOOP_LESSONS, example: loopCase, check: checkLoopUnderstanding,
       metrics: loopLessonMetrics, hash: loopHash, save: saveLoopProgress, progress: readLoopProgress().progress,
       route: '#loop-lesson=', label: 'LOOPING', experiment: '#loops', revisions: LOOP_QUESTION_REVISIONS },
+    lst: { lessons: [LST_DISCOUNT_LESSON], example: lstDiscountCase, check: checkLSTDiscountUnderstanding,
+      save: saveLSTLessonProgress, progress: readLSTLessonProgress().progress,
+      route: '#lst-lesson=', label: 'LST LOOPS', experiment: '#lst-loops', revisions: {} },
   };
   let chapter = 'essentials', course = courses.essentials, progress = course.progress;
   let lesson, draft, example, lessonScene, loopScene;
   const foundationLesson = () => chapter === 'essentials' && ['supply', 'borrow', 'conditions', 'respond'].includes(lesson?.id);
   const stressLesson = () => chapter === 'loops' && lesson?.id === 'stress';
-  const visualLesson = () => foundationLesson() || chapter === 'loops' && ['build', 'stress', 'unwind'].includes(lesson?.id);
+  const visualLesson = () => foundationLesson() || chapter === 'lst' || chapter === 'loops' && ['build', 'stress', 'unwind'].includes(lesson?.id);
   const revealLabel = () => visualLesson() ? 'Explain the question outcome ↓' : 'Read the result ↓';
   const fresh = () => ({ prediction: '', reason: '', application: '', revealed: false, seed: newChoiceSeed() });
   function questionOutcome() {
     const input = example.input;
+    if (chapter === 'lst') return 'After the ' + input.discount + '% market discount';
     if (lesson.id === 'supply') return 'After one year with collateral off';
     if (lesson.id === 'borrow') return 'After borrowing ' + fmt(input.borrow, 0) + ' USDC';
     if (lesson.id === 'conditions') return 'After one year at ' + usd(input.start) + ' per ETH';
@@ -77,11 +84,13 @@ export function initLendingLearning() {
     clearUnderstandingFeedback('lend');
     $('lend-feedback').hidden = true;
     $('lend-continue').hidden = true;
+    $('lst-lesson-followup').hidden = true;
   }
   function reveal() {
     draft.revealed = true;
     updatePredictionFeedback();
-    $('lend-metrics').replaceChildren(...course.metrics(lesson.id, example.result).map(items => learningMetric(...items)));
+    const metrics = course.metrics?.(lesson.id, example.result) || [];
+    $('lend-metrics').replaceChildren(...metrics.map(items => learningMetric(...items)));
     $('lend-metrics').hidden = visualLesson();
     $('lend-observe').hidden = false;
     $('lend-assessment').hidden = false;
@@ -99,6 +108,10 @@ export function initLendingLearning() {
       { container: 'lend-reason-choices', selected: draft.reason, correct: result.reasoning, explanation: reasoning },
       { container: 'lend-application-choices', selected: draft.application, correct: result.application, explanation: application },
     ]);
+    if (chapter === 'lst' && draft.application) {
+      renderLSTMarketFollowup($('lst-lesson-followup'), example.stages.market);
+      lessonScene.allowMarket();
+    }
     $('lend-feedback-copy').textContent = result.passed ? lesson.accomplishment : 'Read the feedback beside each question, then try again. You can change either answer.';
     $('lend-continue').hidden = !result.passed;
     if (result.passed && !progress.completed.includes(lesson.id)) progress.completed.push(lesson.id);
@@ -117,7 +130,7 @@ export function initLendingLearning() {
     }
     lesson = course.lessons.find(item => item.id === id);
     if (!lesson) return;
-    saveLearningLocation('lending.html#' + (name === 'loops' ? 'loop-lesson=' : 'lesson=') + id);
+    saveLearningLocation('lending.html' + course.route + id);
     draft = progress.drafts[id] || fresh();
     if (course.revisions[id]) draft.questionRevisions = { ...course.revisions[id] };
     example = course.example(id);
@@ -127,21 +140,23 @@ export function initLendingLearning() {
     const index = course.lessons.indexOf(lesson);
     document.title = lesson.short + ' · Teren Learn';
     $('lend-number').textContent = course.label + ' ' + (index + 1) + ' OF ' + course.lessons.length;
-    $('lend-meta-label').textContent = (name === 'loops' ? 'Three' : 'Four') + ' steps · Open any lesson';
+    const discount = chapter === 'lst';
+    $('lend-meta-label').textContent = discount ? 'Optional advanced lesson' : (name === 'loops' ? 'Three' : 'Four') + ' steps · Open any lesson';
     $('lend-own-question').href = course.experiment;
     $('lend-title').textContent = lesson.title;
     $('lend-adds').textContent = lesson.adds;
     for (const key of ['intro', 'question', 'takeaway', 'explanation', 'pitfall', 'reasoning']) $('lend-' + key).textContent = lesson[key];
-    renderLessonSetup($('lend-setup'), lendingLessonSetup(lesson.id, example));
+    renderLessonSetup($('lend-setup'), discount ? lesson.setup : lendingLessonSetup(lesson.id, example));
     const showFlow = visualLesson();
     const conditions = chapter === 'essentials' && lesson.id === 'conditions';
     const responses = chapter === 'essentials' && lesson.id === 'respond';
     const stress = stressLesson();
-    $('lend-flow-title').textContent = stress ? 'Same start, different exposure'
+    $('lend-flow-title').textContent = discount ? 'One loan, two prices' : stress ? 'Same start, different exposure'
       : conditions ? 'Watch the health factor' : responses ? 'Where does the extra money go?' : 'Follow the money';
     $('lend-flow-instruction').textContent = stress ? 'Compare holding with looping. Change one condition at a time.'
       : conditions ? 'Change one condition and compare what backs the debt.'
       : responses ? 'Compare two choices using the same extra budget.' : 'Take one action, then look at what changed.';
+    $('lend-flow-instruction').hidden = discount;
     $('lend-adds').hidden = showFlow;
     $('lend-visual').hidden = !showFlow;
     $('lend-money-flow').hidden = !showFlow;
@@ -154,9 +169,14 @@ export function initLendingLearning() {
     $('lend-check-label').textContent = showFlow ? 'CHECK YOUR UNDERSTANDING' : '03 · CHECK YOUR UNDERSTANDING';
     $('lend-observe-title').after(predictionFeedbackElement);
     lessonScene = null; loopScene = null;
-    if (foundationLesson() || stress) {
+    if (foundationLesson() || stress || discount) {
       const prediction = createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) });
-      if (stress) lessonScene = createLoopStressScene(example.input, prediction);
+      if (discount) lessonScene = createLSTDiscountScene(example.stages, prediction, (href, label) => {
+        $('lend-explore').href = href;
+        $('lend-explore').textContent = 'Explore this setup in Experiment ↗';
+        $('lend-explore-note').textContent = 'Opens “' + label + '” in Hold & stress with the balances, prices and lender rule shown above.';
+      });
+      else if (stress) lessonScene = createLoopStressScene(example.input, prediction);
       else if (conditions) lessonScene = createLoanConditionScene(example.input, prediction);
       else if (responses) lessonScene = createLoanResponseScene(example.input, prediction);
       else lessonScene = createLendingScene(example.result, lesson.id, prediction);
@@ -182,10 +202,14 @@ export function initLendingLearning() {
       const paragraph = document.createElement('p'); paragraph.textContent = copy; return paragraph;
     }));
     learningSources($('lend-sources'), lesson.sources);
-    $('lend-explore').href = course.hash(example.input);
+    if (!discount) {
+      $('lend-explore').href = course.hash(example.input);
+      $('lend-explore').textContent = 'Explore the question setup in Experiment ↗';
+      $('lend-explore-note').textContent = 'Opens the question’s starting balances and conditions in a separate tab. All rates and collateral rules are teaching assumptions.';
+    }
     const next = course.lessons[index + 1];
-    $('lend-next').href = next ? course.route + next.id : chapter === 'essentials' ? '#loop-lesson=build' : '#loops';
-    $('lend-next').textContent = next ? 'Next: ' + next.short + ' →' : chapter === 'essentials' ? 'Next: Borrowing loops →' : 'Try your own loop →';
+    $('lend-next').href = next ? course.route + next.id : chapter === 'essentials' ? '#loop-lesson=build' : course.experiment;
+    $('lend-next').textContent = next ? 'Next: ' + next.short + ' →' : chapter === 'essentials' ? 'Next: Borrowing loops →' : discount ? 'Try your own wstETH loop →' : 'Try your own loop →';
     for (const [key, values] of [['prediction', lesson.predictions], ['reason', lesson.reasons], ['application', lesson.applications]]) {
       learningChoices($('lend-' + key + '-choices'), {
         name: 'lend-' + key, values, selected: draft[key], seed: draft.seed, group: id + key,
@@ -224,7 +248,7 @@ export function initLendingLearning() {
   }
   buildNavigation();
   function showResult(sceneFirst = false) {
-    if (sceneFirst) {
+    if (sceneFirst || chapter === 'lst' && !draft.revealed) {
       lessonScene?.showQuestion();
       loopScene?.showQuestion();
     }

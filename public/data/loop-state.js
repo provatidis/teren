@@ -52,11 +52,14 @@ export function saveLoopProgress(progress, getStorage = () => globalThis.localSt
 }
 
 export function readLendingChapter(getStorage = () => globalThis.sessionStorage) {
-  try { return getStorage().getItem(CHAPTER_KEY) === 'loops' ? 'loops' : 'essentials'; }
+  try {
+    const chapter = getStorage().getItem(CHAPTER_KEY);
+    return ['loops', 'lst'].includes(chapter) ? chapter : 'essentials';
+  }
   catch { return 'essentials'; }
 }
 
 export function saveLendingChapter(chapter, getStorage = () => globalThis.sessionStorage) {
-  try { getStorage().setItem(CHAPTER_KEY, chapter === 'loops' ? 'loops' : 'essentials'); return true; }
+  try { getStorage().setItem(CHAPTER_KEY, ['loops', 'lst'].includes(chapter) ? chapter : 'essentials'); return true; }
   catch { return false; }
 }

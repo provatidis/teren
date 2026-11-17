@@ -16,11 +16,11 @@ The [yield lessons](https://teren.sh/yield-learn.html) and [Split the yield](htt
 
 The lessons keep Predict → Observe → Check, with conceptual questions and optional worked calculations. Applications include constructing an example where matching holding still leaves a dollar loss, explaining why a sale cost leaves debt unpaid, and reasoning about a further price move from a recorded token mix. Next, use the [observation plan](learning.md#observation-plan): ask learners to explain an unfamiliar variation and note which hints they need before extending the patterns. [Learning design](learning.md) describes the current questions and visual interactions.
 
-Later candidates are a liquidation lesson that separates debt repaid, collateral removed and the bonus cost, and a correlated-asset looping chapter using the existing LST experiment. Keep the first lending lesson focused on supply before introducing existing-debt restrictions.
+A later candidate is a liquidation lesson that separates debt repaid, collateral removed and the bonus cost. Keep the first lending lesson focused on supply before introducing existing-debt restrictions.
 
 ## Correlated-asset looping and LSTs
 
-The first wstETH/WETH experiment shipped in 1.39.0: build the balances, separate staking and collateral lending growth from WETH borrow costs, stress sale/oracle prices, and inspect a hypothetical atomic exit. The existing ETH/USDC loop remains available.
+The first wstETH/WETH experiment shipped in 1.39.0: build the balances, separate staking and collateral lending growth from WETH borrow costs, stress sale/oracle prices, and inspect a hypothetical atomic exit. The optional [wstETH discount lesson](https://teren.sh/lending.html#lst-lesson=discount) shipped in 1.56.0 and opens directly from that lab.
 
 Release 1.49.0 adds two exact exposure targets under shared conditions, with the main setup’s break-even borrow APR beside its rate controls. Next, observe which shared assumptions experienced users change and whether the paired results help them explain the trade-off. Test whether a person can distinguish a shared ETH-dollar move, a market discount and an oracle change, and whether they understand why a positive yield spread need not pay for the exit.
 

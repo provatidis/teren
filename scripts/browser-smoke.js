@@ -2,6 +2,7 @@ import { checkLPEconomics } from './browser/lp-economics-checks.js';
 import { checkLoanInterest } from './browser/loan-interest-checks.js';
 import { checkFeeFlow } from './browser/fee-flow-checks.js';
 import { checkLSTLoops } from './browser/lst-loop-checks.js';
+import { checkLSTDiscountLesson } from './browser/lst-discount-lesson-checks.js';
 import { checkLSTTargets } from './browser/lst-target-checks.js';
 import { checkLSTComparison } from './browser/lst-comparison-checks.js';
 import { checkWeekReplay, checkMobileWeekReplay } from './browser/week-replay-checks.js';
@@ -225,6 +226,11 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'lst-lesson') {
+    await checkLSTDiscountLesson({ evaluate, click, fill, text, navigate, reload, base, call, nextEvent });
+    assert.deepEqual(errors, [], 'No uncaught errors in the correlated-loop lesson');
+    if (process.env.BROWSER_CHECKS === 'lst-lesson') return;
+  }
   if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'yield-inspect') {
     await checkSdaiCase({ evaluate, fill, navigate, reload, base, call, nextEvent });
     assert.deepEqual(errors, [], 'No uncaught errors in the historical yield case');
