@@ -150,7 +150,7 @@ test('revised essentials applications clear obsolete answers without erasing com
     const old={version:1,completed:[id],lastLesson:id,drafts:{[id]:{
       variant,inputs:result.setup,reason:result.reason,reasonRevision:essentialQuestionRevisions(id,variant).reason,
       application:id==='loss-vs-profit'?'loss-and-gap':'same',applicationRevision:2,
-      prediction:result.prediction,answer:'123',ran:true,choiceSeed:19,
+      prediction:result.prediction,predictionRevision:essentialQuestionRevisions(id,variant).prediction,answer:'123',ran:true,choiceSeed:19,
     }}};
     const migrated=parseProgress(old), draft=migrated.drafts[id];
     assert.deepEqual(migrated.completed,[id]);

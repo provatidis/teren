@@ -44,5 +44,6 @@ export function renderLoopMoneyFlow(container, result, lesson = 'build', predict
   if (stages.length === 1) player.element.hidden = true;
   container.dataset.flow = lesson;
   container.replaceChildren(...(prediction ? [prediction, '\n'] : [intro, '\n']), diagram.element, '\n', player.element, '\n', copy, '\n', health, '\n', net, '\n', limit, '\n', details);
-  return { showQuestion() { player.show(stages.length - 1, false, false); } };
+  const questionStage = isUnwind && prediction ? stages.findIndex(stage => stage.action === 'repay') : stages.length - 1;
+  return { showQuestion() { player.show(questionStage, false, false); } };
 }

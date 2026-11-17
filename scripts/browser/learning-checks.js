@@ -25,9 +25,9 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     ['pool-share','less','ownership','share-same'],
     ['token-balances','less','rebalance','original-mix'],
     ['loss-vs-profit','gain','traded-mix','holding-basket'],
-    ['fee-break-even','short','assumption','gap-reopens'],
+    ['fee-break-even','toward-target','assumption','gap-reopens'],
     ['range-boundaries','usdc','path','both-inside'],
-    ['final-challenge','hold','total','relative-gap'],
+    ['final-challenge','lower-price','total','relative-gap'],
   ];
   for (const [id, prediction, reason, application] of cases) {
     await navigate(base + 'learn.html#lesson=' + id);
@@ -124,7 +124,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"),beforeReadingCard,'Reading preserves the final task, checked answers and completion.');
   await evaluate("Array.from(document.querySelectorAll('.comparison-modes button')).find(button=>button.textContent==='Assumed fees').click()");
   await fill('comparison-fees', '500');
-  await choose('learn-prediction', 'lp');
+  await choose('learn-prediction', 'higher-price');
   assert.equal(await evaluate("document.getElementById('learn-prediction-feedback').dataset.state"), 'different');
   assert.equal(await evaluate("document.getElementById('learn-results').hidden"), false);
   assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), false);
@@ -141,7 +141,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate("document.getElementById('learn-card-preview').hidden"), false);
   assert.match(await text('learn-worked-steps'),/100.00/);
   assert.match(await text('learn-worked-steps'),/328.93/);
-  await choose('learn-prediction', 'hold');
+  await choose('learn-prediction', 'lower-price');
   assert.equal(await evaluate("document.getElementById('learn-prediction-feedback').dataset.state"), 'match');
   await evaluate("document.querySelector('.scene-prediction-show').click()");
   assert.equal(await evaluate("document.getElementById('comparison-fees').value"), '100', 'Only the explicit outcome action restores the question setup.');
@@ -159,12 +159,12 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await text('learn-variation-label'), 'Variation 2 of 3');
   await navigate(base + 'learn.html#lesson=not-a-lesson');
   assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"), false);
-  assert.equal(await text('learn-lesson-title'), 'Compare liquidity with holding');
+  assert.equal(await text('learn-lesson-title'), 'Can you match holding and still lose dollars?');
   const savedLearn = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");
   await evaluate("Storage.prototype.setItem=function(){throw new DOMException('Full','QuotaExceededError')}");
   await click('learn-variation');
   assert.match(await text('learn-storage'), /Saving is unavailable/);
-  await choose('learn-prediction','lp'); await click('learn-run');
+  await choose('learn-prediction','higher-price'); await click('learn-run');
   assert.equal(await evaluate("document.getElementById('learn-results').hidden"), false);
   assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), savedLearn);
   assert.equal(await evaluate("localStorage.getItem('defi-sandbox-v1')"), sandbox);

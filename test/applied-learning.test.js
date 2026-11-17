@@ -23,7 +23,7 @@ test('applied questions use verified period earnings, interval counters and the 
   assert.ok(between.interval.earned0 > 0n && between.interval.earned1 > 0n);
   assert.equal(between.view.secondsInRange, 17580, 'Cumulative active time differs from this interval’s active time.');
   const final = appliedQuestion(returning, 'period-vs-holding');
-  assert.equal(final.index, 16); assert.equal(final.prediction, 'can-trail');
+  assert.equal(final.index, 16); assert.equal(final.prediction, 'two-values');
   assert.equal(final.view.holding.amount0, 4982691068n); assert.equal(final.view.holding.amount1, 14920139441099507n);
   assert.ok(final.view.principalGapUSD < 0 && final.view.gapUSD > 0);
   assert.ok(Math.abs(final.view.gapUSD - .17457169368572067) < 1e-12);
@@ -156,7 +156,10 @@ test('applied question revisions preserve evidence navigation, optional calculat
   assert.equal(migrated.drafts['between-samples'].application,'');
   assert.equal(migrated.drafts['period-vs-holding'].reason,'');
   assert.equal(migrated.drafts['period-vs-holding'].application,'');
-  for(const id of APPLIED_IDS)for(const key of ['prediction','answer','revealed','checkpoint'])assert.equal(migrated.drafts[id][key],old.drafts[id][key]);
+  for (const id of APPLIED_IDS) {
+    assert.equal(migrated.drafts[id].prediction, id === 'period-vs-holding' ? '' : old.drafts[id].prediction);
+    for (const key of ['answer','revealed','checkpoint']) assert.equal(migrated.drafts[id][key],old.drafts[id][key]);
+  }
   assert.equal(migrated.drafts['period-vs-holding'].choiceSeed,7);
   migrated.drafts['between-samples'].reason='returned';
   migrated.drafts['between-samples'].application='edge-placement';
@@ -174,8 +177,9 @@ test('the 1.46 question revision clears only the replaced comparison answers', (
   const migrated = parseAppliedProgress(old), draft = migrated.drafts['period-vs-holding'];
   assert.deepEqual(migrated.completed, old.completed);
   assert.equal(draft.reason, ''); assert.equal(draft.application, '');
-  assert.deepEqual(draft.questionRevisions, {prediction: 1, reason: 4, application: 3});
-  for (const key of ['prediction', 'answer', 'revealed', 'checkpoint', 'choiceSeed']) {
+  assert.deepEqual(draft.questionRevisions, {prediction: 2, reason: 4, application: 3});
+  assert.equal(draft.prediction, '');
+  for (const key of ['answer', 'revealed', 'checkpoint', 'choiceSeed']) {
     assert.equal(draft[key], old.drafts['period-vs-holding'][key]);
   }
   draft.reason = 'price-returned'; draft.application = 'smaller-lead';
@@ -298,7 +302,10 @@ test('the new recorded questions preserve the compatible interval reason and fin
   assert.equal(migrated.drafts['between-samples'].application,'');
   assert.equal(migrated.drafts['period-vs-holding'].reason,'');
   assert.equal(migrated.drafts['period-vs-holding'].application,'smaller-lead');
-  for(const id of Object.keys(old.drafts))for(const key of ['prediction','answer','revealed','checkpoint','choiceSeed'])assert.equal(migrated.drafts[id][key],old.drafts[id][key]);
+  for (const id of Object.keys(old.drafts)) {
+    assert.equal(migrated.drafts[id].prediction, id === 'period-vs-holding' ? '' : old.drafts[id].prediction);
+    for (const key of ['answer','revealed','checkpoint','choiceSeed']) assert.equal(migrated.drafts[id][key], old.drafts[id][key]);
+  }
   migrated.drafts['between-samples'].application='edge-placement';
   migrated.drafts['period-vs-holding'].reason='price-returned';
   assert.deepEqual(parseAppliedProgress(migrated),migrated);

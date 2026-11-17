@@ -48,7 +48,7 @@ export function initLendingLearning() {
     if (lesson.id === 'respond') return 'With ' + usd(input.budget) + ' per choice';
     if (lesson.id === 'build') return 'After borrowing, buying and supplying the ETH';
     if (lesson.id === 'stress') return 'With ETH at ' + usd(input.future);
-    return 'After unwinding at ' + usd(input.future) + ' per ETH';
+    return 'At the first repayment';
   }
   function updatePredictionFeedback() {
     renderPredictionFeedback(predictionFeedbackElement, lesson.predictions, draft.prediction, example.prediction,

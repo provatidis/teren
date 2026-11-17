@@ -80,3 +80,25 @@ test('revised reasoning clears old answers while keeping completed lessons, evid
     assert.equal(parseProgress(cleaned).drafts[id].reason, outcome.reason);
   }
 });
+
+test('new fee and challenge predictions clear old winner guesses while retaining checked work', () => {
+  for (const [id, former] of [['fee-break-even', 'short'], ['final-challenge', 'hold']]) {
+    const inputs = lessonSetup(id), revisions = essentialQuestionRevisions(id, 0);
+    const outcome = runLesson(id, inputs);
+    const task = matchChallengeHolding(inputs, inputs.initialPrice * .75);
+    const old = { version: 1, completed: [id], drafts: { [id]: {
+      inputs, variant: 0, prediction: former, reason: outcome.reason, reasonRevision: revisions.reason,
+      application: lessonApplication(id, outcome).expected, applicationRevision: revisions.application,
+      ran: true, task, taskChecked: true,
+    } } };
+    const clean = parseProgress(old), draft = clean.drafts[id];
+    assert.equal(draft.prediction, '');
+    assert.deepEqual(clean.completed, [id]);
+    assert.equal(draft.reason, outcome.reason);
+    assert.equal(draft.application, old.drafts[id].application);
+    if (id === 'final-challenge') {
+      assert.deepEqual(draft.task, task);
+      assert.equal(draft.taskChecked, true);
+    }
+  }
+});

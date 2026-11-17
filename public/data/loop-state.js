@@ -7,8 +7,9 @@ export const LOOP_DRAFT_KEY = 'teren-loop-draft-v1';
 export const LOOP_LEARNING_KEY = 'teren-loop-learning-v1';
 export const LOOP_LESSON_IDS = ['build', 'stress', 'unwind'];
 export const LOOP_QUESTION_REVISIONS = Object.freeze({
+  build: Object.freeze({ reason: 1 }),
   stress: Object.freeze({ application: 2 }),
-  unwind: Object.freeze({ application: 2 }),
+  unwind: Object.freeze({ prediction: 1, application: 2 }),
 });
 const CHAPTER_KEY = 'teren-lending-chapter-v1';
 

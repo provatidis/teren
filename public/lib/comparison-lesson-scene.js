@@ -7,8 +7,8 @@ import { fmt, usd } from './format.js';
 export function comparisonQuestion(id, input) {
   const price = 'At ' + usd(input.futurePrice) + ' per ETH';
   if (id === 'loss-vs-profit') return price + ', is the LP before fees worth at least the original ' + usd(input.investment) + '?';
-  if (id === 'fee-break-even') return price + ', do ' + usd(input.fees) + ' in assumed fees cover the gap to holding?';
-  return price + ' with ' + usd(input.fees) + ' in assumed fees, which has the higher final value?';
+  if (id === 'final-challenge') return 'Which move in the ETH price would let both strategies end below ' + usd(input.investment) + '?';
+  return 'ETH stays at ' + usd(input.futurePrice) + '. What changes as trading fees come in?';
 }
 
 export function createComparisonScene(id, input, prediction) {
@@ -18,7 +18,7 @@ export function createComparisonScene(id, input, prediction) {
   let price = id === 'loss-vs-profit' ? input.initialPrice : input.futurePrice;
   let fees = id === 'final-challenge' ? input.fees : 0;
   const element = sceneNode('div', undefined, 'lesson-scene comparison-scene');
-  element.append(prediction, '\n');
+  if (prediction) element.append(prediction, '\n');
   const bars = createComparisonBars(input, { withFees });
   const figure = bars.figure;
   const verdict = sceneNode('div', undefined, 'comparison-verdict');
@@ -38,8 +38,15 @@ export function createComparisonScene(id, input, prediction) {
     holding.textContent = subject + (state.versusHolding === 'equal' ? ' matches holding.'
       : ' is ' + usd(Math.abs(r.difference)) + ' ' + state.versusHolding + ' holding.');
     basket.textContent = 'Both start with ' + fmt(r.held.eth, 4) + ' ETH + ' + fmt(r.held.usdc, 2) + ' USDC. All bars use the same fixed dollar scale.';
-    scope.textContent = (price === input.futurePrice && fees === input.fees ? 'Showing the prediction setup. ' : 'Exploring another setup. ')
-      + 'Prediction: ETH at ' + usd(input.futurePrice) + (withFees ? ' and ' + usd(input.fees) + ' assumed fees.' : ', before fees.');
+    const atExample = price === input.futurePrice && fees === input.fees;
+    if (id === 'final-challenge') {
+      scope.textContent = atExample ? 'Showing the worked example.' : 'You changed the worked example. It began with ETH at ' + usd(input.futurePrice) + ' and ' + usd(input.fees) + ' in fees.';
+    } else if (id === 'fee-break-even') {
+      scope.textContent = 'ETH stays at ' + usd(price) + ' while you vary fees.';
+    } else {
+      scope.textContent = (atExample ? 'Showing the prediction setup. ' : 'Exploring another setup. ')
+        + 'Prediction: ETH at ' + usd(input.futurePrice) + (withFees ? ' and ' + usd(input.fees) + ' assumed fees.' : ', before fees.');
+    }
     if (match) match.textContent = 'Match holding · ' + usd(r.breakEvenFees) + ' fees';
     return profit.textContent + ' ' + holding.textContent;
   }
@@ -50,7 +57,7 @@ export function createComparisonScene(id, input, prediction) {
       id: 'comparison-price', min: input.initialPrice / 2, max: input.initialPrice * 2,
       step: input.initialPrice / 100, start: price, target: input.futurePrice, format: usd,
       labelText: 'Explore an ETH price', valueText: value => usd(value) + ' per ETH', scopeText: () => '',
-      shortcuts: [{ label: 'Starting price', value: input.initialPrice }, { label: 'Question price', value: input.futurePrice }],
+      shortcuts: [{ label: 'Starting price', value: input.initialPrice }, { label: id === 'final-challenge' ? 'Example price' : 'Question price', value: input.futurePrice }],
       onChange: value => { price = value; return draw(); },
     });
   }
@@ -61,7 +68,7 @@ export function createComparisonScene(id, input, prediction) {
       step: 'any', start: fees, target: input.fees, format: usd,
       labelText: 'Explore assumed total fees', scopeText: () => '',
       valueText: value => usd(value) + ' assumed cash fees',
-      shortcuts: [{ label: 'No fees', value: 0 }, { label: 'Question fees', value: input.fees }],
+      shortcuts: [{ label: 'No fees', value: 0 }, { label: 'Example fees', value: input.fees }],
       onChange: value => { fees = value; return draw(); },
     });
     match = sceneNode('button', '', 'scene-shortcut'); match.type = 'button'; match.id = 'comparison-match';

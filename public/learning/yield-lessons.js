@@ -34,17 +34,16 @@ function timingStage(label, caption, input) {
   };
 }
 
-function saleStage(label, quote) {
+function saleStage(label, quote, caption) {
   return {
-    label,
-    caption: 'A buyer who expects more interest over the next 45 days may offer more for YT. The seller keeps the interest earned before day 45. Both sales are shown before trading costs.',
+    label, caption,
     rows: [
-      ['PT buyer can sell for', cash(quote.ptSale), 'pt'],
-      ['YT buyer takes home in total', cash(quote.ytTotal), 'yt'],
+      ['What the other trader would receive for PT', cash(quote.ptSale), 'pt'],
+      ['Your sale proceeds plus interest', cash(quote.ytTotal), 'yt'],
     ],
     bars: { unit: 'USDC', max: highQuote.ytSale, items: [
-      { label: 'YT sale price', value: quote.ytSale, role: 'sale' },
-      { label: 'Interest the YT seller keeps', value: quote.ytInterest, role: 'earned' },
+      { label: 'What you would receive for selling YT', value: quote.ytSale, role: 'sale' },
+      { label: 'Interest you earned before the sale', value: quote.ytInterest, role: 'earned' },
     ] },
   };
 }
@@ -237,7 +236,7 @@ export const YIELD_LESSONS = [
     intro: 'Each PT in this example repays 1 USDC on day 90. A buyer who pays less today earns a higher annual return if they hold until then. That return is the market’s implied APY.',
     setup: {
       facts: [
-        ['At purchase', 'Two traders spend 1,000 USDC each. One buys PT. The other buys the interest on fifty 1,000 USDC deposits through YT.'],
+        ['At purchase', 'You spend 1,000 USDC on YT for the next 90 days of interest on 50,000 USDC of principal. Another trader spends the same amount on PT.'],
         ['On day 45', 'You can redeem one PT and its matching YT together for 1 USDC worth of the deposit. That’s why the pair costs 1 USDC in this example.'],
       ],
       action: 'The first quote is at 5% implied APY. The second quote on the same day is at 15%, so a buyer offers less for PT.',
@@ -253,9 +252,10 @@ export const YIELD_LESSONS = [
         unchanged: 'A new buyer can offer more for the remaining interest today. The market price can change before the deposit earns another cent.',
       },
     },
-    finding: 'The higher implied APY raises the YT offer and lowers the PT offer. The YT seller keeps the same interest earned before day 45.',
+    finding: 'At 15% you get a higher offer for your YT. The other trader gets a lower offer for PT. You keep the same interest earned before the sale.',
     scene: { title: 'Compare two offers on day 45', outcome: 1, stages: [
-      saleStage('5% implied APY', lowQuote), saleStage('15% implied APY', highQuote),
+      saleStage('5% implied APY', lowQuote, 'This is the first offer on day 45. Both sale prices are shown before trading costs.'),
+      saleStage('15% implied APY', highQuote, 'A buyer who expects more interest over the remaining 45 days may pay you more for YT. The new offer leaves your earlier interest unchanged.'),
     ] },
     reason: {
       revision: 2,
@@ -280,7 +280,7 @@ export const YIELD_LESSONS = [
         'your-income': 'Include that interest even if you haven’t claimed it yet. With 30 USDC after fees you broke even. Anything above 30 was a gain.',
       },
     },
-    hint: 'Keep the sale day fixed. Trace what the old owner earned before day 45 and what the new owner is buying after it.',
+    hint: 'Keep the sale day fixed. Follow the interest you earned before day 45, then consider what the next owner is buying.',
     accomplishment: 'You accounted for both the resale value of YT and the interest earned before the sale.',
     deeper: [
       'Before maturity, redemption takes equal numbers of PT and YT from the same market. After maturity, PT alone redeems the principal. Interest earned while holding YT can be claimed separately.',

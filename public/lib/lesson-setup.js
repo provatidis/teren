@@ -36,7 +36,13 @@ export function liquidityLessonSetup(id, input) {
       : 'Add ' + fmt(s.depositEth, 0) + ' ETH and ' + fmt(s.depositEth * s.initialPrice, 0) + ' USDC together.',
     assumptions: id === 'swap-impact' ? 'The swap pays a 0.3% fee.' : 'Deposit both tokens in the pool’s existing ratio.',
   };
-  const fees = ['fee-break-even', 'final-challenge'].includes(id);
+  if (id === 'final-challenge') return {
+    facts: [['Starting budget', usd(s.investment)], ['ETH in each strategy', fmt(s.investment / 2 / s.initialPrice, 4) + ' ETH', 'eth'],
+      ['USDC in each strategy', fmt(s.investment / 2, 2) + ' USDC', 'usdc']],
+    actionLabel: 'Starting price', action: usd(s.initialPrice) + ' per ETH.',
+    assumptions: 'USDC stays at $1. You choose the fee income for the pool position.',
+  };
+  const fees = id === 'fee-break-even';
   const facts = [['Starting budget', usd(s.investment)], ['Starting ETH price', usd(s.initialPrice)]];
   if (id === 'range-boundaries') facts.push(['Your range', usd(s.initialPrice * (1 - s.width)) + '–' + usd(s.initialPrice * (1 + s.width))]);
   if (fees) facts.push(['Assumed cash fees', usd(s.fees)]);
@@ -55,8 +61,7 @@ export function managementLessonSetup(result) {
   };
   if (result.id === 'fee-tiers') return {
     facts: [['Pool A swap fee', fmt(result.rates[0], 2) + '%'], ['Pool B swap fee', fmt(result.rates[1], 2) + '%']],
-    action: 'Compare the two positions’ fee income over the same example day.',
-    assumptions: 'Same WETH/USDC pair and equal position budgets. Trade activity and each position’s share of active liquidity are not supplied.',
+    assumptions: 'Whichever pool you choose, your range stays active all day. Neither pool keeps a protocol share of its swap fees.',
   };
   return {
     facts: [['Starting budget', '$5,000'], ['Starting ETH price', '$2,000'], ['Unchanged range', '$1,800–$2,200']],
@@ -102,7 +107,8 @@ export function lendingLessonSetup(id, { input: s, result: r }) {
   return {
     facts: [['Collateral after ' + s.rounds + ' rounds', fmt(r.end.collateralTokens, 4) + ' ETH', 'eth'],
       ['Debt still owed', fmt(r.end.debt, 2) + ' USDC'], ['ETH price', usd(s.future)]],
-    action: 'Withdraw part of the collateral → sell it for USDC → repay debt. Repeat, then withdraw the remaining ETH.',
-    assumptions: 'Unlike the previous zero-cost example, this loop includes ' + s.swapCost + '% swap costs when building and closing it. That is why its starting collateral and debt differ slightly. Keep prices fixed; no outside money or flash loan. USDC = $1.',
+    actionLabel: 'Your goal',
+    action: 'Close the loan using only this ETH. Each withdrawal must leave enough collateral to back the debt still owed.',
+    assumptions: 'ETH’s price stays fixed and USDC stays at $1. Each swap costs ' + s.swapCost + '% when building and closing the loop. No outside funds or flash loan.',
   };
 }

@@ -183,8 +183,8 @@ export function lessonApplicationCopy(id, outcome) {
     feedback: 'Just inside the upper bound, a small amount of ETH remains beside the USDC. The position can earn when swaps use its liquidity; being inside does not itself create fees.'};
   return {...base,
     label: 'Match holding while losing dollars',
-    context: 'Use the starting ' + fmt(outcome.result.held.eth, 4) + ' ETH and ' + fmt(outcome.result.held.usdc, 2) + ' USDC. Find a price and fee assumption where LP matches holding, but both are below the starting capital.',
-    question: 'In that example, what have the fees you entered covered?',
+    context: 'Think back to the price and fees you chose for your own position.',
+    question: 'When your position matches holding below the starting budget, what have its fees covered?',
     choices: [['relative-gap','The shortfall against holding, while a dollar loss remains in both strategies.'],['capital-restored','The entire loss from the starting capital, because LP now matches holding.'],['earned-target','A recorded fee payment that proves this position can recover its loss.']],
     hint: 'Try a price below the start, then use Match holding. The bars keep both comparisons visible.',
     feedbackByChoice: {

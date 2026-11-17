@@ -4,7 +4,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
   const keys=['degenerator-learning-liquidity-v1','passiko-applied-liquidity-v1','defi-sandbox-v1','degenerator-pool-snapshot-v1','degenerator-v3-position-snapshot-v1','degenerator-experiments-v1'];
   const before=await evaluate('JSON.stringify('+JSON.stringify(keys)+'.map(key=>localStorage.getItem(key)))');
   const choose=(name,value)=>evaluate(`document.querySelector('input[name="${name}"][value="${value}"]').click()`);
-  const cases=[['range-width','none','bounds','mix'],['fee-tiers','b','trades','more-volume'],['range-management','same','asset','automatic']];
+  const cases=[['range-width','none','bounds','mix'],['fee-tiers','trade-count','active-swaps','more-volume'],['range-management','same','asset','automatic']];
   for(const [id,prediction,reason,application]of cases) {
     await navigate(base+'learn.html#manage='+id);
     assert.equal(await evaluate("document.getElementById('learn-essential').hidden&&document.getElementById('learn-applied').hidden&&!document.getElementById('learn-management').hidden"),true);
@@ -17,12 +17,16 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
     assert.match(await text('manage-prediction-feedback'),/^The result differs from your prediction\./);
     assert.equal(await evaluate("document.getElementById('manage-observe-title').getBoundingClientRect().top>=document.querySelector('.topbar').getBoundingClientRect().bottom"),true);
     if(id==='range-width')assert.match(await text('manage-metrics'),/Narrow range Inactive.*Wider range Active/s);
-    if(id==='fee-tiers')assert.match(await text('manage-metrics'),/Unknown/);
+    if (id === 'fee-tiers') {
+      assert.match(await text('manage-metrics'), /Unknown/);
+      assert.equal(await text('manage-variation'), 'Try yesterday’s APR screenshot ↻');
+      assert.equal(await text('manage-variation'), await text('manage-fresh'));
+    }
     assert.ok((await text('manage-reason-context')).length>20);
     assert.ok((await text('manage-application-label')).length>10);
     assert.doesNotMatch(await text('manage-application-label'),/APPLY|CHANGE/);
     if(id==='range-management')assert.match(await text('manage-pitfall'),/does not refund earlier losses/);
-    await choose('manage-reason',id==='range-width'?'budget':id==='fee-tiers'?'clock':'liquidated');await choose('manage-application',application);await click('manage-check');
+    await choose('manage-reason',id==='range-width'?'budget':id==='fee-tiers'?'catch-up':'liquidated');await choose('manage-application',application);await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Review your answers.');
     assert.equal(await evaluate("document.getElementById('manage-continue').hidden"),true);
     await choose('manage-reason',reason);await choose('manage-application',id==='range-width'?'capital':id==='fee-tiers'?'bigger-share':'fees');await click('manage-check');
@@ -30,7 +34,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
     await choose('manage-application',application);await click('manage-check');
     assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
     // Revising an expectation does not replace the example or erase later work.
-    await choose('manage-prediction',id==='range-width'?'wide':id==='fee-tiers'?'unknown':'falls');
+    await choose('manage-prediction',id==='range-width'?'wide':id==='fee-tiers'?'active-volume':'falls');
     assert.equal(await evaluate("document.getElementById('manage-prediction-feedback').dataset.state"),'match');
     assert.equal(await evaluate("document.querySelector('input[name=manage-reason]:checked').value"),reason);
     assert.equal(await evaluate("document.querySelector('input[name=manage-application]:checked').value"),application);
@@ -69,7 +73,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
     for(let variant=1;variant<3;variant++) {
       await click('manage-variation');assert.equal(await text('manage-variation-label'),'Situation '+(variant+1)+' of 3');
       assert.equal(await evaluate("document.getElementById('manage-reveal').disabled"),false);assert.equal(await evaluate("document.getElementById('manage-observe').hidden"),true);
-      await choose('manage-prediction',id==='range-width'?(variant===2?'both':'wide'):id==='fee-tiers'?'unknown':variant===1?'same':'rises');await click('manage-reveal');
+      await choose('manage-prediction',id==='range-width'?(variant===2?'both':'wide'):id==='fee-tiers'?'active-volume':variant===1?'same':'rises');await click('manage-reveal');
       const changedAnswer=id==='range-width'?(variant===1?'wide-mix':'own-basket'):id==='fee-tiers'?(variant===1?'smaller-share':'competition-offset'):variant===1?'removed':'sold-earlier';
       await choose('manage-reason',reason);await choose('manage-application',changedAnswer);await click('manage-check');assert.equal(await text('manage-feedback-title'),'Both answers are correct.');
       if(id==='range-width'&&variant===1){
@@ -147,7 +151,7 @@ export async function checkMobileManagementLearning({evaluate,click,text,navigat
     assert.ok(await evaluate("(()=>{const r=document.getElementById('manage-next').getBoundingClientRect();return r.top>=document.querySelector('.topbar').getBoundingClientRect().bottom&&r.bottom<=innerHeight})()"), 'The next exercise is visible with its feedback.');
 assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
     await click('manage-topics');await evaluate("document.querySelector('[data-management-id=fee-tiers]').click()");
-    assert.equal(await evaluate("document.getElementById('learn-course').open"),false);assert.equal(await text('manage-title'),'A higher fee rate is not a higher return');
+    assert.equal(await evaluate("document.getElementById('learn-course').open"),false);assert.equal(await text('manage-title'),'Which pool would you choose?');
     assert.equal(await evaluate("document.getElementById('manage-title').getBoundingClientRect().top>=document.querySelector('.topbar').getBoundingClientRect().bottom"),true);
     for (let reset=0;reset<3&&(await text('manage-variation-label'))!=='Situation 1 of 3';reset++) await click('manage-variation');
     for (let variant=0;variant<3;variant++) {

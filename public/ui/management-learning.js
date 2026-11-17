@@ -89,6 +89,8 @@ export function initManagementLearning() {
     $('manage-adds').textContent='Uniswap v3-style · '+lesson.adds;$('manage-intro').textContent=lesson.intro;
     renderLessonSetup($('manage-setup'), managementLessonSetup(outcome));
     $('manage-prediction-question').textContent=presentation.prediction;$('manage-variation-label').textContent='Situation '+(draft.variant+1)+' of '+MANAGEMENT_VARIANTS;
+    const nextSituation = lesson.situations[(draft.variant + 1) % MANAGEMENT_VARIANTS];
+    $('manage-variation').textContent = $('manage-fresh').textContent = 'Try ' + nextSituation + ' ↻';
     $('manage-observe-title').textContent=visualLesson()?'At '+usd(outcome.price)+' per ETH':'Read the result';
     $('manage-reason-question').textContent=presentation.reasoning||lesson.reasoning;$('manage-application-context').textContent=application.context;$('manage-application-question').textContent=application.question;
     $('manage-reason-context').textContent=presentation.reasonContext||'';
@@ -103,7 +105,8 @@ export function initManagementLearning() {
     $('manage-metrics').hidden = visualLesson();
     $('manage-explanation').hidden = visualLesson();
     $('manage-predict-label').textContent = visualLesson() ? 'EXPLORE THE MECHANISM' : '01 · PREDICT';
-    $('manage-predict-title').textContent = visualLesson() ? 'Watch the same price cross both ranges' : 'Before opening the example';
+    const situation = lesson.situations[draft.variant];
+    $('manage-predict-title').textContent = situation[0].toUpperCase() + situation.slice(1);
     if (visualLesson()) {
       $('manage-prediction-question').textContent = 'If ETH moves to ' + usd(outcome.price) + ', which position will be inside its range?';
       rangeScene = createRangeWidthScene(outcome, createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) }));

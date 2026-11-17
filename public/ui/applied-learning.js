@@ -29,6 +29,7 @@ export function initAppliedLearning() {
   $('applied-comparison').after(costExample);
   let predictionPrompt;
   let lesson, draft, period = null, question = null, application = null, revision = 0;
+  const predictionCheckpoint = () => question.contrastIndex ?? question.index;
   const utc = timestamp => new Date(timestamp * 1000).toISOString().replace('T', ' ').replace('.000Z', ' UTC');
   const states = { inside: 'In range · both tokens', above: 'Above range · all USDC', below: 'Below range · all WETH' };
   const tokens = (zero, one) => formatUnits(zero, 6) + ' USDC + ' + formatUnits(one, 18) + ' WETH';
@@ -96,16 +97,16 @@ export function initAppliedLearning() {
     const questionBlock = question.view.point.snapshot.block.number;
     const comparison = lesson.id === 'period-vs-holding';
     const checkpointLabel = index === question.index ? (comparison ? 'Final comparison checkpoint' : 'Question checkpoint')
-      : comparison && index === question.contrastIndex ? 'Earlier comparison checkpoint' : '';
+      : comparison && index === question.contrastIndex ? 'Prediction checkpoint' : '';
     $('applied-checkpoint').max = String(period.points.length - 1); $('applied-checkpoint').value = String(index);
     $('applied-checkpoint').setAttribute('aria-valuetext', 'Checkpoint ' + (index + 1) + ' of ' + period.points.length + ', ' + states[view.state] + ', block ' + snapshot.block.number);
     $('applied-current').textContent = 'Checkpoint ' + (index + 1) + ' of ' + period.points.length + ' · Block ' + snapshot.block.number + ' · ETH ' + usd(view.price) + (checkpointLabel ? ' · ' + checkpointLabel : '');
     $('applied-state').textContent = states[view.state]; $('applied-state').dataset.state = view.state;
-    $('applied-return-question').hidden = index === question.index;
-    $('applied-return-question').textContent = comparison ? 'Return to the final comparison checkpoint →' : 'Return to the question checkpoint →';
+    $('applied-return-question').hidden = index === predictionCheckpoint();
+    $('applied-return-question').textContent = comparison ? 'Return to checkpoint ' + (question.contrastIndex + 1) + ' →' : 'Return to the question checkpoint →';
     $('applied-question-window').textContent = lesson.id === 'between-samples'
       ? 'Question interval: blocks ' + question.interval.start.number + ' → ' + questionBlock + '. Both sampled endpoints are outside.'
-      : comparison ? 'Final comparison checkpoint: block ' + questionBlock + '. Both comparisons use the original starting tokens.'
+      : comparison ? 'Compare checkpoint ' + (question.contrastIndex + 1) + ' with the end of the record at checkpoint ' + (question.index + 1) + '. Both use the same starting tokens.'
         : 'Question checkpoint: final block ' + questionBlock + '. Compare with the first checkpoint.';
     for (const button of $('applied-milestones').children) button.setAttribute('aria-pressed', String(Number(button.dataset.index) === index));
     const metrics = lesson.id === 'fees-over-time'
@@ -139,13 +140,13 @@ export function initAppliedLearning() {
   function refreshPrediction() {
     const finding = lesson.id === 'fees-over-time' ? 'Fees accrued during this period without being collected.'
       : lesson.id === 'between-samples' ? 'The position was active between the two outside-range samples in the question.'
-      : 'At checkpoint ' + (question.contrastIndex + 1) + ', the position has earned ' + usd(question.contrast.feesUSD) + ' in fees but still trails holding by ' + usd(-question.contrast.gapUSD) + '. At the final checkpoint it is ' + usd(question.view.gapUSD) + ' ahead, before costs.';
+      : 'Value the position with its fees and the original tokens at the same ETH price. At checkpoint ' + (question.contrastIndex + 1) + ', the position has earned ' + usd(question.contrast.feesUSD) + ' in fees but still trails holding by ' + usd(-question.contrast.gapUSD) + '. At the final checkpoint it is ' + usd(question.view.gapUSD) + ' ahead, before costs.';
     renderPredictionFeedback($('applied-prediction-feedback'), lesson.predictions, draft.prediction, question.prediction, finding);
     markPredictionRevealed(predictionField);
   }
   function reveal(resetCheckpoint = false) {
     if (!period) return;
-    if (resetCheckpoint) draft.checkpoint = question.index;
+    if (resetCheckpoint) draft.checkpoint = predictionCheckpoint();
     draft.revealed = true;
     refreshPrediction();
     renderRecordedComparison($('applied-comparison'), question, index => {
@@ -223,7 +224,7 @@ export function initAppliedLearning() {
       onShow: () => {
         if (!period) { activate(true); return; }
         if (draft.revealed) {
-          draft.checkpoint = question.index;
+          draft.checkpoint = predictionCheckpoint();
           renderCheckpoint(); persist();
         } else reveal(true);
         focusTitle('applied-observe-title');
@@ -258,7 +259,7 @@ export function initAppliedLearning() {
       $('applied-hint-text').textContent = lesson.takeaway + ' ' + application.hint;
       if (!application.choices.some(([value]) => value === draft.application)) draft.application = '';
       choices('applied-applications', 'applied-application', application.choices, draft.application, value => { draft.application = value; clearFeedback(); persist(); });
-      if (draft.checkpoint === null || draft.checkpoint >= period.points.length) draft.checkpoint = question.index;
+      if (draft.checkpoint === null || draft.checkpoint >= period.points.length) draft.checkpoint = predictionCheckpoint();
       const first = period.points[0].snapshot, last = period.points.at(-1).snapshot;
       $('applied-source').textContent = 'Position #' + first.tokenId + ' · Ethereum WETH/USDC 0.3% · ' + period.points.length + ' checkpoints over ' + periodDuration(period.validation.durationSeconds) + ' · blocks ' + first.block.number + '–' + last.block.number + '.';
       $('applied-milestones').replaceChildren(...periodMilestones(period).map(item => {
@@ -287,7 +288,7 @@ export function initAppliedLearning() {
     link.addEventListener('click', () => { if (matchMedia('(max-width: 750px)').matches) $('learn-course').open = false; });
   });
   $('applied-checkpoint').addEventListener('input', () => { if (!period) return; draft.checkpoint = Number($('applied-checkpoint').value); renderCheckpoint(); persist(); });
-  $('applied-return-question').addEventListener('click', () => { draft.checkpoint = question.index; renderCheckpoint(); persist(); });
+  $('applied-return-question').addEventListener('click', () => { draft.checkpoint = predictionCheckpoint(); renderCheckpoint(); persist(); });
   $('applied-assessment-form').addEventListener('submit', event => { event.preventDefault(); if (!draft?.revealed || !question) return; check(); });
   $('applied-restart').addEventListener('click', () => { progress.drafts[lesson.id] = fresh(); activate(true); });
   $('applied-topics').addEventListener('click', () => { $('learn-course').open = true; const summary = $('learn-course').querySelector('summary'); summary.focus({ preventScroll: true }); $('learn-course').scrollIntoView({ block: 'start', behavior: 'instant' }); });

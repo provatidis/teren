@@ -4,8 +4,8 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
   const choose = (prefix, group, value) => evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);
   const cases = [
     ['learn.html#lesson=swap-impact', 'learn', 'same', 'less', 'curve', 'quote-received', 'learn-reasons', 'learn-applications', 'learn-run'],
-    ['learn.html#manage=fee-tiers', 'manage', 'a', 'unknown', 'trades', 'more-volume', 'manage-reasons', 'manage-applications', 'manage-reveal'],
-    ['learn.html#applied=period-vs-holding', 'applied', 'fees-win', 'can-trail', 'price-returned', 'smaller-lead', 'applied-reasons', 'applied-applications', 'applied-reveal'],
+    ['learn.html#manage=fee-tiers', 'manage', 'pool-deposits', 'active-volume', 'active-swaps', 'more-volume', 'manage-reasons', 'manage-applications', 'manage-reveal'],
+    ['learn.html#applied=period-vs-holding', 'applied', 'start-dollars', 'two-values', 'price-returned', 'smaller-lead', 'applied-reasons', 'applied-applications', 'applied-reveal'],
     ['lending.html#lesson=conditions', 'lend', 'higher', 'lower', 'interest', 'backing-faster', 'lend-reason-choices', 'lend-application-choices', 'lend-reveal'],
   ];
   const ready = () => evaluate(`new Promise(resolve => {
@@ -104,7 +104,7 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
     assert.match(await text('applied-comparison'), /−\$0.51[\s\S]*\+\$0.17/);
     await evaluate("document.querySelector('#applied-comparison button').click()");
     assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"), '6');
-    assert.match(await text('applied-question-window'), /Final comparison checkpoint: block 26090000/);
+    assert.match(await text('applied-question-window'), /checkpoint 7.*end of the record at checkpoint 17/);
     assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
     for (const lesson of ['build', 'unwind']) {
       const route = base + 'lending.html#loop-lesson=' + lesson;
@@ -112,14 +112,21 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
       const balances = () => evaluate(`['supplied', 'debt', 'wallet', 'selected'].map(id => document.getElementById('loop-flow-' + id).textContent)`);
       const outcome = await balances();
       if (lesson === 'build') { assert.equal(outcome[0], '7.5 ETH'); assert.equal(outcome[1], '5,000 USDC'); }
-      else assert.equal(outcome[1], '0 USDC');
+      else {
+        assert.equal(outcome[1], '1,356.67 USDC');
+        assert.match(outcome[3], /Repay/);
+      }
       const handoff = await evaluate("document.getElementById('lend-explore').href");
       await click('loop-flow-previous');
       const explored = await balances();
       assert.notDeepEqual(explored, outcome);
+      if (lesson === 'unwind') {
+        assert.equal(explored[1], '8,735.01 USDC');
+        assert.match(explored[2], /7,378.34 USDC/);
+      }
       await click('lend-reveal');
       assert.deepEqual(await balances(), explored, 'Opening the question explanation preserves the explored loop step.');
-      assert.match(await text('lend-observe-title'), lesson === 'build' ? /After borrowing, buying and supplying/ : /After unwinding at \$2,000\.00/);
+      assert.match(await text('lend-observe-title'), lesson === 'build' ? /After borrowing, buying and supplying/ : /At the first repayment/);
       await reload();
       assert.deepEqual(await balances(), outcome, 'Reload restores the same diagram as the revealed explanation.');
       await navigate(base + 'lending.html#lesson=supply'); await navigate(route);
