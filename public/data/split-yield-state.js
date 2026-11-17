@@ -26,7 +26,7 @@ export function readSplitSetup(hash) {
   const params = new URLSearchParams(hash.slice(1));
   if (!params.has('yield')) return null;
   const hasExit = params.has('exitDay') || params.has('exitApy');
-  if (params.size !== fields.length + (hasExit ? 3 : 1) || params.get('yield') !== SPLIT_MODEL) {
+  if ([...params.keys()].length !== fields.length + (hasExit ? 3 : 1) || params.get('yield') !== SPLIT_MODEL) {
     throw new Error('This yield setup link is incomplete or unsupported.');
   }
   function number(field) {

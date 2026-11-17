@@ -46,15 +46,28 @@ export function splitDeposit(input) {
   };
 }
 
+// Convert growth over the full term to an effective annual percentage.
+// A valid short-term return can have an APY too large to represent.
+export function annualizedApy(periodGrowth, days) {
+  const apy = 100 * Math.expm1(Math.log1p(periodGrowth) * (365 / days));
+  return Number.isFinite(apy) ? apy : null;
+}
+
 export function splitAtMaturity(input) {
   const [error] = Object.values(splitInputErrors(input));
   if (error) throw new RangeError(error);
   const deposit = splitDeposit(input);
   const ptUnits = input.budget / (1 - input.ytPrice);
   const ytUnits = input.budget / input.ytPrice;
+  const fixedReturn = input.ytPrice / (1 - input.ytPrice);
   return {
     ...deposit, ptUnits, ytUnits, ptFinal: ptUnits,
     ytFinal: ytUnits * (deposit.netInterest / DEPOSIT),
     holdFinal: input.budget * (1 + deposit.grossInterest / DEPOSIT),
+    ptMatchGross: DEPOSIT * fixedReturn,
+    entryImpliedApy: annualizedApy(fixedReturn, input.days),
+    scenarioApy: annualizedApy(deposit.grossInterest / DEPOSIT, input.days),
+    recoverApy: annualizedApy(deposit.recoverGross / DEPOSIT, input.days),
+    matchApy: deposit.matchGross === null ? null : annualizedApy(deposit.matchGross / DEPOSIT, input.days),
   };
 }

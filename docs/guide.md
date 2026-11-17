@@ -10,7 +10,9 @@ New to PT and YT? [Start with the deposit](https://teren.sh/yield-learn.html#les
 
 In Experiment, start with the two buyers of one 1,000 USDC deposit. One buys the principal claim (PT) and one buys the remaining interest (YT). Move **Day the underlying rate changes** from day 80 to day 10. The same 15% annual yield then applies for 80 days instead of ten. Use the points beneath the chart to inspect interest at purchase, at the change or at maturity. The maturity results cover the whole term.
 
-Open **Edit entry price, term and rates** for your own assumptions. Changing the term keeps the switch at approximately the same fraction of the term. **Compare the same budget** shows how many units each buyer can afford and what each receives at maturity. The two targets are gross interest on the original 1,000 USDC deposit. Earning enough to recover the YT price can still leave it behind holding.
+Open **Edit entry price, term and rates** for your own assumptions. Changing the term keeps the switch at approximately the same fraction of the term. **Compare the same budget** shows how many units each buyer can afford and what each receives at maturity. Compare PT’s fixed APY at entry with the annualized yield of your deposit over the whole term. Each YT target shows the gross interest needed on the original 1,000 USDC deposit and the equivalent annual rate.
+
+Try [a deposit earning 8.90%](https://teren.sh/yield.html#yield=pendle-split-v1&ytPrice=0.02&days=90&firstApy=8.9&secondApy=8.9&switchDay=80&budget=1000). That rate exceeds PT’s 8.54% fixed APY. YT earns back its price with a gain, but the unsplit deposit still finishes ahead. YT would need the deposit to earn 9.01% annualized to match it, rounded to two decimal places.
 
 In the [early-sale comparison](https://teren.sh/yield.html#early-exit), choose a sale day and an implied APY. Keep the day fixed and try a higher rate. PT sells for less, and YT’s claim on the remaining interest sells for more. Look at the interest the YT seller already earned. Changing the price of the remaining claim leaves that interest intact. Compare both buyers with the value of the unsplit deposit on the sale day.
 

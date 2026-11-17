@@ -1,4 +1,4 @@
-import { YT_FEE, grossYieldAt, splitInputErrors } from './split-yield-v1.js';
+import { YT_FEE, annualizedApy, grossYieldAt, splitInputErrors } from './split-yield-v1.js';
 
 export function defaultYieldExit(days) {
   return { exitDay: Math.floor(days / 2), exitApy: 10 };
@@ -35,7 +35,7 @@ export function splitAtExit(input, exit) {
     ? { ptPrice: 1 - entryYtPrice, ytPrice: entryYtPrice }
     : marks(entryDiscount * (remainingDays / days));
   const { ptPrice, ytPrice } = marks(Math.log1p(exitApy / 100) * (remainingDays / 365));
-  const annualized = Math.expm1(entryDiscount * (365 / days)) * 100;
+  const entryImpliedApy = annualizedApy(entryYtPrice / (1 - entryYtPrice), days);
   const ptUnits = budget / (1 - entryYtPrice);
   const ytUnits = budget / entryYtPrice;
   const growth = grossYieldAt(input, exitDay);
@@ -43,7 +43,7 @@ export function splitAtExit(input, exit) {
   const ytInterest = ytUnits * growth * (1 - YT_FEE);
   const ytSale = ytUnits * ytPrice;
   return {
-    remainingDays, entryImpliedApy: Number.isFinite(annualized) ? annualized : null,
+    remainingDays, entryImpliedApy,
     ptPrice, ytPrice, ptUnits, ytUnits,
     ptSale: ptUnits * ptPrice, ytSale, ytInterest, ytTotal: ytSale + ytInterest,
     holdValue: budget * (1 + growth),

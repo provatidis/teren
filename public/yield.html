@@ -139,15 +139,22 @@
         </div>
         <div id="split-comparison-results">
           <div class="yield-strategies" aria-label="Amounts at maturity in USDC">
-            <div><h3>Buy PT</h3><p id="strategy-pt-quantity"></p><strong id="strategy-pt-value">—</strong><span id="strategy-pt-change"></span></div>
+            <div><h3>Buy PT</h3><p id="strategy-pt-quantity"></p><strong id="strategy-pt-value">—</strong><span id="strategy-pt-change"></span><small id="strategy-pt-rate"></small></div>
             <div><h3>Buy YT</h3><p id="strategy-yt-quantity"></p><strong id="strategy-yt-value">—</strong><span id="strategy-yt-change"></span></div>
             <div><h3>Hold the underlying</h3><p>Keep the principal and interest</p><strong id="strategy-hold-value">—</strong><span id="strategy-hold-change"></span></div>
           </div>
           <div class="yield-targets">
-            <h3>How much yield does YT need?</h3>
-            <p>Gross interest on the original 1,000 USDC deposit over the whole term, before the 5% yield fee.</p>
-            <dl><div><dt>Recover the YT purchase price</dt><dd id="split-recover">—</dd></div>
-              <div><dt>Match holding the underlying</dt><dd id="split-match">—</dd></div></dl>
+            <h3 id="split-targets-title">What does the deposit need to earn?</h3>
+            <p id="split-targets-scope">Each amount is interest on the original 1,000 USDC deposit over the full term, before the 5% fee on YT interest.</p>
+            <table aria-labelledby="split-targets-title" aria-describedby="split-targets-scope">
+              <thead><tr><th scope="col">Comparison</th><th scope="col">Deposit interest</th><th scope="col">Annualized rate</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Your scenario</th><td id="split-scenario-gross">—</td><td id="split-scenario-apy">—</td></tr>
+                <tr><th scope="row">Holding matches buying PT</th><td id="split-pt-target">—</td><td id="split-pt-apy">—</td></tr>
+                <tr><th scope="row">YT recovers its price</th><td id="split-recover">—</td><td id="split-recover-apy">—</td></tr>
+                <tr><th scope="row">YT matches holding</th><td id="split-match">—</td><td id="split-match-apy">—</td></tr>
+              </tbody>
+            </table>
             <p id="split-benchmark-note"></p>
           </div>
         </div>
@@ -194,7 +201,7 @@
       </div>
       <details class="yield-details yield-assumptions">
         <summary>How the comparison works</summary>
-        <p>The entry prices of one PT and one YT add up to 1 USDC here. Interest compounds at the annual yields you choose. Holding keeps all the interest. YT keeps 95% of it, valued in USDC with the accrued yield left in the asset. At expiry the right to future yield ends and earned interest is still claimable.</p>
+        <p>The entry prices of one PT and one YT add up to 1 USDC here. PT’s fixed APY is the annualized return implied by its entry price and redemption amount. The deposit earns the annual yields you choose, compounded over the days each applies. Holding keeps all the interest. YT keeps 95% of it, valued in USDC with the accrued yield left in the asset. At expiry the right to future yield ends and earned interest is still claimable.</p>
         <p>This example assumes full principal redemption and nonnegative yields. On Pendle, a fall in the underlying exchange rate can reduce PT redemption. The early-exit prices are hypothetical. The market’s implied APY sets the discount on PT for the days remaining. One YT is worth the rest of the 1 USDC pair. The seller keeps interest earned up to the exit day. Values exclude points, rewards, gas, trading fees and slippage.</p>
         <a href="methods.html#split-yield">Methods and Pendle sources →</a>
       </details>

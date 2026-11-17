@@ -1,5 +1,11 @@
 # Release history
 
+## 1.54.0 · 2026-11-17
+
+- Compare PT’s fixed APY with the annualized yield of the chosen deposit scenario. See how much the deposit must earn for YT to recover its cost or match holding, in both USDC and annual rates.
+- Restore shared yield setups and saved drafts in browsers without `URLSearchParams.size`. Align PT and YT prices when the card headings wrap.
+- Clarify what selling future interest achieves, how holding through maturity affects the timing example, and how redeeming a matching PT and YT connects their prices.
+
 ## 1.53.1 · 2026-11-16
 
 - Refine the four yield lessons’ questions and feedback. Compare how long a rate lasts, who bears a YT shortfall, and what an early-sale quote buys. Preserve completed lessons and answers to unchanged questions.

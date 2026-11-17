@@ -17,6 +17,20 @@ export async function checkSplitYield({ evaluate, click, fill, text, navigate, r
     assert.match(await text('split-reading'), /13.90 USDC.*6.10 USDC short/);
     assert.equal(await text('split-recover'), '21.05 USDC');
     assert.equal(await text('split-match'), '21.51 USDC');
+    assert.equal(await text('split-scenario-apy'), '6.07%');
+    assert.equal(await text('split-pt-apy'), '8.54%');
+    assert.equal(await text('split-recover-apy'), '8.82%');
+    assert.equal(await text('split-match-apy'), '9.01%');
+    assert.match(await text('strategy-pt-rate'), /8\.54%/);
+    await evaluate("document.getElementById('split-settings').open = true");
+    await fill('split-first', '8.9');
+    await fill('split-second', '8.9');
+    assert.equal(parseFloat(await text('split-scenario-apy')), 8.9);
+    assert.equal(await text('strategy-pt-value'), '1,020.41 USDC');
+    assert.equal(await text('strategy-yt-value'), '1,009.16 USDC');
+    assert.equal(await text('strategy-hold-value'), '1,021.25 USDC');
+    assert.match(await text('split-benchmark-note'), /[Hh]olding.*ahead/);
+    await click('split-reset');
     await stage('purchase');
     assert.match(await text('split-reading'), /up front/);
     await stage('change');
@@ -69,6 +83,24 @@ export async function checkSplitYield({ evaluate, click, fill, text, navigate, r
 
     await checkSplitExit({ evaluate, click, fill, text, value, visible, navigate, reload, base }, sharedLink);
 
+    // Safari 16 supports parameter iteration but has no URLSearchParams.size.
+    const withoutSize = await call('Page.addScriptToEvaluateOnNewDocument', {
+      source: 'delete URLSearchParams.prototype.size;',
+    });
+    try {
+      await navigate(base + 'yield-learn.html#lesson=exit');
+      await click('yl-reveal');
+      await navigate(await evaluate("document.getElementById('yl-explore').href"));
+      assert.ok(await visible('split-exit-results'), 'The lesson opens its actual early-sale example.');
+      assert.equal(await value('split-exit-apy'), '15');
+      await navigate(sharedLink);
+      await fill('split-budget', '723');
+      await navigate(base + 'yield.html');
+      assert.equal(await value('split-budget'), '723', 'A fresh visit restores the edited draft without the size getter.');
+    } finally {
+      await call('Page.removeScriptToEvaluateOnNewDocument', { identifier: withoutSize.identifier });
+    }
+
     for (const width of [390, 320]) {
       await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
       await call('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
@@ -77,6 +109,8 @@ export async function checkSplitYield({ evaluate, click, fill, text, navigate, r
         outside:[...document.querySelectorAll('body *')].filter(el=>el.getBoundingClientRect().right>${width}+1)
           .slice(0,8).map(el=>el.id||el.className||el.tagName)})`);
       assert.ok(layout.page <= width, 'Yield layout exceeds the phone width: ' + JSON.stringify({ expectedWidth: width, ...layout }));
+      const prices = await evaluate("['split-pt-cost', 'split-yt-cost'].map(id => document.getElementById(id).getBoundingClientRect().top)");
+      assert.ok(Math.abs(prices[0] - prices[1]) < 1, 'PT and YT purchase prices align on the phone.');
       await dragRangeToMax({ evaluate, call, fill }, 'split-switch');
       assert.match(await text('split-rates'), /5% APY for 90 days/);
       await evaluate("document.getElementById('split-switch').focus()");

@@ -18,22 +18,31 @@ function showStrategy(prefix, value, budget) {
 export function showMaturity(input) {
   const result = splitAtMaturity(input);
   setText('strategy-pt-quantity', fmt(result.ptUnits) + ' PT bought');
+  setText('strategy-pt-rate', 'Fixed APY at entry · ' + rateLabel(result.entryImpliedApy));
   setText('strategy-yt-quantity', fmt(result.ytUnits) + ' YT bought');
   for (const key of ['pt', 'yt', 'hold']) {
     showStrategy('strategy-' + key, result[key + 'Final'], input.budget);
   }
+  setText('split-scenario-gross', cash(result.grossInterest));
+  setText('split-scenario-apy', rateLabel(result.scenarioApy));
+  setText('split-pt-target', cash(result.ptMatchGross));
+  setText('split-pt-apy', rateLabel(result.entryImpliedApy));
   setText('split-recover', cash(result.recoverGross));
+  setText('split-recover-apy', rateLabel(result.recoverApy));
   setText('split-match', result.matchGross === null ? 'No finite yield' : cash(result.matchGross));
+  setText('split-match-apy', result.matchGross === null ? '—' : rateLabel(result.matchApy));
   const interpretation = result.matchGross === null
     ? 'At this entry price, holding stays ahead at every nonnegative yield.'
     : Math.abs(result.grossInterest - result.matchGross) < 1e-10 ? 'YT matches holding at maturity.'
     : result.grossInterest > result.matchGross ? 'YT recovers its cost and finishes ahead of holding.'
     : result.grossInterest >= result.recoverGross ? 'YT recovers its cost. Holding still finishes ahead.'
     : 'YT finishes below its purchase price.';
-  setText('split-benchmark-note', 'The deposit earns ' + cash(result.grossInterest) + ' before fees. ' + interpretation);
+  setText('split-benchmark-note', interpretation);
 }
 
 function rateLabel(apy) {
+  if (apy === null) return 'Too large to display';
+  if (apy > 0 && apy < 0.005) return '<0.01%';
   if (apy >= 1e6) return apy.toExponential(2) + '%';
   return apy.toLocaleString('en-US', { maximumFractionDigits: 2 }) + '%';
 }
