@@ -78,7 +78,7 @@ export const LENDING_LESSONS = [
         label: 'ETH price and liquidation boundary',
       },
       note: 'No interest accrues here. USDC stays at $1, and the collateral rules stay unchanged.',
-      explore: { href: loanHash(application.input), text: 'Try a lower loan amount in the lab ↗' },
+      explore: { href: 'lending.html?from=lesson' + loanHash(application.input), text: 'Try a lower loan amount in the lab ↗' },
     }),
     applicationQuestion: 'What does being allowed to borrow this amount tell you?',
     applications: [['opening-limit', 'It meets the opening rule, with little room for ETH to fall.'], ['price-buffer', 'The borrowing limit leaves enough room for ETH’s usual price swings.'], ['full-value', 'Liquidation waits until the debt exceeds the full value of the ETH.']],

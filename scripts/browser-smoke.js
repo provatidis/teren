@@ -1,5 +1,7 @@
 import { checkLPEconomics } from './browser/lp-economics-checks.js';
 import { checkLoanInterest } from './browser/loan-interest-checks.js';
+import { checkLendingLessonHandoffs } from './browser/lending-lesson-handoff-checks.js';
+import { checkLendingShareLinks } from './browser/lending-share-checks.js';
 import { checkFeeFlow } from './browser/fee-flow-checks.js';
 import { checkLSTLoops } from './browser/lst-loop-checks.js';
 import { checkLSTDiscountLesson } from './browser/lst-discount-lesson-checks.js';
@@ -226,6 +228,12 @@ try {
   await call('Page.bringToFront');
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   async function runChecks() {
+  if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'lending-links') {
+    await checkLendingLessonHandoffs({ evaluate, navigate, reload, fill, click, text, base });
+    await checkLendingShareLinks({ evaluate, click, fill, navigate, base });
+    assert.deepEqual(errors, [], 'No uncaught errors in Lending lesson handoffs or copied links');
+    if (process.env.BROWSER_CHECKS === 'lending-links') return;
+  }
   if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'lst-lesson') {
     await checkLSTDiscountLesson({ evaluate, click, fill, text, navigate, reload, base, call, nextEvent });
     assert.deepEqual(errors, [], 'No uncaught errors in the correlated-loop lesson');

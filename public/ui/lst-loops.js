@@ -2,6 +2,7 @@ import { LST_MODEL, LST_DEFAULTS, LST_KEYS, validateLST, calculateLST, upgradeLS
 import { LST_VIEWS, lstHash, readLSTHash } from '../lib/lst-links.js';
 import { readLSTDraft, saveLSTDraft } from '../data/lst-state.js';
 import { saveExperimentLocation } from '../data/experiment-location.js';
+import { isLendingLessonExample } from '../lib/lending-links.js';
 import { createLSTScene } from '../lib/lst-scene.js';
 import { focusInitialLesson as focusLessonDestination } from '../lib/learning-elements.js';
 import { healthLabel, loanStatus } from '../lib/lending-presentation.js';
@@ -18,7 +19,6 @@ export function initLSTLoops() {
   const exactControls = { days: { unit: 'days', step: 1 }, discount: { unit: '% discount', step: 0.1 } };
   const inputField = key => $('lst-' + key + (Object.hasOwn(exactControls, key) ? '-input' : ''));
   const entryParams = new URLSearchParams(location.search);
-  const lessonExample = entryParams.get('from') === 'lesson';
   const stored = readLSTDraft();
   let view = stored.view, current = null, firstInvalid = null, revision = 0;
   let comparison = null, comparisonError = null, showingComparison = false;
@@ -111,6 +111,7 @@ export function initLSTLoops() {
     }
   }
   function persist(input) {
+    const lessonExample = isLendingLessonExample();
     if (active()) {
       const hash = lstHash(input, view, comparison);
       history.replaceState(history.state, '', location.pathname + location.search + hash);
@@ -363,11 +364,7 @@ export function initLSTLoops() {
   });
   $('lst-share').addEventListener('click', async () => {
     if (!current || comparisonError) return;
-    const currentRevision = revision, url = new URL(location.href);
-    if (lessonExample) {
-      url.searchParams.delete('from');
-      url.searchParams.delete('show');
-    }
+    const currentRevision = revision, url = new URL(location.pathname, location.origin);
     url.hash = lstHash(current.input, view, comparison);
     try {
       await navigator.clipboard.writeText(url.href);
@@ -391,7 +388,7 @@ export function initLSTLoops() {
   if (stored.status === 'invalid') $('lst-storage').textContent = 'The saved working copy could not be read. Defaults are shown; the stored copy is unchanged until you edit.';
   else if (stored.status === 'unavailable') $('lst-storage').textContent = 'Browser saving is unavailable. Copy a link to keep your setup.';
   const initial = loadRoute();
-  if (lessonExample && entryParams.get('show') === 'liquidation' && initial.view === 'hold' && current?.liquidation) {
+  if (isLendingLessonExample() && entryParams.get('show') === 'liquidation' && initial.view === 'hold' && current?.liquidation) {
     $('lst-primary-details').open = true;
     $('lst-liquidation').open = true;
     focusLessonDestination('lst-liquidation-summary');

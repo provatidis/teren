@@ -40,6 +40,13 @@ export function initSavedExperiments({ labs, onOpen = () => {} }) {
   function openExperiment(entry) {
     const view = experimentView(entry);
     if (!labs[entry.model]) { location.href = view.page + '#saved=' + entry.id; return; }
+    const url = new URL(location.href);
+    if (view.page === 'lending.html' && url.searchParams.get('from') === 'lesson') {
+      // Opening a named setup makes it the working copy in this tab.
+      url.searchParams.delete('from');
+      if (url.searchParams.get('show') === 'liquidation') url.searchParams.delete('show');
+      history.replaceState(history.state, '', url);
+    }
     labs[entry.model].setExperiment(entry);
     history.replaceState(null, '', location.pathname + location.search + view.hash);
     saveExperimentLocation(entry.model, view.hash);

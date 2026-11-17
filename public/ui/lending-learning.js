@@ -205,7 +205,7 @@ export function initLendingLearning() {
     }));
     learningSources($('lend-sources'), lesson.sources);
     if (!discount) {
-      $('lend-explore').href = course.hash(example.input);
+      $('lend-explore').href = 'lending.html?from=lesson' + course.hash(example.input);
       $('lend-explore').textContent = 'Explore the question setup in Experiment ↗';
       $('lend-explore-note').textContent = 'Opens the question’s starting balances and conditions in a separate tab. All rates and collateral rules are teaching assumptions.';
     }

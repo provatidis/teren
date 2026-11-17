@@ -40,6 +40,8 @@ For focused lab-risk checks, `BROWSER_CHECKS=risk npm run test:browser` covers l
 
 Run `BROWSER_CHECKS=lst-lesson npm run test:browser` to check the wstETH discount lesson, the oracle change, the optional liquidation and both liquidation examples’ links to the lab.
 
+Run `BROWSER_CHECKS=lending-links npm run test:browser` to check that lesson examples preserve Home’s working setup and that both ways to copy a Lending link reproduce the scenario.
+
 For focused LST target-comparison checks, `BROWSER_CHECKS=lst-comparison npm run test:browser` covers shared conditions, unavailable targets, boundary recovery, both exits, persistence and narrow layouts. The full suite includes these checks.
 
 For a focused lesson check, `BROWSER_CHECKS=predictions npm run test:browser` exercises the lesson starting setups, prediction controls, keyboard skipping and progress restoration at desktop and mobile sizes. The full suite remains the release gate.

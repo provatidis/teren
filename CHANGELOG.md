@@ -1,5 +1,10 @@
 # Release history
 
+## 1.57.2 · 2026-11-18
+
+- Opening or editing a Lending essentials or ETH-loop lesson example now preserves the personal setup that Home resumes. You can still save the example as a named experiment.
+- Copied links from all three Lending labs share the scenario inputs and omit unrelated URL parameters, including referral tags. This also applies when the browser displays a link for manual copying.
+
 ## 1.57.1 · 2026-11-17
 
 - Fix the single-loan lab showing a liquidation at the exact boundary under simple interest. Both interest modes now show a health factor of 1 at the calculated boundary price. A lower price makes the loan eligible.
