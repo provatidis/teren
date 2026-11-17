@@ -5,6 +5,7 @@ import { dragRangeToMax } from './touch-range.js';
 
 export async function checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call }) {
   const keys = ['teren-lst-loop-draft-v1', 'teren-experiment-location-v1', 'degenerator-experiments-v1', 'teren-lst-learning-v1', 'teren-learning-location-v1'];
+  await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
   await navigate(base + 'lending.html#lst-loops');
   const saved = await evaluate(`${JSON.stringify(keys)}.map(key=>[key,localStorage.getItem(key)])`);
   const legacy = await evaluate("sessionStorage.getItem('teren-loop-draft-v1')");
