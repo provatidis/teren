@@ -53,6 +53,30 @@ export async function checkLoanInterest({ evaluate, click, fill, text, navigate,
     await fill('loan-budget', '500');
     console.log('PASS: selected interest drives both balances, risk, liquidation and references; invalid edits preserve the valid loan');
 
+    const boundaryLoan = { ...OLD_DEFAULTS, start: 2000, collateral: 16.15, borrow: 12920, threshold: 80, days: 0, future: 1000 };
+    await navigate(base + 'lending.html' + loanHash(boundaryLoan));
+    assert.equal(await value('loan-interestMode'), 'simple', 'An older setup opens using its original interest convention');
+    assert.equal(await text('loan-health'), '1.00');
+    await evaluate("document.querySelector('#loan-liquidation > summary').click()");
+    for (const [price, health, status, eligible] of [
+      ['999.99', '< 1.00', 'Eligible for liquidation', true],
+      ['1000', '1.00', 'At the liquidation boundary', false],
+      ['1000.01', '> 1.00', 'Above the liquidation boundary', false],
+    ]) {
+      await fill('loan-future', price);
+      for (const mode of ['simple', 'compound']) {
+        await fill('loan-interestMode', mode);
+        const scenario = mode + ' interest at ' + price;
+        assert.equal(await text('loan-health'), health, scenario);
+        assert.equal(await text('loan-state'), status, scenario);
+        assert.ok((await text('loan-chart-caption')).includes('health factor is ' + health + '.'), scenario);
+        assert.equal(await evaluate("document.getElementById('loan-liquidation-result').checkVisibility()"), eligible, scenario);
+        if (eligible) assert.equal(await text('loan-liquidation-penalty'), '$323.00', scenario);
+        else assert.match(await text('loan-liquidation-status'), /not eligible/, scenario);
+      }
+    }
+    console.log('PASS: legacy loan entry, health, chart and liquidation event at and around the exact boundary in both interest modes');
+
     const old = { ...OLD_DEFAULTS, days: 365 };
     await navigate(base + 'lending.html' + loanHash(old));
     assert.equal(await value('loan-interestMode'), 'simple');

@@ -1,18 +1,15 @@
 // Shared balance sheet; accrual is supplied by the versioned loan model.
-function position(collateralTokens, debt, price, threshold, enabled, useBoundaryRatio) {
+function position(collateralTokens, debt, price, threshold, enabled) {
   const collateralValue = collateralTokens * price;
-  const weightedCollateral = enabled ? collateralValue * threshold / 100 : 0;
   const boundaryPrice = debt === 0 || !enabled ? null : debt / (collateralTokens * threshold / 100);
-  // The equivalent price ratio makes an exact computed boundary exactly 1,
-  // without treating a genuinely lower price as equal through a tolerance.
-  const healthFactor = debt === 0 ? null : useBoundaryRatio && enabled ? price / boundaryPrice : weightedCollateral / debt;
-  const status = debt === 0 ? 'no-debt' : healthFactor === 1 ? 'boundary' : healthFactor < 1 ? 'eligible' : 'above';
+  // Use the same unrounded boundary for the health factor and eligibility.
+  const healthFactor = boundaryPrice === null ? null : price / boundaryPrice;
+  const status = boundaryPrice === null ? 'no-debt' : price < boundaryPrice ? 'eligible' : price === boundaryPrice ? 'boundary' : 'above';
   return { collateralTokens, collateralValue, debt, healthFactor, boundaryPrice, status };
 }
 
 export function finishLoan(input, supplyInterestTokens, borrowInterest, model) {
-  const state = (collateral, debt, price) => position(collateral, debt, price,
-    input.threshold, input.collateralEnabled, model !== 'collateral-loan-v1');
+  const state = (collateral, debt, price) => position(collateral, debt, price, input.threshold, input.collateralEnabled);
   const start = state(input.collateral, input.borrow, input.start);
   const end = state(input.collateral + supplyInterestTokens, input.borrow + borrowInterest, input.future);
   const repaid = Math.min(input.budget, end.debt);

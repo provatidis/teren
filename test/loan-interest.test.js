@@ -35,6 +35,27 @@ test('upgraded simple-interest loans reproduce all original accounting and bound
   }
 });
 
+test('single-loan interest modes and legacy links agree at and immediately around the same liquidation price', () => {
+  const base = { ...OLD_DEFAULTS, collateral: 16.15, borrow: 12920, days: 0 };
+  const prices = [
+    [999.99, 'eligible'], [999.9999999999999, 'eligible'],
+    [1000, 'boundary'],
+    [1000.0000000000001, 'above'], [1000.01, 'above'],
+  ];
+  for (const [future, status] of prices) {
+    const legacy = { ...base, future };
+    const restored = readLoanHash(loanHash(legacy));
+    assert.deepEqual(restored, { status: 'ready', input: legacy });
+    for (const input of [restored.input, upgradeLoan(legacy), { ...legacy, interestMode: 'compound' }]) {
+      const { end } = calculateLoanForInput(input);
+      assert.equal(end.boundaryPrice, 1000);
+      assert.equal(end.status, status);
+      assert.equal(Math.sign(end.healthFactor - 1), Math.sign(future - 1000));
+      assert.equal(singleLiquidation(input).status, status === 'eligible' ? 'executed' : 'ineligible');
+    }
+  }
+});
+
 test('zero time and rates add nothing; supply-only loans have no debt or liquidation boundary', () => {
   for (const patch of [{ days: 0 }, { days: 1825, supplyAPR: 0, borrowAPR: 0 }]) {
     const r = loan(patch); assert.equal(r.supplyInterestTokens, 0); assert.equal(r.borrowInterest, 0);
