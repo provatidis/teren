@@ -15,25 +15,24 @@ const loanLab = initLending();
 const loopLab = initBorrowingLoops({ initLiquidation: initLoopLiquidation });
 const lstLab = initLSTLoops();
 const learning = initLendingLearning();
-let lastExperimentView = 'loan';
+let lastExperimentView = null;
 
 function route(scroll = false) {
   const loopLesson = loopLessonFromHash(location.hash), essential = lendingLessonFromHash(location.hash);
   const lesson = location.hash === '#learn' ? learning.resume() : loopLesson
     ? { chapter: 'loops', id: loopLesson } : essential ? { chapter: 'essentials', id: essential } : null;
   const savedLibrary = location.hash === '#saved-experiments';
-  // The library belongs to every lab. Keep its originating view in this history
-  // entry so Back and reload retain that context without changing saved drafts.
+  // Learn and Saved share the three labs. Each history entry remembers where
+  // Experiment should return, including after Back or reload.
   const recordedView = history.state?.terenLendingView;
-  const libraryView = ['loan', 'loops', 'lst'].includes(recordedView) ? recordedView : lastExperimentView;
-  const loops = lesson ? lesson.chapter === 'loops' : savedLibrary ? libraryView === 'loops'
+  const origin = [null, 'loan', 'loops', 'lst'].includes(recordedView) ? recordedView : lastExperimentView;
+  const loops = lesson ? lesson.chapter === 'loops' : savedLibrary ? origin === 'loops'
     : location.hash === '#loops' || readLoopHash(location.hash).status !== 'none';
-  const lst = !lesson && (savedLibrary ? libraryView === 'lst'
+  const lst = !lesson && (savedLibrary ? origin === 'lst'
     : location.hash === '#lst-loops' || readLSTHash(location.hash).status !== 'none');
-  if (!lesson) {
-    lastExperimentView = lst ? 'lst' : loops ? 'loops' : 'loan';
-    history.replaceState({ ...history.state, terenLendingView: lastExperimentView }, '');
-  }
+  lastExperimentView = lesson ? origin : lst ? 'lst' : loops ? 'loops' : 'loan';
+  history.replaceState({ ...history.state, terenLendingView: lastExperimentView }, '');
+  const experimentView = lastExperimentView ?? (loops ? 'loops' : 'loan');
   document.body.dataset.lendingView = lesson ? 'learn' : lst ? 'lst' : loops ? 'loops' : 'loan';
   document.getElementById('lending-experiment').hidden = !!lesson || loops || lst;
   document.getElementById('lending-loops').hidden = !!lesson || !loops;
@@ -44,7 +43,7 @@ function route(scroll = false) {
   document.getElementById('lending-tool-loan').setAttribute('aria-current', loops || lst ? 'false' : 'page');
   document.getElementById('lending-tool-loops').setAttribute('aria-current', loops ? 'page' : 'false');
   document.getElementById('lending-tool-lst').setAttribute('aria-current', lst ? 'page' : 'false');
-  document.getElementById('lending-nav-experiment').href = lst ? '#lst-loops' : loops ? '#loops' : '#experiment';
+  document.getElementById('lending-nav-experiment').href = experimentView === 'lst' ? '#lst-loops' : experimentView === 'loops' ? '#loops' : '#experiment';
   document.getElementById('lending-nav-learn').href = loops || lst ? '#loop-lesson=' + (lesson ? lesson.id : learning.resumeIn('loops')) : '#learn';
   document.getElementById('lending-page-title').textContent = lesson
     ? loops ? 'Borrowing loops' : 'Lending essentials' : lst ? 'Correlated-asset loops' : loops ? 'Borrowing loops' : 'Lending lab';

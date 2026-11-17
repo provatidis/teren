@@ -102,6 +102,9 @@ export function initYieldLearning() {
     el('reading').replaceChildren(...entry.deeper.map(copy => sceneNode('p', copy)));
     learningSources(el('sources'), entry.sources);
     el('explore').href = entry.experimentHref;
+    el('explore').textContent = (entry.experimentLabel ?? 'Explore this question in Experiment') + ' ↗';
+    el('explore-note').textContent = entry.experimentNote ?? '';
+    el('explore-note').hidden = !entry.experimentNote;
     const next = YIELD_LESSONS[index + 1];
     el('next').href = next ? route(next.id) : entry.experimentHref;
     el('next').textContent = next ? 'Next: ' + next.short + ' →' : 'Try your own exit in Experiment ↗';

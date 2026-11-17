@@ -1,9 +1,9 @@
 export const APPLIED_CHAPTER = 'Fees, time and range exits';
 export const APPLIED_LESSONS = Object.freeze([
   {
-    id: 'fees-over-time', caseId: 'in-range', title: 'Observe fees accumulating', short: 'Fees over time',
-    adds: 'Start with one position that stays in range.',
-    intro: 'Follow an unchanged WETH/USDC position through an 83-minute recorded period. Separate the tokens in its principal from the new fee tokens earned during that period.',
+    id: 'fees-over-time', caseId: 'in-range', title: 'Fees over time', short: 'Fees over time',
+    adds: 'One position stays in range.',
+    intro: 'Traders swap WETH and USDC in this pool. Follow one liquidity provider’s position from the first checkpoint to the last.',
     prediction: 'Can this position earn fees during the period without its owner collecting them?',
     predictions: [['earned', 'Yes — fees can accrue before collection'], ['collect', 'No — fees only exist after collection']],
     reasoning: 'Some tokens were already collectable at the start. Which amount belongs to this period’s fee earnings?',
@@ -14,11 +14,11 @@ export const APPLIED_LESSONS = Object.freeze([
     explanation: 'New USDC and WETH fee tokens stay separate from principal: the tokens providing liquidity. The record values them at the selected checkpoint’s pool price. Earlier fees and tokens owed are excluded from both starting strategies; new fees are not automatically reinvested.',
   },
   {
-    id: 'between-samples', caseId: 'range-return', title: 'Look between outside-range samples', short: 'Exits and returns',
-    adds: 'Add a range exit, then activity between recorded samples.',
-    intro: 'Look at two recorded snapshots of this position. Both show a price outside its range. Consider what those observations can tell you about the time between them.',
-    prediction: 'Both sampled endpoints are outside the range. Could the position have been active between them?',
-    predictions: [['possible', 'Yes — the sampled endpoints do not describe the whole interval'], ['none', 'No — two outside endpoints prove it stayed outside']],
+    id: 'between-samples', caseId: 'range-return', title: 'Between checkpoints', short: 'Between checkpoints',
+    adds: 'A second position over 33 hours.',
+    intro: 'ETH starts inside this position’s range. Later, two consecutive price checks both show ETH above its upper bound.',
+    prediction: 'Could this position have been active between those two price checks?',
+    predictions: [['possible', 'Yes — ETH could have dipped back into range.'], ['none', 'No — ETH must have stayed above the range.']],
     reasoning: 'What must have happened between these two above-range observations?',
     reasons: [['returned', 'Price entered the range, then moved above it again.'], ['stayed-out', 'The position stayed active with price above its range.'], ['moved-bounds', 'The position’s range moved upward to follow the price.']],
     reasonFinding: 'The recorded active time means price returned inside the unchanged range and later left it. The two outside observations do not show those crossings.',

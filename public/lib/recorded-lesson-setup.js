@@ -17,9 +17,10 @@ export function renderRecordedLessonSetup(container, period, lesson, question) {
       ['USDC principal', fmt(Number(formatUnits(start.principal.amount0, 6)), 2) + ' USDC', 'usdc'],
       ['Recorded period', periodDuration(period.validation.durationSeconds)],
     ],
-    action: lesson.id === 'between-samples' ? 'Examine two outside-range observations, then reveal what the interval records.'
-      : lesson.id === 'fees-over-time' ? 'Follow new fee tokens earned during this period. The owner does not collect them.'
-      : 'Compare the position, including new fees, with holding these exact starting tokens.',
+    actionLabel: lesson.id === 'fees-over-time' ? 'Owner activity' : undefined,
+    action: lesson.id === 'fees-over-time' ? 'The owner leaves the position open and collects nothing.'
+      : lesson.id === 'period-vs-holding' ? 'Compare the position, including new fees, with holding these exact starting tokens.'
+      : undefined,
     assumptions: 'Liquidity and range stay unchanged throughout the record. WETH is wrapped ETH; values use USDC = $1.',
   });
   const figure = node('figure', undefined, 'applied-start-figure');
@@ -34,10 +35,11 @@ export function renderRecordedLessonSetup(container, period, lesson, question) {
   const nodes = [setup, figure];
   if (lesson.id === 'between-samples') {
     const interval = node('div', undefined, 'applied-sample-preview');
-    interval.append(node('strong', 'The two observations in the question'),
-      node('p', 'Earlier: above range · block ' + question.interval.start.number),
-      node('p', 'Later: above range · block ' + question.view.point.snapshot.block.number),
-      node('p', 'The two prices do not show what happened between them.', 'applied-start-key'));
+    const earlier = periodPointView(period, question.index - 1);
+    interval.append(node('strong', 'ETH at two later checkpoints'),
+      node('p', 'Upper bound · ' + usd(upperPrice) + ' per ETH'),
+      node('p', 'Block ' + earlier.point.snapshot.block.number + ' · ' + usd(earlier.price)),
+      node('p', 'Block ' + question.view.point.snapshot.block.number + ' · ' + usd(question.view.price)));
     nodes.push(interval);
   }
   container.replaceChildren(...nodes);

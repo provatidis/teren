@@ -4,13 +4,30 @@ import { lstHash, readLSTHash } from '../../public/lib/lst-links.js';
 import { dragRangeToMax } from './touch-range.js';
 
 export async function checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call }) {
-  const keys = ['teren-lst-loop-draft-v1', 'teren-experiment-location-v1', 'degenerator-experiments-v1'];
+  const keys = ['teren-lst-loop-draft-v1', 'teren-experiment-location-v1', 'degenerator-experiments-v1', 'teren-loop-learning-v1', 'teren-learning-location-v1'];
   await navigate(base + 'lending.html#lst-loops');
   const saved = await evaluate(`${JSON.stringify(keys)}.map(key=>[key,localStorage.getItem(key)])`);
   const legacy = await evaluate("sessionStorage.getItem('teren-loop-draft-v1')");
+  const chapter = await evaluate("sessionStorage.getItem('teren-lending-chapter-v1')");
   const state = () => evaluate("JSON.parse(localStorage.getItem('teren-lst-loop-draft-v1'))");
   const visible = id => evaluate(`!document.getElementById('${id}').hidden`);
   const open = id => evaluate(`document.getElementById('${id}').open=true`);
+  const followLink = id => evaluate(`new Promise(resolve => {
+    addEventListener('hashchange', () => resolve(), { once: true });
+    document.getElementById('${id}').click();
+  })`);
+  async function checkReturnFromLearn(linkId) {
+    const draft = await state();
+    await followLink(linkId);
+    assert.equal(await evaluate('document.body.dataset.lendingView'), 'learn');
+    await reload();
+    assert.equal(await evaluate("document.getElementById('lending-nav-experiment').hash"), '#lst-loops');
+    assert.match(await evaluate("document.getElementById('lend-explore').hash"), /^#loop=borrowing-loop-v1&/);
+    await followLink('lending-nav-experiment');
+    assert.equal(await evaluate('document.body.dataset.lendingView'), 'lst');
+    assert.equal(await visible('lst-' + draft.view), true);
+    assert.equal(await evaluate("document.getElementById('lst-discount-input').value"), String(draft.input.discount));
+  }
   const sliderKey = async (id, key) => {
     await evaluate(`document.getElementById('${id}').focus()`);
     const keyCode = { Home: 36, End: 35, ArrowLeft: 37, ArrowUp: 38, ArrowRight: 39, ArrowDown: 40 }[key];
@@ -61,6 +78,7 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
     assert.deepEqual(readLSTHash(new URL(link).hash).input, (await state()).input);
     assert.equal(await evaluate("sessionStorage.getItem('teren-loop-draft-v1')"), legacy);
     console.log('PASS: dollar prices, market discounts, oracle rules and two-phase borrowing costs remain distinct and survive reload');
+    await checkReturnFromLearn('lending-nav-learn');
 
     await click('lst-reset'); await click('lst-view-hold');
     await fill('lst-days-input', '7.25');
@@ -207,6 +225,7 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
       await fill('lst-discount-input', '0.5');
       assert.equal((await state()).input.days, 7);
       assert.equal((await state()).input.discount, 0.5);
+      await checkReturnFromLearn('lending-start');
       for (const id of ['lst-days-input', 'lst-discount-input']) {
         const bounds = await evaluate(`(() => { const r=document.getElementById('${id}').getBoundingClientRect(); return { width:r.width, height:r.height, left:r.left, right:r.right }; })()`);
         assert.ok(bounds.height >= 44 && bounds.width >= 60 && bounds.left >= 0 && bounds.right <= width, `${width}px ${id}: exact entry remains reachable`);
@@ -228,5 +247,6 @@ export async function checkLSTLoops({ evaluate, click, fill, text, navigate, rel
   } finally {
     await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false });
     await evaluate(`${JSON.stringify(saved)}.forEach(([key,value])=>value===null?localStorage.removeItem(key):localStorage.setItem(key,value))`);
+    await evaluate(chapter === null ? "sessionStorage.removeItem('teren-lending-chapter-v1')" : `sessionStorage.setItem('teren-lending-chapter-v1', ${JSON.stringify(chapter)})`);
   }
 }

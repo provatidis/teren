@@ -135,6 +135,11 @@ export async function checkYieldLearning({ evaluate, click, text, navigate, relo
       const link = await evaluate("({ href:document.getElementById('yl-explore').href, target:document.getElementById('yl-explore').target })");
       assert.equal(link.target, '_blank');
       assert.equal(link.href, new URL(lesson.experimentHref, base).href);
+      assert.equal(await visible(evaluate, 'yl-explore-note'), id === 'exit');
+      if (id === 'exit') {
+        assert.equal(await text('yl-explore'), 'Explore the 15% offer ↗');
+        assert.match(await text('yl-explore-note'), /day-45.*15%.*original 8\.54% implied APY/);
+      }
       const beforeExplore = await text('yl-scene');
       await select(evaluate, '#yl-stage-controls button[aria-pressed="false"]');
       assert.notEqual(await text('yl-scene'), beforeExplore);
@@ -158,6 +163,10 @@ export async function checkYieldLearning({ evaluate, click, text, navigate, relo
       await navigate(link.href);
       assert.equal(await evaluate("document.getElementById('split-budget').value"), '1000');
       assert.equal(await visible(evaluate, 'split-exit-results'), id === 'exit');
+      if (id === 'exit') {
+        assert.equal(await text('exit-entry-rate'), 'Entry rate · 8.54%');
+        assert.equal(await text('exit-scenario-rate'), 'Exit rate · 15%');
+      }
       await evaluate("const input = document.getElementById('split-budget'); input.value='777'; input.dispatchEvent(new Event('input',{bubbles:true}))");
       assert.equal(await evaluate("new URLSearchParams(location.hash.slice(1)).get('budget')"), '777');
       await click('split-share');
