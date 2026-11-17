@@ -27,6 +27,9 @@ export async function checkSdaiCase({ evaluate, fill, navigate, reload, base, ca
     await go('results');
     const results = await evaluate("document.getElementById('results').innerText");
     for (const amount of ['183.96', '100.83', '100.41']) assert.ok(results.includes(amount));
+    const labLink = await evaluate("document.querySelector('#results .case-link').getAttribute('href')");
+    assert.equal(labLink, 'yield.html', 'The hypothetical lab opens its own draft without importing case inputs.');
+    assert.match(results, /Open the hypothetical yield lab/);
     await go('evidence');
     const back = nextEvent('Page.navigatedWithinDocument');
     await evaluate('history.back()');

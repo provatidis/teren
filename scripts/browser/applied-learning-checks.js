@@ -18,6 +18,13 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
     assert.equal(await evaluate("document.querySelector('#applied-setup .applied-start-track').checkVisibility()"), true, 'Starting price and range are introduced before the prediction');
     assert.equal(await evaluate("document.querySelector('#applied-setup .scene-range-scale').textContent"), 'ETH price', 'The opening picture labels meaningful prices, not decorative padding.');
     assert.match(await text('applied-setup'), /WETH principal.*USDC principal/);
+    if (id === 'fees-over-time') {
+      assert.match(await text('applied-setup'), /owner leaves the position open and collects nothing/i);
+    }
+    if (id === 'between-samples') {
+      assert.match(await text('applied-setup'), /Upper bound · \$2,675\.81.*Block 26084375 · \$2,677\.18.*Block 26085000 · \$2,687\.83/s);
+    }
+    assert.equal(await evaluate("document.getElementById('applied-observe').hidden"), true);
     assert.equal(await evaluate("document.querySelectorAll('#applied-prediction-home button').length"), 1, 'One reveal control');
     await choose('applied-prediction', prediction); await click('applied-reveal');
     // Numeric answers from older releases remain inert without resetting the lesson.

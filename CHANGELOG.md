@@ -1,5 +1,11 @@
 # Release history
 
+## 1.55.1 · 2026-11-17
+
+- Return from lending lessons to the last lending experiment, including wstETH/WETH loops.
+- Clarify which day-45 YT offer opens in Experiment and which rate the lab uses for comparison. Label the historical sDAI case’s link to the hypothetical yield lab.
+- Open the first two recorded liquidity lessons with the position and the observed facts. Reveal what the fee and time-in-range records establish after the prediction.
+
 ## 1.55.0 · 2026-11-17
 
 - Add a Yield trading Inspect case for the March 2024 Ethereum sDAI market. Follow what 1,000 DAI could buy, compare PT, YT and holding at a smaller trade size, and see what happened when Maker raised the savings rate.

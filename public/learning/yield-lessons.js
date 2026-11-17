@@ -287,5 +287,8 @@ export const YIELD_LESSONS = [
       'These are hypothetical offers before trading costs. A real sale also depends on available liquidity, the trading fee and price impact. Real YT can include rewards or points. This example follows interest alone.',
     ],
     sources: [glossary, accounting], experimentHref: experiment(original, highExit),
+    experimentLabel: 'Explore the ' + highExit.exitApy + '% offer',
+    experimentNote: 'The lab compares day-' + saleDay + ' prices at ' + highExit.exitApy +
+      '% with what PT and YT would sell for at the original ' + fmt(highQuote.entryImpliedApy) + '% implied APY.',
   },
 ];
