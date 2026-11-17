@@ -1,5 +1,9 @@
 # Release history
 
+## 1.57.1 · 2026-11-17
+
+- Fix the single-loan lab showing a liquidation at the exact boundary under simple interest. Both interest modes now show a health factor of 1 at the calculated boundary price. A lower price makes the loan eligible.
+
 ## 1.57.0 · 2026-11-17
 
 - Extend the wstETH discount lesson with an optional partial liquidation. Follow the WETH repaid and wstETH taken, then compare what the borrower keeps with a 3% bonus and with zero bonus.

@@ -32,7 +32,8 @@ test('the question budget reduces debt or adds ETH without changing price, rules
   close(frame.add.collateralTokens, 5 + 1000 / 1500);
   assert.equal(frame.add.debt, 5000);
   assert.equal(frame.add.backing, 6800);
-  assert.equal(frame.add.healthFactor, 1.36);
+  close(frame.add.healthFactor, 1.36);
+  assert.equal(healthLabel(frame.add.healthFactor), '1.36');
   assert.equal(frame.result.input.future, input.future);
   assert.equal(frame.result.input.threshold, input.threshold);
   assert.equal(frame.result.borrowedCash, 5000);
