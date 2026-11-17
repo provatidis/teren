@@ -1,6 +1,10 @@
 import { loanModel, loanModelForInput } from '../models/loan-models.js';
 import { LIQUIDATION_MODEL, LIQUIDATION_LIMITS, validateLiquidation } from '../models/loan-explanations.js';
 
+export function isLendingLessonExample() {
+  return new URLSearchParams(location.search).get('from') === 'lesson';
+}
+
 export function loanHash(input, liquidation) {
   const { LOAN_MODEL, keys, validateLoan } = loanModelForInput(input);
   if (Object.keys(validateLoan(input)).length) throw new RangeError('Use a valid loan setup.');

@@ -135,7 +135,10 @@ test('the maximum-borrowing application shows model-derived headroom without cha
     note: 'No interest accrues here. USDC stays at $1, and the collateral rules stay unchanged.',
   });
   assert.equal(explore.text, 'Try a lower loan amount in the lab ↗');
-  assert.deepEqual(readLoanHash(explore.href).input, input);
+  const link = new URL(explore.href, 'https://teren.sh/lending.html');
+  assert.equal(link.pathname, '/lending.html');
+  assert.equal(link.searchParams.get('from'), 'lesson');
+  assert.deepEqual(readLoanHash(link.hash).input, input);
   assert.equal(checkLendingUnderstanding('borrow', 'liability', 'opening-limit').passed, true);
   assert.deepEqual(example, before);
 });

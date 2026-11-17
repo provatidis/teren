@@ -3,7 +3,7 @@ import { validateExperimentDraft } from '../data/saved-experiments.js';
 import { LOAN_MODEL, LOAN_DEFAULTS, LOAN_LIMITS, calculateLoan, validateLoan, upgradeLoan } from '../models/collateral-loan-v2.js';
 import { readLoanDraft, saveLoanDraft, readLiquidationDraft, saveLiquidationDraft } from '../data/lending-state.js';
 import { LIQUIDATION_DEFAULTS, LIQUIDATION_LIMITS, validateLiquidation, singleLiquidation, interestReference, healthPriceCurve } from '../models/loan-explanations.js';
-import { loanHash, readLoanHash } from '../lib/lending-links.js';
+import { isLendingLessonExample, loanHash, readLoanHash } from '../lib/lending-links.js';
 import { healthLabel, loanStatus, boundaryDistance, loanMoney as usd } from '../lib/lending-presentation.js';
 import { signedUSD, formatTokenQuantity } from '../lib/format.js';
 import { createLoanInterestScene } from '../lib/loan-interest-scene.js';
@@ -201,9 +201,16 @@ export function initLending() {
     }
     $('loan-repay-note').textContent = usd(responses.repay.spent) + ' repaid · ' + usd(responses.repay.unused) + ' budget left';
     $('loan-add-note').textContent = formatTokenQuantity(result.input.budget / input.future, 6) + ' ETH added at this price';
-    renderExplanations({ ...input, budget: result.input.budget }, result, save);
-    const resumable = save && current && saveExperimentLocation(LOAN_MODEL, loanHash(current.input, readLiquidation()));
-    if (save && !invalid) $('loan-storage').textContent = saveLoanDraft(input)
+    const lessonExample = isLendingLessonExample();
+    renderExplanations({ ...input, budget: result.input.budget }, result, save && !lessonExample);
+    if (!save) return;
+    const hash = current && loanHash(current.input, readLiquidation());
+    if (lessonExample) {
+      if (hash) history.replaceState(history.state, '', hash);
+      return;
+    }
+    const resumable = hash && saveExperimentLocation(LOAN_MODEL, hash);
+    if (!invalid) $('loan-storage').textContent = saveLoanDraft(input)
       ? 'Working setup kept in this tab.' + (resumable ? ' Home can resume these inputs.' : '') + ' Save a named experiment to keep alternatives.'
       : 'Tab storage is unavailable. Copy an experiment link to keep this setup.';
   }
@@ -213,7 +220,7 @@ export function initLending() {
     if (shared.status === 'ready') {
       writeInputs(shared.input);
       writeLiquidation(shared.liquidation || LIQUIDATION_DEFAULTS);
-      render(true);
+      render(!isLendingLessonExample());
     }
   }
   function focusField(key) {
@@ -229,7 +236,8 @@ export function initLending() {
   writeInputs(stored.input);
   writeLiquidation(readLiquidationDraft());
   render();
-  $('loan-storage').textContent = stored.status === 'unavailable'
+  $('loan-storage').textContent = isLendingLessonExample() ? 'Lesson setup. Copy a link or save a named experiment to keep your changes.'
+    : stored.status === 'unavailable'
     ? 'The previous tab draft could not be read. Default inputs are shown; copy a link to keep your work.'
     : 'Working setup kept in this tab. Copy a link to keep or share it.';
   restoreLocation();
@@ -262,7 +270,7 @@ export function initLending() {
   });
   $('loan-share').addEventListener('click', async () => {
     if (!current) return;
-    const url = new URL(location.href); url.hash = loanHash(current.input, readLiquidation());
+    const url = new URL(location.pathname, location.origin); url.hash = loanHash(current.input, readLiquidation());
     const copiedRevision = revision;
     $('loan-share-url').value = url.href;
     try {

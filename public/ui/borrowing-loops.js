@@ -1,4 +1,5 @@
 import { saveExperimentLocation } from '../data/experiment-location.js';
+import { isLendingLessonExample } from '../lib/lending-links.js';
 import { validateExperimentDraft } from '../data/saved-experiments.js';
 import { renderLoopMoneyFlow } from '../lib/loop-money-flow.js';
 import { loopPriceDomain } from '../models/loop-risk.js';
@@ -275,8 +276,14 @@ export function initBorrowingLoops({ initLiquidation }) {
       $('loop-save').disabled = true;
     }
     refreshFlows();
-    const resumable = save && !invalidReference && event.valid && saveExperimentLocation(LOOP_MODEL, loopHash(input, comparisonRounds, comparisonBorrowPercent, event.assumptions));
-    if (save && !invalidReference && event.valid) $('loop-storage').textContent = saveLoopDraft(input, undefined, comparisonRounds, comparisonBorrowPercent, event.assumptions)
+    if (!save || invalidReference || !event.valid) return;
+    const hash = loopHash(input, comparisonRounds, comparisonBorrowPercent, event.assumptions);
+    if (isLendingLessonExample()) {
+      history.replaceState(history.state, '', hash);
+      return;
+    }
+    const resumable = saveExperimentLocation(LOOP_MODEL, hash);
+    $('loop-storage').textContent = saveLoopDraft(input, undefined, comparisonRounds, comparisonBorrowPercent, event.assumptions)
       ? 'Working loop kept in this tab.' + (resumable ? ' Home can resume these inputs.' : '') + ' Save a named experiment to keep alternatives.'
       : 'Tab storage is unavailable. Copy a loop link to keep your setup.';
   }
@@ -299,12 +306,13 @@ export function initBorrowingLoops({ initLiquidation }) {
       liquidation.write(shared.liquidation);
       comparisonRounds = shared.comparisonRounds; comparisonBorrowPercent = shared.comparisonBorrowPercent ?? null;
       $('loop-reference-borrow').value = comparisonBorrowPercent ?? shared.input.borrowPercent;
-      write(shared.input); render(true);
+      write(shared.input); render(!isLendingLessonExample());
     }
   }
   $('loop-reference-borrow').value = comparisonBorrowPercent ?? stored.input.borrowPercent;
   write(stored.input); render();
-  $('loop-storage').textContent = stored.status === 'unavailable'
+  $('loop-storage').textContent = isLendingLessonExample() ? 'Lesson setup. Copy a link or save a named experiment to keep your changes.'
+    : stored.status === 'unavailable'
     ? 'The previous loop draft could not be read. Defaults are shown; copy a link to keep your setup.'
     : 'Working loop kept in this tab, separately from your single loan. Copy a link to keep or share it.';
   restore();
@@ -343,7 +351,7 @@ export function initBorrowingLoops({ initLiquidation }) {
   $('loop-reset').addEventListener('click', () => { comparisonRounds = null; comparisonBorrowPercent = null; liquidation.write(); write(LOOP_DEFAULTS); render(true); $('loop-share-status').textContent = 'Default loop restored.'; });
   $('loop-share').addEventListener('click', async () => {
     if (!current) return;
-    const url = new URL(location.href); url.hash = loopHash(current.input, comparisonRounds, comparisonBorrowPercent, liquidation.read());
+    const url = new URL(location.pathname, location.origin); url.hash = loopHash(current.input, comparisonRounds, comparisonBorrowPercent, liquidation.read());
     const copiedRevision = revision;
     $('loop-share-url').value = url.href;
     try {
