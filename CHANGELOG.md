@@ -1,5 +1,10 @@
 # Release history
 
+## 1.57.0 · 2026-11-17
+
+- Extend the wstETH discount lesson with an optional partial liquidation. Follow the WETH repaid and wstETH taken, then compare what the borrower keeps with a 3% bonus and with zero bonus.
+- Open either example in the loop lab with its liquidation details expanded and its assumptions ready to edit.
+
 ## 1.56.0 · 2026-11-17
 
 - Add an optional wstETH/WETH lesson. Follow what happens to a loop’s sale value, debt and health factor when wstETH trades at a discount, then change the price the lender uses.

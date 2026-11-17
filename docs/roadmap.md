@@ -16,7 +16,7 @@ The [yield lessons](https://teren.sh/yield-learn.html) and [Split the yield](htt
 
 The lessons keep Predict → Observe → Check, with conceptual questions and optional worked calculations. Applications include constructing an example where matching holding still leaves a dollar loss, explaining why a sale cost leaves debt unpaid, and reasoning about a further price move from a recorded token mix. Next, use the [observation plan](learning.md#observation-plan): ask learners to explain an unfamiliar variation and note which hints they need before extending the patterns. [Learning design](learning.md) describes the current questions and visual interactions.
 
-A later candidate is a liquidation lesson that separates debt repaid, collateral removed and the bonus cost. Keep the first lending lesson focused on supply before introducing existing-debt restrictions.
+The optional wstETH walkthrough covers debt repaid, collateral removed and the liquidation bonus. The first lending lesson stays focused on supply.
 
 ## Correlated-asset looping and LSTs
 

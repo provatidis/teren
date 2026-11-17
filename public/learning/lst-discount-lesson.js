@@ -8,21 +8,30 @@ const startingInput = {
   maxLTV: 80, threshold: 82.5, oracleMode: 'rate', discount: 0,
   days: 0, stakingAPY: 0, lendingAPY: 0, borrowAPR: 0, laterAPR: 0,
   swapCost: 0, buildFlashFee: 0, exitCost: 0, flashFee: 0, gas: 0,
-  exitAvailable: true, exitMode: 'weth',
+  exitAvailable: true, exitMode: 'weth', repayPercent: 50, bonus: 3,
 };
 
+const labPath = 'lending.html?from=lesson';
 function stage(input) {
-  return { input, result: calculateLST(input), href: 'lending.html?from=lesson' + lstHash(input, 'hold') };
+  return { input, result: calculateLST(input), href: labPath + lstHash(input, 'hold') };
+}
+
+function liquidationView(scenario) {
+  return { ...scenario, href: labPath + '&show=liquidation' + lstHash(scenario.input, 'hold') };
 }
 
 const start = stage(startingInput);
 const discount = stage({ ...startingInput, discount: 10 });
 const market = stage({ ...discount.input, oracleMode: 'market' });
+const liquidations = {
+  withBonus: liquidationView(market),
+  zeroBonus: liquidationView(stage({ ...market.input, bonus: 0 })),
+};
 const weth = value => formatTokenQuantity(value, 4) + ' WETH';
 
 export function lstDiscountCase(id = 'discount') {
   if (id !== 'discount') throw new RangeError('Choose the wstETH discount lesson.');
-  return { input: discount.input, result: discount.result, prediction: 'sale-only', stages: { start, discount, market } };
+  return { input: discount.input, result: discount.result, prediction: 'sale-only', stages: { start, discount, market }, liquidations };
 }
 
 export function checkLSTDiscountUnderstanding(id, reason, application) {

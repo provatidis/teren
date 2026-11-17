@@ -882,7 +882,7 @@
             </div>
           <details id="lst-accounting"><summary>Where the difference comes from</summary><dl id="lst-ledger" class="lst-facts"></dl><p class="fine-print">The holding reference keeps your original wstETH in a wallet, earning the same staking growth. It earns no extra collateral lending yield. Rates and prices are assumptions; the comparison excludes exit costs.</p></details>
           <details id="lst-chart-details"><summary>See health factor across market discounts</summary><figure class="lst-health-chart"><svg id="lst-health-chart" viewBox="0 0 620 230" role="img" aria-label="Health factor under market and conversion-rate oracle assumptions"><path id="lst-chart-boundary" class="lst-boundary"/><path id="lst-chart-market" class="lst-market-line"/><path id="lst-chart-rate" class="lst-rate-line"/><circle id="lst-chart-dot" r="5" class="lst-chart-dot"/><text x="12" y="26" id="lst-chart-top" class="chart-label"/><text x="14" y="198" class="chart-label">0</text><text x="65" y="224" class="chart-label">0% discount</text><text x="590" y="224" text-anchor="end" class="chart-label">50% discount</text></svg><figcaption id="lst-chart-caption" class="fine-print"></figcaption><p class="fine-print">Solid: market oracle · dashed: conversion-rate oracle · dotted: health factor 1. All other conditions stay fixed; this is a sensitivity chart, not a price history.</p></figure></details>
-          <details id="lst-liquidation" hidden><summary>What could one liquidation take?</summary><p class="body-copy">A liquidator repays some WETH debt and takes wstETH worth that repayment plus a bonus at the assumed oracle price.</p><div class="lst-fields"><div class="scenario-field">
+          <details id="lst-liquidation" hidden><summary id="lst-liquidation-summary">What could one liquidation take?</summary><p class="body-copy">A liquidator repays some WETH debt and takes wstETH worth that repayment plus a bonus at the assumed oracle price.</p><div class="lst-fields"><div class="scenario-field">
   <label for="lst-repayPercent">Debt repaid in this event <span>%</span></label>
   <input id="lst-repayPercent" type="number" min="1" max="100" step="any" value="50" aria-describedby="lst-repayPercent-error">
   <p id="lst-repayPercent-error" class="field-error" hidden></p>
@@ -1046,7 +1046,7 @@
                 <div role="status"><strong id="lend-feedback-title"></strong>
                   <p id="lend-feedback-copy"></p>
                 </div>
-                <div id="lst-lesson-followup" class="learn-question-evidence" hidden></div>
+                <div id="lst-lesson-followup" hidden></div>
                 <div id="lend-continue" class="learn-continue" hidden><a id="lend-next" class="button primary" href="#experiment">Continue →</a>
                   <button id="lend-retry" class="learn-text-button" type="button">Try this lesson again ↻</button>
                 </div>

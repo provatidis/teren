@@ -109,7 +109,7 @@ export function initLendingLearning() {
       { container: 'lend-application-choices', selected: draft.application, correct: result.application, explanation: application },
     ]);
     if (chapter === 'lst' && draft.application) {
-      renderLSTMarketFollowup($('lst-lesson-followup'), example.stages.market);
+      $('lst-lesson-followup').hidden = false;
       lessonScene.allowMarket();
     }
     $('lend-feedback-copy').textContent = result.passed ? lesson.accomplishment : 'Read the feedback beside each question, then try again. You can change either answer.';
@@ -141,6 +141,8 @@ export function initLendingLearning() {
     document.title = lesson.short + ' · Teren Learn';
     $('lend-number').textContent = course.label + ' ' + (index + 1) + ' OF ' + course.lessons.length;
     const discount = chapter === 'lst';
+    if (discount) renderLSTMarketFollowup($('lst-lesson-followup'), example.stages.market, example.liquidations);
+    else $('lst-lesson-followup').replaceChildren();
     $('lend-meta-label').textContent = discount ? 'Optional advanced lesson' : (name === 'loops' ? 'Three' : 'Four') + ' steps · Open any lesson';
     $('lend-own-question').href = course.experiment;
     $('lend-title').textContent = lesson.title;

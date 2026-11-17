@@ -48,6 +48,52 @@ test('each scene hands off its exact model input to Hold and stress as an indepe
   }
 });
 
+test('one partial liquidation cancels half the WETH debt and transfers collateral worth the repayment plus its bonus', () => {
+  const { stages: { market }, liquidations: { withBonus } } = lstDiscountCase();
+  const { end, liquidation } = withBonus.result;
+  const { repay, seized, remaining } = liquidation;
+  const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-12, `${actual} differs from ${expected}`);
+  assert.deepEqual(withBonus.input, market.input);
+  assert.deepEqual(end, market.result.end);
+  assert.equal(end.status, 'eligible');
+  assert.equal(end.net, 0.75);
+  assert.equal(end.marketPrice, 1.125);
+  assert.equal(end.marketPrice, end.oraclePrice);
+  assert.equal(withBonus.input.repayPercent, 50);
+  assert.equal(withBonus.input.bonus, 3);
+  assert.equal(repay, 1.875);
+  assert.equal(remaining.debt, end.debt - repay);
+  close(seized, 1.93125 / 1.125);
+  close(remaining.collateral + seized, end.collateral);
+  close(liquidation.marketValueTaken, 1.93125);
+  close(liquidation.bonusAtOracle, 0.05625);
+  close(remaining.net, 0.69375);
+  close(end.net - remaining.net, liquidation.marketValueTaken - repay);
+});
+
+test('repeating the same liquidation without a bonus reduces collateral and debt by equal market value', () => {
+  const { withBonus, zeroBonus } = lstDiscountCase().liquidations;
+  assert.deepEqual(zeroBonus.input, { ...withBonus.input, bonus: 0 });
+  assert.deepEqual(zeroBonus.result.end, withBonus.result.end);
+  const { end, liquidation } = zeroBonus.result;
+  assert.equal(liquidation.repay, withBonus.result.liquidation.repay);
+  assert.equal(liquidation.bonusAtOracle, 0);
+  assert.ok(liquidation.remaining.collateral < end.collateral);
+  assert.equal(liquidation.remaining.debt, 1.875);
+  assert.ok(Math.abs(liquidation.marketValueTaken - liquidation.repay) < 1e-12);
+  assert.ok(Math.abs(liquidation.remaining.net - end.net) < 1e-12);
+});
+
+test('both bonus settings open the identical lesson assumptions in the lab’s liquidation disclosure', () => {
+  for (const { href, input } of Object.values(lstDiscountCase().liquidations)) {
+    const url = new URL(href, 'https://teren.sh/');
+    assert.equal(url.pathname, '/lending.html');
+    assert.equal(url.searchParams.get('from'), 'lesson');
+    assert.equal(url.searchParams.get('show'), 'liquidation');
+    assert.deepEqual(readLSTHash(url.hash), { status: 'ready', input, view: 'hold' });
+  }
+});
+
 test('the lesson checks debt exposure and the oracle change independently with feedback on every option', () => {
   const lesson = LST_DISCOUNT_LESSON;
   assert.ok(lesson.predictions.some(([id]) => id === lstDiscountCase().prediction));

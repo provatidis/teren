@@ -3,6 +3,7 @@ import { LST_VIEWS, lstHash, readLSTHash } from '../lib/lst-links.js';
 import { readLSTDraft, saveLSTDraft } from '../data/lst-state.js';
 import { saveExperimentLocation } from '../data/experiment-location.js';
 import { createLSTScene } from '../lib/lst-scene.js';
+import { focusInitialLesson as focusLessonDestination } from '../lib/learning-elements.js';
 import { healthLabel, loanStatus } from '../lib/lending-presentation.js';
 import { fmt, usd, formatTokenQuantity } from '../lib/format.js';
 import { lstExitCopy, lstExitFacts } from '../lib/lst-presentation.js';
@@ -16,7 +17,8 @@ export function initLSTLoops() {
   const $ = id => document.getElementById(id);
   const exactControls = { days: { unit: 'days', step: 1 }, discount: { unit: '% discount', step: 0.1 } };
   const inputField = key => $('lst-' + key + (Object.hasOwn(exactControls, key) ? '-input' : ''));
-  const lessonExample = new URLSearchParams(location.search).get('from') === 'lesson';
+  const entryParams = new URLSearchParams(location.search);
+  const lessonExample = entryParams.get('from') === 'lesson';
   const stored = readLSTDraft();
   let view = stored.view, current = null, firstInvalid = null, revision = 0;
   let comparison = null, comparisonError = null, showingComparison = false;
@@ -259,11 +261,12 @@ export function initLSTLoops() {
     $('lst-liquidation-results').hidden = false;
     if (r.liquidation) {
       const l = r.liquidation;
+      const weth = amount => formatTokenQuantity(amount, 5) + ' WETH';
       pairs('lst-liquidation-results', [
-        ['WETH repaid by the liquidator', tokens(l.repay)], ['wstETH removed', tokens(l.seized, 'wstETH')],
-        ['Bonus at oracle valuation', tokens(l.bonusAtOracle)], ['Market value of all removed collateral', tokens(l.marketValueTaken)],
-        ['wstETH remaining', tokens(l.remaining.collateral, 'wstETH')], ['WETH debt remaining', tokens(l.remaining.debt)],
-        ['Net market value after this event', tokens(l.remaining.net)],
+        ['WETH repaid by the liquidator', weth(l.repay)], ['wstETH removed', tokens(l.seized, 'wstETH')],
+        ['Bonus at oracle valuation', weth(l.bonusAtOracle)], ['Market value of all removed collateral', weth(l.marketValueTaken)],
+        ['wstETH remaining', tokens(l.remaining.collateral, 'wstETH')], ['WETH debt remaining', weth(l.remaining.debt)],
+        ['Net market value after this event', weth(l.remaining.net)],
       ]);
     }
     $('lst-exit-status').textContent = lstExitCopy(r);
@@ -361,7 +364,10 @@ export function initLSTLoops() {
   $('lst-share').addEventListener('click', async () => {
     if (!current || comparisonError) return;
     const currentRevision = revision, url = new URL(location.href);
-    if (lessonExample) url.searchParams.delete('from');
+    if (lessonExample) {
+      url.searchParams.delete('from');
+      url.searchParams.delete('show');
+    }
     url.hash = lstHash(current.input, view, comparison);
     try {
       await navigator.clipboard.writeText(url.href);
@@ -377,13 +383,19 @@ export function initLSTLoops() {
     const link = readLSTHash(location.hash);
     $('lst-route-note').hidden = link.status !== 'invalid';
     if (link.status === 'ready') { write(link.input); writeComparison(link.comparison); view = link.view; render(true, true); }
+    return link;
   }
   write(stored.input);
   writeComparison(stored.comparison);
   render();
   if (stored.status === 'invalid') $('lst-storage').textContent = 'The saved working copy could not be read. Defaults are shown; the stored copy is unchanged until you edit.';
   else if (stored.status === 'unavailable') $('lst-storage').textContent = 'Browser saving is unavailable. Copy a link to keep your setup.';
-  loadRoute();
+  const initial = loadRoute();
+  if (lessonExample && entryParams.get('show') === 'liquidation' && initial.view === 'hold' && current?.liquidation) {
+    $('lst-primary-details').open = true;
+    $('lst-liquidation').open = true;
+    focusLessonDestination('lst-liquidation-summary');
+  }
   window.addEventListener('hashchange', loadRoute);
   return {
     getExperimentDraft: () => current && !comparisonError ? { model: LST_MODEL, inputs: { ...current.input }, origin: null, ...(comparison ? { comparison: { ...comparison } } : {}) } : null,

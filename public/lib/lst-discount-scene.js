@@ -1,6 +1,7 @@
 import { formatTokenQuantity } from './format.js';
 import { healthLabel } from './lending-presentation.js';
 import { sceneNode as node } from './lesson-scene.js';
+import { liquidationWalkthrough } from './lst-liquidation-walkthrough.js';
 
 const weth = value => formatTokenQuantity(value, 4) + ' WETH';
 const stageLabels = { start: 'Starting position', discount: 'Market discount', market: 'Market-price lender' };
@@ -73,7 +74,7 @@ export function createLSTDiscountScene(stages, prediction, onStage) {
   };
 }
 
-export function renderLSTMarketFollowup(container, stage) {
+export function renderLSTMarketFollowup(container, stage, liquidations) {
   const balance = stage.result.end;
   const heading = node('h4', 'With the market-price lender');
   const copy = node('p', 'The sale value is still ' + weth(balance.collateralValue) + ' and the debt is still ' +
@@ -83,6 +84,7 @@ export function renderLSTMarketFollowup(container, stage) {
   lab.href = stage.href;
   lab.target = '_blank';
   lab.rel = 'noopener noreferrer';
-  container.replaceChildren(heading, copy, lab);
-  container.hidden = false;
+  const comparison = node('div', undefined, 'learn-question-evidence');
+  comparison.append(heading, copy, lab);
+  container.replaceChildren(comparison, liquidationWalkthrough(liquidations));
 }
