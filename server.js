@@ -7,7 +7,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), process.env.SITE_D
 const types = {
   '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml',
   '.xml': 'application/xml', '.json': 'application/json', '.webmanifest': 'application/manifest+json',
-  '.png': 'image/png', '.ico': 'image/x-icon', '.txt': 'text/plain',
+  '.zip': 'application/zip', '.png': 'image/png', '.ico': 'image/x-icon', '.txt': 'text/plain',
 };
 const headers = {
   'Cache-Control': 'no-store',

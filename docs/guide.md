@@ -2,7 +2,7 @@
 
 [Project overview](../README.md) · [Model assumptions](models.md) · [Current review](review.md)
 
-Jump to [Split the yield](#split-the-yield), [single loans](#lending-supply-borrow-change-conditions-respond), [ETH/USDC loops](#borrowing-loops-build-change-conditions-unwind), [LST loops](#correlated-asset-loops), [controlled widths](#compare-widths-with-a-common-starting-mix), [fee flow](#follow-the-fees), [recorded cases](#historical-cases-fees-through-a-recorded-period), [lessons](#learn-liquidity-essentials) or [saved experiments](#saved-experiments). Each tool is available directly.
+Jump to [Split the yield](#split-the-yield), [the recorded sDAI case](#a-month-of-sdai-on-pendle), [single loans](#lending-supply-borrow-change-conditions-respond), [ETH/USDC loops](#borrowing-loops-build-change-conditions-unwind), [LST loops](#correlated-asset-loops), [controlled widths](#compare-widths-with-a-common-starting-mix), [fee flow](#follow-the-fees), [recorded cases](#historical-cases-fees-through-a-recorded-period), [lessons](#learn-liquidity-essentials) or [saved experiments](#saved-experiments). Each tool is available directly.
 
 ## Split the yield
 
@@ -18,6 +18,10 @@ In the [early-sale comparison](https://teren.sh/yield.html#early-exit), choose a
 
 Valid edits are kept in this browser and appear under **Continue experimenting** on Home. Use **Copy setup link** to share the selected comparison and its assumptions. Earlier links still open at maturity. **Reset example** restores the 90-day case. See [the model](models.md#split-the-yield) for the yield fee, benchmark and full-redemption assumption.
 
+## A month of sDAI on Pendle
+
+Open [Yield trading → Inspect](https://teren.sh/yield-inspect.html) to see what a buyer knew 30 days before maturity in March 2024. Start with the 1,000 DAI budget and see which orders the pool could fill. A separate comparison uses 100 DAI each for PT, YT and holding sDAI. Follow the change in Maker’s savings rate to settlement, or go straight to the outcomes and receipts. [Case methods](https://teren.sh/methods.html#sdai-case)
+
 ## Fees, time and costs in liquidity labs
 
 In either endpoint lab, choose **A total cash amount** or **An average fee APR**. APR applies to your starting capital over the duration you enter. Use an average for the whole period, including time outside a range; changing the width does not automatically increase it. Cash mode can leave duration blank.
@@ -30,7 +34,7 @@ The optional V2-style reference in the range lab keeps its own cash fees and use
 
 Home introduces Liquidity, Lending and Yield trading. Each topic offers a direct experiment and **Learn step by step**. **Continue experimenting** restores the last valid assumptions edited or saved in this browser, independently of lesson progress. Its local bookmark contains inputs, not recorded provenance; use named saves to retain a source snapshot. **Your saved experiments** opens the shared library. Phones have a shortcut to each topic above the cards. The Teren logo returns Home, and **Continue learning** reopens the most recently visited lesson in this browser after it has been opened in this release. It is a navigation bookmark, not a completion mark.
 
-All three topics have Learn and Experiment. Liquidity also has Inspect. Switch topics in the header. Valid liquidity drafts survive a same-tab visit to Home, Learn or Lending. An explicit shared scenario takes precedence when reopening the lab.
+Valid liquidity drafts survive a same-tab visit to Home, Learn or Lending. An explicit shared scenario takes precedence when reopening the lab.
 
 The liquidity lab now lives at `liquidity.html`. Existing links such as `/#scenario=...`, `/#inspect` and `/#historical-case` still open the corresponding liquidity view and preserve their fragment. Home links and lesson links remain directly shareable.
 
@@ -39,15 +43,15 @@ The liquidity lab now lives at `liquidity.html`. Existing links such as `/#scena
 
 ## Finding a tool and returning to your setup
 
-Choose **Liquidity**, **Lending** or **Yield trading** in the topic switch. Experiment and Learn follow the chosen topic. Inspect currently contains liquidity snapshots and historical cases; lending has no live or recorded position imports yet.
+Choose **Liquidity**, **Lending** or **Yield trading** in the topic switch. Each topic opens directly in Experiment or Learn. Liquidity and Yield trading also have recorded cases in Inspect.
 
-| Topic | Experiment | Learn |
-| --- | --- | --- |
-| Liquidity | [Full-range and price-range labs](https://teren.sh/liquidity.html#experiment) | [Foundations, range choices and recorded cases](https://teren.sh/learn.html) |
-| Lending | [Collateralized-loan lab](https://teren.sh/lending.html#experiment) | [Supply, borrow, change conditions and respond](https://teren.sh/lending.html#learn) |
-| Yield trading | [Split the yield](https://teren.sh/yield.html) | [From one deposit to an early sale](https://teren.sh/yield-learn.html) |
+| Topic | Experiment | Learn | Inspect |
+| --- | --- | --- | --- |
+| Liquidity | [Full-range and price-range labs](https://teren.sh/liquidity.html#experiment) | [Foundations, range choices and recorded cases](https://teren.sh/learn.html) | [Pool snapshots and position history](https://teren.sh/liquidity.html#inspect) |
+| Lending | [Collateralized-loan lab](https://teren.sh/lending.html#experiment) | [Supply, borrow, change conditions and respond](https://teren.sh/lending.html#learn) | — |
+| Yield trading | [Split the yield](https://teren.sh/yield.html) | [From one deposit to an early sale](https://teren.sh/yield-learn.html) | [March 2024 sDAI market](https://teren.sh/yield-inspect.html) |
 
-The top navigation stays visible while scrolling. **Experiment** opens the chosen topic’s calculator workspace; **Learn** opens its lessons. **Inspect** opens liquidity’s pool/position workspace. Within Liquidity, the tool links follow the current workspace: calculator tools in Experiment, snapshot sources in Inspect, and a return to experiments from recorded history or Pool mechanics. Historical cases belong to Inspect and remain directly accessible from Experiment. Existing tool and shared-scenario links still open their targets directly.
+The top navigation stays visible while scrolling. Within Liquidity, the tool links follow the current workspace: calculator tools in Experiment, snapshot sources in Inspect, and a return to experiments from recorded history or Pool mechanics. Historical cases belong to Inspect and remain directly accessible from Experiment. Existing tool and shared-scenario links still open their targets directly.
 
 Switching workspaces or calculator tabs preserves their current inputs. In Lending, opening **Saved experiments** also keeps the active loan or loop lab for the return through Experiment, Back or reload. Clicking a same-tab Learn or Lending link temporarily retains valid liquidity calculator inputs, the selected lab and any matching source snapshot. Returning restores those working drafts; an explicit shared scenario takes precedence. This handoff uses per-tab session storage and is consumed after restoration. If storage is blocked, navigation still works but the handoff cannot be saved. Invalid/incomplete inputs are not captured. Use **Save experiment** and export the library for a durable, portable liquidity copy.
 

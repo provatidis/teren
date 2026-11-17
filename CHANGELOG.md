@@ -1,5 +1,10 @@
 # Release history
 
+## 1.55.0 · 2026-11-17
+
+- Add a Yield trading Inspect case for the March 2024 Ethereum sDAI market. Follow what 1,000 DAI could buy, compare PT, YT and holding at a smaller trade size, and see what happened when Maker raised the savings rate.
+- Publish the block-pinned entry simulations, real redemption receipts and reproduction tools with the case.
+
 ## 1.54.0 · 2026-11-17
 
 - Compare PT’s fixed APY with the annualized yield of the chosen deposit scenario. See how much the deposit must earn for YT to recover its cost or match holding, in both USDC and annual rates.

@@ -30,7 +30,7 @@ Open http://127.0.0.1:3000/ in your browser. The hypothetical labs, lessons and 
 npm test
 ```
 
-Tests cover the sandbox and hypothetical liquidity, lending and yield models, versioned links and exports, v2/v3 snapshot validation, exact v3 fee accounting, fixed-position period accounting and continuity evidence, essential and applied learning assessments, saved comparisons, Learn-return drafts and storage failures. The bundled historical records are checked locally without RPC calls; `npm run check:replay` separately recaptures and verifies chain history through public providers.
+Tests cover the sandbox and hypothetical liquidity, lending and yield models, versioned links and exports, v2/v3 snapshot validation, exact v3 fee accounting, fixed-position period accounting and continuity evidence, essential and applied learning assessments, saved comparisons, Learn-return drafts and storage failures. The bundled historical records can be checked locally. For a fresh chain check, `npm run check:replay` re-reads the original Uniswap replay cases. The [sDAI evidence bundle](../public/examples/pendle-sdai-march-2024.zip) has its own reproduction script for an Ethereum archive node with state-override support.
 
 For a local browser smoke test, install Chromium or set `CHROMIUM_BIN` to its executable, then run `npm run test:browser`. It starts temporary servers and checks actual page interactions at desktop and mobile sizes, including calculators, learning, snapshot imports, saved comparisons, the historical checkpoint slider, downloads and persistence. Navigation checks cover sticky-header offsets, direct tool fragments, browser history and returning from Learn. The same suite runs in CI before deployment. Its mobile routing checks use touch events as well as keyboard and mouse input. The test runner launches Chromium with its browser sandbox disabled; serving the app itself requires no browser installation.
 
@@ -44,7 +44,7 @@ For a focused lesson check, `BROWSER_CHECKS=predictions npm run test:browser` ex
 
 For the guided chapter, `BROWSER_CHECKS=yield-learning npm run test:browser` follows the lessons from prediction to feedback and into the lab on desktop and mobile.
 
-For focused yield trading lab checks, `BROWSER_CHECKS=yield npm run test:browser` covers direct entry, the two rate timings, maturity and early-sale comparisons, valid and invalid edits, shared links, local restoration and narrow screens. The full suite includes these checks.
+For focused yield trading lab checks, `BROWSER_CHECKS=yield npm run test:browser` covers direct entry, the two rate timings, maturity and early-sale comparisons, valid and invalid edits, shared links, local restoration and narrow screens. Use `BROWSER_CHECKS=yield-inspect npm run test:browser` for the recorded sDAI case. The full suite includes both.
 
 For focused startup checks, `BROWSER_CHECKS=startup npm run test:browser` blocks application entries and nested dependencies, interrupts initialization, holds a dependency pending, and checks reload recovery, saved work, narrow layouts and JavaScript-disabled access. The full suite includes these checks. A successful normal load alone does not test this failure boundary.
 
@@ -60,14 +60,14 @@ The period model lives in `public/models/fixed-position-period.js`; record valid
 
 ## Project structure
 
-- public/*-entry.js and public/lib/app-startup.js: guarded startup; public/home-main.js, public/main.js, public/learn-main.js, public/lending-main.js, public/yield-main.js and public/yield-learn-main.js: composition roots for Home, liquidity Experiment/Inspect, liquidity Learn, lending, the yield lab and yield lessons. They initialize each document's controllers and inject the interfaces they need.
+- The modules in `public/*-entry.js` use `public/lib/app-startup.js` to start each document. Page-specific modules initialize the controllers for Home, the labs, lessons and Inspect views.
 - public/ui/: explicit initializers for the sandbox, both labs, learning, pool/position snapshots, saved experiments, historical replay and navigation. Importing a controller does not start it.
 - public/models/: pure hypothetical calculations, lesson experiments and exact protocol/period arithmetic. They do not read the DOM, browser storage or network.
 - public/data/: deployment configuration, read-only Uniswap v2/v3 adapters, snapshot/period schemas, saved experiments, learning progress and temporary Learn-return storage.
 - public/lib/: compatible scenario links, exports, formatting and rendering utilities.
 - public/lib/lesson-setup.js: shared lesson setup presentation; balances come from the selected lesson inputs and results. public/lib/recorded-lesson-setup.js introduces validated historical positions without inferring intermediate price paths. Keep required context before predictions when adding or changing scenes.
 - public/learning/: essential and applied lesson definitions, optional deeper reading and the eleven-example progression.
-- public/examples/: bundled pool/position snapshots, three unchanged-position historical cases and the matched-week comparison with collections; these open without RPC requests.
+- `public/examples/` holds the liquidity snapshots, fixed-position cases, matched-week comparison and sDAI capture. All open without RPC requests.
 - public/styles/: shared foundation and components followed by feature styles. public/styles.css preserves the existing cascade order.
 - public/index.html, public/liquidity.html, public/learn.html and public/lending.html: semantic, static markup with one module entry point per document. Each feature owns its IDs; the structure check rejects duplicates.
 - scripts/: development, integration and browser checks; test/: reference calculations and adapter/storage contracts.
@@ -191,7 +191,7 @@ For coverage diagnostics, import the same canonical source URL used by the model
 
 ## Lending foundations
 
-`lending.html` has its own composition root, `lending-main.js`, with separate Experiment and Learn panels. It does not add lending controllers to the liquidity document. The topic links preserve the current mode where the destination supports it. Inspect belongs to Liquidity; Lending has Learn and Experiment. Strict `#loan=collateral-loan-v1` and `#loan=collateral-loan-v2` links carry all model assumptions, and `#lesson=supply|borrow|conditions|respond` routes select directly accessible lessons.
+`lending.html` has its own composition root, `lending-main.js`, with separate Experiment and Learn panels. It does not add lending controllers to the liquidity document. The topic links preserve the current mode where the destination supports it. Liquidity and Yield trading offer Inspect. Lending has Learn and Experiment. Strict `#loan=collateral-loan-v1` and `#loan=collateral-loan-v2` links carry all model assumptions, and `#lesson=supply|borrow|conditions|respond` routes select directly accessible lessons.
 
 `models/collateral-loan-v1.js` retains original simple-interest arithmetic. `models/collateral-loan-v2.js` adds a required `interestMode`, defaulting to continuous compounding for new loans. Both use the shared pure `models/loan-accounting.js` balance sheet; `models/loan-models.js` dispatches legacy/current links, drafts and explanations. The current UI upgrades legacy inputs explicitly to simple interest. Named records keep their original model; saving an opened working copy creates a v2 variation. `lib/loan-interest-scene.js` renders original-plus-interest bars from the same calculated result, on a common USD scale. It is pure floating-point teaching arithmetic, separate from the integer protocol accounting. `models/lending-lessons.js` defines reference cases and grades conceptual choices; `learning/lending-essentials.js` owns editorial definitions. `lib/lending-presentation.js` preserves the side of the liquidation boundary when formatting health factors. UI controllers share choice rendering and feedback focus without importing one another.
 

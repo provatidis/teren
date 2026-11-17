@@ -10,7 +10,7 @@ Release 1.44.0 makes single-loan interest explicit and consistent across balance
 
 ## Yield trading
 
-The [yield lessons](https://teren.sh/yield-learn.html) and [Split the yield](https://teren.sh/yield.html) cover the original deposit, the claims on it, holding to maturity and an early sale. Ask people to change the sale-day implied APY and explain which part of the YT seller’s proceeds moved. At maturity, can they explain why recovering the purchase price and matching holding are separate targets? PT-backed borrowing is a separate potential link to the lending labs.
+The [yield lessons](https://teren.sh/yield-learn.html) and [Split the yield](https://teren.sh/yield.html) cover the original deposit, the claims on it, holding to maturity and an early sale. Ask people to change the sale-day implied APY and explain which part of the YT seller’s proceeds moved. At maturity, can they explain why recovering the purchase price and matching holding are separate targets? The [March 2024 sDAI case](https://teren.sh/yield-inspect.html) now provides a historical reference for what a YT buyer could purchase and earn. PT-backed borrowing is a separate potential link to the lending labs.
 
 ## Learning depth
 
