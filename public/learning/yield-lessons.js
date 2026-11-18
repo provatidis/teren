@@ -55,8 +55,8 @@ export const YIELD_LESSONS = [
     setup: {
       title: 'Meet your deposit',
       facts: [
-        ['Your principal tokens (PT)', 'Together they let you redeem the original 1,000 USDC on day 90.'],
-        ['Your yield tokens (YT)', 'Together they give you the interest that deposit earns over the 90 days.'],
+        ['Your 1,000 principal tokens (PT)', 'Each PT lets you redeem 1 USDC on day 90.'],
+        ['Your 1,000 yield tokens (YT)', 'Each YT lets you collect the interest that 1 USDC earns while you hold the token, up to day 90.'],
       ],
       action: 'You keep all your PT. A buyer pays you 20 USDC for all your YT at the start.',
       assumptions: 'Day 90 is the maturity date. The deposit repays its principal in full in this example.',
@@ -110,8 +110,9 @@ export const YIELD_LESSONS = [
     hint: 'For the first question, follow the 20 USDC from the buyer’s wallet. For the second, look at what the buyer had already earned by day 90.',
     accomplishment: 'You followed the original deposit, the buyer’s payment and the interest to their owners.',
     deeper: [
-      'The split produces 1,000 PT and 1,000 YT. Each PT represents one unit of principal. You can still redeem your PT after day 90. Waiting earns you no extra interest.',
-      'Each YT receives the interest on one unit until expiry. The buyer can collect it as it accrues. Here the interest stays in the earning asset. We value it in USDC after the 5% fee on YT interest.',
+      'Suppose you sell only 100 YT at the start. The buyer gets the interest on 100 USDC. Your 900 YT still earn the interest on the other 900 USDC, and you keep all 1,000 PT for the full principal.',
+      'You can still redeem your PT after day 90. Waiting earns you no extra interest.',
+      'YT holders can collect interest as it accrues. Here the interest stays in the earning asset. We value it in USDC after the 5% fee on YT interest.',
     ],
     sources: [academy, claims, fees], experimentHref: experiment(original),
   },
