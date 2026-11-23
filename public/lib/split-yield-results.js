@@ -40,10 +40,11 @@ export function showMaturity(input) {
   setText('split-benchmark-note', interpretation);
 }
 
-function rateLabel(apy) {
+function rateLabel(apy, digits) {
   if (apy === null) return 'Too large to display';
+  if (apy >= 1e6) return apy.toExponential(digits ?? 2) + '%';
+  if (digits !== undefined) return fmt(apy, digits) + '%';
   if (apy > 0 && apy < 0.005) return '<0.01%';
-  if (apy >= 1e6) return apy.toExponential(2) + '%';
   return apy.toLocaleString('en-US', { maximumFractionDigits: 2 }) + '%';
 }
 
@@ -61,8 +62,18 @@ export function showExit(input, exit) {
   element('exit-earned-bar').setAttribute('width', result.ytTotal > 0 ? 100 - saleShare : 0);
 
   setText('exit-price-caption', 'Same day, same time left. Prices per token in USDC on day ' + exit.exitDay + ', before trading costs.');
-  setText('exit-entry-rate', result.entryImpliedApy === null ? 'Original entry rate' : 'Entry rate · ' + rateLabel(result.entryImpliedApy));
-  setText('exit-scenario-rate', 'Exit rate · ' + rateLabel(exit.exitApy));
+  const difference = result.ytTotal - result.unchangedYtTotal;
+  const sameToCent = Math.abs(difference) < 0.005;
+  let entryRate = rateLabel(result.entryImpliedApy);
+  let exitRate = rateLabel(exit.exitApy);
+  if (result.remainingDays > 0 && !sameToCent && result.entryImpliedApy !== exit.exitApy) {
+    for (let digits = 3; entryRate === exitRate && digits <= 20; digits++) {
+      entryRate = rateLabel(result.entryImpliedApy, digits);
+      exitRate = rateLabel(exit.exitApy, digits);
+    }
+  }
+  setText('exit-entry-rate', result.entryImpliedApy === null ? 'Original entry rate' : 'Entry rate · ' + entryRate);
+  setText('exit-scenario-rate', 'Exit rate · ' + exitRate);
   for (const [id, price] of [['flat-pt', result.unchangedPtPrice], ['flat-yt', result.unchangedYtPrice],
     ['mark-pt', result.ptPrice], ['mark-yt', result.ytPrice]]) {
     setText('exit-' + id, formatTokenQuantity(price, 6, 2));
@@ -72,8 +83,7 @@ export function showExit(input, exit) {
   if (result.remainingDays === 0) {
     reading = 'At maturity, each PT redeems for 1 USDC. YT has no future interest left to sell. Its owner can still collect the interest already earned.';
   } else {
-    const difference = result.ytTotal - result.unchangedYtTotal;
-    if (Math.abs(difference) < 0.005) {
+    if (sameToCent) {
       reading = 'At these rates your YT position sells for the same amount to the nearest cent. The interest you keep depends on what the underlying earned by day ' + exit.exitDay + '.';
     } else {
       const higher = difference > 0;

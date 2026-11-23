@@ -17,8 +17,20 @@ export async function checkSplitExit({ evaluate, click, fill, text, value, visib
   assert.equal(await money('exit-yt-earned'), 0, 'Selling immediately leaves no past yield to collect.');
   assert.equal(await money('exit-hold-value'), 1000);
   await fill('split-exit-day', '45');
+  for (const [quote, entryLabel, exitLabel, reading] of [
+    ['8.54', '8.538%', '8.540%', /higher exit rate.*0\.09 USDC more/],
+    ['8.538', '8.5383%', '8.5380%', /lower exit rate.*0\.02 USDC less/],
+    ['8.538330586413784', '8.54%', '8.54%', /same amount to the nearest cent/],
+  ]) {
+    await fill('split-exit-apy', quote);
+    assert.equal(await text('exit-entry-rate'), 'Entry rate · ' + entryLabel);
+    assert.equal(await text('exit-scenario-rate'), 'Exit rate · ' + exitLabel);
+    assert.match(await text('exit-reading'), reading);
+  }
   await evaluate("document.querySelector('[data-exit-rate=\"5\"]').click()");
   assert.equal(await value('split-exit-apy'), '5');
+  assert.equal(await text('exit-entry-rate'), 'Entry rate · 8.54%');
+  assert.equal(await text('exit-scenario-rate'), 'Exit rate · 5%');
   const low = {};
   for (const id of ['pt-value', 'yt-sale', 'yt-earned', 'hold-value']) low[id] = await money('exit-' + id);
   await evaluate("document.querySelector('[data-exit-rate=\"15\"]').click()");

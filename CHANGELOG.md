@@ -1,5 +1,10 @@
 # Release history
 
+## 1.57.3 · 2026-11-23
+
+- Show more APY decimals in the early-sale comparison when rounding would hide the higher or lower rate behind a change in YT sale proceeds.
+- Clarify that in the day-45 lesson, the seller keeps the interest earned before the sale even if they claim it later.
+
 ## 1.57.2 · 2026-11-18
 
 - Opening or editing a Lending essentials or ETH-loop lesson example now preserves the personal setup that Home resumes. You can still save the example as a named experiment.
