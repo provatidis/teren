@@ -1,6 +1,6 @@
 {
   "name": "teren",
-  "version": "1.57.2",
+  "version": "1.57.3",
   "private": true,
   "type": "module",
   "description": "A DeFi playground for liquidity, lending and yield trading experiments",

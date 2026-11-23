@@ -266,7 +266,7 @@ export const YIELD_LESSONS = [
       feedback: {
         'fixed-rate': 'The 15% comes from the market price for PT. The interest the new YT owner receives depends on what the deposit actually earns during the remaining 45 days.',
         'future-income': 'What the buyer pays is known on day 45. How much interest those next 45 days will bring is still open.',
-        unclaimed: 'Interest belongs to whoever held the YT when it was earned. Waiting to claim it leaves it with the seller.',
+        unclaimed: 'In this example, you keep the interest earned through day 45 even if you claim it later. The buyer earns interest from then until maturity.',
       },
     },
     applicationContext: 'For a different trade, your wallet shows two swaps. You paid 200 USDC for YT and later sold it for 170 USDC. Trading costs are zero in this example.',
