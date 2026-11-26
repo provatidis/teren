@@ -1,5 +1,9 @@
 # Release history
 
+## 1.61.0 · 2026-11-26
+
+- A pilot of liquidity lesson 1 with the pool first opens at `learn.html#lesson=swap-impact&layout=play`. The question sits under the pool and the swap plays where you are looking. The setup box and assumption lines are replaced by one “About this example” note. The usual link, Home and every other lesson are unchanged.
+
 ## 1.60.0 · 2026-11-26
 
 - Yield lessons 3 and 4 now have a slider under the drawing. In **When does the interest arrive?** you drag the day the rate rises and watch the interest the YT buyer collects against the 20 USDC they paid. In **Selling before maturity** you drag the implied APY of the day-45 offer and watch the PT offer fall while the YT offer rises. The two named cases stay as buttons, and exploring never changes your answers.

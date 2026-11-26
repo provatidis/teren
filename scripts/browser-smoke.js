@@ -19,6 +19,7 @@ import { checkLessonFeedback } from './browser/lesson-feedback-checks.js';
 import { checkVisualLessonPilots } from './browser/visual-lesson-checks.js';
 import { checkFoundationLessons } from './browser/foundation-lesson-checks.js';
 import { checkFoundationMotion, checkRangePicks } from './browser/watchable-change-checks.js';
+import { checkPlayFirstPilot } from './browser/play-first-checks.js';
 import { checkLendingScenes } from './browser/lending-scene-checks.js';
 import { checkLoanConditionLesson } from './browser/loan-condition-checks.js';
 import { checkLoanResponseLesson } from './browser/loan-response-checks.js';
@@ -313,6 +314,7 @@ try {
     await checkFoundationLessons({ evaluate, click, fill, text, navigate, reload, base, call });
     await checkFoundationMotion({ evaluate, navigate, base, call });
     await checkRangePicks({ evaluate, navigate, base, call });
+    await checkPlayFirstPilot({ evaluate, navigate, base, call });
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     return;
   }
@@ -804,6 +806,7 @@ try {
   await checkFoundationLessons({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkFoundationMotion({ evaluate, navigate, base, call });
   await checkRangePicks({ evaluate, navigate, base, call });
+  await checkPlayFirstPilot({ evaluate, navigate, base, call });
   await checkLendingScenes({ evaluate, click, text, navigate, reload, base, call });
   await checkLoanConditionLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkLoanResponseLesson({ evaluate, click, fill, text, navigate, reload, base, call });

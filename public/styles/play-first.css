@@ -1,0 +1,13 @@
+/* Pilot: liquidity lesson 1 with the pool first (#lesson=swap-impact&layout=play).
+   The question sits under the pool and the verdict appears between them. Steps,
+   the trade-size slider and the explanation appear once the swap has been shown. */
+#learn-essential[data-play-first] :is(#learn-level, #learn-skill, #learn-setup, .learn-experiment-footer, .foundation-scene > .fine-print) { display: none; }
+#learn-essential[data-play-first]:not([data-ran]) :is(.scene-player, #foundation-action-copy, .foundation-scene > .scene-price-control, #learn-run, #learn-input-status) { display: none; }
+#learn-essential[data-play-first] .lesson-scene .foundation-pool { margin-top: 4px; }
+/* The verdict and the trade-size comparison carry the average price here, so the
+   pool drops its own average line and stays compact. */
+#learn-essential[data-play-first] .foundation-execution { display: none; }
+#learn-essential[data-play-first] .foundation-scene > .learn-prediction-feedback { margin: 16px 0 0; }
+.learn-about-example { margin: 18px 0 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
+.learn-about-example summary { display: flex; align-items: center; min-height: 44px; color: var(--text); cursor: pointer; }
+.learn-about-example p { margin: 4px 0 8px; }
