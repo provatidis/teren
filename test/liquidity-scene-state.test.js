@@ -15,10 +15,10 @@ test('token frames explain both directions and returning to start without accumu
       const { held, pooled } = frame.result;
       if (factor > 1) {
         assert.ok(pooled.eth < held.eth && pooled.usdc > held.usdc);
-        assert.match(frame.exchange, /USDC into the pool and take ETH out/);
+        assert.match(frame.exchange, /buy ETH from the pool and pay in USDC/);
       } else if (factor < 1) {
         assert.ok(pooled.eth > held.eth && pooled.usdc < held.usdc);
-        assert.match(frame.exchange, /ETH into the pool and take USDC out/);
+        assert.match(frame.exchange, /sell ETH to the pool and take USDC out/);
       } else assert.deepEqual(pooled, held);
       assert.equal(frame.result.fees, 0);
     }

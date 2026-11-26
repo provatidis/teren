@@ -4,8 +4,8 @@ import { motionSettled, reduceMotion } from './motion-settled.js';
 const shown = id => `document.querySelector(${JSON.stringify(id)})?.checkVisibility() ?? false`;
 const box = selector => `(r => [r.top, r.bottom])(document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect())`;
 
-// Liquidity lessons 1 and 2 put the pool first: the question sits under it and
-// reveals the outcome with the pool on screen. Links from lesson 1's pilot still
+// Liquidity lessons 1 to 3 put the figure first: the question sits under it and
+// reveals the outcome with the figure on screen. Links from lesson 1's pilot still
 // open it, and later lessons keep the question-first layout.
 export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
   const progressKey = 'degenerator-learning-liquidity-v1';
@@ -86,8 +86,45 @@ export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
         return { slider: document.getElementById('foundation-amount').getBoundingClientRect().top, sentence: document.getElementById('foundation-ownership-copy').getBoundingClientRect().bottom, height: innerHeight }; })()`);
       if (width === 390) assert.ok(together.slider > 0 && together.sentence <= together.height, 'The slider, the two bars and their sentence share one phone screen: ' + JSON.stringify(together));
     }
+    // Lesson 3 puts the claim first. Its slider appears with the outcome, right under the bars it moves.
+    for (const [width, height] of [[390, 844], [320, 640]]) {
+      await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: true });
+      await evaluate(`localStorage.removeItem('${progressKey}')`);
+      await navigate(base + 'learn.html#lesson=token-balances');
+      const arrive = await evaluate(`({ poolFirst: document.getElementById('learn-essential').hasAttribute('data-pool-first'),
+        visible: ['#learn-setup', '#learn-level', '#learn-skill', '#learn-run', '#token-scene-price', '#token-scene-invite', '#token-scene-outcome'].filter(id => document.querySelector(id)?.checkVisibility()),
+        figure: ${box('.scene-token-figure')}, question: ${box('.scene-prediction-question')}, header: document.querySelector('.topbar').getBoundingClientRect().bottom, height: innerHeight })`);
+      assert.deepEqual([arrive.poolFirst, arrive.visible], [true, []], `${width}px: ` + JSON.stringify(arrive));
+      assert.ok(arrive.question[0] - arrive.figure[1] < 120, 'The question sits right under the claim: ' + JSON.stringify(arrive));
+      if (width === 390) assert.ok(arrive.figure[0] >= arrive.header && arrive.figure[1] <= arrive.height, 'Arriving from a link shows the claim on the first screen: ' + JSON.stringify(arrive));
+      await evaluate("document.querySelector('.scene-prediction input[value=more]').click()");
+      await evaluate(`(b => scrollBy(0, b.bottom - innerHeight + 40))(document.getElementById('learn-reveal').getBoundingClientRect())`);
+      const reveal = await evaluate(`(() => {
+        document.getElementById('learn-reveal').click();
+        const figure = document.querySelector('.scene-token-figure').getBoundingClientRect(), header = document.querySelector('.topbar').getBoundingClientRect().bottom;
+        const slider = document.getElementById('token-scene-price').getBoundingClientRect(), feedback = document.getElementById('learn-prediction-feedback');
+        return { onScreen: figure.top >= header - 1 && figure.bottom <= innerHeight, gap: slider.top - figure.bottom, together: slider.bottom - figure.top <= innerHeight - header,
+          sliderOnScreen: slider.bottom <= innerHeight, verdict: feedback.textContent, verdictTop: feedback.getBoundingClientRect().top,
+          afterSlider: document.getElementById('token-scene-price').closest('.scene-price-control').nextElementSibling === feedback,
+          fills: [...document.querySelectorAll('.scene-token-figure .scene-token-fill')].map(fill => fill.getAnimations().find(item => !(item instanceof CSSTransition))?.effect.getTiming().delay ?? null) };
+      })()`);
+      assert.ok(reveal.onScreen && reveal.sliderOnScreen, `${width}px: the claim and its slider are on screen while the price move plays: ` + JSON.stringify(reveal));
+      assert.ok(reveal.gap < 170 && reveal.together, 'The slider sits right under the bars it moves, on one screen with them: ' + JSON.stringify(reveal));
+      assert.deepEqual(reveal.fills, [400, 400], 'The revealed price move plays from the starting claim.');
+      assert.match(reveal.verdict, /differs from your prediction[\s\S]*Less ETH\./);
+      assert.ok(reveal.afterSlider, 'The verdict follows the slider.');
+      if (width === 390) assert.ok(reveal.verdictTop < height - 60, 'The verdict starts on the same screen.');
+      await motionSettled(evaluate);
+    }
+    // Reduced motion shows lesson 3's outcome at once.
+    await evaluate("document.getElementById('learn-variation').click()");
+    await reduceMotion({ call, evaluate });
+    await evaluate("document.getElementById('learn-reveal').click()");
+    assert.deepEqual(await evaluate("[document.querySelector('.scene-token-figure').getAnimations({subtree:true}).length, document.getElementById('token-scene-at').textContent]"), [0, 'ETH at $750.00']);
+    await call('Emulation.setEmulatedMedia', { features: [] });
+
     // Later lessons keep the question-first layout, their setup box and the pitfall in the results.
-    await navigate(base + 'learn.html#lesson=token-balances');
+    await navigate(base + 'learn.html#lesson=loss-vs-profit');
     await evaluate("document.getElementById('learn-run').click()");
     assert.deepEqual(await evaluate(`({ poolFirst: document.getElementById('learn-essential').hasAttribute('data-pool-first'), setup: ${shown('#learn-setup')}, run: ${shown('#learn-run')},
       pitfall: document.getElementById('learn-pitfall').closest('#learn-results') !== null && (${shown('#learn-pitfall')}), title: document.getElementById('learn-check-title').textContent })`),
@@ -101,5 +138,5 @@ export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
     await call('Emulation.setEmulatedMedia', { features: [] });
     await evaluate(`${saved === null ? `localStorage.removeItem('${progressKey}')` : `localStorage.setItem('${progressKey}', ${JSON.stringify(saved)})`}`);
   }
-  console.log('PASS: lessons 1 and 2 show the pool first, reveal in place at 390/320px and keep slider and comparison together; later lessons are unchanged');
+  console.log('PASS: lessons 1 to 3 show their figure first, reveal in place at 390/320px and keep the slider with what it moves; later lessons are unchanged');
 }

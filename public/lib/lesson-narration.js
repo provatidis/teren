@@ -8,7 +8,7 @@ export function lessonFinding(id, outcome) {
     + ' USDC. The pool quotes ' + fmt(outcome.out, 2) + ' USDC for the whole trade, an average price of ' + usd(outcome.out / s.amount) + ' per ETH.';
   if (id === 'pool-share') return 'The pool holds ' + fmt(s.reserveEth + s.depositEth, 0) + ' ETH after your deposit, and ' + fmt(s.depositEth, 0) + ' of them came from you. You own '
     + fmt(outcome.share, 2) + '% of the pool: the same share of its ETH and of its USDC.';
-  if (id === 'token-balances') return tokenBalanceNarration(outcome).exchange;
+  if (id === 'token-balances') return tokenBalanceNarration(outcome).finding;
   if (id === 'range-boundaries') return outcome.prediction === 'usdc'
     ? 'At or above the upper ETH-price boundary, the position’s principal is all USDC.'
     : outcome.prediction === 'eth' ? 'At or below the lower ETH-price boundary, the position’s principal is all ETH.'
@@ -20,20 +20,57 @@ export function lessonFinding(id, outcome) {
   return 'A lower ETH price makes the original ETH and USDC worth less in dollars. Matching that basket with fees can leave both strategies below the starting budget.';
 }
 
+// Round claims read as round numbers: 1.25 ETH + 2,500 USDC, then 0.8839 ETH + 3,535.53 USDC.
+const tokenAmount = (value, digits) => value.toLocaleString('en-US', { maximumFractionDigits: digits });
+export const claimText = claim => tokenAmount(claim.eth, 4) + ' ETH + ' + tokenAmount(claim.usdc, 2) + ' USDC';
+
+// "Claim" is the tokens behind the reader's share, as in lesson 2. The check
+// question steps outside the scene: the market has moved and nobody has traded
+// yet. It asks who changes a claim, which the scene's ideal arbitrage hides.
 export function tokenBalanceNarration(outcome) {
   const { setup: s, result: r } = outcome;
   const direction = s.futurePrice > s.initialPrice ? 'up' : s.futurePrice < s.initialPrice ? 'down' : 'same';
+  const start = claimText(r.held), now = claimText(r.pooled);
   const exchange = direction === 'up'
-    ? 'Traders put USDC into the pool and take ETH out. The LP holds less ETH and more USDC.'
+    ? 'Traders buy ETH from the pool and pay in USDC. Your claim holds less ETH and more USDC.'
     : direction === 'down'
-      ? 'Traders put ETH into the pool and take USDC out. The LP holds more ETH and less USDC.'
-      : 'The price is unchanged. In this fee-free endpoint model, both token quantities stay the same.';
-  const correctReason = direction === 'up' ? 'Arbitrage traders exchange USDC for ETH, leaving the LP with less ETH and more USDC.'
-    : direction === 'down' ? 'Arbitrage traders exchange ETH for USDC, leaving the LP with more ETH and less USDC.'
-      : 'There is no price change to rebalance against in this fee-free endpoint model.';
-  return { direction, exchange, correctReason,
-    reasoning: direction === 'same' ? 'Why do the token quantities stay the same in this setup?' : 'What explains the change in token quantities?',
-    explanation: 'ETH moves from ' + usd(s.initialPrice) + ' to ' + usd(s.futurePrice) + '. ' + exchange + ' The LP starts with ' + fmt(r.held.eth, 6) + ' ETH and ' + fmt(r.held.usdc, 2) + ' USDC, and ends with ' + fmt(r.pooled.eth, 6) + ' ETH and ' + fmt(r.pooled.usdc, 2) + ' USDC. Tokens move through swaps; neither ETH nor USDC is created by the pool.' };
+      ? 'Traders sell ETH to the pool and take USDC out. Your claim holds more ETH and less USDC.'
+      : 'The price is unchanged, so nobody has a reason to trade. Both token amounts stay the same.';
+  const finding = direction === 'up'
+    ? 'Less ETH. Traders bought ETH from the pool and paid in USDC, so your claim went from ' + start + ' to ' + now + '.'
+    : direction === 'down'
+      ? 'More ETH. Traders sold ETH to the pool and took USDC out, so your claim went from ' + start + ' to ' + now + '.'
+      : 'The same ETH. The price has not moved, so nobody had a reason to trade. Your claim is still ' + start + '.';
+  const correctReason = direction === 'same' ? 'With no price change, nobody has a reason to trade with the pool.'
+    : 'Still ' + start + '. Only a trade changes it.';
+  const reasons = direction === 'same'
+    ? [['rebalance', correctReason], ['automatic', 'The pool keeps its token amounts fixed whatever the price does.'], ['drift', 'The pool needs more time before its amounts adjust.']]
+    : [['rebalance', correctReason], ['automatic', 'Already ' + now + '. The pool updates with the market price.'], ['drift', 'Something in between. The pool drifts toward the market price.']];
+  const waiting = 'Time alone changes nothing in a pool. Its balances move only when someone trades, deposits or withdraws.';
+  const feedbackByChoice = direction === 'same' ? {
+    rebalance: 'Traders act on a gap between the pool’s price and the market’s. With no gap there is nothing to trade on, so your claim stays at ' + start + '.',
+    automatic: 'The pool does not hold its amounts fixed: any trade changes them. They stay the same here because the price has not moved, so nobody has a reason to trade.',
+    drift: waiting + ' The price has not moved, so nobody has a reason to.',
+  } : {
+    rebalance: 'The pool has no price feed. Its balances change only when someone trades, deposits or withdraws, so your claim is still ' + start + '. '
+      + (direction === 'up' ? 'The pool now sells ETH below the market price, and the first trader to notice buys it.' : 'The pool now pays more than the market for ETH, and the first trader to notice sells to it.'),
+    automatic: 'The pool does not watch the market. Until someone trades, it holds its starting balances and still prices ETH at ' + usd(s.initialPrice) + '. '
+      + (direction === 'up' ? 'A trader buying that cheap ETH' : 'A trader selling ETH to it at that price') + ' is what takes your claim to ' + now + '.',
+    drift: waiting + ' A small trade would take your claim part of the way. With no trade it is still ' + start + '.',
+  };
+  return { direction, exchange, finding, correctReason, reasons, feedbackByChoice,
+    reasoning: direction === 'same' ? 'ETH’s market price has not moved. Why do the token amounts stay the same?'
+      : 'ETH’s market price ' + (direction === 'up' ? 'jumps' : 'drops') + ' to ' + usd(s.futurePrice) + ', but nobody has traded with the pool yet. What does your claim hold?',
+    explanation: 'ETH moves from ' + usd(s.initialPrice) + ' to ' + usd(s.futurePrice) + '. ' + exchange + ' Your claim starts at ' + start + ' and ends at ' + now + '. Tokens move through trades; neither ETH nor USDC is created by the pool.' };
+}
+
+// The prediction names the move: "ETH rises from $2,000.00 to $4,000.00."
+export function priceMovePrediction(setup) {
+  const start = usd(setup.initialPrice), end = usd(setup.futurePrice);
+  const move = setup.futurePrice > setup.initialPrice ? 'ETH rises from ' + start + ' to ' + end
+    : setup.futurePrice < setup.initialPrice ? 'ETH falls from ' + start + ' to ' + end
+      : 'ETH stays at ' + start;
+  return move + '. Will your claim hold less, more, or the same ETH?';
 }
 
 export function lossProfitReasoning(outcome) {
@@ -111,11 +148,8 @@ export function deeperPoolQuestion(outcome) {
 export function lessonReasonFeedback(id, outcome, reason, feedbackByChoice = {}) {
   if (id === 'swap-impact') return deeperPoolQuestion(outcome).feedbackByChoice[reason]
     || 'Choose an answer. Compare the swap with how much each pool holds.';
-  if (id === 'token-balances') {
-    const copy = tokenBalanceNarration(outcome);
-    if (reason === 'automatic') return 'Tokens change hands through trades. The pool does not move between token mixes on a timer or without a swap. ' + copy.exchange;
-    if (reason === 'ownership-share') return 'Your ownership share stays fixed here: nobody adds or removes liquidity. Swaps change the tokens behind that share. ' + copy.exchange;
-  }
+  if (id === 'token-balances') return tokenBalanceNarration(outcome).feedbackByChoice[reason]
+    || 'Choose an answer. Ask who can change the pool’s balances.';
   if (id === 'loss-vs-profit') {
     const copy = lossProfitReasoning(outcome);
     return reason === outcome.reason ? copy.feedback : copy.feedbackByChoice[reason]

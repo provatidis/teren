@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
-import { lessonFinding, rangeBoundaryNarration } from '../public/lib/lesson-narration.js';
+import { lessonFinding, rangeBoundaryNarration, priceMovePrediction, tokenBalanceNarration } from '../public/lib/lesson-narration.js';
 import { rangePositionState, rangeSceneState } from '../public/lib/liquidity-scene-state.js';
 import { managementCase } from '../public/models/range-decisions.js';
 import { lendingCase, checkLendingUnderstanding } from '../public/models/lending-lessons.js';
@@ -12,6 +12,7 @@ import { calculateLoop } from '../public/models/borrowing-loop-v1.js';
 import { appliedQuestion } from '../public/lib/applied-lessons.js';
 import { validatePositionPeriod } from '../public/data/position-period.js';
 import { depositSceneState } from '../public/lib/foundation-scene-state.js';
+import { LESSONS } from '../public/learning/liquidity-essentials.js';
 
 test('findings track changed price directions and the average price rather than the starting pool price', () => {
   const swap = runLesson('swap-impact', lessonSetup('swap-impact'));
@@ -21,7 +22,10 @@ test('findings track changed price directions and the average price rather than 
   // The difference is already in the quote. Calling it a loss would teach the
   // confusion the wallet question clears up.
   assert.doesNotMatch(finding, /\blos[est]/i);
-  for (const [price, text] of [[1000, /more ETH and less USDC/], [2000, /both token quantities stay the same/], [4000, /less ETH and more USDC/]]) {
+  // Lesson 3's verdict answers the question first, then shows the claim before and after.
+  for (const [price, text] of [[1000, /^More ETH\. Traders sold ETH to the pool.*from 1\.25 ETH \+ 2,500 USDC to 1\.7678 ETH \+ 1,767\.77 USDC\.$/],
+    [2000, /^The same ETH\..*nobody had a reason to trade\. Your claim is still 1\.25 ETH \+ 2,500 USDC\.$/],
+    [4000, /^Less ETH\. Traders bought ETH from the pool.*from 1\.25 ETH \+ 2,500 USDC to 0\.8839 ETH \+ 3,535\.53 USDC\.$/]]) {
     assert.match(lessonFinding('token-balances', runLesson('token-balances', { futurePrice: price })), text);
   }
   for (const variant of [0, 1, 2]) {
@@ -83,4 +87,25 @@ test('the historical contrast preserves the full record and its final assessed e
   assert.ok(question.view.gapUSD > 0);
   assert.ok(Math.abs(question.contrast.gapUSD + .5119849579) < 1e-8);
   assert.equal(JSON.stringify(period), before);
+});
+
+test('lesson 3 names its price move in the question and checks an idea its scene cannot show', () => {
+  const questions = [0, 1, 2].map(variant => priceMovePrediction(lessonSetup('token-balances', variant)));
+  assert.deepEqual(questions, [
+    'ETH rises from $2,000.00 to $4,000.00. Will your claim hold less, more, or the same ETH?',
+    'ETH falls from $1,500.00 to $750.00. Will your claim hold less, more, or the same ETH?',
+    'ETH rises from $3,000.00 to $4,500.00. Will your claim hold less, more, or the same ETH?',
+  ]);
+  assert.match(priceMovePrediction({ initialPrice: 2000, futurePrice: 2000 }), /^ETH stays at \$2,000\.00\./);
+  for (const variant of [0, 1, 2]) {
+    const copy = tokenBalanceNarration(runLesson('token-balances', lessonSetup('token-balances', variant), variant));
+    // The slider always shows a pool that traders have already brought to the
+    // market price, so a pool nobody has traded with yet is a new situation.
+    assert.match(copy.reasoning, /nobody has traded with the pool yet/);
+    // The lesson's one explanation must not hand over the answer word for word.
+    const lesson = LESSONS.find(item => item.id === 'token-balances');
+    for (const [, answer] of copy.reasons) assert.ok(!lesson.explanation.includes(answer.split('. ')[1]), answer);
+    const words = copy.reasons.map(([, answer]) => answer.split(' ').length);
+    assert.ok(Math.max(...words) - Math.min(...words) <= 3, 'answers are of similar length: ' + words);
+  }
 });

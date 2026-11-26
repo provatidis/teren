@@ -27,14 +27,16 @@ export const LESSONS = [
     takeaway: 'Your share is a fraction of whatever the pool holds. The tokens behind it change with every swap.',
   },
   {
-    id: 'token-balances', completion: 'You traced how swaps change the tokens a liquidity position owns.', protocol: 'Uniswap v2-style', title: 'Token balances after a price change', short: 'Changing token balances', concept: 'Allocation', skill: 'Explain what a price move does to token quantities.',
-    intro: 'When ETH’s market price changes, traders exchange tokens with the pool. Follow what comes in and what goes out.',
-    prediction: 'At your selected future price, will the LP hold less, more, or the same ETH as at the start?',
+    id: 'token-balances', completion: 'You traced how trades change the tokens behind your share.', protocol: 'Uniswap v2-style', title: 'Token balances after a price change', short: 'Changing token balances', concept: 'Allocation', skill: 'Explain what a price move does to token quantities.',
+    intro: 'When ETH’s market price moves, traders trade with the pool until its price catches up. Watch what that does to your claim, the tokens behind your share.',
+    // The question names the lesson's own price move: see priceMovePrediction.
+    prediction: 'After the price move, will your claim hold less, more, or the same ETH?',
     predictions: [['less', 'Less ETH'], ['more', 'More ETH'], ['same', 'The same ETH']],
-    reasoning: 'How does this model arrive at the token mix for a new ETH price?',
-    reasons: [['rebalance', 'Traders exchange ETH and USDC as the market price changes.'], ['automatic', 'The pool adjusts the token mix automatically, without anyone trading.'], ['ownership-share', 'The price change alters your ownership share of the pool.']],
-    explanation: 'When ETH rises, arbitrage buys ETH from the pool: the LP holds less ETH and more USDC. When ETH falls, it holds more ETH and less USDC. This is an endpoint model with ideal arbitrage and no fees.',
-    takeaway: 'Equal dollar weights do not mean fixed token quantities.',
+    // The question and its answers carry the lesson's own amounts: see tokenBalanceNarration.
+    reasoning: 'The market price moves, but nobody has traded with the pool yet. What does your claim hold?',
+    reasons: [['rebalance', 'The starting amounts. Only a trade changes them.'], ['automatic', 'The new amounts. The pool updates with the market price.'], ['drift', 'Something in between. The pool drifts toward the market price.']],
+    explanation: 'When ETH costs more elsewhere, traders buy it from the pool until the pool’s price catches up. When it costs less, they sell it to the pool. This is called arbitrage, and it leaves your claim with more of whichever token got cheaper.',
+    takeaway: 'Your share stays the same while the tokens behind it change. Traders leave you with more of whichever token got cheaper.',
   },
   {
     id: 'loss-vs-profit', completion: 'You distinguished dollar profit or loss from performance against holding.', protocol: 'Uniswap v2-style', title: 'Dollar profit and impermanent loss', short: 'Loss versus profit', concept: 'Benchmarks', skill: 'Separate dollar profit from impermanent loss.',

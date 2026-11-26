@@ -1,14 +1,6 @@
-import { sceneNode as node, createActionPlayer, createSceneExplorer } from './lesson-scene.js';
+import { sceneNode as node, createActionPlayer, createSceneExplorer, ACTION_MS, ACTION_EASING, REVEAL_DELAY_MS } from './lesson-scene.js';
 import { swapSceneState, depositSceneState } from './foundation-scene-state.js';
 import { fmt, usd } from './format.js';
-
-// A named action replays the change from the previous stage, slowly enough to
-// follow. Text, values and final widths are written at once; only painting is
-// delayed and eased, and reduced motion skips it.
-const ACTION_MS = 900;
-const ACTION_EASING = 'cubic-bezier(.45, 0, .2, 1)';
-// After the reveal jumps to the outcome, give the eye a moment to land first.
-const REVEAL_DELAY_MS = 400;
 
 const percent = value => fmt(value, 2) + '%';
 // Round claims read as round numbers: 5 ETH + 10,000 USDC, then 5.4762 ETH + 9,132.82 USDC.
