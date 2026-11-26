@@ -59,15 +59,15 @@ export function initLearning() {
   function updateProgress() {
     const count = progress.completed.length;
     if (!managementLessonFromHash(location.hash) && !appliedLessonFromHash(location.hash)) learningChapter('Essentials', count, 7);
-    $('learn-progress-count').textContent = count + ' of 7 checked';
+    $('learn-progress-count').textContent = count + ' of 7 done';
     $('learn-progress').value = count;
-    $('learn-progress').setAttribute('aria-label', count + ' of 7 exercises checked');
-    $('learn-course-status').textContent = count === 7 ? 'All essentials exercises checked. Continue with range choices or revisit an experiment.' : 'Swaps and ownership, then comparisons and price ranges.';
+    $('learn-progress').setAttribute('aria-label', count + ' of 7 exercises done');
+    $('learn-course-status').textContent = count === 7 ? 'All essentials exercises done. Continue with range choices or revisit an experiment.' : 'Swaps and ownership, then comparisons and price ranges.';
     for (const link of document.querySelectorAll('[data-lesson-id]')) {
       const id = link.dataset.lessonId;
       const active = !managementLessonFromHash(location.hash) && !appliedLessonFromHash(location.hash) && id === lesson?.id;
       link.setAttribute('aria-current', active ? 'step' : 'false');
-      link.querySelector('.learn-step-state').textContent = progress.completed.includes(id) ? 'Checked' : active ? 'Now exploring' : 'Open lesson';
+      link.querySelector('.learn-step-state').textContent = progress.completed.includes(id) ? 'Done' : active ? 'Now exploring' : 'Open lesson';
       link.classList.toggle('learn-step-done', progress.completed.includes(id));
     }
     if (lesson && !managementLessonFromHash(location.hash) && !appliedLessonFromHash(location.hash) && !matchMedia('(max-width: 750px)').matches) {

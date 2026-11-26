@@ -130,7 +130,38 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.deepEqual(await draft(), taskBeforeExploration, 'Observe exploration does not edit the assessed task.');
   assert.equal(await handoff(), originalHandoff);
   assert.deepEqual(await isolated(), working);
-  console.log('PASS: independent constructed challenge, default-task failure, explained example, explicit checks, preserved completion and isolated Observe/handoff');
+  // The two goals and the solved state follow the sliders at once, before any check.
+  const goals = () => evaluate("Array.from(document.querySelectorAll('#liquidity-task-goals li'), item => item.dataset.met)");
+  const fee = () => text('liquidity-task-fees-value');
+  await click('liquidity-task-reset');
+  assert.deepEqual(await goals(), ['true', 'false'], 'At the starting price the position matches holding without a dollar loss.');
+  assert.equal(await hidden('liquidity-task-solved'), true);
+  await fill('liquidity-task-price', '1500');
+  assert.deepEqual(await goals(), ['false', 'true']);
+  assert.equal(await text('liquidity-task-finding'), 'LP + fees is $44.87 below holding. Holding is $625.00 below the starting capital.');
+  await fill('liquidity-task-fees', '40');
+  assert.equal(await fee(), '$40.00', 'An amount reached in one jump is used as given.');
+  assert.equal(await text('liquidity-task-finding'), 'LP + fees is $4.87 below holding. Holding is $625.00 below the starting capital.');
+  await key('liquidity-task-fees', 'ArrowRight');
+  assert.equal(await fee(), '$44.87', 'An arrow step that crosses the matching amount stops on it.');
+  assert.ok(Math.abs((await draft()).task.fees - 44.8729810778068) < 1e-9, 'The slider settles on the exact amount, not a rounded one.');
+  assert.deepEqual(await goals(), ['true', 'true']);
+  assert.equal(await hidden('liquidity-task-solved'), false);
+  assert.match(await text('liquidity-task-solved'), /^Solved\. The pool position and holding are both worth \$4,375\.00, which is \$625\.00 less than you started with\./);
+  assert.equal(await hidden('learn-feedback'), true, 'Solving the task does not check the written answers.');
+  await key('liquidity-task-fees', 'ArrowRight');
+  assert.equal(await fee(), '$49.87', 'The next step moves on from the matching amount.');
+  assert.equal(await hidden('liquidity-task-solved'), true);
+  await key('liquidity-task-fees', 'Home');
+  assert.equal(await fee(), '$0.00', 'Home travels past the matching amount.');
+  assert.equal(await text('liquidity-task-match'), 'Match holding for me');
+  await click('liquidity-task-match');
+  assert.equal(await fee(), '$44.87');
+  assert.equal(await hidden('liquidity-task-solved'), false, 'The hint reaches the same solved state.');
+  await fill('liquidity-task-price', '2400');
+  assert.deepEqual(await goals(), ['false', 'false']);
+  assert.equal(await hidden('liquidity-task-solved'), true, 'A new price needs its own fee amount.');
+  console.log('PASS: independent constructed challenge, default-task failure, explained example, explicit checks, live goals and solved state, preserved completion and isolated Observe/handoff');
 
   for (const width of [390, 320]) {
     await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });

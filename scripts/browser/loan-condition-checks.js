@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { motionSettled } from './motion-settled.js';
 
 const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
 
@@ -40,6 +41,7 @@ export async function checkLoanConditionLesson({ evaluate, click, fill, text, na
   await evaluate("Array.from(document.querySelectorAll('.condition-scene .scene-shortcut')).find(button=>button.textContent.startsWith('Boundary')).click()");
   assert.equal(await evaluate("document.getElementById('condition-price').value"), '1375');
   assert.equal(await text('condition-health'), '1.00');
+  await motionSettled(evaluate);
   const equal = await evaluate("Array.from(document.querySelectorAll('.condition-fill')).map(bar=>bar.getBoundingClientRect().width)");
   assert.equal(equal[0], equal[1], 'Both values use the same dollar scale.');
   await key('condition-price', 'ArrowLeft');

@@ -310,7 +310,7 @@ export async function checkBorrowingLoops({ evaluate, click, fill, text, navigat
     assert.equal(await evaluate("document.querySelector('#lend-money-flow .scene-prediction-show').textContent"), 'Show the outcome again ↓');
     await click('lend-reveal');
     assert.equal(await text('lend-feedback-title'), 'Both answers are correct.', 'Reading the explanation does not erase checked answers.');
-    assert.equal(await text('lend-progress'), (index + 1) + ' of 3 checked');
+    assert.equal(await text('lend-progress'), (index + 1) + ' of 3 done');
     assert.match(await evaluate("document.getElementById('lend-explore').href"), /loop=borrowing-loop-v1/);
     assert.equal(await evaluate("document.getElementById('lend-explore').target"), '_blank');
   }

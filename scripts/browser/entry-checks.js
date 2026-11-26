@@ -38,7 +38,7 @@ export async function checkEntry({ navigate, evaluate, text, fill, click, nextEv
     const progress = await evaluate("Object.keys(localStorage).filter(k=>/learning|progress|liquidity/.test(k)).sort().map(k=>[k,localStorage.getItem(k)])");
     await navigate(base);
     assert.equal(await evaluate("document.getElementById('home-continue').getAttribute('href')"), route);
-    assert.deepEqual(await evaluate("Object.keys(localStorage).filter(k=>/learning|progress|liquidity/.test(k)).sort().map(k=>[k,localStorage.getItem(k)])"), progress, 'Home only reads the navigation bookmark.');
+    assert.deepEqual(await evaluate("Object.keys(localStorage).filter(k=>/learning|progress|liquidity/.test(k)).sort().map(k=>[k,localStorage.getItem(k)])"), progress, 'Home reads the bookmark and lesson progress without changing them.');
   }
   // Existing root fragments remain usable; replacement must not create a Back loop.
   await navigate(base + '#scenario=cp50-v1&investment=5000&start=2000&future=3333&fees=9');

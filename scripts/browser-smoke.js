@@ -1,4 +1,6 @@
 import { checkLPEconomics } from './browser/lp-economics-checks.js';
+import { checkHomeProgress } from './browser/home-progress-checks.js';
+import { checkMotion } from './browser/motion-checks.js';
 import { checkLoanInterest } from './browser/loan-interest-checks.js';
 import { checkLendingLessonHandoffs } from './browser/lending-lesson-handoff-checks.js';
 import { checkLendingShareLinks } from './browser/lending-share-checks.js';
@@ -254,6 +256,12 @@ try {
     assert.deepEqual(errors, [], 'No uncaught errors in the yield experiment');
     if (process.env.BROWSER_CHECKS === 'yield') return;
   }
+  if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'home-progress') {
+    await checkHomeProgress({ evaluate, navigate, base, call });
+    await checkMotion({ evaluate, navigate, base, call });
+    assert.deepEqual(errors, [], 'No uncaught errors in Home progress or motion');
+    if (process.env.BROWSER_CHECKS === 'home-progress') return;
+  }
   if (!process.env.BROWSER_CHECKS || process.env.BROWSER_CHECKS === 'startup') {
     await checkStartup({ evaluate, click, fill, text, navigate, base, call, nextEvent, waitForStartup });
     assert.deepEqual(errors, [], 'Startup failures are handled without uncaught errors');
@@ -289,6 +297,13 @@ try {
   }
   if (process.env.BROWSER_CHECKS === 'risk') {
     await checkLabRisk({ evaluate, click, fill, text, navigate, reload, base, call });
+    assert.deepEqual(errors, [], 'No uncaught browser errors');
+    return;
+  }
+  if (process.env.BROWSER_CHECKS === 'loan-scenes') {
+    await checkLoanConditionLesson({ evaluate, click, fill, text, navigate, reload, base, call });
+    await checkLoanResponseLesson({ evaluate, click, fill, text, navigate, reload, base, call });
+    await checkLoopStressLesson({ evaluate, click, fill, text, navigate, reload, base, call });
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     return;
   }

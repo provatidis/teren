@@ -12,7 +12,7 @@ export function renderPredictionFeedback(element, choices, selected, actual, fin
 
 export function learningChapter(chapter, completed, total) {
   document.getElementById('learn-current-chapter').textContent = chapter;
-  document.getElementById('learn-current-progress').textContent = completed + ' of ' + total + ' checked';
+  document.getElementById('learn-current-progress').textContent = completed + ' of ' + total + ' done';
 }
 
 export function focusLearningFeedback(prefix) {

@@ -123,13 +123,13 @@ export async function checkLending({ evaluate, click, fill, text, navigate, base
     assert.equal(await text('lend-feedback-title'), 'Review your answers.');
     await choose('reason', reason); await choose('application', application); await click('lend-check');
     assert.equal(await text('lend-feedback-title'), 'Both answers are correct.');
-    assert.equal(await text('lend-progress'), (index + 1) + ' of 4 checked');
+    assert.equal(await text('lend-progress'), (index + 1) + ' of 4 done');
     assert.equal(await evaluate('document.activeElement.id'), 'lend-feedback');
     assert.match(await evaluate("document.getElementById('lend-explore').href"), /loan=collateral-loan-v1/);
     assert.equal(await evaluate("document.getElementById('lend-explore').target"), '_blank');
   }
   await navigate(base + 'lending.html#lesson=respond');
-  assert.equal(await text('lend-progress'), '4 of 4 checked');
+  assert.equal(await text('lend-progress'), '4 of 4 done');
   assert.equal(await evaluate("document.getElementById('lend-continue').hidden"), false);
   await click('lending-nav-experiment'); await settle(evaluate);
   assert.equal(await evaluate("document.getElementById('loan-future').value"), '1500');

@@ -6,6 +6,12 @@
 .learning-application-scene .scene-consequence { margin: 14px 0; font-size: 15px; }
 .learning-application-scene .scene-essential-note { margin-bottom: 0; }
 .learning-application-scene .learn-answer-feedback { margin-top: 16px; }
+.learning-task-goals { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 14px 0 4px; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
+.learning-task-goals li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.learning-task-goals li > span[aria-hidden] { display: inline-block; width: 1.1em; text-align: center; }
+.learning-task-goals li[data-met=true] { color: var(--accent); font-weight: 600; }
+.learning-application-scene .learning-task-solved { margin: 0 0 16px; }
+.learning-application-scene .learning-task-solved > strong { margin-right: 2px; }
 @media (max-width: 450px) { .learning-application-scene { padding: 14px 10px; } }
 .learn-setup { font-size: 16px; line-height: 1.6; color: var(--text); margin: 20px 0; padding: 18px; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 10px; }
 .learn-setup .learn-setup-title { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--accent); }

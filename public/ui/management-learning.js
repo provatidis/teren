@@ -22,12 +22,12 @@ export function initManagementLearning() {
   const fresh=(variant=0)=>({variant,prediction:'',reason:'',application:'',revealed:false,choiceSeed:newChoiceSeed(),questionRevisions:managementQuestionRevisions(lesson.id,variant)});
   function focus(id) {$(id).focus({preventScroll:true});$(id).scrollIntoView({block:'start',behavior:'instant'});}
   function navigation() {
-    $('manage-progress-count').textContent=progress.completed.length+' of 3 checked';
+    $('manage-progress-count').textContent=progress.completed.length+' of 3 done';
     if(managementLessonFromHash(location.hash))learningChapter('Range choices',progress.completed.length,3);
     for(const link of document.querySelectorAll('[data-management-id]')) {
       const id=link.dataset.managementId, active=id===managementLessonFromHash(location.hash), complete=progress.completed.includes(id);
       link.setAttribute('aria-current',active?'step':'false');link.classList.toggle('learn-step-done',complete);
-      link.querySelector('.learn-step-state').textContent=complete?'Checked':active?'Now exploring':'Open exercise';
+      link.querySelector('.learn-step-state').textContent=complete?'Done':active?'Now exploring':'Open exercise';
     }
   }
   function persist() {

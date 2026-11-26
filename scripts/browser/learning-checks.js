@@ -8,7 +8,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   const position = await evaluate("localStorage.getItem('degenerator-v3-position-snapshot-v1')");
   await navigate(base + 'learn.html#lesson=range-boundaries');
   assert.equal(await text('learn-lesson-title'), 'Token balances at range boundaries');
-  assert.equal(await text('learn-progress-count'), '0 of 7 checked');
+  assert.equal(await text('learn-progress-count'), '0 of 7 done');
   assert.equal(await evaluate("document.querySelector('.product-nav a[aria-current=page]').textContent"), 'Learn');
   assert.equal(await evaluate("document.querySelectorAll('[data-lesson-id]').length"), 7);
   assert.equal(await text('learn-level'), 'Uniswap v3-style · Ranges');
@@ -67,11 +67,11 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
       await choose('learn-application','quote-misread');
       await click('learn-check');
       assert.match(await text('learn-applications-feedback'), /Price impact and slippage tolerance are different/);
-      assert.equal(await text('learn-progress-count'), '0 of 7 checked');
+      assert.equal(await text('learn-progress-count'), '0 of 7 done');
       await choose('learn-application', application);
       await choose('learn-reason', 'fixed'); await click('learn-check');
       assert.match(await text('learn-reasons-feedback'), /Spot price describes the pool before this trade/);
-      assert.equal(await text('learn-progress-count'), '0 of 7 checked');
+      assert.equal(await text('learn-progress-count'), '0 of 7 done');
       await choose('learn-reason', reason);
     }
     if (id === 'final-challenge') await click('liquidity-task-example');
@@ -98,8 +98,8 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
       assert.equal(await evaluate("document.getElementById('learn-explore').target"), '_blank');
     }
   }
-  assert.equal(await text('learn-progress-count'), '7 of 7 checked');
-  assert.match(await text('learn-course-status'), /All essentials exercises checked/);
+  assert.equal(await text('learn-progress-count'), '7 of 7 done');
+  assert.match(await text('learn-course-status'), /All essentials exercises done/);
   assert.equal(await evaluate("document.getElementById('learn-share').hidden"), false);
   await evaluate("Object.defineProperty(navigator, 'clipboard', { configurable:true, value:{writeText:async value=>{window.learningCopied=value}} });");
   await click('learn-copy');
@@ -154,7 +154,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate("document.getElementById('learn-share').hidden"), true);
   assert.equal(await evaluate("document.querySelector('#learn-answer, #learn-calculation, #learn-calculation-check')"),null);
   assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false, 'The visual challenge permits explanation without a prediction.');
-  assert.equal(await text('learn-progress-count'), '7 of 7 checked');
+  assert.equal(await text('learn-progress-count'), '7 of 7 done');
   await reload();
   assert.equal(await text('learn-variation-label'), 'Variation 2 of 3');
   await navigate(base + 'learn.html#lesson=not-a-lesson');

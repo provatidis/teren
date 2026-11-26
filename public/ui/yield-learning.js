@@ -31,13 +31,13 @@ export function initYieldLearning() {
     return { id: entry.id, link, state };
   });
   function updateNavigation() {
-    el('progress').textContent = progress.completed.length + ' of ' + links.length + ' checked';
+    el('progress').textContent = progress.completed.length + ' of ' + links.length + ' done';
     for (const { id, link, state } of links) {
       const completed = progress.completed.includes(id);
       link.classList.toggle('learn-step-done', completed);
       if (id === lesson.id) link.setAttribute('aria-current', 'step');
       else link.removeAttribute('aria-current');
-      state.textContent = completed ? 'Checked' : id === lesson.id ? 'Now exploring' : 'Open lesson';
+      state.textContent = completed ? 'Done' : id === lesson.id ? 'Now exploring' : 'Open lesson';
     }
   }
   function save() {

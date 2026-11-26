@@ -31,7 +31,15 @@
 .home-loan-branches span:last-child { color: var(--text); }
 .home-topic-actions { display: grid; gap: 10px; margin: 0 0 18px; }
 .home-topic-actions .button { display: flex; align-items: center; justify-content: space-between; min-height: 48px; width: 100%; padding: 10px 14px; font-size: 15px; text-align: left; }
-.home-topic-actions .button span { font-size: 20px; }
+.home-topic-actions .button span[aria-hidden="true"] { font-size: 20px; }
+/* Shown on every topic once one lesson is done; a first visit keeps the plain cards. */
+.home-progress { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0 12px; margin: -4px 0 18px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.home-progress progress { flex: 0 0 100%; display: block; width: 100%; height: 5px; margin-bottom: 8px; border: 0; border-radius: 4px; overflow: hidden; accent-color: var(--accent); }
+.home-progress progress::-webkit-progress-bar { background: var(--bg); }
+.home-progress progress::-webkit-progress-value { background: var(--accent); }
+.home-progress progress::-moz-progress-bar { background: var(--accent); }
+.home-progress-count { flex: none; }
+.home-progress-next { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; color: var(--accent); }
 .home-return-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
 .home-return-links .home-continue { margin-top: 0; }
 .home-return-links:has(a:not([hidden])) { margin-bottom: 8px; }
