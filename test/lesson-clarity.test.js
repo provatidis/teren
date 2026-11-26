@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
-import { lessonFinding, rangeBoundaryNarration, priceMovePrediction, tokenBalanceNarration, benchmarkPrediction, lossProfitReasoning } from '../public/lib/lesson-narration.js';
+import { lessonFinding, rangeBoundaryNarration, priceMovePrediction, tokenBalanceNarration, benchmarkPrediction, lossProfitReasoning, feePrediction } from '../public/lib/lesson-narration.js';
 import { rangePositionState, rangeSceneState } from '../public/lib/liquidity-scene-state.js';
 import { managementCase } from '../public/models/range-decisions.js';
 import { lendingCase, checkLendingUnderstanding } from '../public/models/lending-lessons.js';
@@ -138,4 +138,27 @@ test('lesson 4 asks about holding in the lesson’s own numbers and leaves the c
   }
   assert.match(lesson.explanation, /never beats holding[\s\S]*impermanent loss[\s\S]*a comparison, not a charge/);
   assert.doesNotMatch(lesson.intro, /fall behind|behind holding|trails/);
+});
+
+test('lesson 5 asks which bar fees grow, in the lesson’s own numbers, and says where they leave the claim', () => {
+  const lesson = LESSONS.find(item => item.id === 'fee-break-even');
+  for (const variant of [0, 1, 2]) {
+    const outcome = runLesson('fee-break-even', lessonSetup('fee-break-even', variant), variant), { result, setup } = outcome;
+    const { question, choices } = feePrediction(setup, result);
+    assert.ok(question.startsWith('ETH is at ' + usd(setup.futurePrice) + ' and your claim is ' + usd(result.breakEvenFees) + ' behind holding. Then it earns ' + usd(setup.fees) + ' in trading fees.'), question);
+    assert.deepEqual(choices, lesson.predictions);
+    assert.equal(outcome.prediction, 'toward-target');
+    assert.equal(choices[0][0], outcome.prediction);
+    const finding = lessonFinding('fee-break-even', outcome), after = result.breakEvenFees - setup.fees;
+    assert.ok(finding.startsWith('Only your claim. ' + usd(setup.fees) + ' in fees takes it from ' + usd(result.breakEvenFees) + ' behind holding to ' + usd(Math.abs(after)) + (after > 0 ? ' behind.' : ' ahead.')), finding);
+    assert.match(finding, /Holding is tokens in a wallet: it earns no fees\.$/);
+  }
+  // Variations cover fees that fall short of the gap and fees that pass it.
+  const sides = [0, 1, 2].map(variant => { const { result, setup } = runLesson('fee-break-even', lessonSetup('fee-break-even', variant), variant); return Math.sign(result.breakEvenFees - setup.fees); });
+  assert.ok(sides.includes(1) && sides.includes(-1), String(sides));
+  // Fees that exactly close the gap read as level, and a setup without a gap or fees still reads plainly.
+  const base = lessonSetup('fee-break-even'), gap = runLesson('fee-break-even', base).result.breakEvenFees;
+  assert.match(lessonFinding('fee-break-even', runLesson('fee-break-even', { ...base, fees: gap })), /to level with it\./);
+  const flat = runLesson('fee-break-even', { ...base, futurePrice: base.initialPrice, fees: 0 });
+  assert.match(feePrediction(flat.setup, flat.result).question, /your claim is level with holding\. Then it earns trading fees\. Which bar grows\?$/);
 });

@@ -27,6 +27,7 @@ import { checkLoopStressLesson } from './browser/loop-stress-checks.js';
 import { checkReviewPolish } from './browser/review-polish-checks.js';
 import { checkComparisonLessons } from './browser/comparison-lesson-checks.js';
 import { checkBenchmarkLesson } from './browser/benchmark-lesson-checks.js';
+import { checkFeeLesson } from './browser/fee-lesson-checks.js';
 import { checkBorrowingLoops } from './browser/borrowing-loop-checks.js';
 import { checkProjectInformation, checkMobileTools } from './browser/clarity-checks.js';
 import { checkLending } from './browser/lending-checks.js';
@@ -317,6 +318,7 @@ try {
     await checkRangePicks({ evaluate, navigate, base, call });
     await checkPoolFirstLesson({ evaluate, navigate, base, call });
     await checkBenchmarkLesson({ evaluate, click, fill, text, navigate, reload, base, call });
+    await checkFeeLesson({ evaluate, click, fill, text, navigate, reload, base, call });
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     return;
   }
@@ -815,6 +817,7 @@ try {
   await checkLoopStressLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkReviewPolish({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkBenchmarkLesson({ evaluate, click, fill, text, navigate, reload, base, call });
+  await checkFeeLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkComparisonLessons({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkLearningApplications({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent });

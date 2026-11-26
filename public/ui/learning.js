@@ -3,7 +3,7 @@ import { focusSceneOutcome, createPredictionPrompt, markPredictionRevealed, fold
 import { createTokenBalanceScene, createRangeBoundaryScene } from '../lib/liquidity-lesson-scenes.js';
 import { createFoundationScene } from '../lib/foundation-lesson-scenes.js';
 import { createComparisonScene, comparisonQuestion } from '../lib/comparison-lesson-scene.js';
-import { createBenchmarkScene } from '../lib/benchmark-lesson-scene.js';
+import { createBenchmarkScene, createFeeScene } from '../lib/benchmark-lesson-scene.js';
 import { createLiquidityApplication } from '../lib/liquidity-application-scene.js';
 import { stageForLesson } from '../learning/example-path.js';
 import { DEEPER_READING } from '../learning/deeper-reading.js';
@@ -24,7 +24,7 @@ import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
 import { resultCardBlob } from '../lib/result-card.js';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
-import { tokenBalanceNarration, lossProfitReasoning, rangeBoundaryNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding, deeperPoolQuestion, depositPrediction, priceMovePrediction, benchmarkPrediction } from '../lib/lesson-narration.js';
+import { tokenBalanceNarration, lossProfitReasoning, rangeBoundaryNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding, deeperPoolQuestion, depositPrediction, priceMovePrediction, benchmarkPrediction, feePrediction } from '../lib/lesson-narration.js';
 
 function finalReason(outcome) {
   const r = outcome.result;
@@ -39,15 +39,16 @@ export function initLearning() {
   const predictionFeedbackElement = $('learn-prediction-feedback');
   const predictionField = $('learn-prediction-field'), controls = $('learn-controls');
   let lessonScene, applicationScene;
-  // Lessons 1 to 4 put the figure before the question and reveal the outcome in
+  // Lessons 1 to 5 put the figure before the question and reveal the outcome in
   // place. Links from lesson 1's pilot (&layout=play) still open it.
-  const POOL_FIRST = ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit'];
+  const POOL_FIRST = ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit', 'fee-break-even'];
   let poolFirst = false;
-  // Lessons 2 to 4 ask their prediction in the setup's own numbers.
+  // Lessons 2 to 5 ask their prediction in the setup's own numbers.
   const predictionCopy = () => lesson.id === 'pool-share' ? depositPrediction(draft.inputs)
     : lesson.id === 'token-balances' ? { question: priceMovePrediction(draft.inputs), choices: lesson.predictions }
       : lesson.id === 'loss-vs-profit' ? benchmarkPrediction(draft.inputs)
-        : { question: lesson.prediction, choices: lesson.predictions };
+        : lesson.id === 'fee-break-even' ? feePrediction(draft.inputs, runLesson(lesson.id, draft.inputs, draft.variant).result)
+          : { question: lesson.prediction, choices: lesson.predictions };
   const pitfallElement = $('learn-pitfall');
   const foundationLesson = () => ['swap-impact', 'pool-share'].includes(lesson?.id);
   const comparisonLesson = () => ['loss-vs-profit', 'fee-break-even', 'final-challenge'].includes(lesson?.id);
@@ -121,7 +122,9 @@ export function initLearning() {
     const s = draft.inputs;
     if (lesson.id === 'swap-impact') return formatTokenQuantity(s.amount, 4) + ' ETH swap';
     if (lesson.id === 'pool-share') return formatTokenQuantity(s.depositEth, 4) + ' ETH deposit';
-    return 'ETH at ' + usd(s.futurePrice) + (['fee-break-even', 'final-challenge'].includes(lesson.id) ? ' · ' + usd(s.fees) + ' in fees' : '');
+    // Lesson 5 holds the price still: its question is about the fees.
+    if (lesson.id === 'fee-break-even') return usd(s.fees) + ' in fees';
+    return 'ETH at ' + usd(s.futurePrice) + (lesson.id === 'final-challenge' ? ' · ' + usd(s.fees) + ' in fees' : '');
   }
   function explanationLabel() {
     if (lesson.id === 'final-challenge') return 'Compare with the worked example ↓';
@@ -130,7 +133,7 @@ export function initLearning() {
   }
   function renderPrediction() {
     renderPredictionFeedback(predictionFeedbackElement, predictionCopy().choices, draft.prediction, outcome.prediction,
-      (lesson.id === 'final-challenge' ? '' : questionLabel() + ': ') + lessonFinding(lesson.id, outcome));
+      (['final-challenge', 'fee-break-even'].includes(lesson.id) ? '' : questionLabel() + ': ') + lessonFinding(lesson.id, outcome));
     markPredictionRevealed(predictionField);
     if (poolFirst) foldPrediction(predictionField, 'Your prediction for ' + (foundationLesson() ? 'the ' : '') + questionLabel());
   }
@@ -165,6 +168,7 @@ export function initLearning() {
       prediction.querySelector('.scene-prediction-show').id = 'learn-reveal';
       lessonScene = foundationLesson() ? createFoundationScene(lesson.id, s, draft.variant, prediction, { explanation: lesson.explanation })
         : lesson.id === 'loss-vs-profit' ? createBenchmarkScene(s, prediction, { explanation: lesson.explanation })
+        : lesson.id === 'fee-break-even' ? createFeeScene(s, prediction, { explanation: lesson.explanation })
         : comparisonLesson() ? createComparisonScene(lesson.id, s, hasTask ? null : prediction)
         : lesson.id === 'range-boundaries' ? createRangeBoundaryScene(s, prediction)
         : createTokenBalanceScene(s, prediction, { explanation: lesson.explanation });
@@ -186,7 +190,8 @@ export function initLearning() {
                 : ' Each trade size you explore starts from the same pool.')
             : 'You start with ' + usd(s.investment) + ', half in ETH and half in USDC, at ' + usd(s.initialPrice) + ' per ETH. '
               + (lesson.id === 'loss-vs-profit' ? 'Holding keeps those tokens in your wallet. Each price you explore is a separate outcome, as if traders had already brought the pool’s price to the market’s. Fees are left out here; the next lesson adds them.'
-                : 'Each price you explore is compared with that same start, as if traders had already brought the pool’s price to the market’s. Fees are left out.'))),
+                : lesson.id === 'fee-break-even' ? 'ETH has moved to ' + usd(s.futurePrice) + ' and stays there while you change the fees. Fees are cash you choose, added to your claim after any protocol share. Gas and other costs are left out.'
+                  : 'Each price you explore is compared with that same start, as if traders had already brought the pool’s price to the market’s. Fees are left out.'))),
           sceneNode('p', $('learn-variation-label').textContent + '. Try another variation for new ' + (foundationLesson() ? 'pool balances' : 'prices') + '.'));
         lessonScene.element.append(about);
       }
@@ -367,7 +372,7 @@ export function initLearning() {
     $('learn-metrics').hidden = visualLesson(); $('learn-visual').hidden = visualLesson();
     $('learn-experiment-title').textContent = {
       'swap-impact': 'Follow the swap', 'pool-share': 'Watch your pool share', 'token-balances': 'Watch your claim',
-      'loss-vs-profit': 'Profit compared with what?', 'fee-break-even': 'Fees and the holding benchmark', 'final-challenge': 'Start with the same tokens', 'range-boundaries': 'Watch the price cross your range',
+      'loss-vs-profit': 'Profit compared with what?', 'fee-break-even': 'Can fees close the gap?', 'final-challenge': 'Start with the same tokens', 'range-boundaries': 'Watch the price cross your range',
     }[lesson.id] || 'Your experiment';
     $('learn-results-title').after(predictionFeedbackElement);
     if (lesson.id === 'range-boundaries') {

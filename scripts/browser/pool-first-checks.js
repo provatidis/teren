@@ -4,10 +4,10 @@ import { motionSettled, reduceMotion } from './motion-settled.js';
 const shown = id => `document.querySelector(${JSON.stringify(id)})?.checkVisibility() ?? false`;
 const box = selector => `(r => [r.top, r.bottom])(document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect())`;
 
-// Liquidity lessons 1 to 4 put the figure first: the question sits under it and
+// Liquidity lessons 1 to 5 put the figure first: the question sits under it and
 // reveals the outcome with the figure on screen. Links from lesson 1's pilot still
-// open it, and later lessons keep the question-first layout. Lesson 4's own
-// layout checks are in benchmark-lesson-checks.js.
+// open it, and later lessons keep the question-first layout. Lessons 4 and 5 have
+// their own layout checks in benchmark-lesson-checks.js and fee-lesson-checks.js.
 export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
   const progressKey = 'degenerator-learning-liquidity-v1';
   await navigate(base + 'learn.html');
@@ -125,7 +125,7 @@ export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
     await call('Emulation.setEmulatedMedia', { features: [] });
 
     // Later lessons keep the question-first layout, their setup box and the pitfall in the results.
-    await navigate(base + 'learn.html#lesson=fee-break-even');
+    await navigate(base + 'learn.html#lesson=range-boundaries');
     await evaluate("document.getElementById('learn-run').click()");
     assert.deepEqual(await evaluate(`({ poolFirst: document.getElementById('learn-essential').hasAttribute('data-pool-first'), setup: ${shown('#learn-setup')}, run: ${shown('#learn-run')},
       pitfall: document.getElementById('learn-pitfall').closest('#learn-results') !== null && (${shown('#learn-pitfall')}), title: document.getElementById('learn-check-title').textContent })`),

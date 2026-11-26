@@ -13,8 +13,9 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     for (let i = 0; i < 3 && !(await text('learn-variation-label')).includes('1 of 3'); i++) await click('learn-variation');
   };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
-  // Lessons 5 and 7 share this figure. Lesson 4 has its own: see benchmark-lesson-checks.js.
-  for (const [id, reason, application] of [['fee-break-even', 'assumption', 'gap-reopens'], ['final-challenge', 'total', 'relative-gap']]) {
+  // Only lesson 7's worked example still uses this figure. Lessons 4 and 5 have their own:
+  // see benchmark-lesson-checks.js and fee-lesson-checks.js.
+  for (const [id, reason, application] of [['final-challenge', 'total', 'relative-gap']]) {
     await navigate(base + 'learn.html#lesson=' + id); await reset();
     assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false);
     assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
@@ -104,7 +105,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
       assert.equal(await text('comparison-start-value'), usd(question.setup.investment));
     }
   }
-  console.log('PASS: two fee comparison lessons, all variants, optional predictions, fixed benchmarks, exact fee target, mode preservation, isolated exploration and restored conceptual completion');
+  console.log('PASS: the worked fee comparison, all variants, optional predictions, fixed benchmarks, exact fee target, mode preservation, isolated exploration and restored conceptual completion');
 
   await reset(); await click('learn-run');
   await evaluate("{const progress=JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1'));Object.assign(progress.drafts['final-challenge'].inputs,{futurePrice:2033.25,fees:123.45});localStorage.setItem('degenerator-learning-liquidity-v1',JSON.stringify(progress));}");
@@ -119,7 +120,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
   await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
   for (const width of [390, 320]) {
     await call('Emulation.setDeviceMetricsOverride', { width, height: 740, deviceScaleFactor: 1, mobile: true });
-    for (const id of ['fee-break-even', 'final-challenge']) {
+    for (const id of ['final-challenge']) {
       await navigate(base + 'learn.html#lesson=' + id); await reset();
       if (id === 'final-challenge') {
         await click('learn-run');
