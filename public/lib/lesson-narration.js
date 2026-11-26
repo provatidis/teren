@@ -6,7 +6,8 @@ export function lessonFinding(id, outcome) {
   // is not called a loss. The wallet question later depends on that.
   if (id === 'swap-impact') return 'At the starting pool price of ' + usd(s.initialPrice) + ', ' + fmt(s.amount, 0) + ' ETH is worth ' + fmt(s.amount * s.initialPrice, 0)
     + ' USDC. The pool quotes ' + fmt(outcome.out, 2) + ' USDC for the whole trade, an average price of ' + usd(outcome.out / s.amount) + ' per ETH.';
-  if (id === 'pool-share') return 'Your deposit buys ' + fmt(outcome.share, 2) + '% of the enlarged pool. Ownership includes your deposit in the total and gives you a claim on both tokens.';
+  if (id === 'pool-share') return 'The pool holds ' + fmt(s.reserveEth + s.depositEth, 0) + ' ETH after your deposit, and ' + fmt(s.depositEth, 0) + ' of them came from you. You own '
+    + fmt(outcome.share, 2) + '% of the pool: the same share of its ETH and of its USDC.';
   if (id === 'token-balances') return tokenBalanceNarration(outcome).exchange;
   if (id === 'range-boundaries') return outcome.prediction === 'usdc'
     ? 'At or above the upper ETH-price boundary, the position’s principal is all USDC.'
@@ -76,6 +77,20 @@ export function rangeBoundaryNarration(outcome) {
       : 'At the unchanged price, the position keeps its starting ETH and USDC amounts in this fee-free model.';
   return exchange + ' ' + lessonFinding('range-boundaries', outcome)
     + ' Outside the range, swaps stop changing its token amounts until price returns. This final token mix does not tell us how much it earned earlier.';
+}
+
+// The share question in the lesson's own numbers: the deposit against the pool
+// before it, or against the pool that includes it.
+export function depositPrediction(setup) {
+  const deposit = fmt(setup.depositEth, 0) + ' ETH';
+  const percent = value => fmt(value, Number.isInteger(value) ? 0 : 2) + '%';
+  return {
+    question: 'After the deposit, what share of the pool will you own?',
+    choices: [
+      ['less', percent(setup.depositEth / (setup.reserveEth + setup.depositEth) * 100) + ', my ' + deposit + ' out of the ' + fmt(setup.reserveEth + setup.depositEth, 0) + ' ETH it will hold'],
+      ['same', percent(setup.depositEth / setup.reserveEth * 100) + ', my ' + deposit + ' out of the ' + fmt(setup.reserveEth, 0) + ' ETH it holds now'],
+    ],
+  };
 }
 
 // The same swap in this pool and in one ten times deeper, in the lesson's own numbers.

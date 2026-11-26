@@ -5,10 +5,11 @@
 .foundation-pool .scene-token-track { margin-bottom: 4px; }
 .foundation-pool .scene-token-fill { position: relative; overflow: hidden; }
 .foundation-owned { position: absolute; top: 0; right: 0; height: 100%; background: repeating-linear-gradient(135deg, #172635 0 2px, transparent 2px 5px); border-left: 1px solid #172635; }
-.foundation-pool-price { font-size: 14px; line-height: 1.7; margin: 14px 0 0; font-variant-numeric: tabular-nums; }
-.foundation-execution { font-size: 15px; line-height: 1.7; font-weight: 600; margin: 12px 0 0; }
-.foundation-execution + .foundation-pool-price { margin-top: 2px; }
-.foundation-pool-share { font-size: 14px; line-height: 1.7; min-height: 1.7em; margin: 8px 0 0; font-weight: 600; }
+.foundation-fact { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 0 12px; margin: 4px 0 0; font-size: 14px; line-height: 1.7; }
+.foundation-balances + .foundation-fact, .foundation-balances + [hidden] + .foundation-fact { margin-top: 12px; }
+.foundation-fact > strong { min-width: 19ch; text-align: right; white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+.foundation-fact > strong > span { display: block; }
+#foundation-average > span { font-weight: 600; }
 .foundation-pool .scene-key { margin: 8px 0 0; }
 .foundation-outcome { margin: 20px 0; padding: 18px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); }
 .foundation-outcome h4 { margin: 0 0 18px; font-size: 16px; line-height: 1.6; }
@@ -19,6 +20,14 @@
 .foundation-outcome .learn-pitfall { margin: 16px 0 0; }
 .foundation-invite { font-size: 16px; line-height: 1.6; font-weight: 600; margin: 22px 0 0; }
 .foundation-invite + .scene-price-control { margin-top: 10px; }
+.foundation-later { margin: 20px 0 0; }
+.foundation-later .foundation-invite { margin-top: 0; }
+.foundation-later button { margin-top: 10px; min-height: 44px; }
+.foundation-later-result { margin: 8px 0 0; }
+.foundation-later-result .foundation-fact { grid-template-columns: auto minmax(0, 1fr); margin-top: 2px; }
+.foundation-later-result .foundation-fact > span { min-width: 7.5em; color: var(--muted); }
+.foundation-later-result .foundation-fact > strong { min-width: 0; text-align: left; }
+.foundation-later .text-button { color: var(--accent); font-size: 14px; }
 .foundation-scene .scene-question-scope:empty { display: none; }
 .foundation-comparison-row { margin: 16px 0; }
 .foundation-comparison-row p { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 6px; font-size: 13px; line-height: 1.6; }
@@ -28,6 +37,21 @@
 .foundation-comparison-row:nth-of-type(1) .foundation-comparison-track > span { background: var(--muted); }
 .foundation-outcome .foundation-share { font-weight: 600; font-size: 18px; margin: 0 0 12px; }
 .foundation-balances { scroll-margin-block: 12px 24px; }
+/* On a wide figure each value sits beside its label, in a label column sized for the lesson's own labels. */
+@media (min-width: 751px) {
+  .foundation-pool .foundation-fact { grid-template-columns: 14.5em auto; justify-content: start; }
+  .foundation-pool[data-action=deposit] .foundation-fact { grid-template-columns: 7em auto; }
+  .foundation-pool .foundation-fact > strong { min-width: 0; text-align: left; }
+  .foundation-pool .foundation-fact > strong > span { display: inline; }
+}
+@media (max-width: 360px) {
+  .foundation-fact { grid-template-columns: minmax(0, 1fr); }
+  .foundation-fact > strong { min-width: 0; text-align: left; }
+}
+/* The longest claim does not fit beside its label on a phone, so every claim sits under it. */
+@media (max-width: 480px) {
+  .foundation-later-result .foundation-fact { grid-template-columns: minmax(0, 1fr); line-height: 1.5; margin-top: 6px; }
+}
 @media (max-width: 750px) {
   .foundation-outcome { padding: 12px; }
   .foundation-pool .scene-token-heading { font-size: 14px; }

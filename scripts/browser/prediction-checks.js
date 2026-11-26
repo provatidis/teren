@@ -38,8 +38,8 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         await navigate(base + route); await ready();
         assert.equal(await evaluate(`document.querySelector('${selector} input').checkVisibility()`), true, route + ': choices are visible immediately');
         assert.equal(await evaluate(`document.querySelector('${selector} input:checked') === null`), true);
-        // Liquidity lesson 1 has no setup box: the pool above the question carries the setup.
-        const poolFirst = id === 'swap-impact';
+        // Liquidity lessons 1 and 2 have no setup box: the pool above the question carries the setup.
+        const poolFirst = ['swap-impact', 'pool-share'].includes(id);
         const setup = await evaluate(`(() => {
           const field = document.querySelector('${selector}');
           const section = field.closest('article');
@@ -48,7 +48,8 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
             beforeQuestion: setup.getBoundingClientRect().bottom <= field.getBoundingClientRect().top } : null;
         })()`);
         assert.ok(setup?.text.length > 60, route + ': the prediction has a visible setup');
-        if (poolFirst) assert.match(setup.text, /Ready to swap: 10 ETH → USDC[\s\S]*100\.00 ETH[\s\S]*200,000\.00 USDC[\s\S]*Starting pool price: \$2,000\.00 per ETH/);
+        if (poolFirst) assert.match(setup.text, id === 'swap-impact' ? /Ready to swap: 10 ETH → USDC[\s\S]*100\.00 ETH[\s\S]*200,000\.00 USDC[\s\S]*Starting pool price: \$2,000\.00 per ETH/
+          : /Ready to add: 5 ETH \+ 10,000 USDC → pool[\s\S]*100\.00 ETH[\s\S]*200,000\.00 USDC[\s\S]*Pool price: \$2,000\.00 per ETH/);
         assert.ok((poolFirst || setup.size >= 15) && setup.beforeQuestion, route + ': readable setup precedes the question');
         if (id === 'build') assert.match(setup.text, /Borrow 5,000 USDC → buy ETH with all of it → supply/);
         assert.equal(await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').textContent.includes('scored')`), false);

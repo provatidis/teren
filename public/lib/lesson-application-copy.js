@@ -30,39 +30,40 @@ export function lessonApplicationCopy(id, outcome) {
       feedback: 'The unchanged pool pays the quoted ' + fmt(application.quote, 2) + ' USDC. The 0.5% tolerance sets a minimum of about ' + fmt(application.minimumReceived, 2) + ' USDC if the pool changes before execution; it does not undo your own price impact.',
     };
   }
-  if (id === 'pool-share' && outcome.variant === 1) return {...base,
+  // "Share" is the percentage; "claim" is the tokens behind it.
+  if (id === 'pool-share' && application.kind === 'later-deposit') return {...base,
     label: 'Another provider deposits',
-    context: 'Another provider adds both tokens in the pool’s current proportions. No trades, fees or withdrawals occur.',
-    question: 'What happens to your existing claim?',
-    choices: [['diluted-same-claim', 'A smaller percentage of a larger pool, representing the same token amounts.'], ['fewer-tokens', 'A smaller percentage that also takes away some of your tokens.'], ['fixed-share', 'The same percentage, now representing more tokens.']],
-    hint: 'The new provider receives new LP tokens in exchange for adding reserves.',
+    context: 'After your deposit, another provider adds both tokens in the pool’s current ratio. No trades, fees or withdrawals occur.',
+    question: 'What happens to your share and your claim?',
+    choices: [['diluted-same-claim', 'A smaller share of a larger pool. My claim stays the same.'], ['fewer-tokens', 'A smaller share, and my claim shrinks with it.'], ['fixed-share', 'The same share of a larger pool. My claim grows.']],
+    hint: 'The new provider receives new LP tokens for the tokens they add.',
     feedbackByChoice: {
-      'fewer-tokens': 'The smaller percentage applies to a larger pool. A proportional deposit adds enough reserves to leave the tokens behind your existing claim unchanged.',
-      'fixed-share': 'The new provider receives LP tokens too. Your token count stays the same, but your fraction of all LP tokens becomes smaller.',
+      'fewer-tokens': 'Your smaller share applies to a larger pool. A proportional deposit adds tokens and LP tokens together, so the tokens behind your claim stay the same.',
+      'fixed-share': 'The new provider receives LP tokens too, so your share of all LP tokens falls. Their tokens back their claim, not yours.',
     },
-    feedback: 'Your percentage falls as the pool grows. A proportional deposit adds reserves and ownership together, leaving the token amounts behind your existing claim unchanged.'};
-  if (id === 'pool-share' && outcome.variant === 2) return {...base,
+    feedback: 'Your share falls as the pool grows. A proportional deposit adds tokens and ownership together, so your claim is unchanged.'};
+  if (id === 'pool-share' && application.kind === 'later-withdrawal') return {...base,
+    label: 'Another provider withdraws',
+    context: 'After your deposit, another provider withdraws their share of both tokens. No trades or fees occur.',
+    question: 'What happens to your share and your claim?',
+    choices: [['larger-same-claim', 'A larger share of a smaller pool. My claim stays the same.'], ['more-tokens', 'A larger share, and my claim grows with it.'], ['fixed-share', 'The same share of a smaller pool. My claim shrinks.']],
+    hint: 'The leaving provider returns LP tokens and takes the tokens behind them.',
+    feedbackByChoice: {
+      'more-tokens': 'Your larger share applies to a smaller pool. The leaving provider takes only the tokens behind their own claim, so yours stays the same.',
+      'fixed-share': 'The leaving provider’s LP tokens are removed, so your share of the remaining LP tokens rises. They take only their own tokens.',
+    },
+    feedback: 'Your share rises as the pool shrinks. A withdrawal removes tokens and ownership together, so your claim is unchanged.'};
+  if (id === 'pool-share') return {...base,
     label: 'A trader buys ETH',
     context: 'After your deposit, a trader pays USDC to buy ETH from the pool. Nobody adds or removes liquidity.',
-    question: 'What changes behind your LP tokens?',
-    choices: [['reverse-swap', 'The same ownership percentage now represents less ETH and more USDC.'], ['share-rises', 'Your ownership percentage rises as the trader adds USDC.'], ['claim-fixed', 'Your original ETH and USDC amounts remain reserved for you.']],
+    question: 'What happens to your share and your claim?',
+    choices: [['reverse-swap', 'The same share. My claim is now less ETH and more USDC.'], ['share-rises', 'A larger share, because the trader added USDC to the pool.'], ['claim-fixed', 'The same share and the same claim. My tokens are set aside.']],
     hint: 'Follow which token enters and which leaves. A swap does not issue LP tokens.',
     feedbackByChoice: {
-      'share-rises': 'A swap adds one token and removes another without issuing LP tokens. Your ownership fraction stays the same.',
-      'claim-fixed': 'Your claim is on a fraction of the current reserves. The trader takes ETH and adds USDC, so the mix behind your claim changes.',
+      'share-rises': 'A swap adds one token and removes another without issuing LP tokens. Your share stays the same.',
+      'claim-fixed': 'Your claim is a share of the pool’s current balances. The trader takes ETH and adds USDC, so the mix behind your claim changes.',
     },
-    feedback: 'USDC enters and ETH leaves. Your fraction stays the same, but the token amounts it represents change with the reserves.'};
-  if (id === 'pool-share') return {...base,
-    label: 'A trader sells ETH',
-    context: 'After your deposit, a trader swaps ETH for USDC. Nobody adds or removes liquidity.',
-    question: 'What changes for your share of the pool?',
-    choices: [['share-same','The ownership percentage stays the same, but it represents more ETH and less USDC.'],['share-smaller','The ownership percentage falls because the trader removes USDC.'],['claim-fixed','The ownership percentage and the token amounts it represents stay the same.']],
-    hint: 'A trade changes the reserves without minting or burning LP tokens in this example.',
-    feedbackByChoice: {
-      'share-smaller': 'The trader exchanges tokens, not ownership shares. No LP tokens are issued or removed, so your percentage stays the same.',
-      'claim-fixed': 'Your percentage stays the same, but it applies to changed reserves. ETH came in and USDC went out.',
-    },
-    feedback: 'Your LP tokens still represent the same fraction of the pool. ETH enters and USDC leaves, so the token amounts behind that fraction change.'};
+    feedback: 'USDC enters and ETH leaves. Your share stays the same, and your claim changes with the pool’s balances.'};
   if (id === 'token-balances' && outcome.variant === 1) return {...base,
     label: 'After ETH falls',
     context: 'ETH falls to ' + usd(application.next.setup.futurePrice) + '. The model now shows more ETH in the LP, but a lower total dollar value. No fees are included.',
