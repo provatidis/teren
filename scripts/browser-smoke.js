@@ -26,6 +26,7 @@ import { checkLoanResponseLesson } from './browser/loan-response-checks.js';
 import { checkLoopStressLesson } from './browser/loop-stress-checks.js';
 import { checkReviewPolish } from './browser/review-polish-checks.js';
 import { checkComparisonLessons } from './browser/comparison-lesson-checks.js';
+import { checkBenchmarkLesson } from './browser/benchmark-lesson-checks.js';
 import { checkBorrowingLoops } from './browser/borrowing-loop-checks.js';
 import { checkProjectInformation, checkMobileTools } from './browser/clarity-checks.js';
 import { checkLending } from './browser/lending-checks.js';
@@ -287,7 +288,7 @@ try {
   }
   if (process.env.BROWSER_CHECKS === 'lp-costs') {
     await call('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: profile, eventsEnabled: true });
-    await checkLPEconomics({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
+    await checkLPEconomics({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile, nextEvent });
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     return;
   }
@@ -315,6 +316,7 @@ try {
     await checkFoundationMotion({ evaluate, navigate, base, call });
     await checkRangePicks({ evaluate, navigate, base, call });
     await checkPoolFirstLesson({ evaluate, navigate, base, call });
+    await checkBenchmarkLesson({ evaluate, click, fill, text, navigate, reload, base, call });
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     return;
   }
@@ -796,7 +798,7 @@ try {
   await checkLending({ evaluate, click, fill, text, navigate, base, call, nextEvent });
   await checkLoanConsequences({ evaluate, click, fill, text, navigate, base, call });
   await checkLoanInterest({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
-  await checkLPEconomics({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile });
+  await checkLPEconomics({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile, nextEvent });
   await checkLabRisk({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkBorrowingLoops({ evaluate, click, fill, text, navigate, base, call });
   await checkLSTLoops({ evaluate, click, fill, text, navigate, reload, base, call });
@@ -812,6 +814,7 @@ try {
   await checkLoanResponseLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkLoopStressLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkReviewPolish({ evaluate, click, fill, text, navigate, reload, base, call });
+  await checkBenchmarkLesson({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkComparisonLessons({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkLearningApplications({ evaluate, click, fill, text, navigate, reload, base, call });
   await checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent });

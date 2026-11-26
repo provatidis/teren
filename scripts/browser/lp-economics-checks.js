@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-export async function checkLPEconomics({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile }) {
+export async function checkLPEconomics({ evaluate, click, fill, text, navigate, reload, base, call, downloadFile, nextEvent }) {
   const mode = (prefix, value) => evaluate(`{const el=document.getElementById('${prefix}-fee-mode');el.value='${value}';el.dispatchEvent(new Event('change',{bubbles:true}));}`);
   const value = id => evaluate(`document.getElementById('${id}').value`);
   for (const width of [1440, 390, 320]) {
@@ -37,8 +37,10 @@ export async function checkLPEconomics({ evaluate, click, fill, text, navigate, 
     await navigate(base + 'learn.html#lesson=fee-break-even');
     // Capture the actual Learn handoff by following its link from the lab.
     await navigate(shared);
+    // Wait for the lesson page itself: a timed pause can be cut off by the page load it is waiting for.
+    const opened = nextEvent('Page.loadEventFired');
     await evaluate("document.querySelector('a[href=\"learn.html\"]').click()");
-    await evaluate("new Promise(resolve=>setTimeout(resolve,100))");
+    await opened;
     await navigate(base + 'liquidity.html');
     assert.equal(await value('scenario-fee-mode'), 'apr'); assert.equal(await value('scenario-closing-cost'), '50');
     if (width === 1440) {

@@ -40,13 +40,15 @@ export const LESSONS = [
   },
   {
     id: 'loss-vs-profit', completion: 'You distinguished dollar profit or loss from performance against holding.', protocol: 'Uniswap v2-style', title: 'Dollar profit and impermanent loss', short: 'Loss versus profit', concept: 'Benchmarks', skill: 'Separate dollar profit from impermanent loss.',
-    intro: 'An LP can gain dollars and still fall behind holding. Change ETH’s price and compare both benchmarks.',
-    prediction: 'Before fees, is the LP worth at least the original budget at your selected price?',
-    predictions: [['gain', 'Yes — it gains dollars or breaks even'], ['loss', 'No — it loses dollars']],
-    reasoning: 'Why does the LP finish differently from holding the starting tokens?',
-    reasons: [['traded-mix', 'Swaps change the LP’s token mix while holding keeps the original amounts.'], ['same-exposure', 'The starting split between ETH and USDC explains the difference.'], ['swap-fees', 'The LP pays trading fees that reduce its return.']],
-    explanation: 'If ETH rallies, both strategies can gain dollars while the LP trails holding. If ETH falls, both can lose dollars. Impermanent loss describes the relative gap; it is not a separate charge taken from your wallet.',
-    takeaway: 'Choose the benchmark before interpreting a return.',
+    intro: 'You could have left your tokens in your wallet instead. That is called holding. Compare your claim in the pool with holding, and with what you started with.',
+    // The question carries the lesson's own price move and holding's value: see benchmarkPrediction.
+    prediction: 'After the price move, will your claim be worth more, less, or the same as holding?',
+    predictions: [['more', 'More than holding'], ['less', 'Less than holding'], ['same', 'The same as holding']],
+    reasoning: 'Why does your claim finish differently from holding?',
+    reasons: [['traded-mix', 'Trades change your claim’s tokens while holding keeps its amounts.'], ['same-exposure', 'The half-and-half split of your deposit explains the difference.'], ['swap-fees', 'Your claim pays trading fees, and they reduce its return.']],
+    // The cause of the gap is left to the check question: the tokens under each bar are its evidence.
+    explanation: 'Before fees, your claim never beats holding. The gap opens when the price moves either way and closes only at the starting price. This gap is called impermanent loss. It is a comparison, not a charge: your claim can be up in dollars and still behind holding. The tokens under each bar show why.',
+    takeaway: 'Say what you compare with: your start, or holding. The gap to holding is impermanent loss.',
   },
   {
     id: 'fee-break-even', completion: 'You separated an assumed fee amount from fees actually earned.', protocol: 'Uniswap v2-style', title: 'Fees needed to match holding', short: 'Fees & break-even', concept: 'Fee income', skill: 'Distinguish a fee target from assumed and earned fees.',

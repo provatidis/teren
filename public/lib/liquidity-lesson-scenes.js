@@ -1,4 +1,4 @@
-import { sceneNode as node, createPriceExplorer, createSceneExplorer, ACTION_MS, ACTION_EASING, REVEAL_DELAY_MS } from './lesson-scene.js';
+import { sceneNode as node, createPriceExplorer, createSceneExplorer, playRevealedBars, endPlayedBars } from './lesson-scene.js';
 import { tokenSceneState, rangeSceneState, rangePositionState } from './liquidity-scene-state.js';
 import { fmt, usd } from './format.js';
 import { createRangeGuide } from './range-scene-guide.js';
@@ -51,9 +51,7 @@ export function createTokenBalanceScene(input, prediction, { explanation = '' } 
       ...(moved ? [{ label: 'The question · ' + dollars(target), value: target }] : [])],
     onChange(price) {
       const state = tokenSceneState(input, price), { result } = state;
-      // The slider owns the bars again; a played reveal steps aside.
-      for (const animation of figure.getAnimations({ subtree: true })) animation.cancel();
-      figure.dataset.motion = 'false';
+      endPlayedBars(figure);
       figure.dataset.direction = state.direction;
       at.textContent = 'ETH at ' + usd(price);
       for (const { token, value, fill, start, change, from } of rows) {
@@ -79,11 +77,7 @@ export function createTokenBalanceScene(input, prediction, { explanation = '' } 
     showQuestion(animate = false) {
       const before = rows.map(({ fill }) => fill.style.width);
       reveal(true); explorer.show(target);
-      if (!animate || !matchMedia('(prefers-reduced-motion: no-preference)').matches) return;
-      // The played move owns its bars; the shared short easing (motion.css) steps aside.
-      figure.dataset.motion = 'true';
-      rows.forEach(({ fill }, i) => fill.animate([{ width: before[i] }, { width: fill.style.width }],
-        { duration: ACTION_MS, delay: REVEAL_DELAY_MS, easing: ACTION_EASING, fill: 'backwards' }));
+      if (animate) playRevealedBars(figure, rows.map(({ fill }) => fill), before);
     } };
 }
 

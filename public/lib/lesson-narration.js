@@ -13,9 +13,12 @@ export function lessonFinding(id, outcome) {
     ? 'At or above the upper ETH-price boundary, the position’s principal is all USDC.'
     : outcome.prediction === 'eth' ? 'At or below the lower ETH-price boundary, the position’s principal is all ETH.'
       : 'Inside its price range, the position’s principal contains both ETH and USDC.';
-  if (id === 'loss-vs-profit') return r.lpBeforeFees === s.investment
-    ? 'At the unchanged price, LP principal matches the starting budget and holding.'
-    : 'LP principal ' + (r.lpBeforeFees > s.investment ? 'grew' : 'fell') + ' in dollar value. It still trails holding the same starting tokens by ' + usd(r.breakEvenFees) + ' before fees.';
+  // Lesson 4's verdict answers the question, then gives both comparisons.
+  if (id === 'loss-vs-profit') return r.lpBeforeFees === r.holdValue
+    ? 'The same. At the starting price your claim and holding are the same tokens, worth ' + usd(s.investment) + '.'
+    : 'Less. Your claim is worth ' + usd(r.lpBeforeFees) + ', which is ' + usd(r.breakEvenFees) + ' less than holding'
+      + (r.lpBeforeFees > s.investment ? '. It is still ' + usd(r.lpBeforeFees - s.investment) + ' more than the ' + usd(s.investment) + ' you started with.'
+        : ' and ' + usd(s.investment - r.lpBeforeFees) + ' less than the ' + usd(s.investment) + ' you started with.');
   if (id === 'fee-break-even') return 'At this ETH price, the fee target stays at ' + usd(r.breakEvenFees) + '. Counting ' + usd(s.fees) + ' in fees leaves ' + usd(Math.max(0, r.breakEvenFees - s.fees)) + ' still to earn to match holding.';
   return 'A lower ETH price makes the original ETH and USDC worth less in dollars. Matching that basket with fees can leave both strategies below the starting budget.';
 }
@@ -73,35 +76,51 @@ export function priceMovePrediction(setup) {
   return move + '. Will your claim hold less, more, or the same ETH?';
 }
 
+// The tokens under each bar are the evidence: holding keeps its amounts and the
+// claim does not. The lesson's explanation leaves that step to this question.
 export function lossProfitReasoning(outcome) {
   const { initialPrice, futurePrice } = outcome.setup;
   const direction = futurePrice > initialPrice ? 'up' : futurePrice < initialPrice ? 'down' : 'same';
   const correct = direction === 'up'
-    ? 'Swaps exchanged ETH for USDC as ETH rose, leaving the LP with less ETH to gain value.'
+    ? 'Traders bought ETH from the pool as it rose, so your claim holds less ETH.'
     : direction === 'down'
-      ? 'Swaps exchanged USDC for ETH as ETH fell, increasing the LP’s ETH while holding kept its original mix.'
-      : 'At the starting price, this fee-free model has the same token amounts as the original holding.';
+      ? 'Traders sold ETH to the pool as it fell, so your claim holds more ETH.'
+      : 'At the starting price your claim holds the same token amounts as holding.';
   const exposure = direction === 'up'
-    ? 'Half the original deposit was in USDC, so the LP missed part of ETH’s rise.'
+    ? 'Half of your deposit was USDC, so it missed part of ETH’s rise.'
     : direction === 'down'
-      ? 'Half the original deposit was in ETH, so the price fall explains the gap to holding.'
-      : 'A pool that starts 50/50 keeps pace with the original holding at every price.';
+      ? 'Half of your deposit was ETH, so the price fall explains the gap to holding.'
+      : 'A deposit that starts half and half keeps pace with holding at every price.';
   return {
     direction,
-    reasoning: direction === 'up' ? 'When ETH rises, why does the LP gain less than holding?'
-      : direction === 'down' ? 'When ETH falls, why does the LP lose more than holding?'
-        : 'Why does the LP match holding before fees at this price?',
+    reasoning: direction === 'up' ? 'When ETH rises, why does your claim gain less than holding?'
+      : direction === 'down' ? 'When ETH falls, why does your claim lose more than holding?'
+        : 'Why does your claim match holding at this price?',
     reasons: [['traded-mix', correct], ['same-exposure', exposure],
-      ['swap-fees', direction === 'same' ? 'Swap fees earned along the way cover the gap to holding.' : 'The LP pays trading fees that reduce its return.']],
-    feedback: correct + (direction === 'same' ? ' A different final price would change the mix and the comparison.' : ' Holding keeps the exact ETH and USDC that funded the position.'),
+      ['swap-fees', direction === 'same' ? 'Swap fees earned along the way cover the gap to holding.' : 'Your claim pays trading fees, and they reduce its return.']],
+    feedback: correct + (direction === 'same' ? ' A different price would change your claim’s tokens and open a gap.' : ' Holding keeps the exact ETH and USDC you started with.'),
     feedbackByChoice: {
       'same-exposure': direction === 'same'
-        ? 'The values match because the price is unchanged here. At a different final price, swaps leave the LP with a different mix from holding.'
-        : 'Holding starts with the same 50/50 split. The difference comes from the LP exchanging tokens as the price moves, while holding keeps the original amounts.',
+        ? 'The values match because the price is unchanged here. At any other price, trades leave your claim with different tokens from holding.'
+        : 'Holding starts with the same half-and-half split, so the split cannot explain the difference. The gap comes from your claim’s tokens changing as the price moves, while holding keeps its amounts.',
       'swap-fees': direction === 'same'
-        ? 'No fees are included. At the starting price, the LP has the original token amounts and matches holding without fee income.'
-        : 'No fees are included in this comparison. The shortfall comes from the changed token mix; it is not a trading fee charged to the LP.',
+        ? 'No fees are counted here. At the starting price your claim holds its starting tokens and matches holding without any fee income.'
+        : 'No fees are counted in this comparison. The gap comes from the changed tokens; it is not a fee charged to you.',
     },
+  };
+}
+
+// The question gives holding's value at the new price and asks about the claim.
+export function benchmarkPrediction(setup) {
+  const start = usd(setup.initialPrice), end = usd(setup.futurePrice);
+  // A 50/50 start: half the starting value is ETH and follows its price.
+  const holding = usd(setup.investment / 2 * (1 + setup.futurePrice / setup.initialPrice));
+  const move = setup.futurePrice > setup.initialPrice ? 'ETH rises from ' + start + ' to ' + end + '. Holding would then be worth ' + holding
+    : setup.futurePrice < setup.initialPrice ? 'ETH falls from ' + start + ' to ' + end + '. Holding would then be worth ' + holding
+      : 'ETH stays at ' + start + '. Holding is still worth ' + holding;
+  return {
+    question: move + '. Will your claim be worth more, less, or the same?',
+    choices: [['more', 'More than holding'], ['less', 'Less than holding'], ['same', 'The same as holding']],
   };
 }
 

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
-import { lessonFinding, rangeBoundaryNarration, priceMovePrediction, tokenBalanceNarration } from '../public/lib/lesson-narration.js';
+import { lessonFinding, rangeBoundaryNarration, priceMovePrediction, tokenBalanceNarration, benchmarkPrediction, lossProfitReasoning } from '../public/lib/lesson-narration.js';
 import { rangePositionState, rangeSceneState } from '../public/lib/liquidity-scene-state.js';
 import { managementCase } from '../public/models/range-decisions.js';
 import { lendingCase, checkLendingUnderstanding } from '../public/models/lending-lessons.js';
@@ -13,6 +13,7 @@ import { appliedQuestion } from '../public/lib/applied-lessons.js';
 import { validatePositionPeriod } from '../public/data/position-period.js';
 import { depositSceneState } from '../public/lib/foundation-scene-state.js';
 import { LESSONS } from '../public/learning/liquidity-essentials.js';
+import { usd } from '../public/lib/format.js';
 
 test('findings track changed price directions and the average price rather than the starting pool price', () => {
   const swap = runLesson('swap-impact', lessonSetup('swap-impact'));
@@ -108,4 +109,33 @@ test('lesson 3 names its price move in the question and checks an idea its scene
     const words = copy.reasons.map(([, answer]) => answer.split(' ').length);
     assert.ok(Math.max(...words) - Math.min(...words) <= 3, 'answers are of similar length: ' + words);
   }
+});
+
+test('lesson 4 asks about holding in the lesson’s own numbers and leaves the cause to its check question', () => {
+  const lesson = LESSONS.find(item => item.id === 'loss-vs-profit');
+  for (const variant of [0, 1, 2]) for (const factor of [.5, 1, 1.5, 2]) {
+    const base = lessonSetup('loss-vs-profit', variant);
+    const outcome = runLesson('loss-vs-profit', { futurePrice: base.initialPrice * factor }, variant), { result, setup } = outcome;
+    const { question, choices } = benchmarkPrediction(setup);
+    // The question's holding value is the model's own.
+    assert.ok(question.includes(usd(result.holdValue)), question);
+    assert.match(question, factor > 1 ? /^ETH rises from / : factor < 1 ? /^ETH falls from / : /^ETH stays at /);
+    assert.deepEqual(choices.map(([id]) => id), ['more', 'less', 'same']);
+    assert.deepEqual(choices, lesson.predictions);
+    assert.equal(outcome.prediction, factor === 1 ? 'same' : 'less');
+    const finding = lessonFinding('loss-vs-profit', outcome);
+    if (factor === 1) assert.match(finding, /^The same\. At the starting price your claim and holding are the same tokens/);
+    else {
+      assert.ok(finding.startsWith('Less. Your claim is worth ' + usd(result.lpBeforeFees) + ', which is ' + usd(result.breakEvenFees) + ' less than holding'), finding);
+      assert.match(finding, factor > 1 ? /It is still \$[\d,.]+ more than the \$[\d,.]+ you started with\.$/ : / and \$[\d,.]+ less than the \$[\d,.]+ you started with\.$/);
+    }
+    // The explanation names the gap and leaves its cause to the check question.
+    const correct = lossProfitReasoning(outcome).reasons[0][1];
+    assert.ok(!lesson.explanation.includes(correct));
+    assert.doesNotMatch(lesson.explanation, /bought ETH|sold ETH|holds less ETH|holds more ETH/);
+    const words = lossProfitReasoning(outcome).reasons.map(([, answer]) => answer.split(' ').length);
+    assert.ok(Math.max(...words) - Math.min(...words) <= 5, 'answers are of similar length: ' + words);
+  }
+  assert.match(lesson.explanation, /never beats holding[\s\S]*impermanent loss[\s\S]*a comparison, not a charge/);
+  assert.doesNotMatch(lesson.intro, /fall behind|behind holding|trails/);
 });

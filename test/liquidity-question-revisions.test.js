@@ -20,17 +20,17 @@ test('loss reasoning follows custom rising, falling and unchanged prices, indepe
       if (factor > 1) {
         assert.ok(pooled.eth < held.eth && pooled.usdc > held.usdc);
         assert.ok(lpBeforeFees < holdValue && lpBeforeFees > base.investment);
-        assert.match(copy.reasoning, /gain less than holding/);
-        assert.match(correct, /ETH for USDC/);
+        assert.match(copy.reasoning, /your claim gain less than holding/);
+        assert.match(correct, /bought ETH from the pool.*your claim holds less ETH/);
       } else if (factor < 1) {
         assert.ok(pooled.eth > held.eth && pooled.usdc < held.usdc);
         assert.ok(lpBeforeFees < holdValue && holdValue < base.investment);
-        assert.match(copy.reasoning, /lose more than holding/);
-        assert.match(correct, /USDC for ETH/);
+        assert.match(copy.reasoning, /your claim lose more than holding/);
+        assert.match(correct, /sold ETH to the pool.*your claim holds more ETH/);
       } else {
         assert.deepEqual(pooled, held);
         assert.equal(lpBeforeFees, holdValue);
-        assert.match(copy.reasoning, /match holding/);
+        assert.match(copy.reasoning, /your claim match holding/);
         assert.match(correct, /same token amounts/);
       }
       const application = lessonApplication('loss-vs-profit', outcome);

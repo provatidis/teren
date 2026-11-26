@@ -141,7 +141,7 @@ The response lesson compares two alternatives from the same 5 ETH / 5,000 USDC l
 
 The loop-stress lesson compares holding the original 5 ETH with a three-round loop: 9.375 ETH and 8,750 USDC debt. Both start with $10,000 after debt, without additional capital or retained borrowed cash. Price changes keep tokens fixed; gain/loss bars extend from the same zero on a fixed dollar scale. The $1,500 question gives $7,500 for holding and $5,312.50 for the loop, whose health factor remains above 1. This separates price loss from liquidation eligibility. The separate Time example uses the original $2,000 price, 0% supply APR and 10% borrow APR with continuous compounding for up to one year; it explicitly shows zero supply interest and growing debt. Those are teaching assumptions, not live rates. Mode changes start fresh examples and never edit the assessed case or accumulate history.
 
-The three essentials comparison lessons share one fixed dollar scale for starting capital, holding the exact starting tokens and LP principal. Assumed cash fees form a separate striped segment; they never change principal or the holding basket. Loss versus profit starts at the original price with zero fees. Break-even starts at the question price with zero fees, isolating the fee assumption. The final challenge keeps the learner’s constructed position separate from the optional worked example, which has its own **ETH price** and **Assumed fees** controls. **Match holding** selects the exact total fee target at the explored price, not a forecast or a rounded input. Explicit outcome replay and revealed-lesson reload restore the question’s observation; opening its explanation preserves the explored prices and fees. Range-width or variation changes invalidate answers to the changed case, while revised predictions preserve them.
+The two fee comparison lessons, Fees & break-even and the Final challenge, share one fixed dollar scale for starting capital, holding the exact starting tokens and LP principal. Assumed cash fees form a separate striped segment; they never change principal or the holding basket. Loss versus profit has its own two-bar figure, described under the pool-first lessons below. Break-even starts at the question price with zero fees, isolating the fee assumption. The final challenge keeps the learner’s constructed position separate from the optional worked example, which has its own **ETH price** and **Assumed fees** controls. **Match holding** selects the exact total fee target at the explored price, not a forecast or a rounded input. Explicit outcome replay and revealed-lesson reload restore the question’s observation; opening its explanation preserves the explored prices and fees. Range-width or variation changes invalidate answers to the changed case, while revised predictions preserve them.
 
 The final challenge opens with a construction task that uses the same comparison bars as the worked example. Learners choose a price and use **Match holding** to construct an example where both strategies remain below their starting capital. A broad range of lower prices works, with named shortcuts and **Show an example** available. The task checks the resulting state and a conceptual explanation; it does not require a particular click sequence or infer understanding from motion. Task inputs and its checked state survive reload separately from the fixed observation. Editing them clears current feedback and sharing eligibility until checked again, while earlier lesson completion remains. The result card and Experiment link keep the worked observation's assumptions. Financial models and recorded evidence remain unchanged.
 
@@ -161,7 +161,7 @@ Each visual should replace repeated setup/result prose, retain essential assumpt
 
 A prediction makes an expectation explicit. It is visible, ungraded and deliberately skippable. Removing arithmetic and long introductory text supports this step; it does not require hiding it. Explanations and changed-situation checks remain the completion criteria, and direct Experiment access serves people who already have a question. Evaluate reviews against that sequence, including people who choose to see the outcome first.
 
-## Liquidity lessons 1 to 3: pool first
+## Liquidity lessons 1 to 4: pool first
 
 [Lesson 1](https://teren.sh/learn.html#lesson=swap-impact) is the reference for how a lesson moves from seeing to doing. Links from its pilot (`&layout=play`) still open it.
 
@@ -188,7 +188,16 @@ Lesson 2 uses two names: share, a percentage of the pool, and claim, the tokens 
 3. **Read why.** One panel names who changes the claim: traders, acting on the gap between the pool’s price and the market’s. It holds the pitfall too.
 4. **Apply it.** The first check question describes a market price that has moved before anyone has traded with the pool. The slider cannot show that state, because every price it shows assumes traders have already closed the gap. The second question asks about a round trip, or about value after a fall.
 
-Anything above a slider keeps its height while the slider moves, so the slider stays under a dragging thumb. Lines whose numbers follow the slider use a label and a value in fixed columns or stay on one line, and sentences above a slider do not contain those numbers. Later liquidity lessons keep the question-first layout with their setup box and stepped controls.
+[Lesson 4](https://teren.sh/learn.html#lesson=loss-vs-profit) puts a dollar value on that claim and compares it with two things.
+
+1. **See one price move.** Two bars come first: holding and the claim, on one dollar scale, each with its tokens underneath. A dashed line marks the starting value on both. The question gives holding's value at the new price and asks whether the claim will be worth more, less, or the same. The verdict answers, then gives the claim against holding and against the start.
+2. **Drag the price.** The slider sits under the bars and two fixed lines: the claim against its start, and against holding. The prompt asks for a price where the claim beats holding. Before fees there is none, and finding that out is the point.
+3. **Name the gap.** One panel calls the gap to holding impermanent loss, shows it as a percentage at the chosen price and says it is a comparison, not a charge. It does not say why the gap exists.
+4. **Apply it.** The first check question asks why, with three plausible causes. The tokens under each bar are the evidence: holding has the same half-and-half start, so the split cannot be the cause. The second question is a dashboard that reports one comparison only, or a withdrawal.
+
+Lesson 4 uses three names: your start, holding, and your claim. Lessons 5 and 7 keep the shared fee comparison and its question-first layout.
+
+Anything above a slider keeps its height while the slider moves, so the slider stays under a dragging thumb. Lines whose numbers follow the slider use a label and a value in fixed columns or stay on one line, and sentences above a slider do not contain those numbers. Lessons 5 to 7 keep the question-first layout with their setup box.
 
 ## Observation plan
 

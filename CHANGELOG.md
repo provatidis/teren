@@ -1,5 +1,14 @@
 # Release history
 
+## 1.65.0 · 2026-11-26
+
+- Liquidity lesson 4 now follows the layout of lessons 1 to 3. Two bars come first: holding, the same tokens left in your wallet, and your claim in the pool. Each shows its dollar value and the tokens behind it. The question sits under them, and showing the outcome plays the price move on the bars.
+- The question is new. It gives what holding would be worth after the price move and asks whether your claim will be worth more, less, or the same. The earlier question asked only whether the position gained dollars. A saved answer to it is cleared; completed lessons stay completed.
+- Two lines under the bars keep both comparisons in view: your claim against your start, and against holding. The price slider appears with the outcome, right under the bars, with a prompt to look for a price where your claim beats holding.
+- One panel names the gap to holding as impermanent loss and shows it as a percentage at the price you picked. Why the gap exists is left to the first check question, with the tokens under each bar as evidence.
+- The setup box, the separate starting-capital bar and the explanation button are gone. A dashed line on both bars marks what you started with.
+- The lesson says “your claim” and “holding” throughout. Lessons 5 and 7 keep their fee comparison unchanged.
+
 ## 1.64.0 · 2026-11-26
 
 - Liquidity lesson 3 now follows the layout of lessons 1 and 2. Your claim, the tokens behind your share, comes first with the question under it. Showing the outcome plays the price move on the bars you are looking at.

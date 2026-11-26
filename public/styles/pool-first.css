@@ -14,6 +14,30 @@
 .token-scene .scene-token-detail > span:first-child { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
 .token-scene .scene-question-scope:empty { display: none; }
 .token-scene > .learn-prediction-feedback + .scene-prediction { margin-top: 14px; }
-.learn-about-example { margin: 18px 0 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
-.learn-about-example summary { display: flex; align-items: center; min-height: 44px; color: var(--text); cursor: pointer; }
-.learn-about-example p { margin: 4px 0 8px; }
+/* Lesson 4: holding and the claim on one dollar scale, with the tokens behind each.
+   Its lines keep their place while the price moves, as lesson 3's do. */
+#learn-essential[data-pool-first] .benchmark-scene .benchmark-figure { margin-top: 4px; }
+.benchmark-figure .scene-token-row { padding: 10px 12px; margin: 8px 0; }
+.benchmark-figure .scene-token-track { margin: 10px 0 6px; }
+.benchmark-figure .scene-token-heading { flex-wrap: nowrap; }
+.benchmark-figure .scene-token-heading > span { white-space: nowrap; }
+.benchmark-name strong::before { width: 10px; height: 10px; border: 0; border-radius: 2px; transform: none; background: #a9c7f5; }
+[data-benchmark=claim] .benchmark-name strong::before { background: #e5bd85; }
+.benchmark-place { color: var(--muted); font-size: 14px; }
+.benchmark-figure [data-benchmark=hold] .scene-token-fill { background: #a9c7f5; }
+.benchmark-figure [data-benchmark=claim] .scene-token-fill { background: #e5bd85; }
+.benchmark-figure .scene-token-detail { white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums; }
+.benchmark-figure .foundation-fact { grid-template-columns: minmax(0, 1fr) auto; }
+.benchmark-figure .foundation-fact > strong { min-width: 10ch; text-align: right; }
+.benchmark-figure .scene-token-row + .foundation-fact { margin-top: 10px; }
+.benchmark-figure .scene-key { margin: 8px 0 0; }
+.benchmark-scene .scene-question-scope:empty { display: none; }
+.benchmark-scene > .learn-prediction-feedback + .scene-prediction { margin-top: 14px; }
+@media (min-width: 751px) {
+  .benchmark-figure .foundation-fact { grid-template-columns: 14.5em auto; justify-content: start; }
+  .benchmark-figure .foundation-fact > strong { min-width: 0; text-align: left; }
+}
+@media (max-width: 360px) {
+  .benchmark-place { display: none; }
+  .benchmark-figure .scene-token-heading { font-size: 15px; }
+}

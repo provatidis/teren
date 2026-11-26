@@ -115,15 +115,15 @@ export function lessonApplicationCopy(id, outcome) {
   }
   if (id === 'loss-vs-profit') return {...base,
     label: 'Withdrawing the position',
-    context: 'ETH is now ' + usd(application.futurePrice) + '. Both strategies are ' + (application.next.result.lpReturn > 0 ? 'above' : 'below') + ' the starting budget, but the LP trails holding. The owner withdraws all the LP’s tokens. Price stays fixed, with no fees or costs.',
-    question: 'What happens to the gap with holding when the tokens reach the wallet?',
+    context: 'ETH is now ' + usd(application.futurePrice) + '. Your claim and holding are both ' + (application.next.result.lpReturn > 0 ? 'above' : 'below') + ' what you started with, and your claim trails holding. You withdraw all of your claim’s tokens. The price stays fixed, with no fees or costs.',
+    question: 'What happens to the gap to holding when the tokens reach your wallet?',
     choices: [['gap-unchanged', 'The same gap remains.'], ['gap-erased', 'The gap disappears.'], ['gap-charged', 'Another loss is deducted, making the gap larger.']],
     hint: 'Follow the tokens from the position to the wallet. Does the withdrawal change their amounts or prices?',
     feedbackByChoice: {
-      'gap-erased': 'Leaving the pool does not restore the starting mix. The owner receives the LP’s current tokens, which still trail the holding basket at this price.',
+      'gap-erased': 'Leaving the pool does not bring back your starting tokens. You receive your claim’s current tokens, which are still worth less than holding at this price.',
       'gap-charged': 'Impermanent loss is the comparison already shown, not a withdrawal fee. No extra amount is deducted in this example.',
     },
-    feedback: 'The withdrawal moves the same tokens into the wallet. Their value and the gap with holding stay the same; no extra impermanent-loss charge is taken.'};
+    feedback: 'The withdrawal moves the same tokens into your wallet. Their value and the gap to holding stay the same; no extra impermanent-loss charge is taken.'};
   if (id === 'fee-break-even') return {...base,
     label: 'After matching holding',
     context: (application.fees === 0

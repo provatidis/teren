@@ -4,22 +4,20 @@ import { createComparisonBars } from './comparison-bars.js';
 import { createSceneExplorer, sceneNode } from './lesson-scene.js';
 import { fmt, usd } from './format.js';
 
+// Lessons 5 and 7. Lesson 4 has its own figure: see benchmark-lesson-scene.js.
 export function comparisonQuestion(id, input) {
-  const price = 'At ' + usd(input.futurePrice) + ' per ETH';
-  if (id === 'loss-vs-profit') return price + ', is the LP before fees worth at least the original ' + usd(input.investment) + '?';
   if (id === 'final-challenge') return 'Which move in the ETH price would let both strategies end below ' + usd(input.investment) + '?';
   return 'ETH stays at ' + usd(input.futurePrice) + '. What changes as trading fees come in?';
 }
 
 export function createComparisonScene(id, input, prediction) {
-  const withFees = id !== 'loss-vs-profit';
-  const feeContext = withFees ? createFeeContext('comparison') : null;
+  const feeContext = createFeeContext('comparison');
   const withPrice = id !== 'fee-break-even';
-  let price = id === 'loss-vs-profit' ? input.initialPrice : input.futurePrice;
+  let price = input.futurePrice;
   let fees = id === 'final-challenge' ? input.fees : 0;
   const element = sceneNode('div', undefined, 'lesson-scene comparison-scene');
   if (prediction) element.append(prediction, '\n');
-  const bars = createComparisonBars(input, { withFees });
+  const bars = createComparisonBars(input);
   const figure = bars.figure;
   const verdict = sceneNode('div', undefined, 'comparison-verdict');
   const profit = sceneNode('p'); profit.id = 'comparison-profit';
@@ -30,28 +28,23 @@ export function createComparisonScene(id, input, prediction) {
 
   function draw() {
     const state = comparisonSceneState(input, price, fees), r = state.result;
-    feeContext?.update(r);
+    feeContext.update(r);
     bars.draw(state);
-    const subject = withFees ? 'LP + fees' : 'LP';
+    const subject = 'LP + fees';
     profit.textContent = subject + (state.versusStart === 'equal' ? ' matches the starting capital.'
       : ' is ' + usd(Math.abs(state.fromStart)) + ' ' + state.versusStart + ' the starting capital.');
     holding.textContent = subject + (state.versusHolding === 'equal' ? ' matches holding.'
       : ' is ' + usd(Math.abs(r.difference)) + ' ' + state.versusHolding + ' holding.');
     basket.textContent = 'Both start with ' + fmt(r.held.eth, 4) + ' ETH + ' + fmt(r.held.usdc, 2) + ' USDC. All bars use the same fixed dollar scale.';
     const atExample = price === input.futurePrice && fees === input.fees;
-    if (id === 'final-challenge') {
-      scope.textContent = atExample ? 'Showing the worked example.' : 'You changed the worked example. It began with ETH at ' + usd(input.futurePrice) + ' and ' + usd(input.fees) + ' in fees.';
-    } else if (id === 'fee-break-even') {
-      scope.textContent = 'ETH stays at ' + usd(price) + ' while you vary fees.';
-    } else {
-      scope.textContent = (atExample ? 'Showing the prediction setup. ' : 'Exploring another setup. ')
-        + 'Prediction: ETH at ' + usd(input.futurePrice) + (withFees ? ' and ' + usd(input.fees) + ' assumed fees.' : ', before fees.');
-    }
-    if (match) match.textContent = 'Match holding · ' + usd(r.breakEvenFees) + ' fees';
+    scope.textContent = id === 'final-challenge'
+      ? (atExample ? 'Showing the worked example.' : 'You changed the worked example. It began with ETH at ' + usd(input.futurePrice) + ' and ' + usd(input.fees) + ' in fees.')
+      : 'ETH stays at ' + usd(price) + ' while you vary fees.';
+    match.textContent = 'Match holding · ' + usd(r.breakEvenFees) + ' fees';
     return profit.textContent + ' ' + holding.textContent;
   }
 
-  let match, priceControl, feeControl;
+  let priceControl;
   if (withPrice) {
     priceControl = createSceneExplorer({
       id: 'comparison-price', min: input.initialPrice / 2, max: input.initialPrice * 2,
@@ -61,23 +54,21 @@ export function createComparisonScene(id, input, prediction) {
       onChange: value => { price = value; return draw(); },
     });
   }
-  if (withFees) {
-    feeControl = createSceneExplorer({
-      id: 'comparison-fees', min: 0, max: input.investment / 2,
-      // The exact break-even amount usually falls between whole-dollar steps.
-      step: 'any', start: fees, target: input.fees, format: usd,
-      labelText: 'Explore assumed total fees', scopeText: () => '',
-      valueText: value => usd(value) + ' assumed cash fees',
-      shortcuts: [{ label: 'No fees', value: 0 }, { label: 'Example fees', value: input.fees }],
-      onChange: value => { fees = value; return draw(); },
-    });
-    match = sceneNode('button', '', 'scene-shortcut'); match.type = 'button'; match.id = 'comparison-match';
-    match.addEventListener('click', () => feeControl.show(comparisonSceneState(input, price).result.breakEvenFees, true));
-    feeControl.element.querySelector('.scene-shortcuts').append(' ', match);
-  }
+  const feeControl = createSceneExplorer({
+    id: 'comparison-fees', min: 0, max: input.investment / 2,
+    // The exact break-even amount usually falls between whole-dollar steps.
+    step: 'any', start: fees, target: input.fees, format: usd,
+    labelText: 'Explore assumed total fees', scopeText: () => '',
+    valueText: value => usd(value) + ' assumed cash fees',
+    shortcuts: [{ label: 'No fees', value: 0 }, { label: 'Example fees', value: input.fees }],
+    onChange: value => { fees = value; return draw(); },
+  });
+  const match = sceneNode('button', '', 'scene-shortcut'); match.type = 'button'; match.id = 'comparison-match';
+  match.addEventListener('click', () => feeControl.show(comparisonSceneState(input, price).result.breakEvenFees, true));
+  feeControl.element.querySelector('.scene-shortcuts').append(' ', match);
   // A visible, optional question precedes exploration. Keep the figure beside
   // its active control on phones; changing modes preserves both assumptions.
-  if (priceControl && feeControl) {
+  if (priceControl) {
     const modes = sceneNode('div', undefined, 'scene-shortcuts comparison-modes');
     modes.setAttribute('role', 'group'); modes.setAttribute('aria-label', 'Choose what to explore');
     const buttons = [];
@@ -96,15 +87,14 @@ export function createComparisonScene(id, input, prediction) {
   }
   element.append(figure, '\n');
   if (priceControl) element.append(priceControl.element, '\n');
-  if (feeControl) element.append(feeControl.element, '\n');
-  element.append(verdict, '\n', scope, '\n', basket, '\n', sceneNode('p', withFees
-    ? 'Fees here are hypothetical cash added to the LP, after any protocol share. Matching holding is a target, not a forecast. Gas and other costs are excluded.'
-    : 'Each price is a separate hypothetical outcome. Dollar profit and performance against holding answer different questions.', 'scene-essential-note'));
-  if (feeContext) element.append(feeContext.element);
+  element.append(feeControl.element, '\n');
+  element.append(verdict, '\n', scope, '\n', basket, '\n', sceneNode('p',
+    'Fees here are hypothetical cash added to the LP, after any protocol share. Matching holding is a target, not a forecast. Gas and other costs are excluded.', 'scene-essential-note'));
+  element.append(feeContext.element);
   for (const control of element.querySelectorAll('input[type=range]')) control.setAttribute('aria-describedby', scope.id);
-  priceControl?.show(price); feeControl?.show(fees); draw();
+  priceControl?.show(price); feeControl.show(fees); draw();
   return { element, showQuestion() {
     price = input.futurePrice; fees = input.fees;
-    priceControl?.show(price); feeControl?.show(fees); draw();
+    priceControl?.show(price); feeControl.show(fees); draw();
   } };
 }
