@@ -158,6 +158,7 @@ export function createActionPlayer({ id, stages, onShow, replayLabel = 'Replay a
     for (const [i, stop] of stops.entries()) stop.setAttribute('aria-current', i === index ? 'step' : 'false');
     previous.disabled = index === 0;
     replay.disabled = index === 0;
+    replay.textContent = stage.replayLabel || replayLabel;
     next.textContent = index === stages.length - 1 ? 'Start again ↺' : (stages[index + 1].playLabel || 'Show ' + stages[index + 1].label) + ' →';
     onShow(stage, animate && index > 0);
     if (announce) status.textContent = selected.textContent + '. ' + stage.copy;

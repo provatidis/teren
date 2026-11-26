@@ -51,20 +51,20 @@ export async function checkFoundationMotion({ evaluate, navigate, base, call }) 
     assert.ok(explored.bars.every((bar, i) => bar.from === reveal.bars[i].from && bar.to !== reveal.bars[i].to && bar.to === bar.final), 'Replay follows the explored trade size.');
     await motionSettled(evaluate);
 
-    // Lesson 2 keeps its steps: a pressed action plays at once and grows the striped share.
+    // Lesson 2: the revealed deposit grows the striped share; the later trade is a
+    // pressed action, so it plays at once, and it does not push the bars.
     await navigate(base + 'learn.html#lesson=pool-share');
-    const deposit = await evaluate(`(() => { document.getElementById('foundation-next').click();
+    const deposit = await evaluate(`(() => { document.getElementById('learn-reveal').click();
       return { owned: Array.from(document.querySelectorAll('.foundation-owned'), owned => owned.getAnimations().filter(item => !(item instanceof CSSTransition)).length), bars: ${playedBars} }; })()`);
     assert.deepEqual(deposit.owned, [1, 1], 'The striped share grows with the deposit.');
-    assert.ok(deposit.bars.every(bar => bar && bar.from !== bar.to && bar.delay === 0 && bar.duration >= 700), 'A pressed action plays at once and slowly enough to follow.');
+    assert.ok(deposit.bars.every(bar => bar && bar.from !== bar.to && bar.delay >= 300 && bar.duration >= 700), 'The revealed deposit waits for the page to land, then plays.');
     assert.equal(await evaluate("document.getElementById('foundation-average').hidden"), true, 'A deposit has no average line.');
     await motionSettled(evaluate);
-    // Stepping back and forward must not move the bars while they change.
-    await evaluate("document.getElementById('foundation-previous').click()"); await motionSettled(evaluate);
     await evaluate("document.querySelector('.foundation-balances').scrollIntoView({block:'center',behavior:'instant'})"); await settle(evaluate);
     const steady = await evaluate("document.querySelector('.foundation-balances').getBoundingClientRect().top");
-    const forward = await act(evaluate, "document.getElementById('foundation-next').click()");
-    assert.equal(forward.top, steady, 'Stepping forward does not push the bars.');
+    const trade = await act(evaluate, "document.getElementById('foundation-later-show').click()");
+    assert.ok(trade.bars.every((bar, i) => bar && bar.from === deposit.bars[i].to && bar.from !== bar.to && bar.delay === 0 && bar.duration >= 700), 'The later trade plays at once, from the pool after the deposit.');
+    assert.equal(trade.top, steady, 'The trade changes the lines under the bars without pushing the bars.');
     await motionSettled(evaluate);
 
     await navigate(base + 'learn.html#lesson=swap-impact');

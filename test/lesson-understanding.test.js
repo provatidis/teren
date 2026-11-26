@@ -12,7 +12,7 @@ import { matchChallengeHolding } from '../public/models/liquidity-challenge.js';
 import { LESSONS } from '../public/learning/liquidity-essentials.js';
 import { APPLIED_LESSONS } from '../public/learning/applied-liquidity.js';
 import { parseProgress } from '../public/data/learning-progress.js';
-import { lessonReasonFeedback, deeperPoolQuestion } from '../public/lib/lesson-narration.js';
+import { lessonReasonFeedback, deeperPoolQuestion, depositPrediction, lessonFinding } from '../public/lib/lesson-narration.js';
 import { fmt } from '../public/lib/format.js';
 import { parseAppliedProgress } from '../public/data/applied-progress.js';
 import { newChoiceSeed, validChoiceSeed, orderedLearningChoices, predictionFeedback } from '../public/lib/learning-choices.js';
@@ -57,7 +57,8 @@ test('transfer changes the actual selected setup, including extremes and falling
       assert.equal(app.expected,'quote-received');
     }
     const share=runLesson('pool-share',lessonSetup('pool-share',variant),variant), app=lessonApplication('pool-share',share);
-    assert.equal(app.expected,['share-same','diluted-same-claim','reverse-swap'][variant]);
+    // The scene itself shows a trader selling ETH, so no variation asks about that again.
+    assert.deepEqual([app.kind,app.expected],[['later-deposit','diluted-same-claim'],['later-withdrawal','larger-same-claim'],['reverse-swap','reverse-swap']][variant]);
     for (const multiplier of [.5,1,1.5,2]) {
       const futurePrice=start.initialPrice*multiplier;
       const balances=lessonApplication('token-balances',runLesson('token-balances',{futurePrice},variant));
@@ -260,4 +261,31 @@ test('the deeper-pool question uses each variation’s own swap and clears answe
     assert.deepEqual([old.completed, old.drafts['swap-impact'].reason, old.drafts['swap-impact'].application, old.drafts['swap-impact'].prediction],
       [['swap-impact'], '', 'quote-received', 'less']);
   }
+});
+
+test('lesson 2 asks its share prediction in each variation’s numbers and never repeats its own scene', () => {
+  const labels = new Set();
+  for (let variant = 0; variant < VARIANTS; variant++) {
+    const setup = lessonSetup('pool-share', variant), result = { ...runLesson('pool-share', setup, variant), variant };
+    const prediction = depositPrediction(setup), choice = Object.fromEntries(prediction.choices);
+    assert.equal(result.prediction, 'less');
+    // The correct choice is the deposit against the enlarged pool; the other is against the pool before it.
+    assert.equal(choice.less, fmt(result.share, 2) + '%, my ' + setup.depositEth + ' ETH out of the ' + (setup.reserveEth + setup.depositEth) + ' ETH it will hold');
+    assert.equal(choice.same, setup.depositEth / setup.reserveEth * 100 + '%, my ' + setup.depositEth + ' ETH out of the ' + setup.reserveEth + ' ETH it holds now');
+    assert.match(lessonFinding('pool-share', result), new RegExp('holds ' + (setup.reserveEth + setup.depositEth) + ' ETH after your deposit, and ' + setup.depositEth + ' of them came from you\\. You own ' + fmt(result.share, 2).replace('.', '\\.') + '% of the pool'));
+    const copy = lessonApplicationCopy('pool-share', result);
+    labels.add(copy.label);
+    assert.notEqual(copy.label, 'A trader sells ETH');
+    assert.equal(copy.question, 'What happens to your share and your claim?');
+    assert.ok(copy.choices.some(([id]) => id === copy.expected) && copy.choices.length === 3);
+    for (const [, text] of copy.choices) assert.doesNotMatch(text, /percentage|fraction|reserves/, 'Use “share” and “claim” in the choices.');
+    assert.ok(checkLessonUnderstanding('pool-share', setup, variant, 'ownership', copy.expected).passed);
+    // Earlier answers to the replaced questions are cleared; the unchanged reason and completion are kept.
+    const old = parseProgress({ version: 1, completed: ['pool-share'], lastLesson: 'pool-share', drafts: { 'pool-share': {
+      variant, inputs: setup, prediction: 'same', reason: 'ownership', application: ['share-same', 'diluted-same-claim', 'reverse-swap'][variant],
+      applicationRevision: [1, 2, 2][variant], ran: true } } });
+    assert.deepEqual([old.completed, old.drafts['pool-share'].prediction, old.drafts['pool-share'].reason, old.drafts['pool-share'].application],
+      [['pool-share'], '', 'ownership', variant === 2 ? 'reverse-swap' : '']);
+  }
+  assert.equal(labels.size, VARIANTS, 'Each variation meets a different new situation.');
 });

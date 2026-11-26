@@ -1,5 +1,15 @@
 # Release history
 
+## 1.63.0 · 2026-11-26
+
+- Liquidity lesson 2 now follows lesson 1’s layout. The pool comes first with the question under it, and showing the outcome plays your deposit where you are looking. The pool lists your share and your claim, the tokens that share is worth.
+- The question is asked in the pool’s own numbers: 4.76% of the pool your deposit enlarges, or 5% of the pool as it stands. The verdict answers in the same numbers.
+- The later trade is its own step beside the pool. **Show the trade** plays it, and three lines compare your share and your claim before and after.
+- A deposit-size slider follows, with two bars: your deposit against the pool before it, and against the pool after it. One explanation and the caution about getting your deposit back sit with those bars. The separate explanation button and its repeated paragraph are gone.
+- The second check question no longer repeats what the lesson just showed. Its three variations ask about another provider depositing, another provider withdrawing, and a trader buying ETH. Saved answers to the earlier prediction and that question are cleared; completed lessons stay completed.
+- The lesson uses two fixed names: your share, a percentage of the pool, and your claim, the tokens behind it.
+- In both lessons, the lines under the pool keep their place while you drag the slider.
+
 ## 1.62.0 · 2026-11-26
 
 - Liquidity lesson 1 now opens with the pool and puts the question under it. Showing the outcome plays the swap where you are looking, with the verdict right under the pool. Links to the pilot layout still work.

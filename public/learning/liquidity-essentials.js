@@ -12,18 +12,19 @@ export const LESSONS = [
     takeaway: 'A quote is for one trade size against one pool’s balances. The starting pool price alone cannot tell you what you will receive.',
   },
   {
-    id: 'pool-share', completion: 'You separated your ownership percentage from the tokens behind that claim.', protocol: 'Uniswap v2-style', title: 'Ownership after a liquidity deposit', short: 'Providing liquidity', concept: 'Ownership', skill: 'Explain what your share represents after a matching deposit.',
+    id: 'pool-share', completion: 'You separated your share of the pool from the tokens behind it.', protocol: 'Uniswap v2-style', title: 'Ownership after a liquidity deposit', short: 'Providing liquidity', concept: 'Ownership', skill: 'Explain what your share represents after a matching deposit.',
     intro: 'Add both tokens to the pool and receive a share of it. Then watch what happens to your share when someone trades.',
-    prediction: 'After your deposit, which balances determine your pool share?',
-    predictions: [['less', 'The enlarged pool, including my deposit'], ['same', 'The pool balances before my deposit']],
-    reasoning: 'What does owning this share entitle you to when you later withdraw?',
-    reasons: [['ownership', 'A share of both token balances when I withdraw.'], ['dollars', 'My deposited dollar value plus my share of swap fees.'], ['eth', 'My deposited token amounts plus my share of swap fees.']],
+    // The question and its choices name the lesson's own amounts: see depositPrediction.
+    prediction: 'After the deposit, what share of the pool will you own?',
+    predictions: [['less', 'My deposit out of the pool after it is added'], ['same', 'My deposit out of the pool before it is added']],
+    reasoning: 'What does your share entitle you to when you withdraw?',
+    reasons: [['ownership', 'My share of whatever the pool holds when I withdraw.'], ['dollars', 'My deposited dollar value plus my share of swap fees.'], ['eth', 'My deposited token amounts plus my share of swap fees.']],
     reasonFeedbackByChoice: {
-      dollars: 'Your LP tokens represent a fraction of the pool’s tokens, not a promise to repay your original dollar deposit. Those tokens can change in amount and value.',
-      eth: 'The pool does not set aside your original tokens. Swaps change both reserves, so your share can represent a different mix when you withdraw.',
+      dollars: 'Your LP tokens represent a share of the pool’s tokens, not a promise to repay your original dollar deposit. Those tokens can change in amount and value.',
+      eth: 'The pool does not set aside your original tokens. Swaps change both balances, so your claim can be a different mix when you withdraw.',
     },
-    explanation: 'Liquidity provider (LP) tokens represent a fraction of both pool balances. Swaps change the amounts behind that claim. A later deposit by someone else can change the fraction you own.',
-    takeaway: 'Your deposit becomes part of the bigger pool. LP tokens are a claim on changing assets.',
+    explanation: 'Your deposit becomes part of the pool, so your share is measured against the enlarged pool. Liquidity provider (LP) tokens record that share. A swap changes the tokens behind it, not the share itself.',
+    takeaway: 'Your share is a fraction of whatever the pool holds. The tokens behind it change with every swap.',
   },
   {
     id: 'token-balances', completion: 'You traced how swaps change the tokens a liquidity position owns.', protocol: 'Uniswap v2-style', title: 'Token balances after a price change', short: 'Changing token balances', concept: 'Allocation', skill: 'Explain what a price move does to token quantities.',

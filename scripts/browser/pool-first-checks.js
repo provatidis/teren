@@ -4,9 +4,9 @@ import { motionSettled, reduceMotion } from './motion-settled.js';
 const shown = id => `document.querySelector(${JSON.stringify(id)})?.checkVisibility() ?? false`;
 const box = selector => `(r => [r.top, r.bottom])(document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect())`;
 
-// Liquidity lesson 1 puts the pool first: the question sits under it and reveals
-// the swap with the pool on screen. Links from the pilot still open it, and
-// lesson 2 keeps the question-first layout.
+// Liquidity lessons 1 and 2 put the pool first: the question sits under it and
+// reveals the outcome with the pool on screen. Links from lesson 1's pilot still
+// open it, and later lessons keep the question-first layout.
 export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
   const progressKey = 'degenerator-learning-liquidity-v1';
   await navigate(base + 'learn.html');
@@ -61,12 +61,37 @@ export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
     assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"), false);
     await navigate(base + 'learn.html#lesson=pool-share&layout=play');
     assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"), false, 'Only lesson 1 accepts the pilot link.');
-    // Lesson 2 keeps the question-first layout and its setup box.
-    await navigate(base + 'learn.html#lesson=pool-share');
+    // Lesson 2 follows the same layout, with its later trade beside the pool.
+    for (const [width, height] of [[390, 844], [320, 640]]) {
+      await call('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: true });
+      await evaluate(`localStorage.removeItem('${progressKey}')`);
+      await navigate(base + 'learn.html#lesson=pool-share');
+      const arrive = await evaluate(`({ poolFirst: document.getElementById('learn-essential').hasAttribute('data-pool-first'), setup: ${shown('#learn-setup')},
+        bars: ${box('.foundation-balances')}, pool: ${box('.foundation-pool')}, question: ${box('.scene-prediction-question')}, header: document.querySelector('.topbar').getBoundingClientRect().bottom, height: innerHeight })`);
+      assert.deepEqual([arrive.poolFirst, arrive.setup], [true, false]);
+      assert.ok(arrive.question[0] - arrive.pool[1] < 120, 'The question sits right under the pool: ' + JSON.stringify(arrive));
+      if (width === 390) assert.ok(arrive.bars[0] >= arrive.header && arrive.bars[1] <= arrive.height, 'Arriving from a link shows the pool on the first screen: ' + JSON.stringify(arrive));
+      await evaluate(`(b => scrollBy(0, b.bottom - innerHeight + 40))(document.getElementById('learn-reveal').getBoundingClientRect())`);
+      await evaluate("document.getElementById('learn-reveal').click()");
+      assert.ok(await evaluate(`(bars => bars.top >= document.querySelector('.topbar').getBoundingClientRect().bottom - 1 && bars.bottom <= innerHeight)(document.querySelector('.foundation-balances').getBoundingClientRect())`), `${width}px: the pool stays on screen while the deposit plays.`);
+      await motionSettled(evaluate);
+      // The learner scrolls to the trade button and presses it. The pool is still there to watch.
+      await evaluate(`(b => scrollBy(0, b.bottom - innerHeight + 60))(document.getElementById('foundation-later-show').getBoundingClientRect())`);
+      const trade = await evaluate(`(() => { document.getElementById('foundation-later-show').click();
+        const bars = document.querySelector('.foundation-balances').getBoundingClientRect(), claim = document.getElementById('foundation-claim').getBoundingClientRect();
+        return { bars: bars.top >= document.querySelector('.topbar').getBoundingClientRect().bottom - 1 && bars.bottom <= innerHeight, claim: claim.bottom <= innerHeight, stage: document.querySelector('.scene-player').dataset.stage }; })()`);
+      assert.deepEqual(trade, { bars: true, claim: true, stage: '2' }, `${width}px: the bars and the claim are on screen for the later trade.`);
+      await motionSettled(evaluate);
+      const together = await evaluate(`(() => { document.getElementById('foundation-invite').scrollIntoView({ block: 'start', behavior: 'instant' });
+        return { slider: document.getElementById('foundation-amount').getBoundingClientRect().top, sentence: document.getElementById('foundation-ownership-copy').getBoundingClientRect().bottom, height: innerHeight }; })()`);
+      if (width === 390) assert.ok(together.slider > 0 && together.sentence <= together.height, 'The slider, the two bars and their sentence share one phone screen: ' + JSON.stringify(together));
+    }
+    // Later lessons keep the question-first layout, their setup box and the pitfall in the results.
+    await navigate(base + 'learn.html#lesson=token-balances');
+    await evaluate("document.getElementById('learn-run').click()");
     assert.deepEqual(await evaluate(`({ poolFirst: document.getElementById('learn-essential').hasAttribute('data-pool-first'), setup: ${shown('#learn-setup')}, run: ${shown('#learn-run')},
-      questionFirst: Boolean(document.querySelector('.scene-prediction').compareDocumentPosition(document.querySelector('.foundation-pool')) & Node.DOCUMENT_POSITION_FOLLOWING),
-      title: document.getElementById('learn-check-title').textContent })`),
-      { poolFirst: false, setup: true, run: true, questionFirst: true, title: 'Explain the result and apply the idea' });
+      pitfall: document.getElementById('learn-pitfall').closest('#learn-results') !== null && (${shown('#learn-pitfall')}), title: document.getElementById('learn-check-title').textContent })`),
+      { poolFirst: false, setup: true, run: true, pitfall: true, title: 'Explain the result and apply the idea' });
 
     await navigate(base + 'learn.html#lesson=swap-impact');
     await reduceMotion({ call, evaluate });
@@ -76,5 +101,5 @@ export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
     await call('Emulation.setEmulatedMedia', { features: [] });
     await evaluate(`${saved === null ? `localStorage.removeItem('${progressKey}')` : `localStorage.setItem('${progressKey}', ${JSON.stringify(saved)})`}`);
   }
-  console.log('PASS: lesson 1 shows the pool first, reveals the swap in place at 390/320px, keeps slider and comparison together, and lesson 2 is unchanged');
+  console.log('PASS: lessons 1 and 2 show the pool first, reveal in place at 390/320px and keep slider and comparison together; later lessons are unchanged');
 }

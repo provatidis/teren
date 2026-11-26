@@ -161,7 +161,7 @@ Each visual should replace repeated setup/result prose, retain essential assumpt
 
 A prediction makes an expectation explicit. It is visible, ungraded and deliberately skippable. Removing arithmetic and long introductory text supports this step; it does not require hiding it. Explanations and changed-situation checks remain the completion criteria, and direct Experiment access serves people who already have a question. Evaluate reviews against that sequence, including people who choose to see the outcome first.
 
-## Liquidity lesson 1: pool first
+## Liquidity lessons 1 and 2: pool first
 
 [Lesson 1](https://teren.sh/learn.html#lesson=swap-impact) is the reference for how a lesson moves from seeing to doing. Links from its pilot (`&layout=play`) still open it.
 
@@ -170,7 +170,18 @@ A prediction makes an expectation explicit. It is visible, ungraded and delibera
 3. **Reason about a deeper pool.** The first check question puts the same swap into a pool holding ten times as much. Every answer's feedback shows both quotes. The three variations all sell 10% of the pool, so this question is where depth is tested.
 4. **Read a wallet warning.** The second check question separates price impact, already in the quote, from slippage tolerance.
 
-The lesson uses one name for each of three different numbers: starting pool price, average price you receive, and pool price after the swap. Lesson 2 shares the scene and keeps the question-first layout with its stepped controls.
+The lesson uses one name for each of three different numbers: starting pool price, average price you receive, and pool price after the swap.
+
+[Lesson 2](https://teren.sh/learn.html#lesson=pool-share) follows the same sequence with a deposit.
+
+1. **See one deposit.** The question offers two numbers from the pool on screen: the deposit as a share of the pool it enlarges, or of the pool as it stands. The verdict answers in those numbers.
+2. **Watch a later trade.** The trade is a separate step beside the pool, because it is the lesson's second idea. Its result compares the share and the claim before and after in three fixed lines.
+3. **Try another size.** The slider changes the deposit. Two bars compare it with the pool before and after, which is the difference the question asked about. The panel holds one explanation and the pitfall.
+4. **Apply it.** The reason question asks what LP tokens represent. The application question changes the situation in every variation: another provider deposits, another provider withdraws, or a trader buys ETH. None repeats the trade the lesson showed.
+
+Lesson 2 uses two names: share, a percentage of the pool, and claim, the tokens that share is worth at the moment.
+
+Anything above a slider keeps its height while the slider moves, so the slider stays under a dragging thumb. Lines whose numbers follow the slider use a label and a value in fixed columns, and sentences above a slider do not contain those numbers. Later liquidity lessons keep the question-first layout with their setup box and stepped controls.
 
 ## Observation plan
 
