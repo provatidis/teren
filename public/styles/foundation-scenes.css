@@ -6,7 +6,8 @@
 .foundation-pool .scene-token-fill { position: relative; overflow: hidden; }
 .foundation-owned { position: absolute; top: 0; right: 0; height: 100%; background: repeating-linear-gradient(135deg, #172635 0 2px, transparent 2px 5px); border-left: 1px solid #172635; }
 .foundation-pool-price { font-size: 14px; line-height: 1.7; margin: 14px 0 0; font-variant-numeric: tabular-nums; }
-.foundation-execution { font-size: 16px; line-height: 1.7; font-weight: 600; margin: 14px 0; }
+.foundation-execution { font-size: 15px; line-height: 1.7; font-weight: 600; margin: 12px 0 0; }
+.foundation-execution + .foundation-pool-price { margin-top: 2px; }
 .foundation-pool-share { font-size: 14px; line-height: 1.7; min-height: 1.7em; margin: 8px 0 0; font-weight: 600; }
 .foundation-pool .scene-key { margin: 8px 0 0; }
 .foundation-outcome { margin: 20px 0; padding: 18px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); }
@@ -14,6 +15,11 @@
 .foundation-outcome p { font-size: 14px; line-height: 1.7; }
 .foundation-outcome .scene-consequence { margin-bottom: 0; }
 .foundation-outcome .fine-print { font-size: 13px; }
+.foundation-why { margin: 12px 0 0; color: var(--muted); }
+.foundation-outcome .learn-pitfall { margin: 16px 0 0; }
+.foundation-invite { font-size: 16px; line-height: 1.6; font-weight: 600; margin: 22px 0 0; }
+.foundation-invite + .scene-price-control { margin-top: 10px; }
+.foundation-scene .scene-question-scope:empty { display: none; }
 .foundation-comparison-row { margin: 16px 0; }
 .foundation-comparison-row p { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 6px; font-size: 13px; line-height: 1.6; }
 .foundation-comparison-row strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -21,12 +27,6 @@
 .foundation-comparison-track > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
 .foundation-comparison-row:nth-of-type(1) .foundation-comparison-track > span { background: var(--muted); }
 .foundation-outcome .foundation-share { font-weight: 600; font-size: 18px; margin: 0 0 12px; }
-/* Both lines share one cell, so the bars below keep their place when the result appears. */
-.foundation-execution:not([hidden]) { display: grid; }
-.foundation-execution > span { grid-area: 1 / 1; }
-.foundation-execution-pending { font-size: 14px; font-weight: 400; color: var(--muted); }
-.foundation-execution.foundation-pending > span:first-child,
-.foundation-execution:not(.foundation-pending) > .foundation-execution-pending { visibility: hidden; }
 .foundation-balances { scroll-margin-block: 12px 24px; }
 @media (max-width: 750px) {
   .foundation-outcome { padding: 12px; }

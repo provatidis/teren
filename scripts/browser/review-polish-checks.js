@@ -21,6 +21,7 @@ export async function checkReviewPolish({ evaluate, click, fill, text, navigate,
     }
   }
   await navigate(base + 'learn.html#lesson=swap-impact'); await settle(evaluate);
+  await click('learn-reveal');
   const progress = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");
   await fill('foundation-amount', '12');
   await click('learn-topics');

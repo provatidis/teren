@@ -32,17 +32,14 @@ function poolFigure(original, deposit) {
   const balances = node('div', undefined, 'foundation-balances');
   balances.append(...rows.flatMap(({ row }) => ['\n', row]), '\n');
   const price = node('p', '', 'foundation-pool-price'); price.id = 'foundation-pool-price';
-  // The average line keeps its space at every stage, so the bars stay put when
-  // it appears. A deposit has no average, so it never takes space there.
-  const execution = node('p', undefined, 'foundation-execution'); execution.id = 'foundation-average'; execution.hidden = true;
-  const executionValue = node('span');
-  execution.append(executionValue, node('span', 'Your average execution appears after the swap.', 'foundation-execution-pending'));
+  // The average sits under the bars, so the bars keep their place when it appears.
+  const execution = node('p', '', 'foundation-execution'); execution.id = 'foundation-average'; execution.hidden = true;
   const share = node('p', '', 'foundation-pool-share'); share.id = 'foundation-pool-share'; share.hidden = !deposit;
-  element.append(caption, '\n', flow, '\n', execution, '\n', balances, '\n', price, '\n',
+  element.append(caption, '\n', flow, '\n', balances, '\n', execution, '\n', price, '\n',
     share, '\n',
     node('p', 'Dashed = starting balances. Bars use different token units.', 'scene-key'));
   const width = (amounts, token) => amounts[token] / (original[token] * 1.6) * 100 + '%';
-  return { element, show({ pool, from, title, transfer, fraction = 0, fromFraction = 0, average, averageShown = false }, animate = false, delay = 0) {
+  return { element, show({ pool, from, title, transfer, fraction = 0, fromFraction = 0, average, priceLabel = 'Pool price' }, animate = false, delay = 0) {
     for (const animation of element.getAnimations({ subtree: true })) animation.cancel();
     const play = animate && Boolean(from) && matchMedia('(prefers-reduced-motion: no-preference)').matches;
     // A played action owns its bars; the shared short easing (motion.css) steps aside.
@@ -58,9 +55,8 @@ function poolFigure(original, deposit) {
       if (deposit && fraction !== fromFraction) owned.animate([{ width: fromFraction * 100 + '%' }, { width: fraction * 100 + '%' }], timing);
     }
     execution.hidden = average === undefined;
-    executionValue.textContent = average === undefined ? '' : 'Your average execution: ' + usd(average) + ' per ETH, including the fee.';
-    execution.classList.toggle('foundation-pending', !averageShown);
-    price.textContent = (averageShown ? 'Pool price after this trade: ' : 'Pool price: ') + usd(pool.usdc / pool.eth) + ' per ETH';
+    execution.textContent = average === undefined ? '' : 'Average price you receive: ' + usd(average) + ' per ETH';
+    price.textContent = priceLabel + ': ' + usd(pool.usdc / pool.eth) + ' per ETH';
     share.textContent = fraction ? 'Your share: ' + fmt(fraction * 100, 2) + '% · striped'
       : 'Your share: 0% · before deposit';
     // Replaying with the bars scrolled away would play to no one.
@@ -68,10 +64,10 @@ function poolFigure(original, deposit) {
   } };
 }
 
-function executionComparison() {
+function executionComparison(why) {
   const element = node('section', undefined, 'foundation-outcome');
   element.id = 'foundation-comparison'; element.setAttribute('aria-labelledby', 'foundation-comparison-title');
-  const title = node('h4', 'USDC received per ETH'); title.id = 'foundation-comparison-title';
+  const title = node('h4', 'USDC per ETH'); title.id = 'foundation-comparison-title';
   const rows = Array.from({ length: 3 }, (_, i) => {
     const row = node('div', undefined, 'foundation-comparison-row');
     const line = node('p'), label = node('span'), value = node('strong');
@@ -82,14 +78,14 @@ function executionComparison() {
     return { row, label, value, fill };
   });
   const explanation = node('p', '', 'scene-consequence'); explanation.id = 'foundation-comparison-copy';
-  element.append(title, ...rows.flatMap(({ row }) => ['\n', row]), '\n', explanation, '\n',
-    node('p', 'Both trades start from the same pool. Their average prices include the 0.3% swap fee.', 'fine-print'));
+  const reason = node('p', why, 'foundation-why'); reason.id = 'foundation-why';
+  element.append(title, ...rows.flatMap(({ row }) => ['\n', row]), '\n', explanation, '\n', reason);
   return { element, show(frame, visible) {
     element.hidden = !visible;
     const data = [
       ['Starting pool price', frame.beforePrice],
-      ['1 ETH trade · average', frame.referenceAverage],
-      [fmt(frame.amount, 0) + ' ETH trade · average', frame.average],
+      ['1 ETH trade · average price', frame.referenceAverage],
+      [fmt(frame.amount, 0) + ' ETH trade · average price', frame.average],
     ];
     rows.forEach(({ label, value, fill }, i) => {
       label.textContent = data[i][0]; value.textContent = fmt(data[i][1], 2);
@@ -97,7 +93,7 @@ function executionComparison() {
     });
     explanation.textContent = frame.amount === 1
       ? 'Both trade rows now show the same 1 ETH swap. Increase the size to compare.'
-      : 'The larger trade receives more USDC in total, but less for each ETH. It changes the pool more.';
+      : 'The larger trade receives more USDC in total, but a lower average price. It moves the pool price further.';
   } };
 }
 
@@ -123,35 +119,37 @@ function ownershipReceipt() {
 
 // The slider explores fresh examples. Only the controller can edit the lesson's
 // assessed setup; neither the amount nor the displayed action is persisted here.
-// playFirst: the pilot layout (#lesson=swap-impact&layout=play) puts the pool
-// before the question; the default keeps the question first.
-export function createFoundationScene(id, input, variant, prediction, { playFirst = false } = {}) {
+// poolFirst: the pool comes before the question, the outcome is revealed from the
+// question, and the slider and comparison appear once the swap has been shown.
+export function createFoundationScene(id, input, variant, prediction, { poolFirst = false, explanation = '' } = {}) {
   const deposit = id === 'pool-share';
   const element = node('div', undefined, 'lesson-scene foundation-scene'); element.dataset.lesson = id;
   const target = deposit ? input.depositEth : input.amount;
   const calculate = amount => deposit ? depositSceneState(input, amount, variant) : swapSceneState(input, amount, variant);
   let frame = calculate(target), index = 0, player;
   const figure = poolFigure(frame.before, deposit);
-  const outcome = deposit ? ownershipReceipt() : executionComparison();
+  const outcome = deposit ? ownershipReceipt() : executionComparison(explanation);
   const copy = node('p', '', 'scene-consequence'); copy.id = 'foundation-action-copy';
+  const invite = node('p', 'Now sell more. What happens to the average price you receive?', 'foundation-invite'); invite.id = 'foundation-invite';
   const stages = deposit ? [
     { action: 'start', label: 'Starting pool', group: 'One deposit', copy: 'Your deposit contains both ETH and USDC in the pool’s current ratio.' },
     { action: 'deposit', label: 'Add both tokens', group: 'One deposit', playLabel: 'Show the deposit', copy: 'Both balances grow together. The pool price stays the same, and you receive a share of the enlarged pool.' },
     { action: 'trade', label: 'A later trade', group: 'One deposit', playLabel: 'Show a later trade', copy: 'Another trader exchanges ETH for USDC. Your percentage stays the same while the balances it represents change.' },
   ] : [
-    { action: 'start', label: 'Starting pool', group: 'One swap', copy: 'The pool has a limited amount of each token. Its starting price describes the reserves before your trade.' },
-    { action: 'swap', label: 'After the swap', group: 'One swap', playLabel: 'Show the swap', copy: 'ETH enters and USDC leaves. The trade changes the pool’s reserves and its exchange rate.' },
+    { action: 'start', label: 'Starting pool', group: 'One swap', copy: 'The pool has a limited amount of each token. The starting pool price describes its balances before your swap.' },
+    { action: 'swap', label: 'After the swap', group: 'One swap', playLabel: 'Show the swap', copy: 'ETH enters and USDC leaves. The swap changes the pool’s balances and its price.' },
   ];
   const explorer = createSceneExplorer({
     id: 'foundation-amount', min: 1, max: input.reserveEth / 2, step: 1, start: target, target,
-    labelText: deposit ? 'Explore a matching deposit' : 'Explore a trade size',
+    labelText: deposit ? 'Explore a matching deposit' : 'Trade size',
     format: amount => fmt(amount, 0) + ' ETH',
     shortcuts: [
       { label: 'Small · 1 ETH', value: 1 },
-      { label: 'Lesson setup · ' + fmt(target, 0) + ' ETH', value: target },
+      { label: (deposit ? 'Lesson setup · ' : 'The question · ') + fmt(target, 0) + ' ETH', value: target },
     ],
-    scopeText: amount => (amount === target ? 'Showing the lesson setup. ' : 'Exploring another amount. ')
-      + 'Prediction: a ' + fmt(target, 0) + ' ETH ' + (deposit ? 'deposit, with matching USDC.' : 'swap.'),
+    // The swap's pressed shortcut already marks the question's amount.
+    scopeText: amount => deposit ? (amount === target ? 'Showing the lesson setup. ' : 'Exploring another amount. ')
+      + 'Prediction: a ' + fmt(target, 0) + ' ETH deposit, with matching USDC.' : '',
     onChange(amount) {
       frame = calculate(amount);
       if (player) player.show(index, false, false);
@@ -160,7 +158,7 @@ export function createFoundationScene(id, input, variant, prediction, { playFirs
     },
   });
   let delay = 0;
-  player = createActionPlayer({ id: 'foundation', stages, onShow(stage, animate) {
+  player = createActionPlayer({ id: 'foundation', stages, replayOnly: poolFirst, replayLabel: poolFirst ? 'Replay the swap ↻' : undefined, onShow(stage, animate) {
     index = stages.indexOf(stage);
     const pools = deposit ? [frame.before, frame.after, frame.traded] : [frame.before, frame.after];
     const fractions = deposit ? [0, frame.fraction, frame.fraction] : [0, 0];
@@ -178,13 +176,19 @@ export function createFoundationScene(id, input, variant, prediction, { playFirs
     }
     figure.show({
       pool, from: animate ? pools[index - 1] : undefined, title: stage.label, transfer, fraction, fromFraction: fractions[index - 1] ?? 0,
-      average: deposit ? undefined : frame.average, averageShown: !deposit && index > 0,
+      average: !deposit && index > 0 ? frame.average : undefined,
+      priceLabel: deposit ? 'Pool price' : index === 0 ? 'Starting pool price' : 'Pool price after the swap',
     }, animate, delay);
     copy.textContent = stage.copy;
+    // Trying other sizes comes after the question's own swap has been shown.
+    invite.hidden = explorer.element.hidden = poolFirst && index === 0;
   } });
-  element.append(...(playFirst ? [figure.element, '\n', prediction] : [prediction, '\n', figure.element]), '\n', player.element, '\n', copy, '\n', explorer.element, '\n', outcome.element, '\n',
-    node('p', deposit ? 'Each amount starts with the same pool and shows one deposit, then one separate trade. The trade pays a 0.3% fee. Claims use proportional ownership before withdrawal rounding.'
-      : 'Each amount starts with the same pool and shows one ETH-to-USDC swap, including the 0.3% fee.', 'fine-print'));
+  const parts = poolFirst
+    ? [figure.element, player.element, prediction, invite, explorer.element, outcome.element]
+    : [prediction, figure.element, player.element, copy, explorer.element, outcome.element,
+      node('p', deposit ? 'Each amount starts with the same pool and shows one deposit, then one separate trade. The trade pays a 0.3% fee. Claims use proportional ownership before withdrawal rounding.'
+        : 'Each amount starts with the same pool and shows one ETH-to-USDC swap, including the 0.3% fee.', 'fine-print')];
+  element.append(...parts.flatMap(part => [part, '\n']));
   explorer.show(target);
   // animate: the learner asked to see the outcome, so play the action once the page has landed on it.
   return { element, showQuestion(animate = false) {

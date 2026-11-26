@@ -17,12 +17,12 @@ export function lessonApplicationCopy(id, outcome) {
       },
       question: 'What happens with this quote and a 0.5% slippage tolerance?',
       choices: [['quote-received', 'You receive the quoted USDC amount.'],
-        ['spot-limit', 'You receive within 0.5% of the starting-price value.'],
+        ['spot-limit', 'You receive within 0.5% of the value at the starting pool price.'],
         ['quote-misread', highImpact ? 'The swap fails because price impact exceeds 0.5%.'
           : 'You receive 0.5% less than the quote, even though nothing changed.']],
-      hint: 'The quote already reflects the effect of your trade. Slippage tolerance sets a limit relative to that quote.',
+      hint: 'For the two pools, compare the swap with how much each pool holds. For the wallet, the quote already reflects the effect of your trade. Slippage tolerance sets a limit relative to that quote.',
       feedbackByChoice: {
-        'spot-limit': 'The limit is measured from the quote, not the starting price. This trade changes the pool’s reserves, and its quoted proceeds already include that price impact.',
+        'spot-limit': 'The limit is measured from the quote, not from the starting pool price. This trade changes the pool’s balances, and the quote already includes that price impact.',
         'quote-misread': highImpact
           ? 'Price impact and slippage tolerance are different. The impact is already in this quote; the 0.5% tolerance limits how far execution may fall below the quote.'
           : 'Slippage tolerance is a maximum allowed shortfall, not an extra fee. With the pool unchanged, this swap still receives the quoted amount.',

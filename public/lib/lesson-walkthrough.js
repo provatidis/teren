@@ -4,10 +4,10 @@ import { fmt, usd, signedUSD, percent } from './format.js';
 export function lessonWalkthrough(id, outcome) {
   const s = outcome.setup, r = outcome.result;
   if (id === 'swap-impact') return [
-    ['Start with the reserves', fmt(s.reserveEth, 0) + ' ETH and ' + fmt(s.reserveEth * s.initialPrice, 0) + ' USDC imply a spot price of ' + usd(s.initialPrice) + ' per ETH.'],
+    ['Start with the balances', fmt(s.reserveEth, 0) + ' ETH and ' + fmt(s.reserveEth * s.initialPrice, 0) + ' USDC give a starting pool price of ' + usd(s.initialPrice) + ' per ETH.'],
     ['Apply the input fee', fmt(s.amount, 0) + ' ETH × 0.997 = ' + fmt(s.amount * 0.997, 3) + ' effective ETH for the output calculation. The full input is retained in the pool.'],
-    ['Quote the trade', 'The reserve formula returns ' + fmt(outcome.out, 2) + ' USDC, rounded down in integer token units before display.'],
-    ['Compare execution with spot', fmt(outcome.out, 2) + ' ÷ ' + s.amount + ' = ' + usd(outcome.out / s.amount) + ' per ETH, including the fee. Price impact excluding the fee is ' + fmt(outcome.impact, 2) + '%.'],
+    ['Quote the trade', 'The pool’s formula returns ' + fmt(outcome.out, 2) + ' USDC, rounded down in integer token units before display.'],
+    ['Compare with the starting pool price', fmt(outcome.out, 2) + ' ÷ ' + s.amount + ' = ' + usd(outcome.out / s.amount) + ' per ETH. That is the average price you receive, including the fee. Price impact excluding the fee is ' + fmt(outcome.impact, 2) + '%.'],
   ];
   if (id === 'pool-share') return [
     ['Match the pool ratio', fmt(s.depositEth, 0) + ' ETH × ' + usd(s.initialPrice) + ' per ETH requires ' + fmt(outcome.usdcDeposit, 0) + ' USDC.'],

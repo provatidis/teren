@@ -2,7 +2,10 @@ import { fmt, usd, signedUSD } from './format.js';
 
 export function lessonFinding(id, outcome) {
   const { setup: s, result: r } = outcome;
-  if (id === 'swap-impact') return 'The trade receives ' + usd(outcome.out / s.amount) + ' per ETH on average, below the starting pool price of ' + usd(s.initialPrice) + '. The trade moves the price and pays a 0.3% fee.';
+  // State both amounts and stop: the difference is already in the quote, so it
+  // is not called a loss. The wallet question later depends on that.
+  if (id === 'swap-impact') return 'At the starting pool price of ' + usd(s.initialPrice) + ', ' + fmt(s.amount, 0) + ' ETH is worth ' + fmt(s.amount * s.initialPrice, 0)
+    + ' USDC. The pool quotes ' + fmt(outcome.out, 2) + ' USDC for the whole trade, an average price of ' + usd(outcome.out / s.amount) + ' per ETH.';
   if (id === 'pool-share') return 'Your deposit buys ' + fmt(outcome.share, 2) + '% of the enlarged pool. Ownership includes your deposit in the total and gives you a claim on both tokens.';
   if (id === 'token-balances') return tokenBalanceNarration(outcome).exchange;
   if (id === 'range-boundaries') return outcome.prediction === 'usdc'
@@ -75,7 +78,24 @@ export function rangeBoundaryNarration(outcome) {
     + ' Outside the range, swaps stop changing its token amounts until price returns. This final token mix does not tell us how much it earned earlier.';
 }
 
+// The same swap in this pool and in one ten times deeper, in the lesson's own numbers.
+export function deeperPoolQuestion(outcome) {
+  const s = outcome.setup, amount = fmt(s.amount, 0) + ' ETH';
+  const here = fmt(outcome.out, 2) + ' USDC', deeper = fmt(outcome.deeperOut, 2) + ' USDC';
+  const share = value => fmt(value, Number.isInteger(value) ? 0 : 1) + '%';
+  return {
+    reasoning: 'A second pool starts at the same price and charges the same fee. It holds ten times as much of each token. You sell ' + amount + ' into each. Which pool gives you more USDC, and why?',
+    feedbackByChoice: {
+      deeper: amount + ' is ' + share(s.amount / s.reserveEth * 100) + ' of this pool’s ETH and ' + share(s.amount / s.reserveEth * 10) + ' of the deeper pool’s. This pool quotes ' + here + '; the deeper pool would quote ' + deeper + '. Pool depth matters as much as trade size.',
+      equal: 'The starting pool price and the fee match, but the price moves as you trade. The same ' + amount + ' moves the deeper pool’s price much less: it would quote ' + deeper + ', against ' + here + ' here.',
+      shallow: 'The swap does move this pool’s price further, and that move works against you: each ETH you sell lowers the price for the next. This pool quotes ' + here + '; the deeper pool would quote ' + deeper + '.',
+    },
+  };
+}
+
 export function lessonReasonFeedback(id, outcome, reason, feedbackByChoice = {}) {
+  if (id === 'swap-impact') return deeperPoolQuestion(outcome).feedbackByChoice[reason]
+    || 'Choose an answer. Compare the swap with how much each pool holds.';
   if (id === 'token-balances') {
     const copy = tokenBalanceNarration(outcome);
     if (reason === 'automatic') return 'Tokens change hands through trades. The pool does not move between token mixes on a timer or without a swap. ' + copy.exchange;

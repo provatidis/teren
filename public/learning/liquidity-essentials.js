@@ -1,18 +1,15 @@
 export const COURSE = { id: 'liquidity-essentials-v1', title: 'Liquidity essentials' };
 export const LESSONS = [
   {
-    id: 'swap-impact', completion: 'You connected trade size and pool depth to the price a swap receives.', protocol: 'Uniswap v2-style', title: 'Trade size and execution price', short: 'Swaps & price impact', concept: 'Swaps', skill: 'Explain how trade size affects execution.',
+    id: 'swap-impact', completion: 'You connected trade size and pool depth to the price a swap receives.', protocol: 'Uniswap v2-style', title: 'Trade size and the price you receive', short: 'Swaps & price impact', concept: 'Swaps', skill: 'Explain how trade size affects the price you receive.',
     intro: 'Trade ETH for USDC. Watch the pool’s balances change, then compare a small trade with a larger one.',
-    prediction: 'How will this swap’s average price compare with the starting price?',
-    predictions: [['less', 'A lower average price than the starting price'], ['same', 'The same average price as the starting price'], ['more', 'A higher average price than the starting price']],
-    reasoning: 'Why does the execution price differ from the starting spot price?',
-    reasons: [['curve', 'The trade changes the reserves; the input also pays a swap fee.'], ['fixed', 'The starting spot price sets the rate for the whole trade.'], ['forecast', 'The outside market price sets the reserves used for this trade.']],
-    reasonFeedbackByChoice: {
-      fixed: 'Spot price describes the pool before this trade. As ETH enters and USDC leaves, each part of the trade meets a different exchange rate.',
-      forecast: 'The outside price is fixed in this example. The swap itself changes the pool’s balances and exchange rate.',
-    },
-    explanation: 'The trade itself changes the pool’s exchange rate. A larger trade moves it further, so the average price per ETH is lower. The displayed trade averages also include the 0.3% swap fee; Go deeper separates the fee from price impact.',
-    takeaway: 'A quote describes a trade against finite reserves. Spot price alone cannot tell you its proceeds.',
+    prediction: 'How will the average price you receive compare with the starting pool price?',
+    predictions: [['less', 'Lower than the starting pool price'], ['same', 'The same as the starting pool price'], ['more', 'Higher than the starting pool price']],
+    // The question and its feedback name the lesson's own amounts: see deeperPoolQuestion.
+    reasoning: 'A second pool starts at the same price and charges the same fee. It holds ten times as much of each token. You make the same swap in each. Which pool gives you more USDC, and why?',
+    reasons: [['deeper', 'The deeper pool. The swap is a smaller share of it, so its price moves less.'], ['equal', 'Neither. The same starting price and the same fee give the same amount.'], ['shallow', 'This pool. The swap moves its price further, and a bigger move pays more.']],
+    explanation: 'Each ETH you sell moves the pool price down a little, so the next one sells for less. A larger trade moves it further, and the average price you receive falls. These averages include the 0.3% swap fee.',
+    takeaway: 'A quote is for one trade size against one pool’s balances. The starting pool price alone cannot tell you what you will receive.',
   },
   {
     id: 'pool-share', completion: 'You separated your ownership percentage from the tokens behind that claim.', protocol: 'Uniswap v2-style', title: 'Ownership after a liquidity deposit', short: 'Providing liquidity', concept: 'Ownership', skill: 'Explain what your share represents after a matching deposit.',

@@ -27,7 +27,26 @@ export function createPredictionPrompt(fieldset, { selected, onShow, disabled = 
 export function markPredictionRevealed(fieldset) {
   const prompt = fieldset.closest('.scene-prediction');
   prompt.dataset.revealed = 'true';
-  prompt.querySelector('button').textContent = 'Show the outcome again ↓';
+  prompt.querySelector('.scene-prediction-show').textContent = 'Show the outcome again ↓';
+}
+
+// Once the outcome is shown, a scene can fold its answered question into one
+// line. "Change" opens the choices again; a new choice folds them back.
+export function foldPrediction(fieldset, summary) {
+  const prompt = fieldset.closest('.scene-prediction');
+  let recap = prompt.querySelector('.scene-prediction-recap');
+  if (!recap) {
+    recap = sceneNode('p', undefined, 'scene-prediction-recap');
+    const change = sceneNode('button', 'Change', 'learn-text-button'); change.type = 'button';
+    change.addEventListener('click', () => {
+      prompt.dataset.folded = 'false';
+      (fieldset.querySelector('input:checked') || fieldset.querySelector('input')).focus();
+    });
+    recap.append(sceneNode('span'), ' ', change);
+    prompt.append(recap);
+  }
+  recap.querySelector('span').textContent = summary;
+  prompt.dataset.folded = 'true';
 }
 
 // Keep the diagram and its controls together when a learner requests an outcome.
@@ -99,12 +118,14 @@ export function createSceneExplorer({ id, min, max, step, start, target, format,
 
 // One action per activation. There are no timers or queued transitions; the
 // completed frame is available immediately, including with reduced motion.
-export function createActionPlayer({ id, stages, onShow }) {
-  const element = sceneNode('div', undefined, 'scene-player');
+// replayOnly: a two-state scene whose outcome is revealed elsewhere needs no
+// step controls. It keeps the announcements and one replay button.
+export function createActionPlayer({ id, stages, onShow, replayLabel = 'Replay action', replayOnly = false }) {
+  const element = sceneNode('div', undefined, replayOnly ? 'scene-player scene-player-replay' : 'scene-player');
   const selected = sceneNode('p', '', 'scene-step-label'); selected.id = id + '-selected';
   const actions = sceneNode('div', undefined, 'scene-actions');
   const previous = sceneNode('button', '← Back', 'text-button');
-  const replay = sceneNode('button', 'Replay action', 'text-button');
+  const replay = sceneNode('button', replayLabel, 'text-button');
   const next = sceneNode('button', '', 'button primary');
   for (const [button, suffix] of [[previous, 'previous'], [replay, 'replay'], [next, 'next']]) {
     button.type = 'button'; button.id = id + '-' + suffix;

@@ -4,7 +4,7 @@ import { motionSettled } from './motion-settled.js';
 export async function checkLessonFeedback({ evaluate, click, fill, text, navigate, reload, base, call }) {
   const choose = (prefix, group, value) => evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);
   const cases = [
-    ['learn.html#lesson=swap-impact', 'learn', 'same', 'less', 'curve', 'quote-received', 'learn-reasons', 'learn-applications', 'learn-run'],
+    ['learn.html#lesson=swap-impact', 'learn', 'same', 'less', 'deeper', 'quote-received', 'learn-reasons', 'learn-applications', 'learn-reveal'],
     ['learn.html#manage=fee-tiers', 'manage', 'pool-deposits', 'active-volume', 'active-swaps', 'more-volume', 'manage-reasons', 'manage-applications', 'manage-reveal'],
     ['learn.html#applied=period-vs-holding', 'applied', 'start-dollars', 'two-values', 'price-returned', 'smaller-lead', 'applied-reasons', 'applied-applications', 'applied-reveal'],
     ['lending.html#lesson=conditions', 'lend', 'higher', 'lower', 'interest', 'backing-faster', 'lend-reason-choices', 'lend-application-choices', 'lend-reveal'],
