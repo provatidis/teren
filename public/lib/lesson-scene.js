@@ -58,7 +58,9 @@ export function createSceneExplorer({ id, min, max, step, start, target, format,
   const output = sceneNode('output'); output.htmlFor = id; output.id = id + '-value';
   output.setAttribute('aria-live', 'off');
   // Reserve the largest label so changing digits cannot push the slider down.
-  const characters = Math.max(...[min, max, start, target, ...shortcuts.map(item => item.value)].map(value => format(value).length));
+  // A fractional step can show a longer value just below the maximum (19.5% beside 20%).
+  const nearMax = typeof step === 'number' && !Number.isInteger(step) ? [max - step] : [];
+  const characters = Math.max(...[min, max, start, target, ...nearMax, ...shortcuts.map(item => item.value)].map(value => format(value).length));
   output.style.minWidth = (characters + 1) + 'ch';
   heading.append(label, ' ', output);
   const slider = sceneNode('input');

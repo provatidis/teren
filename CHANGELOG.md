@@ -1,5 +1,10 @@
 # Release history
 
+## 1.60.0 · 2026-11-26
+
+- Yield lessons 3 and 4 now have a slider under the drawing. In **When does the interest arrive?** you drag the day the rate rises and watch the interest the YT buyer collects against the 20 USDC they paid. In **Selling before maturity** you drag the implied APY of the day-45 offer and watch the PT offer fall while the YT offer rises. The two named cases stay as buttons, and exploring never changes your answers.
+- On narrow phones, the bar labels in those lessons sit on their own line, so the slider no longer moves while you drag.
+
 ## 1.59.0 · 2026-11-26
 
 - In the first two liquidity lessons you can now watch the swap or deposit happen. After **See what happens**, the page lands on the outcome and the pool’s balances then move from the starting pool to the result. **Replay action** plays the same change again and brings the bars into view if you have scrolled away. Reduced-motion settings still show the result at once.

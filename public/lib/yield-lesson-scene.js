@@ -1,4 +1,4 @@
-import { sceneNode } from './lesson-scene.js';
+import { sceneNode, createSceneExplorer } from './lesson-scene.js';
 import { fmt } from './format.js';
 
 function claimCard([label, value, role], animate) {
@@ -53,7 +53,7 @@ function drawRatePath({ days, switchDay, firstApy, secondApy }) {
     segment.setAttribute('height', 1);
     segment.setAttribute('class', 'yl-time-' + name);
     svg.append(segment);
-    key.append(sceneNode('span', length + ' days at ' + rate + '%', 'yl-time-' + name));
+    key.append(sceneNode('span', (length === 1 ? '1 day' : length + ' days') + ' at ' + rate + '%', 'yl-time-' + name));
   }
   const axis = sceneNode('div', undefined, 'yl-time-axis');
   axis.append(sceneNode('span', 'Day 0'), ' ', sceneNode('span', 'Day ' + days));
@@ -62,8 +62,15 @@ function drawRatePath({ days, switchDay, firstApy, secondApy }) {
 }
 
 // The diagram can be explored in any order; the question always refers to its named outcome.
-export function createYieldLessonScene(scene, controls, drawing, caption) {
-  let current;
+// A scene with `explore` also gets a slider under the drawing. The named cases
+// stay as buttons above it, pressed whenever the slider sits on their value.
+export function createYieldLessonScene(scene, controls, drawing, caption, explorerHome) {
+  let current, explorer, played = false;
+  const { explore } = scene;
+  const stageAt = value => {
+    const index = explore.values.indexOf(value);
+    return index < 0 ? explore.stage(value) : scene.stages[index];
+  };
   const buttons = scene.stages.map((stage, index) => {
     const button = sceneNode('button', stage.label, 'scene-shortcut');
     button.type = 'button';
@@ -82,9 +89,25 @@ export function createYieldLessonScene(scene, controls, drawing, caption) {
   const announcement = sceneNode('span', '', 'sr-only');
   announcement.setAttribute('role', 'status');
   controls.replaceChildren(...buttons, announcement);
+  caption.style.minHeight = '';
+  if (explore) {
+    // Exploring never changes the question or the saved answers.
+    explorer = createSceneExplorer({
+      id: 'yl-scene-slider', min: explore.min, max: explore.max, step: explore.step,
+      start: explore.values[0], target: explore.values[scene.outcome ?? explore.values.length - 1],
+      format: explore.format, valueText: explore.valueText, scopeText: explore.scope, labelText: explore.label, shortcuts: [],
+      onChange(value) {
+        // A named case highlights what changed; a drag redraws without the cue.
+        render(stageAt(value), explore.values.indexOf(value), played);
+        played = false;
+        return '';
+      },
+    });
+    explorerHome.replaceChildren(explorer.element);
+  } else explorerHome.replaceChildren();
+  explorerHome.hidden = !explore;
 
-  function show(index, animate = true) {
-    const stage = scene.stages[index];
+  function render(stage, index, animate) {
     const prior = animate ? current : null;
     current = stage;
     for (const [i, button] of buttons.entries()) button.setAttribute('aria-pressed', String(i === index));
@@ -106,6 +129,14 @@ export function createYieldLessonScene(scene, controls, drawing, caption) {
     if (stage.bars) content.append(drawBars(stage.bars, prior?.bars));
     drawing.replaceChildren(content);
     caption.textContent = stage.caption;
+    // Near the end of the page, a shorter caption would shrink the page and
+    // scroll the slider out from under a dragging thumb. Let it only grow.
+    if (explorer) caption.style.minHeight = caption.getBoundingClientRect().height + 'px';
+  }
+  function show(index, animate = true) {
+    if (!explorer) return render(scene.stages[index], index, animate);
+    played = animate;
+    explorer.show(explore.values[index]);
   }
   return { show, showOutcome: () => show(scene.outcome ?? scene.stages.length - 1) };
 }

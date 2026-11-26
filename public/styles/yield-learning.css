@@ -15,6 +15,14 @@
 #yl-stage-controls { margin: 16px 0 12px; }
 #yl-stage-controls button { flex: 1 1 0; }
 #yl-scene-caption { margin: 12px 0 0; font-size: 15px; line-height: 1.65; color: var(--text); }
+#yl-scene-explorer .scene-price-control { margin: 14px 0 0; }
+#yl-scene-explorer .scene-shortcuts:empty { display: none; }
+#yl-scene-explorer .scene-question-scope { margin: 0; }
+/* With a slider, amounts change width as you drag. On a narrow phone, give each
+   label its own line so a wider amount never rewraps it and pushes the slider. */
+@media (max-width: 420px) {
+  #yl-scene:has(#yl-scene-explorer:not([hidden])) .yl-bar > :is(dt, dd) { grid-column: 1 / -1; }
+}
 #yl-observe { margin-top: 16px; }
 #yl-explore { display: inline-flex; align-items: center; min-height: 44px; }
 #yl-deeper { margin-top: 8px; padding-top: 12px; }
