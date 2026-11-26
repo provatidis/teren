@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { motionSettled } from './motion-settled.js';
 
 export async function checkLessonFeedback({ evaluate, click, fill, text, navigate, reload, base, call }) {
   const choose = (prefix, group, value) => evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);
@@ -74,6 +75,7 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
       }) && bounds[0].getBoundingClientRect().bottom <= bounds[1].getBoundingClientRect().top;
     }))()`);
     assert.equal(await guidesFit(), true, 'Boundary labels align with the band instead of pretending to be scale endpoints.');
+    await motionSettled(evaluate);
     assert.equal(await evaluate(`(() => {
       const guide = document.querySelector('#learn-scene .scene-range-guide');
       return guide.querySelector('.scene-range-marker').getBoundingClientRect().left > guide.querySelector('.scene-range-band').getBoundingClientRect().right;

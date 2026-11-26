@@ -63,13 +63,13 @@ export function initLendingLearning() {
     markPredictionRevealed(predictionField);
   }
   function navigation() {
-    $('lend-progress').textContent = progress.completed.length + ' of ' + course.lessons.length + ' checked';
+    $('lend-progress').textContent = progress.completed.length + ' of ' + course.lessons.length + ' done';
     for (const name of Object.keys(courses)) $('lend-chapter-' + name).setAttribute('aria-current', name === chapter ? 'true' : 'false');
     for (const link of document.querySelectorAll('[data-lending-lesson]')) {
       const id = link.dataset.lendingLesson;
       link.setAttribute('aria-current', id === lesson?.id ? 'step' : 'false');
       link.classList.toggle('learn-step-done', progress.completed.includes(id));
-      link.querySelector('.learn-step-state').textContent = progress.completed.includes(id) ? 'Checked' : id === lesson?.id ? 'Now exploring' : 'Open lesson';
+      link.querySelector('.learn-step-state').textContent = progress.completed.includes(id) ? 'Done' : id === lesson?.id ? 'Now exploring' : 'Open lesson';
     }
   }
   function persist() {

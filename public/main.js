@@ -8,6 +8,7 @@ import { initWorkspaces } from './ui/workspaces.js';
 import { initPositionFees } from './ui/position-fees.js';
 import { initExamples } from './ui/examples.js';
 import { initPageAccess } from './ui/page-access.js';
+import { initMotion } from './ui/motion.js';
 import { initPositionSnapshots } from './ui/positions.js';
 import { initSnapshotNavigation } from './ui/snapshot-navigation.js';
 import { initSandbox } from './ui/sandbox.js';
@@ -19,6 +20,7 @@ import { initSavedExperiments } from './ui/saved-experiments.js';
 
 // Compose controllers explicitly. Data adapters and calculation models never initialize UI.
 const pageAccess = initPageAccess();
+initMotion();
 const workspaces = initWorkspaces();
 const navigation = initLabNavigation({ activate: () => { workspaces.select('experiment'); pageAccess.refreshOffsets(); } });
 const snapshots = initSnapshotNavigation({ activate: () => workspaces.select('inspect') });

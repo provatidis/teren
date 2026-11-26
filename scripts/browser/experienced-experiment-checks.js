@@ -125,11 +125,9 @@ export async function checkExperiencedExperiments({ evaluate, click, fill, text,
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
       const destinations = await evaluate(`Array.from(document.querySelectorAll('.home-topic-actions'),
         group => Array.from(group.querySelectorAll('a'), link => link.getAttribute('href')))`);
-      assert.deepEqual(destinations, [
-        ['liquidity.html#experiment', 'learn.html#lesson=swap-impact'],
-        ['lending.html#experiment', 'lending.html#lesson=supply'],
-        ['yield.html', 'yield-learn.html#lesson=split'],
-      ], 'Each Home topic opens its lab or its first lesson.');
+      assert.deepEqual(destinations.map(([lab]) => lab), ['liquidity.html#experiment', 'lending.html#experiment', 'yield.html'], 'Each Home topic opens its lab.');
+      // The first lesson on a first visit, or the next unfinished one; home-progress-checks pins both.
+      assert.deepEqual(destinations.map(([, lesson]) => lesson.split('#')[0]), ['learn.html', 'lending.html', 'yield-learn.html'], 'Each Home topic opens one of its own lessons.');
       const returnLinks = await evaluate("['home-experiment','home-continue'].map(id=>{const link=document.getElementById(id),title=link.querySelector('strong').getBoundingClientRect(),arrow=link.lastElementChild.getBoundingClientRect();return {shown:!link.hidden,titleRight:title.right,titleBottom:title.bottom,arrowLeft:arrow.left,arrowTop:arrow.top}})");
       assert.ok(returnLinks.every(link => link.shown && link.arrowLeft >= link.titleRight + 8 && link.arrowTop < link.titleBottom), 'Return-link arrows stay beside their destinations, including a long lesson title.');
     }

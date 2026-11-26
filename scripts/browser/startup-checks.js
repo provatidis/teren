@@ -120,7 +120,18 @@ export async function checkStartup({ evaluate, click, fill, text, navigate, base
     const held = nextEvent('Fetch.requestPaused');
     const loading = navigate(base + 'lending.html#experiment', { startup: false });
     const request = await held;
-    await evaluate("new Promise(resolve => { const check = () => document.getElementById('app-startup') ? resolve() : setTimeout(check, 20); check(); })");
+    // The held request can pause before the stylesheet has loaded. The guard hides
+    // unavailable content through that stylesheet, so wait for it to apply.
+    await evaluate(`new Promise((resolve, reject) => {
+      const deadline = Date.now() + 5000;
+      const check = () => {
+        const content = document.getElementById('app-content');
+        if (document.getElementById('app-startup') && content && getComputedStyle(content).visibility === 'hidden') return resolve();
+        if (Date.now() > deadline) return reject(new Error('The pending page never hid its unavailable content'));
+        setTimeout(check, 20);
+      };
+      check();
+    })`);
     await unavailable();
     assert.equal(await state(), 'loading');
     await call('Fetch.continueRequest', { requestId: request.requestId });

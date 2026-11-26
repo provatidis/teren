@@ -172,7 +172,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
       assert.equal(await evaluate("document.getElementById('cl-fees').value"), '0');
     }
   }
-  assert.equal(await text('applied-progress-count'), '3 of 3 checked');
+  assert.equal(await text('applied-progress-count'), '3 of 3 done');
   assert.equal(await evaluate("document.getElementById('applied-reflection').hidden"), false);
   assert.equal(await evaluate('JSON.stringify(' + JSON.stringify(existingKeys) + '.map(key=>localStorage.getItem(key)))'), before, 'Applied work preserves all existing lesson and snapshot storage.');
   // A saved choice for the retired outcome question is not an answer to the new mechanism question.
@@ -190,7 +190,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
   assert.equal(await evaluate("document.querySelector('input[name=applied-application]:checked')"),null);
   assert.equal(await evaluate("document.getElementById('applied-feedback').hidden"),true);
   assert.equal(await evaluate("document.getElementById('applied-continue').hidden"),true);
-  assert.equal(await text('applied-progress-count'),'3 of 3 checked');
+  assert.equal(await text('applied-progress-count'),'3 of 3 done');
   assert.equal(await savedAnswer('period-vs-holding'),'0.17');
   assert.deepEqual(await evaluate("JSON.parse(localStorage.getItem('passiko-applied-liquidity-v1')).drafts['period-vs-holding'].questionRevisions"), {prediction:2,reason:4,application:3});
   await evaluate(`(() => {const key='passiko-applied-liquidity-v1', progress=JSON.parse(localStorage.getItem(key));
@@ -202,7 +202,7 @@ export async function checkAppliedLearning({ evaluate, click, fill, text, naviga
   assert.equal(await evaluate("document.querySelector('input[name=applied-application]:checked')"),null);
   assert.equal(await evaluate("document.getElementById('applied-checkpoint').value"),'3');
   assert.equal(await savedAnswer('between-samples'),'2724');
-  assert.equal(await text('applied-progress-count'),'3 of 3 checked');
+  assert.equal(await text('applied-progress-count'),'3 of 3 done');
   assert.match(await text('applied-reason-evidence'), /45m 24s/);
   await choose('applied-reason','returned'); await choose('applied-application','edge-placement'); await click('applied-check');
   assert.equal(await text('applied-feedback-title'),'Both answers are correct.');

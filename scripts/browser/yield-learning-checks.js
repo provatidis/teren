@@ -176,7 +176,10 @@ export async function checkYieldLearning({ evaluate, click, text, navigate, relo
       assert.equal(await evaluate('localStorage.getItem(' + JSON.stringify(draftKey) + ')'), experimentDraft, 'Opening the lesson setup preserves an existing lab draft.');
     }
     await navigate(base);
-    assert.equal(await evaluate("document.getElementById('home-continue').getAttribute('href')"), route('exit'));
+    // A finished topic offers a review; Home's next lesson lies outside it.
+    assert.equal(await evaluate("document.querySelector('.home-progress[data-topic=yield] .home-progress-count').textContent"), 'All 4 lessons done');
+    assert.equal(await evaluate("document.querySelector('.home-learn-link[href=\"" + route('split') + "\"] .home-learn-label').textContent"), 'Review the lessons');
+    assert.equal(await evaluate("(link => link.hidden || !link.getAttribute('href').startsWith('yield-learn.html'))(document.getElementById('home-continue'))"), true);
     assert.equal(await evaluate("document.getElementById('home-experiment').href"), homeExperiment, 'Editing the lesson handoff keeps the independent lab resume.');
     await navigate(base + route('split'));
     await select(evaluate, "#learn-lesson-list a[href='#lesson=buyers']");

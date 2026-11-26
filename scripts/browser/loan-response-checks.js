@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { motionSettled, reduceMotion } from './motion-settled.js';
 
 const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
 
@@ -33,6 +34,7 @@ export async function checkLoanResponseLesson({ evaluate, click, fill, text, nav
   assert.equal(await text('response-add-debt'), '$5,000.00');
   assert.equal(await text('response-repay-health'), '1.50');
   assert.equal(await text('response-add-health'), '1.36');
+  await motionSettled(evaluate);
   const bars = await evaluate("Array.from(document.querySelectorAll('.response-fill')).map(bar=>bar.getBoundingClientRect().width)");
   assert.ok(Math.abs(bars[0] / bars[2] - 1.5) < .01, 'Repay backing and debt have the same scale.');
   assert.ok(Math.abs(bars[1] / bars[3] - 1.36) < .01, 'Add backing and debt have the same scale.');
@@ -129,7 +131,7 @@ export async function checkLoanResponseLesson({ evaluate, click, fill, text, nav
       await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
     assert.equal(await evaluate("document.getElementById('response-budget').value"), '6000');
-    await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+    await reduceMotion({ call, evaluate });
     try {
       await shortcut('Question');
       assert.equal(await evaluate("document.querySelector('.response-scene').getAnimations({subtree:true}).length"), 0);

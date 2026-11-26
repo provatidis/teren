@@ -109,7 +109,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
 
     }
   }
-  assert.equal(await text('manage-progress-count'),'3 of 3 checked');assert.equal(await evaluate("document.getElementById('manage-next').hash"),'#applied=fees-over-time');
+  assert.equal(await text('manage-progress-count'),'3 of 3 done');assert.equal(await evaluate("document.getElementById('manage-next').hash"),'#applied=fees-over-time');
   assert.equal(await evaluate('JSON.stringify('+JSON.stringify(keys)+'.map(key=>localStorage.getItem(key)))'),before,'Range lessons preserve all older progress and saved work.');
   // Retire only changed application answers; completed chapters and compatible explanations survive.
   await evaluate(`(() => {const key='passiko-range-learning-v1', progress=JSON.parse(localStorage.getItem(key));
@@ -119,7 +119,7 @@ export async function checkManagementLearning({evaluate,click,text,navigate,relo
   assert.equal(await evaluate("document.querySelector('input[name=manage-prediction]:checked').value"),'wide');
   assert.equal(await evaluate("document.querySelector('input[name=manage-reason]:checked').value"),'bounds');
   assert.equal(await evaluate("document.querySelector('input[name=manage-application]:checked')"),null);
-  assert.equal(await text('manage-progress-count'),'3 of 3 checked');
+  assert.equal(await text('manage-progress-count'),'3 of 3 done');
   assert.equal(await text('manage-variation-label'),'Situation 2 of 3');
   await choose('manage-application','wide-mix');await click('manage-check');
   assert.equal(await text('manage-feedback-title'),'Both answers are correct.');

@@ -1,5 +1,6 @@
 import { initSavedExperiments } from './ui/saved-experiments.js';
 import { initPageAccess } from './ui/page-access.js';
+import { initMotion } from './ui/motion.js';
 import { initLending } from './ui/lending.js';
 import { initLendingLearning } from './ui/lending-learning.js';
 import { initBorrowingLoops } from './ui/borrowing-loops.js';
@@ -11,6 +12,7 @@ import { loopLessonFromHash, readLoopHash } from './lib/loop-links.js';
 import { focusInitialLesson } from './lib/learning-elements.js';
 
 initPageAccess();
+initMotion();
 const loanLab = initLending();
 const loopLab = initBorrowingLoops({ initLiquidation: initLoopLiquidation });
 const lstLab = initLSTLoops();

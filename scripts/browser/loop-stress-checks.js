@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { motionSettled, reduceMotion } from './motion-settled.js';
 
 const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
 
@@ -29,6 +30,7 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
   assert.equal(await text('stress-holding-change'), 'Loss: $2,500.00');
   assert.equal(await text('stress-loop-change'), 'Loss: $4,687.50');
   assert.equal(await text('stress-health'), '1.29');
+  await motionSettled(evaluate);
   const bars = await evaluate("Array.from(document.querySelectorAll('.stress-fill')).map(el=>({width:el.getBoundingClientRect().width,left:parseFloat(el.style.left)}))");
   assert.ok(Math.abs(bars[1].width / bars[0].width - 1.875) < .01);
   assert.ok(bars.every(bar=>bar.left < 50), 'Losses extend left of the shared zero.');
@@ -143,7 +145,7 @@ export async function checkLoopStressLesson({ evaluate, click, fill, text, navig
         await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
       } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
       assert.equal(await evaluate(`document.getElementById('${id}').value`), current === 'price' ? '3000' : '365');
-      await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+      await reduceMotion({ call, evaluate });
       try {
         await key(id, 'Home');
         assert.equal(await evaluate("document.querySelector('.stress-scene').getAnimations({subtree:true}).length"), 0);

@@ -1,8 +1,10 @@
 import { initPageAccess } from './ui/page-access.js';
+import { initMotion } from './ui/motion.js';
 import { initLearning } from './ui/learning.js';
 import { initAppliedLearning } from './ui/applied-learning.js';
 import { initManagementLearning } from './ui/management-learning.js';
 initPageAccess();
+initMotion();
 initLearning();
 initAppliedLearning();
 initManagementLearning();

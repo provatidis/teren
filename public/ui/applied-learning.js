@@ -37,14 +37,14 @@ export function initAppliedLearning() {
   const fresh = () => ({ prediction: '', answer: '', reason: '', application: '', choiceSeed: newChoiceSeed(), revealed: false, checkpoint: null, questionRevisions: {...APPLIED_QUESTION_REVISIONS[lesson.id]} });
   function focusTitle(id) { $(id).focus({ preventScroll: true }); $(id).scrollIntoView({ block: 'start', behavior: 'instant' }); }
   function updateNavigation() {
-    $('applied-progress-count').textContent = progress.completed.length + ' of 3 checked';
+    $('applied-progress-count').textContent = progress.completed.length + ' of 3 done';
     if (appliedLessonFromHash(location.hash)) learningChapter('Recorded cases', progress.completed.length, 3);
     for (const link of document.querySelectorAll('[data-applied-id]')) {
       const active = link.dataset.appliedId === appliedLessonFromHash(location.hash);
       const complete = progress.completed.includes(link.dataset.appliedId);
       link.setAttribute('aria-current', active ? 'step' : 'false');
       link.classList.toggle('learn-step-done', complete);
-      link.querySelector('.learn-step-state').textContent = complete ? 'Checked' : active ? 'Now exploring' : 'Open exercise';
+      link.querySelector('.learn-step-state').textContent = complete ? 'Done' : active ? 'Now exploring' : 'Open exercise';
     }
   }
   function persist() {

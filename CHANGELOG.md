@@ -1,5 +1,12 @@
 # Release history
 
+## 1.58.0 · 2026-11-26
+
+- Home shows how many lessons you have finished in each topic once you complete your first one. Each topic’s lesson button continues with your next unfinished lesson, and the link above the topics opens the next lesson after one you have finished.
+- Bars in the lessons and labs now ease to their new value after a button, preset or keyboard step. They still follow a dragged slider directly, and reduced-motion settings turn the easing off.
+- The liquidity final challenge has a fee slider beside its price slider, two goals that tick as you meet them, and a solved state that appears as soon as both are met. **Match holding for me** remains available as a hint.
+- Lesson lists say “done” in place of “checked”.
+
 ## 1.57.3 · 2026-11-23
 
 - Show more APY decimals in the early-sale comparison when rounding would hide the higher or lower rate behind a change in YT sale proceeds.
