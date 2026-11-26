@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { YIELD_LESSONS } from '../../public/learning/yield-lessons.js';
+import { dragRangeToMax } from './touch-range.js';
 
 const progressKey = 'teren-yield-learning-v1';
 const draftKey = 'teren-split-yield-v1';
@@ -99,6 +100,72 @@ async function checkPhoneLessons({ evaluate, call, navigate, base, reload, text 
   }
 }
 
+// Lessons 3 and 4 put a slider under the drawing. The named cases stay as
+// buttons above it; exploring never touches the question or saved answers.
+async function checkYieldLessonSliders({ evaluate, call, navigate, base }) {
+  const fill = (id, value) => evaluate(`(() => { const el = document.getElementById(${JSON.stringify(id)}); el.value = ${JSON.stringify(String(value))}; el.dispatchEvent(new Event('input', { bubbles: true })); })()`);
+  const state = () => evaluate(`({
+    value: document.getElementById('yl-scene-slider').value, output: document.getElementById('yl-scene-slider-value').textContent,
+    scope: document.getElementById('yl-scene-slider-scope').textContent, caption: document.getElementById('yl-scene-caption').textContent,
+    pressed: [...document.querySelectorAll('#yl-stage-controls button')].map(button => button.getAttribute('aria-pressed')),
+    labels: [...document.querySelectorAll('.yl-time-labels span')].map(node => node.textContent),
+    bars: Object.fromEntries([...document.querySelectorAll('.yl-bar')].map(row => [row.dataset.role, Number(row.querySelector('progress').value)])),
+    pt: document.querySelector('.yl-claim[data-role=pt] dd')?.textContent || null,
+    saved: localStorage.getItem(${JSON.stringify(progressKey)}),
+  })`);
+  for (const width of [390, 320]) for (const lesson of YIELD_LESSONS) {
+    await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
+    await evaluate('localStorage.removeItem(' + JSON.stringify(progressKey) + ')');
+    await navigate(base + route(lesson.id));
+    const explore = lesson.scene.explore;
+    assert.equal(await visible(evaluate, 'yl-scene-explorer'), Boolean(explore), 'Only lessons with a continuous condition show a slider: ' + lesson.id);
+    if (!explore) continue;
+    const start = await state();
+    assert.deepEqual([start.value, start.pressed], [String(explore.values[0]), ['true', 'false']], 'The slider starts on the first named case.');
+    const order = await evaluate(`(() => { const top = id => document.getElementById(id).getBoundingClientRect().top;
+      return top('yl-stage-controls') < top('yl-scene-drawing') && top('yl-scene-drawing') < top('yl-scene-slider') && top('yl-scene-slider') < top('yl-scene-caption'); })()`);
+    assert.ok(order, 'Named cases above the drawing, the slider under it and the caption last.');
+    await dragRangeToMax({ evaluate, call, fill }, 'yl-scene-slider');
+    const dragged = await state();
+    assert.deepEqual(dragged.pressed, ['false', 'false'], 'No named case is pressed while exploring another value.');
+    assert.match(dragged.scope, /^Exploring /);
+    assert.equal(dragged.saved, start.saved, 'Exploring never saves or changes an answer.');
+    await evaluate("document.querySelectorAll('#yl-stage-controls button')[1].click()");
+    const named = await state();
+    assert.deepEqual([named.value, named.pressed, named.caption], [String(explore.values[1]), ['false', 'true'], lesson.scene.stages[1].caption], 'A named case moves the slider and shows its own caption.');
+    await fill('yl-scene-slider', explore.values[0]);
+    assert.deepEqual((await state()).pressed, ['true', 'false'], 'Reaching a named value by dragging presses its button.');
+    if (lesson.id === 'timing') {
+      assert.deepEqual(dragged.labels, ['89 days at 5%', '1 day at 15%']);
+      assert.match(dragged.caption, /for the last 1 day\. .*short of the 20 USDC they paid\.$/);
+      const rows = [];
+      for (const day of [1, 30, 54, 55, 89]) {
+        await fill('yl-scene-slider', day);
+        const view = await state();
+        assert.equal(view.output, 'Day ' + day);
+        rows.push([day, view.bars.yt, view.bars.cash, /more than/.test(view.caption)]);
+      }
+      assert.ok(rows.every(([, interest, cost]) => cost === 20) && rows.every((row, i) => !i || row[1] < rows[i - 1][1]), 'A later rise always earns less interest for the same 20 USDC: ' + JSON.stringify(rows));
+      assert.deepEqual(rows.map(row => row[3]), [true, true, true, false, false], 'The buyer comes out ahead only when the rise comes by day 54.');
+    } else {
+      assert.equal(dragged.output, '20%');
+      const rows = [];
+      for (const apy of [0, 5, 10, 15, 20]) {
+        await fill('yl-scene-slider', apy);
+        const view = await state();
+        rows.push([apy, Number(view.pt.replace(/[^0-9.]/g, '')), view.bars.sale, view.bars.earned]);
+      }
+      assert.equal(rows[0][2], 0, 'At 0% the remaining interest is worth nothing to a buyer.');
+      assert.ok(rows.every((row, i) => !i || (row[1] < rows[i - 1][1] && row[2] > rows[i - 1][2] && row[3] === rows[0][3])),
+        'A higher implied APY lowers the PT offer, raises the YT offer and leaves the earned interest alone: ' + JSON.stringify(rows));
+    }
+    await evaluate("document.getElementById('yl-reveal').click()");
+    assert.equal((await state()).value, String(explore.values[lesson.scene.outcome]), 'Showing the outcome returns the slider to the question’s case.');
+  }
+  await evaluate('localStorage.removeItem(' + JSON.stringify(progressKey) + ')');
+  console.log('PASS: yield lessons 3 and 4 explore a rise day and an implied APY with a slider under the drawing at 390/320px, keep named cases and saved answers');
+}
+
 export async function checkYieldLearning({ evaluate, click, text, navigate, reload, base, call, nextEvent }) {
   await navigate(base);
   const before = await evaluate('({local: {...localStorage}, session: {...sessionStorage}})');
@@ -192,6 +259,7 @@ export async function checkYieldLearning({ evaluate, click, text, navigate, relo
     console.log('PASS: four yield lessons, different and matching feedback, explanations and applications, fixed model handoffs, progress, Home resume and Back');
     for (const width of [390, 320]) await checkPhoneLessons({ evaluate, call, navigate, base, reload, text }, width);
     console.log('PASS: yield lesson headings, readable setups, optional predictions, single scene control, native touch and reduced motion at 390/320px');
+    await checkYieldLessonSliders({ evaluate, call, navigate, base });
   } finally {
     await call('Emulation.setEmulatedMedia', { features: [] });
     await call('Emulation.setTouchEmulationEnabled', { enabled: false });

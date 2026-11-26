@@ -13,25 +13,43 @@ const original = SPLIT_DEFAULTS;
 const zero = { ...original, firstApy: 0, secondApy: 0 };
 const early = { ...original, switchDay: 10 };
 const lateDeposit = splitDeposit(original);
-const earlyDeposit = splitDeposit(early);
 const zeroDeposit = splitDeposit(zero);
 const saleDay = 45;
 const highExit = { exitDay: saleDay, exitApy: 15 };
 const lowQuote = splitAtExit(original, { exitDay: saleDay, exitApy: 5 });
 const highQuote = splitAtExit(original, highExit);
 const cash = value => fmt(value, Number.isInteger(value) ? 0 : 2) + ' USDC';
+const percent = value => fmt(value, Number.isInteger(value) ? 0 : 1) + '%';
+const dayCount = count => count === 1 ? '1 day' : count + ' days';
 const experiment = (input, exit) => 'yield.html?from=lesson' + splitHash(input, exit);
+
+// Each slider keeps one bar scale over its whole range, so dragging compares
+// lengths instead of rescaling them.
+const riseDays = { min: 1, max: original.days - 1 };
+const riseScale = splitDeposit({ ...original, switchDay: riseDays.min }).netInterest;
+const offerApys = { min: 0, max: 20, step: 0.5 };
+const offerScale = splitAtExit(original, { exitDay: saleDay, exitApy: offerApys.max }).ytSale;
 
 function timingStage(label, caption, input) {
   const deposit = splitDeposit(input);
   const { days, switchDay, firstApy, secondApy } = input;
   return {
     label, caption, rows: [], path: { days, switchDay, firstApy, secondApy },
-    bars: { unit: 'USDC', max: earlyDeposit.netInterest, items: [
+    bars: { unit: 'USDC', max: riseScale, items: [
       { label: 'Cost of YT on day one', value: deposit.ytCost, role: 'cash' },
       { label: 'Interest earned after fees', value: deposit.netInterest, role: 'yt' },
     ] },
   };
+}
+
+function riseStage(day) {
+  const input = { ...original, switchDay: day };
+  const { netInterest, ytCost } = splitDeposit(input);
+  const gap = netInterest - ytCost;
+  const result = Math.abs(gap) < 0.005 ? 'exactly the ' + cash(ytCost) + ' they paid'
+    : cash(Math.abs(gap)) + (gap < 0 ? ' short of' : ' more than') + ' the ' + cash(ytCost) + ' they paid';
+  return timingStage('Rise on day ' + day, 'The deposit earns 15% for the last ' + dayCount(original.days - day)
+    + '. By maturity the buyer collects ' + cash(netInterest) + ' of interest after fees, ' + result + '.', input);
 }
 
 function saleStage(label, quote, caption) {
@@ -41,11 +59,18 @@ function saleStage(label, quote, caption) {
       ['What the other trader would receive for PT', cash(quote.ptSale), 'pt'],
       ['Your sale proceeds plus interest', cash(quote.ytTotal), 'yt'],
     ],
-    bars: { unit: 'USDC', max: highQuote.ytSale, items: [
+    bars: { unit: 'USDC', max: offerScale, items: [
       { label: 'What you would receive for selling YT', value: quote.ytSale, role: 'sale' },
       { label: 'Interest you earned before the sale', value: quote.ytInterest, role: 'earned' },
     ] },
   };
+}
+
+function offerStage(apy) {
+  const quote = splitAtExit(original, { exitDay: saleDay, exitApy: apy });
+  return saleStage(percent(apy) + ' implied APY', quote, 'At ' + percent(apy) + ' implied APY, a buyer offers '
+    + cash(quote.ytSale) + ' for your YT and the other trader ' + cash(quote.ptSale) + ' for PT. The interest you earned before the sale stays '
+    + cash(quote.ytInterest) + '.');
 }
 
 export const YIELD_LESSONS = [
@@ -200,7 +225,14 @@ export const YIELD_LESSONS = [
     scene: { title: 'Move the rate rise', outcome: 1, stages: [
       timingStage('Rise on day 80', 'Only the last 10 days earn the higher rate. By maturity the buyer still hasn’t recovered the 20 USDC they paid.', original),
       timingStage('Rise on day 10', 'The deposit now earns the higher rate for 80 days. The buyer paid the same price on day one.', early),
-    ] },
+    ], explore: {
+      ...riseDays, step: 1, values: [original.switchDay, early.switchDay], stage: riseStage,
+      label: 'Day the rate rises to 15%', format: day => 'Day ' + day,
+      valueText: day => 'Day ' + day + ', ' + cash(splitDeposit({ ...original, switchDay: day }).netInterest) + ' of interest after fees',
+      scope: day => day === original.switchDay ? 'Showing the first case: a rise on day ' + day + '.'
+        : day === early.switchDay ? 'Showing the question’s case: a rise on day ' + day + '.'
+        : 'Exploring a rise on day ' + day + '. The question compares day ' + original.switchDay + ' with day ' + early.switchDay + '.',
+    } },
     reason: {
       revision: 2,
       question: 'Reverse the day-80 example. Ten days at 15% come first, then 80 days at 5%. The YT earns the same ' + cash(lateDeposit.netInterest) + ' either way. Why?',
@@ -257,7 +289,13 @@ export const YIELD_LESSONS = [
     scene: { title: 'Compare two offers on day 45', outcome: 1, stages: [
       saleStage('5% implied APY', lowQuote, 'This is the first offer on day 45. Both sale prices are shown before trading costs.'),
       saleStage('15% implied APY', highQuote, 'A buyer who expects more interest over the remaining 45 days may pay you more for YT. The new offer leaves your earlier interest unchanged.'),
-    ] },
+    ], explore: {
+      ...offerApys, values: [5, highExit.exitApy], stage: offerStage,
+      label: 'Implied APY of the day-' + saleDay + ' offer', format: percent,
+      valueText: apy => percent(apy) + ' implied APY, ' + cash(splitAtExit(original, { exitDay: saleDay, exitApy: apy }).ytSale) + ' offered for your YT',
+      scope: apy => apy === 5 ? 'Showing the first offer at 5%.' : apy === highExit.exitApy ? 'Showing the second offer at ' + percent(apy) + '.'
+        : 'Exploring an offer at ' + percent(apy) + '. The question compares 5% with ' + percent(highExit.exitApy) + '.',
+    } },
     reason: {
       revision: 2,
       question: 'What does the higher YT offer buy for the new owner?',

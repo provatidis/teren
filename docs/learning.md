@@ -57,6 +57,8 @@ The three historical exercises continue to use the original two independently ch
 | When does the interest arrive? | Distinguish spending more days at a higher rate from putting the same ten high-rate days first or last. Compare breaking even on YT with depositing the same money. |
 | Selling before maturity | Explain what a higher YT offer buys and which interest belongs to each owner. Identify the missing amount in a wallet’s buy and sale history. |
 
+Lessons 3 and 4 add a slider under the drawing. In lesson 3 it moves the day the rate rises (1 to 89); the buyer covers the 20 USDC price only when the rise comes by day 54. In lesson 4 it moves the implied APY of the day-45 offer (0% to 20%): the PT offer falls, the YT offer rises and the interest earned before the sale stays the same. The two named cases remain buttons above the drawing, and exploring never changes the question or a saved answer.
+
 To observe understanding, ask a learner to explain an early sale from the seller’s point of view using their own example. A useful follow-up is what else they would need to know after seeing only the sale price.
 
 ## Lending foundations

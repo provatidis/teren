@@ -95,7 +95,7 @@ export function initYieldLearning() {
     for (const key of ['intro', 'title']) el(key).textContent = entry[key];
     el('scene-title').textContent = entry.scene.title;
     renderLessonSetup(el('setup'), entry.setup);
-    scene = createYieldLessonScene(entry.scene, el('stage-controls'), el('scene-drawing'), el('scene-caption'));
+    scene = createYieldLessonScene(entry.scene, el('stage-controls'), el('scene-drawing'), el('scene-caption'), el('scene-explorer'));
     scene.show(draft.revealed ? entry.scene.outcome ?? entry.scene.stages.length - 1 : 0, false);
     el('application-context').textContent = entry.applicationContext;
     el('hint-text').textContent = entry.hint;
