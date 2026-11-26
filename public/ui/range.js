@@ -243,14 +243,21 @@ export function initRangeLab({ navigation }) {
     $('cl-results').focus({ preventScroll: true });
     $('cl-results').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   });
-  $('cl-explorer').addEventListener('input', () => setFuturePrice(Number($('cl-explorer').value), false));
+  // A drag or a tap picks a price to the nearest step the control can resolve,
+  // not to the floating-point pixel: $1 on a $1,500–$4,500 scale.
+  function pickedPrice(price) {
+    const step = 10 ** Math.floor(Math.log10((domain.high - domain.low) / 1000));
+    const rounded = Number((Math.round(price / step) * step).toPrecision(12));
+    return Math.max(domain.low, Math.min(domain.high, rounded));
+  }
+  $('cl-explorer').addEventListener('input', () => setFuturePrice(pickedPrice(Number($('cl-explorer').value)), false));
   $('cl-reference').addEventListener('toggle', () => { if (current) renderChart(current); });
   $('cl-chart').addEventListener('click', (event) => {
     if (!current || !domain) return;
     const rect = $('cl-chart').getBoundingClientRect();
     const coordinate = (event.clientX - rect.left) / rect.width * 720;
     const fraction = Math.max(0, Math.min(1, (coordinate - 70) / 620));
-    setFuturePrice(Number((domain.low + fraction * (domain.high - domain.low)).toPrecision(12)), false);
+    setFuturePrice(pickedPrice(domain.low + fraction * (domain.high - domain.low)), false);
   });
   for (const button of document.querySelectorAll('[data-range-width], [data-range-centered]')) button.addEventListener('click', () => {
     try { fillInputs(rangeButtonInput(readInputs(), button)); render(); }

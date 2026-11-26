@@ -79,17 +79,22 @@ export function calculateRange(input) {
   };
 }
 
+// Percentage presets should land on the price a person would type: 3,000 × 1.1
+// is 3300.0000000000005 in floating point. Twelve significant digits keep every
+// real difference and drop that noise.
+const presetPrice = price => Number(price.toPrecision(12));
+
 export function rangePreset(input, width) {
   const scenario = validateRange(input);
   if (![0.05, 0.1, 0.5].includes(width)) throw new Error('Choose a supported range width.');
-  return validateRange({ ...scenario, lowerPrice: scenario.initialPrice * (1 - width), upperPrice: scenario.initialPrice * (1 + width) });
+  return validateRange({ ...scenario, lowerPrice: presetPrice(scenario.initialPrice * (1 - width)), upperPrice: presetPrice(scenario.initialPrice * (1 + width)) });
 }
 
 export function futurePricePreset(input, preset) {
   const scenario = validateRange(input);
   const prices = {
-    below: scenario.lowerPrice * 0.8, lower: scenario.lowerPrice,
-    start: scenario.initialPrice, upper: scenario.upperPrice, above: scenario.upperPrice * 1.2,
+    below: presetPrice(scenario.lowerPrice * 0.8), lower: scenario.lowerPrice,
+    start: scenario.initialPrice, upper: scenario.upperPrice, above: presetPrice(scenario.upperPrice * 1.2),
   };
   if (!Object.hasOwn(prices, preset)) throw new Error('Choose a supported future-price preset.');
   return validateRange({ ...scenario, futurePrice: prices[preset] });

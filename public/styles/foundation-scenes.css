@@ -21,11 +21,13 @@
 .foundation-comparison-track > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
 .foundation-comparison-row:nth-of-type(1) .foundation-comparison-track > span { background: var(--muted); }
 .foundation-outcome .foundation-share { font-weight: 600; font-size: 18px; margin: 0 0 12px; }
-.foundation-pool[data-motion=true] .scene-token-fill { animation: foundation-transfer-cue .5s ease-out; }
-@keyframes foundation-transfer-cue { from { opacity: .35; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) {
-  .foundation-pool[data-motion=true] .scene-token-fill { animation: none; }
-}
+/* Both lines share one cell, so the bars below keep their place when the result appears. */
+.foundation-execution:not([hidden]) { display: grid; }
+.foundation-execution > span { grid-area: 1 / 1; }
+.foundation-execution-pending { font-size: 14px; font-weight: 400; color: var(--muted); }
+.foundation-execution.foundation-pending > span:first-child,
+.foundation-execution:not(.foundation-pending) > .foundation-execution-pending { visibility: hidden; }
+.foundation-balances { scroll-margin-block: 12px 24px; }
 @media (max-width: 750px) {
   .foundation-outcome { padding: 12px; }
   .foundation-pool .scene-token-heading { font-size: 14px; }

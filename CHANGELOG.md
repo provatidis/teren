@@ -1,5 +1,11 @@
 # Release history
 
+## 1.59.0 · 2026-11-26
+
+- In the first two liquidity lessons you can now watch the swap or deposit happen. After **See what happens**, the page lands on the outcome and the pool’s balances then move from the starting pool to the result. **Replay action** plays the same change again and brings the bars into view if you have scrolled away. Reduced-motion settings still show the result at once.
+- The pool bars stay in place when the average execution line appears, so they no longer jump while they change. Before the swap, that line says the average appears after the swap.
+- The range lab’s percentage presets now set prices a person would type, such as 3,300 instead of 3300.0000000000005. Prices picked on the chart or with the slider are rounded to the nearest dollar on a typical scale.
+
 ## 1.58.0 · 2026-11-26
 
 - Home shows how many lessons you have finished in each topic once you complete your first one. Each topic’s lesson button continues with your next unfinished lesson, and the link above the topics opens the next lesson after one you have finished.

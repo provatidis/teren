@@ -171,6 +171,19 @@ test('range presets keep the current future price and both fee assumptions', () 
   assert.throws(() => futurePricePreset(input, 'unknown'), /supported/);
 });
 
+test('percentage presets land on the prices a person would type', () => {
+  for (const initialPrice of [3000, 2900, 3100, 1800, 4200]) {
+    for (const width of [0.05, 0.1, 0.5]) {
+      const preset = rangePreset({ ...DEFAULT_RANGE, initialPrice, futurePrice: initialPrice }, width);
+      assert.equal(preset.lowerPrice, Math.round(initialPrice * (1 - width) * 100) / 100);
+      assert.equal(preset.upperPrice, Math.round(initialPrice * (1 + width) * 100) / 100);
+      assert.equal(futurePricePreset(preset, 'below').futurePrice, Math.round(preset.lowerPrice * 0.8 * 100) / 100);
+      assert.equal(futurePricePreset(preset, 'above').futurePrice, Math.round(preset.upperPrice * 1.2 * 100) / 100);
+    }
+  }
+  assert.equal(rangePreset({ ...DEFAULT_RANGE, initialPrice: 3000, futurePrice: 3000 }, 0.1).upperPrice, 3300);
+});
+
 test('comparisons retain the funding mix and fee assumptions while including both exact edges', () => {
   const rows = comparisonRanges(DEFAULT_RANGE);
   assert.deepEqual(rows.map((row) => row.futurePrice), [1440, 1800, 2000, 2100, 2200, 2640]);

@@ -381,7 +381,7 @@ export function initLearning() {
   }
   function showResult(sceneFirst = false) {
     draft.prediction = selection('learn-prediction');
-    if (sceneFirst && visualLesson()) lessonScene.showQuestion();
+    if (sceneFirst && visualLesson()) lessonScene.showQuestion(true);
     if (!draft.ran) { draft.ran = true; renderResults(); }
     else renderPrediction();
     persist();
