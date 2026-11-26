@@ -12,3 +12,6 @@
     .width-eth, .lst-comparison-bar-fill
   ) { transition: width .28s cubic-bezier(.2, .7, .3, 1), left .28s cubic-bezier(.2, .7, .3, 1); }
 }
+/* A replayed lesson action animates its own bars over a longer time
+   (lib/foundation-lesson-scenes.js); the short easing above would override it. */
+:root .foundation-pool[data-motion=true] :is(.scene-token-fill, .foundation-owned) { transition: none; }
