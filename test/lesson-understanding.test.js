@@ -12,6 +12,8 @@ import { matchChallengeHolding } from '../public/models/liquidity-challenge.js';
 import { LESSONS } from '../public/learning/liquidity-essentials.js';
 import { APPLIED_LESSONS } from '../public/learning/applied-liquidity.js';
 import { parseProgress } from '../public/data/learning-progress.js';
+import { lessonReasonFeedback, deeperPoolQuestion } from '../public/lib/lesson-narration.js';
+import { fmt } from '../public/lib/format.js';
 import { parseAppliedProgress } from '../public/data/applied-progress.js';
 import { newChoiceSeed, validChoiceSeed, orderedLearningChoices, predictionFeedback } from '../public/lib/learning-choices.js';
 
@@ -134,8 +136,13 @@ test('every essentials misconception has specific feedback and every application
     const copy=lessonApplicationCopy(item.id,result);
     assert.ok(copy.label);
     for (const [reason] of item.reasons) {
-      const dynamic=['token-balances','loss-vs-profit'].includes(item.id)||(item.id==='range-boundaries'&&reason==='zero');
+      const dynamic=['token-balances','loss-vs-profit','swap-impact'].includes(item.id)||(item.id==='range-boundaries'&&reason==='zero');
       if(reason!==result.reason&&!dynamic) assert.ok(item.reasonFeedbackByChoice[reason]);
+      // The deeper-pool question answers every choice, right or wrong, with both quotes.
+      if(item.id==='swap-impact') {
+        const feedback=lessonReasonFeedback(item.id,result,reason);
+        assert.ok(feedback.includes(fmt(result.out,2)+' USDC')&&feedback.includes(fmt(result.deeperOut,2)+' USDC'),feedback);
+      }
     }
     for (const [answer] of copy.choices) if(answer!==copy.expected) assert.ok(copy.feedbackByChoice[answer]);
     if(item.id==='fee-break-even') {
@@ -230,4 +237,27 @@ test('additive draft fields preserve legacy completion and calculations without 
   assert.deepEqual(applied.completed,['fees-over-time']); assert.equal(applied.drafts['fees-over-time'].application,'');
   applied.drafts['fees-over-time'].application='same'; applied.drafts['fees-over-time'].choiceSeed=0;
   assert.deepEqual(parseAppliedProgress(applied),applied);
+});
+
+test('the deeper-pool question uses each variation’s own swap and clears answers to the question it replaced', () => {
+  for (let variant = 0; variant < VARIANTS; variant++) {
+    const setup = lessonSetup('swap-impact', variant), result = runLesson('swap-impact', setup, variant);
+    // Same swap, same starting price and fee, ten times the balances.
+    const effective = setup.amount * 0.997, deepEth = setup.reserveEth * 10;
+    const expected = deepEth * setup.initialPrice * effective / (deepEth + effective);
+    assert.ok(Math.abs(result.deeperOut - expected) < 0.01, variant + ': ' + result.deeperOut + ' vs ' + expected);
+    assert.ok(result.deeperOut > result.out && result.deeperOut < setup.amount * setup.initialPrice);
+    assert.equal(result.reason, 'deeper');
+    const copy = deeperPoolQuestion(result);
+    assert.match(copy.reasoning, new RegExp('You sell ' + setup.amount + ' ETH into each'));
+    assert.deepEqual(Object.keys(copy.feedbackByChoice).sort(), LESSONS[0].reasons.map(([id]) => id).sort());
+    assert.ok(checkLessonUnderstanding('swap-impact', setup, variant, 'deeper', 'quote-received').passed);
+    assert.equal(checkLessonUnderstanding('swap-impact', setup, variant, 'equal', 'quote-received').reasoning, false);
+    // A saved answer to the earlier recall question is not reused; completion is kept.
+    const old = parseProgress({ version: 1, completed: ['swap-impact'], lastLesson: 'swap-impact', drafts: { 'swap-impact': {
+      variant, inputs: setup, prediction: 'less', reason: 'curve', application: 'quote-received',
+      applicationRevision: essentialQuestionRevisions('swap-impact', variant).application, ran: true } } });
+    assert.deepEqual([old.completed, old.drafts['swap-impact'].reason, old.drafts['swap-impact'].application, old.drafts['swap-impact'].prediction],
+      [['swap-impact'], '', 'quote-received', 'less']);
+  }
 });

@@ -50,6 +50,11 @@
 .scene-prediction .scene-prediction-show { margin-top: 14px; }
 .scene-prediction .learn-prediction-feedback { margin: 14px 0 0; }
 .scene-prediction .learn-prediction-feedback:empty { display: none; }
+/* An answered question folds into one line; "Change" opens it again. */
+.scene-prediction[data-folded=true] { padding: 4px 0; }
+.scene-prediction[data-folded=true] > :not(.scene-prediction-recap), .scene-prediction:not([data-folded=true]) > .scene-prediction-recap { display: none; }
+.scene-prediction-recap { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0; font-size: 14px; line-height: 1.6; color: var(--muted); }
+.scene-prediction-recap .learn-text-button { flex: none; min-height: 44px; font-size: 14px; }
 @media (min-width: 1000px) {
   .scene-prediction .learn-choices { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 }
@@ -73,6 +78,11 @@
 .scene-actions .primary { justify-self: end; min-width: 160px; width: auto; }
 .scene-actions button:disabled { opacity: .45; cursor: default; }
 .scene-jump { margin-top: 10px; }
+/* A two-state scene revealed from its question keeps one replay button. */
+.scene-player-replay { margin: 0; }
+.scene-player-replay[data-stage="0"], .scene-player-replay > :is(.scene-step-label, .scene-jump), .scene-player-replay .scene-actions > :not([id$="-replay"]) { display: none; }
+.scene-player-replay .scene-actions { display: block; }
+.scene-player-replay .scene-actions button { color: var(--accent); font-size: 14px; }
 .scene-step-group { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .scene-step-group > p { flex-basis: 100%; margin: 4px 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
 .scene-token-row { padding: 12px 14px; margin: 10px 0; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); }

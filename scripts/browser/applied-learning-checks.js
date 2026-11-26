@@ -293,7 +293,7 @@ export async function checkMobileAppliedLearning({ evaluate, click, fill, text, 
     assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
     await evaluate("document.querySelector('.learn-entry-links a[href=\"#lesson=swap-impact\"]').click()");
     assert.equal(await evaluate("document.getElementById('learn-applied').hidden"), true);
-    assert.equal(await text('learn-lesson-title'), 'Trade size and execution price');
+    assert.equal(await text('learn-lesson-title'), 'Trade size and the price you receive');
   }
   await call('Emulation.setDeviceMetricsOverride', {width:390,height:844,deviceScaleFactor:1,mobile:true});
   await navigate(base + 'liquidity.html');

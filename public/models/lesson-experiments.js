@@ -4,6 +4,7 @@ import { amountOut } from './uniswap-v2.js';
 
 export const LESSON_IDS = Object.freeze(['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit', 'fee-break-even', 'range-boundaries', 'final-challenge']);
 export const VARIANTS = 3;
+export const DEEPER_POOL = 10;
 const bases = [
   { investment: 5000, initialPrice: 2000, futurePrice: 4000, fees: 100, reserveEth: 100, depositEth: 5, amount: 10 },
   { investment: 3000, initialPrice: 1500, futurePrice: 750, fees: 50, reserveEth: 50, depositEth: 10, amount: 5 },
@@ -44,8 +45,11 @@ export function runLesson(id, input, variant = 0) {
     const out = Number(amountOut(BigInt(setup.amount) * 10n ** 18n, BigInt(setup.reserveEth) * 10n ** 18n, BigInt(reserveUsdc) * 10n ** 6n)) / 1e6;
     const smallOut = Number(amountOut(10n ** 18n, BigInt(setup.reserveEth) * 10n ** 18n, BigInt(reserveUsdc) * 10n ** 6n)) / 1e6;
     const impact = setup.amount * 0.997 / (setup.reserveEth + setup.amount * 0.997) * 100;
-    return { setup, variant, out, smallOut, impact, afterEth: setup.reserveEth + setup.amount, afterUsdc: reserveUsdc - out,
-      prediction: 'less', reason: 'curve' };
+    // The same swap against a pool holding ten times as much of each token,
+    // at the same starting price and fee.
+    const deeperOut = Number(amountOut(BigInt(setup.amount) * 10n ** 18n, BigInt(setup.reserveEth * DEEPER_POOL) * 10n ** 18n, BigInt(reserveUsdc * DEEPER_POOL) * 10n ** 6n)) / 1e6;
+    return { setup, variant, out, smallOut, deeperOut, impact, afterEth: setup.reserveEth + setup.amount, afterUsdc: reserveUsdc - out,
+      prediction: 'less', reason: 'deeper' };
   }
   if (id === 'pool-share') {
     const percent = setup.depositEth / (setup.reserveEth + setup.depositEth) * 100;

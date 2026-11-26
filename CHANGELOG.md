@@ -1,5 +1,13 @@
 # Release history
 
+## 1.62.0 · 2026-11-26
+
+- Liquidity lesson 1 now opens with the pool and puts the question under it. Showing the outcome plays the swap where you are looking, with the verdict right under the pool. Links to the pilot layout still work.
+- After the swap, the answered question folds to one line, the step controls become a single **Replay the swap** button, and the trade-size slider follows with a prompt to sell more. One explanation and the “small test swap” caution sit with the comparison. The separate explanation button and its repeated paragraph are gone.
+- The verdict states what the trade is worth at the starting pool price and what the pool quotes for it.
+- The first check question now asks which of two pools pays more for the same swap, one holding ten times as much. Each answer’s feedback shows both quotes. A saved answer to the earlier question is cleared; completed lessons stay completed.
+- The lesson uses three fixed names: starting pool price, average price you receive, and pool price after the swap. Its title is now “Trade size and the price you receive”.
+
 ## 1.61.0 · 2026-11-26
 
 - A pilot of liquidity lesson 1 with the pool first opens at `learn.html#lesson=swap-impact&layout=play`. The question sits under the pool and the swap plays where you are looking. The setup box and assumption lines are replaced by one “About this example” note. The usual link, Home and every other lesson are unchanged.

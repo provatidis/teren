@@ -15,63 +15,68 @@ const act = (evaluate, script) => evaluate(`(() => { ${script}; return { bars: $
 // from the starting pool to the result. Replay plays the same change again, and
 // the bars keep their place when the result lines appear.
 export async function checkFoundationMotion({ evaluate, navigate, base, call }) {
-  await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
-  await navigate(base + 'learn.html#lesson=swap-impact');
-  await evaluate("document.getElementById('learn-variation').click()");
-  for (let i = 0; i < 3 && !(await evaluate("document.getElementById('learn-variation-label').textContent")).includes('1 of 3'); i++) await evaluate("document.getElementById('learn-variation').click()");
-  assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), '0');
-  assert.equal(await evaluate("document.getElementById('foundation-average').checkVisibility()"), true, 'The average line keeps its space before the swap.');
-  assert.match(await evaluate("document.querySelector('.foundation-execution-pending').textContent"), /appears after the swap/);
-
-  const shown = await act(evaluate, "document.getElementById('foundation-next').click()");
-  assert.ok(shown.bars.every(bar => bar && bar.from !== bar.to && bar.to === bar.final), 'Showing the swap plays each balance from the starting pool to the result.');
-  assert.ok(shown.bars.every(bar => bar.duration >= 700 && bar.delay === 0), 'A pressed action plays at once and slowly enough to follow.');
-  assert.match(await evaluate("document.getElementById('foundation-pool-eth').textContent"), /110\.00 ETH/, 'Values are final at once.');
-  await motionSettled(evaluate);
-
-  // Stepping back and forward must not move the bars while they change.
-  await evaluate("document.getElementById('foundation-previous').click()"); await motionSettled(evaluate);
-  await evaluate("document.querySelector('.foundation-balances').scrollIntoView({block:'center',behavior:'instant'})"); await settle(evaluate);
-  const before = await evaluate("document.querySelector('.foundation-balances').getBoundingClientRect().top");
-  const forward = await act(evaluate, "document.getElementById('foundation-next').click()");
-  assert.equal(forward.top, before, 'The average line appears without pushing the bars down.');
-  await motionSettled(evaluate);
-
-  // Replay plays the change again from where it started, with the bars in view.
-  const replayAt = await evaluate("(() => { const button = document.getElementById('foundation-replay'); button.scrollIntoView({block:'start',behavior:'instant'}); scrollBy(0, -40); return document.querySelector('.foundation-balances').getBoundingClientRect().bottom; })()");
-  assert.ok(replayAt < 70, 'Set-up: the bars start above the screen.');
-  const replay = await act(evaluate, "document.getElementById('foundation-replay').click()");
-  assert.deepEqual(replay.bars.map(bar => [bar.from, bar.to]), shown.bars.map(bar => [bar.from, bar.to]), 'Replay plays the same change from the starting pool.');
-  assert.ok(replay.top >= 60 && replay.top < 300, 'Replay brings the bars into view below the header.');
-  assert.equal(await evaluate("document.getElementById('foundation-replay').getBoundingClientRect().bottom <= innerHeight"), true, 'Replay keeps its own button on screen.');
-  await motionSettled(evaluate);
-
-  // The reveal lands on the outcome first; the swap starts once the eye can find it.
-  await evaluate("document.getElementById('foundation-previous').click()"); await motionSettled(evaluate);
-  await evaluate("document.querySelector('.scene-prediction input[value=same]').click()");
-  const reveal = await act(evaluate, "document.querySelector('.scene-prediction-show').click()");
-  assert.ok(reveal.bars.every(bar => bar && bar.delay >= 300 && bar.from !== bar.to), 'The revealed swap waits for the scroll to land, then plays.');
-  assert.ok(reveal.top > 0 && reveal.top < 844 - 120, 'The revealed bars are on the screen that the page lands on.');
-  assert.match(await evaluate("document.getElementById('learn-prediction-feedback').textContent"), /differs from your prediction/);
-  await motionSettled(evaluate);
-
-  // A deposit plays the same way and also grows the striped share.
-  await navigate(base + 'learn.html#lesson=pool-share');
-  const deposit = await evaluate(`(() => { document.getElementById('foundation-next').click();
-    return Array.from(document.querySelectorAll('.foundation-owned'), owned => owned.getAnimations().filter(item => !(item instanceof CSSTransition)).length); })()`);
-  assert.deepEqual(deposit, [1, 1], 'The striped share grows with the deposit.');
-  assert.equal(await evaluate("document.getElementById('foundation-average').hidden"), true, 'A deposit has no average line.');
-  await motionSettled(evaluate);
-
-  await navigate(base + 'learn.html#lesson=swap-impact');
-  await reduceMotion({ call, evaluate });
+  const progressKey = 'degenerator-learning-liquidity-v1';
+  await navigate(base + 'learn.html');
+  const saved = await evaluate(`localStorage.getItem('${progressKey}')`);
+  const documentTop = "(r => r.top + scrollY)(document.querySelector('.foundation-balances').getBoundingClientRect())";
   try {
-    await evaluate("document.getElementById('foundation-previous').click()");
-    const reduced = await act(evaluate, "document.getElementById('foundation-next').click()");
+    await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+    await evaluate(`localStorage.removeItem('${progressKey}')`);
+
+    // Lesson 1: the question reveals the swap. The page lands, then the bars move.
+    await navigate(base + 'learn.html#lesson=swap-impact');
+    assert.equal(await evaluate("document.querySelector('.scene-player').dataset.stage"), '0');
+    await evaluate("document.querySelector('.scene-prediction input[value=same]').click()");
+    await evaluate("(b => scrollBy(0, b.bottom - innerHeight + 40))(document.getElementById('learn-reveal').getBoundingClientRect())");
+    const before = await evaluate(documentTop);
+    const reveal = await act(evaluate, "document.getElementById('learn-reveal').click()");
+    assert.ok(reveal.bars.every(bar => bar && bar.from !== bar.to && bar.to === bar.final), 'The reveal plays each balance from the starting pool to the result.');
+    assert.ok(reveal.bars.every(bar => bar.delay >= 300 && bar.duration >= 700), 'The swap waits for the page to land, then plays slowly enough to follow.');
+    assert.equal(await evaluate(documentTop), before, 'The average line and the verdict appear without moving the bars.');
+    assert.ok(reveal.top > 60 && reveal.top < 844 - 160, 'The bars are on the screen that the page lands on.');
+    assert.match(await evaluate("document.getElementById('foundation-pool-eth').textContent"), /110\.00 ETH/, 'Values are final at once.');
+    await motionSettled(evaluate);
+
+    // Replay plays the change again from where it started, with the bars in view.
+    const replayAt = await evaluate("(() => { const button = document.getElementById('foundation-replay'); button.scrollIntoView({block:'start',behavior:'instant'}); scrollBy(0, -40); return document.querySelector('.foundation-balances').getBoundingClientRect().bottom; })()");
+    assert.ok(replayAt < 70, 'Set-up: the bars start above the screen.');
+    const replay = await act(evaluate, "document.getElementById('foundation-replay').click()");
+    assert.deepEqual(replay.bars.map(bar => [bar.from, bar.to, bar.delay]), reveal.bars.map(bar => [bar.from, bar.to, 0]), 'Replay plays the same change from the starting pool, at once.');
+    assert.ok(replay.top >= 60 && replay.top < 300, 'Replay brings the bars into view below the header.');
+    assert.equal(await evaluate("document.getElementById('foundation-replay').getBoundingClientRect().bottom <= innerHeight"), true, 'Replay keeps its own button on screen.');
+    await motionSettled(evaluate);
+    // After exploring another size, Replay plays that size's swap.
+    await evaluate("(slider => { slider.value = '36'; slider.dispatchEvent(new Event('input', { bubbles: true })); })(document.getElementById('foundation-amount'))");
+    const explored = await act(evaluate, "document.getElementById('foundation-replay').click()");
+    assert.ok(explored.bars.every((bar, i) => bar.from === reveal.bars[i].from && bar.to !== reveal.bars[i].to && bar.to === bar.final), 'Replay follows the explored trade size.');
+    await motionSettled(evaluate);
+
+    // Lesson 2 keeps its steps: a pressed action plays at once and grows the striped share.
+    await navigate(base + 'learn.html#lesson=pool-share');
+    const deposit = await evaluate(`(() => { document.getElementById('foundation-next').click();
+      return { owned: Array.from(document.querySelectorAll('.foundation-owned'), owned => owned.getAnimations().filter(item => !(item instanceof CSSTransition)).length), bars: ${playedBars} }; })()`);
+    assert.deepEqual(deposit.owned, [1, 1], 'The striped share grows with the deposit.');
+    assert.ok(deposit.bars.every(bar => bar && bar.from !== bar.to && bar.delay === 0 && bar.duration >= 700), 'A pressed action plays at once and slowly enough to follow.');
+    assert.equal(await evaluate("document.getElementById('foundation-average').hidden"), true, 'A deposit has no average line.');
+    await motionSettled(evaluate);
+    // Stepping back and forward must not move the bars while they change.
+    await evaluate("document.getElementById('foundation-previous').click()"); await motionSettled(evaluate);
+    await evaluate("document.querySelector('.foundation-balances').scrollIntoView({block:'center',behavior:'instant'})"); await settle(evaluate);
+    const steady = await evaluate("document.querySelector('.foundation-balances').getBoundingClientRect().top");
+    const forward = await act(evaluate, "document.getElementById('foundation-next').click()");
+    assert.equal(forward.top, steady, 'Stepping forward does not push the bars.');
+    await motionSettled(evaluate);
+
+    await navigate(base + 'learn.html#lesson=swap-impact');
+    await reduceMotion({ call, evaluate });
+    const reduced = await act(evaluate, "document.getElementById('learn-reveal').click()");
     assert.deepEqual(reduced.bars, [null, null], 'Reduced motion shows the result at once.');
     await evaluate("document.getElementById('foundation-replay').click()");
     assert.equal(await evaluate("document.querySelector('.foundation-pool').getAnimations({subtree:true}).length"), 0);
-  } finally { await call('Emulation.setEmulatedMedia', { features: [] }); }
+  } finally {
+    await call('Emulation.setEmulatedMedia', { features: [] });
+    await evaluate(`${saved === null ? `localStorage.removeItem('${progressKey}')` : `localStorage.setItem('${progressKey}', ${JSON.stringify(saved)})`}`);
+  }
   console.log('PASS: the swap plays after the page lands, bars hold their place, Replay plays start to end and reduced motion skips it');
 }
 

@@ -18,7 +18,7 @@ Keep the evidence needed for a question beside it, and name the situation being 
 
 | Topic | Misconception to challenge | Understanding check |
 | --- | --- | --- |
-| Trade size | Every unit receives the starting spot price; a slippage limit removes impact. | Explain changing reserves; distinguish price impact already included in a wallet quote from slippage tolerance relative to that quote. |
+| Trade size | Every unit receives the starting pool price; pool depth does not matter; a slippage limit removes impact. | Say which of two pools pays more for the same swap and why; distinguish price impact already included in a wallet quote from slippage tolerance relative to that quote. |
 | Ownership | Withdrawal guarantees the original dollar deposit or original ETH. | Follow a claim through swaps in either direction; distinguish them from another provider's proportional deposit. |
 | Token balances | Rebalancing creates tokens, pays interest or protects a falling asset. | Explain swaps and a price return; distinguish holding more ETH from having more dollar value. |
 | Loss versus profit | Dollar profit means beating holding; withdrawal erases or charges the holding gap. | Explain the swaps behind the changed exposure, then choose the original-token benchmark for a fictional dashboard or consider withdrawal. Reasoning follows the selected price, including an unchanged price. |
@@ -161,11 +161,16 @@ Each visual should replace repeated setup/result prose, retain essential assumpt
 
 A prediction makes an expectation explicit. It is visible, ungraded and deliberately skippable. Removing arithmetic and long introductory text supports this step; it does not require hiding it. Explanations and changed-situation checks remain the completion criteria, and direct Experiment access serves people who already have a question. Evaluate reviews against that sequence, including people who choose to see the outcome first.
 
-## Pilot: play-first lesson 1
+## Liquidity lesson 1: pool first
 
-[`learn.html#lesson=swap-impact&layout=play`](https://teren.sh/learn.html#lesson=swap-impact&layout=play) opens liquidity lesson 1 with the pool first. The question sits under the pool, and the swap plays with the pool on screen. The verdict appears between them. The skill line, the protocol line and the setup box are dropped; the pool's own labels and the "Ready to swap" line carry the setup. One "About this example" note holds the assumptions. Steps, the trade-size slider and the explanation appear once the swap has been shown. Only this link opens the pilot: Home, the lesson list and every other lesson keep the usual layout, and progress is shared.
+[Lesson 1](https://teren.sh/learn.html#lesson=swap-impact) is the reference for how a lesson moves from seeing to doing. Links from its pilot (`&layout=play`) still open it.
 
-To compare, give one person the pilot link and another [the usual link](https://teren.sh/learn.html#lesson=swap-impact). Observe where they hesitate or stop scrolling, whether they predict or skip, whether they notice the bars change, and whether they move the trade-size slider unprompted. Afterwards, ask why the 10 ETH trade got a worse price per ETH than the 1 ETH trade. Roll the layout out only if it clearly helps; otherwise remove it.
+1. **See one swap.** The pool comes first, and its labels carry the setup. The question sits under it. Answering or skipping reveals the swap with the pool on screen, and the verdict appears right under it. The verdict states what the trade is worth at the starting pool price and what the pool quotes. It does not call the difference a loss, because the wallet question later depends on that difference already being in the quote.
+2. **Try another size.** The answered question folds to one line with a Change button, the steps reduce to one Replay button, and the slider follows with a prompt to sell more. The comparison under it holds one explanation and the pitfall.
+3. **Reason about a deeper pool.** The first check question puts the same swap into a pool holding ten times as much. Every answer's feedback shows both quotes. The three variations all sell 10% of the pool, so this question is where depth is tested.
+4. **Read a wallet warning.** The second check question separates price impact, already in the quote, from slippage tolerance.
+
+The lesson uses one name for each of three different numbers: starting pool price, average price you receive, and pool price after the swap. Lesson 2 shares the scene and keeps the question-first layout with its stepped controls.
 
 ## Observation plan
 

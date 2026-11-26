@@ -13,9 +13,14 @@ import { appliedQuestion } from '../public/lib/applied-lessons.js';
 import { validatePositionPeriod } from '../public/data/position-period.js';
 import { depositSceneState } from '../public/lib/foundation-scene-state.js';
 
-test('findings track changed price directions and the average execution rather than the spot price', () => {
+test('findings track changed price directions and the average price rather than the starting pool price', () => {
   const swap = runLesson('swap-impact', lessonSetup('swap-impact'));
-  assert.match(lessonFinding('swap-impact', swap), /\$1,813.22 per ETH on average/);
+  const finding = lessonFinding('swap-impact', swap);
+  assert.match(finding, /starting pool price of \$2,000\.00, 10 ETH is worth 20,000 USDC/);
+  assert.match(finding, /quotes 18,132\.22 USDC for the whole trade, an average price of \$1,813\.22 per ETH/);
+  // The difference is already in the quote. Calling it a loss would teach the
+  // confusion the wallet question clears up.
+  assert.doesNotMatch(finding, /\blos[est]/i);
   for (const [price, text] of [[1000, /more ETH and less USDC/], [2000, /both token quantities stay the same/], [4000, /less ETH and more USDC/]]) {
     assert.match(lessonFinding('token-balances', runLesson('token-balances', { futurePrice: price })), text);
   }

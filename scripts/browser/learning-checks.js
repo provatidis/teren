@@ -21,7 +21,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"), true);
   const choose = (name, value) => evaluate("document.querySelector('input[name=\"" + name + "\"][value=\"" + value + "\"]').click()");
   const cases = [
-    ['swap-impact','less','curve','quote-received'],
+    ['swap-impact','less','deeper','quote-received'],
     ['pool-share','less','ownership','share-same'],
     ['token-balances','less','rebalance','original-mix'],
     ['loss-vs-profit','gain','traded-mix','holding-basket'],
@@ -33,7 +33,9 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     await navigate(base + 'learn.html#lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0, 'Only the visual explores amounts, prices and fees.');
     await choose('learn-prediction', id === 'swap-impact' ? 'same' : prediction);
-    await click('learn-run');
+    // Lesson 1 reveals the swap from its question; it has no separate explanation button.
+    await click(id === 'swap-impact' ? 'learn-reveal' : 'learn-run');
+    if (id === 'swap-impact') assert.equal(await evaluate("document.getElementById('learn-run').checkVisibility()"), false);
     assert.equal(await evaluate("document.getElementById('learn-results').hidden"), false);
     assert.ok((await text('learn-pitfall')).length>40);
     assert.equal(await evaluate("document.getElementById('learn-deeper').open"),false);
@@ -69,8 +71,8 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
       assert.match(await text('learn-applications-feedback'), /Price impact and slippage tolerance are different/);
       assert.equal(await text('learn-progress-count'), '0 of 7 done');
       await choose('learn-application', application);
-      await choose('learn-reason', 'fixed'); await click('learn-check');
-      assert.match(await text('learn-reasons-feedback'), /Spot price describes the pool before this trade/);
+      await choose('learn-reason', 'equal'); await click('learn-check');
+      assert.match(await text('learn-reasons-feedback'), /price moves as you trade[\s\S]*19,743\.16 USDC, against 18,132\.22 USDC here/);
       assert.equal(await text('learn-progress-count'), '0 of 7 done');
       await choose('learn-reason', reason);
     }
