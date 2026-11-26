@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { motionSettled } from './motion-settled.js';
+import { motionSettled, reduceMotion } from './motion-settled.js';
 
 const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
 
@@ -131,7 +131,7 @@ export async function checkLoanResponseLesson({ evaluate, click, fill, text, nav
       await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
     assert.equal(await evaluate("document.getElementById('response-budget').value"), '6000');
-    await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+    await reduceMotion({ call, evaluate });
     try {
       await shortcut('Question');
       assert.equal(await evaluate("document.querySelector('.response-scene').getAnimations({subtree:true}).length"), 0);

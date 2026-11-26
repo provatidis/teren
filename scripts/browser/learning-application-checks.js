@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { reduceMotion } from './motion-settled.js';
 
 export async function checkLearningApplications({ evaluate, click, fill, text, navigate, reload, base, call }) {
   const choose = (group, value) => evaluate(`document.querySelector('input[name="learn-${group}"][value="${value}"]').click()`);
@@ -167,7 +168,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
     await call('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: true });
     await navigate(base + 'learn.html#lesson=final-challenge');
     await click('liquidity-task-reset');
-    await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+    await reduceMotion({ call, evaluate });
     try {
       await key('liquidity-task-price', 'End');
       assert.equal(await taskPrice(), '4000');

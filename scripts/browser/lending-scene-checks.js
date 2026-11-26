@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { reduceMotion } from './motion-settled.js';
 
 export async function checkLendingScenes({ evaluate, click, text, navigate, reload, base, call }) {
   const saved = () => evaluate("localStorage.getItem('teren-lending-learning-v1')");
@@ -147,7 +148,7 @@ export async function checkLendingScenes({ evaluate, click, text, navigate, relo
         const size = await evaluate("({scene:document.getElementById('loan-scene-next').getBoundingClientRect().bottom-document.querySelector('.loan-scene-figure').getBoundingClientRect().top,available:innerHeight-Math.max(0,document.querySelector('.topbar').getBoundingClientRect().bottom)})");
         assert.ok(size.scene <= size.available, `${id}, stage ${i}, ${width}px: scene and primary action need ${size.scene}px; available ${size.available}px.`);
       }
-      await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+      await reduceMotion({ call, evaluate });
       try {
         await click('loan-scene-replay');
         assert.equal(await evaluate("document.querySelector('.loan-scene-figure').getAnimations({subtree:true}).length"), 0);
