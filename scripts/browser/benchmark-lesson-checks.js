@@ -141,8 +141,9 @@ export async function checkBenchmarkLesson({ evaluate, click, fill, text, naviga
         const bars = document.querySelector('.benchmark-figure .scene-token-row').getBoundingClientRect();
         const slider = document.getElementById('benchmark-price').getBoundingClientRect(), feedback = document.getElementById('learn-prediction-feedback');
         return { onScreen: figure.top >= header - 1 && figure.bottom <= innerHeight, gap: slider.top - figure.bottom,
-          // The bars, their two lines and the slider share one screen under the header.
-          together: slider.bottom - bars.top <= innerHeight - document.querySelector('.topbar').getBoundingClientRect().height,
+          // The bars, their two lines and the slider share one screen under the sticky header.
+          // Measured against the header's visible part, with room for a font that wraps differently.
+          together: slider.bottom - bars.top <= innerHeight - header - 24,
           afterSlider: document.getElementById('benchmark-price').closest('.scene-price-control').nextElementSibling === feedback, verdict: feedback.textContent,
           fills: [...document.querySelectorAll('.benchmark-figure .scene-token-fill')].map(fill => {
             const animation = fill.getAnimations().find(item => !(item instanceof CSSTransition)), frames = animation?.effect.getKeyframes() || [];
