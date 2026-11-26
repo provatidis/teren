@@ -2,8 +2,6 @@
 .learning-application-scene { margin: 18px 0 26px; padding: 18px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); }
 .learning-application-scene > h4 { margin: 0 0 8px; font-size: 17px; }
 .learning-application-scene .scene-question-scope { margin-top: 0; }
-.learning-application-scene .comparison-figure { margin-top: 18px; }
-.learning-application-scene .scene-consequence { margin: 14px 0; font-size: 15px; }
 .learning-application-scene .scene-essential-note { margin-bottom: 0; }
 .learning-application-scene .learn-answer-feedback { margin-top: 16px; }
 .learning-task-goals { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 14px 0 4px; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }

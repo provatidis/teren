@@ -19,8 +19,13 @@ export function lessonFinding(id, outcome) {
     : 'Less. Your claim is worth ' + usd(r.lpBeforeFees) + ', which is ' + usd(r.breakEvenFees) + ' less than holding'
       + (r.lpBeforeFees > s.investment ? '. It is still ' + usd(r.lpBeforeFees - s.investment) + ' more than the ' + usd(s.investment) + ' you started with.'
         : ' and ' + usd(s.investment - r.lpBeforeFees) + ' less than the ' + usd(s.investment) + ' you started with.');
-  if (id === 'fee-break-even') return 'At this ETH price, the fee target stays at ' + usd(r.breakEvenFees) + '. Counting ' + usd(s.fees) + ' in fees leaves ' + usd(Math.max(0, r.breakEvenFees - s.fees)) + ' still to earn to match holding.';
-  return 'A lower ETH price makes the original ETH and USDC worth less in dollars. Matching that basket with fees can leave both strategies below the starting budget.';
+  // Lesson 5's verdict answers which bar grew, then says where the fees leave the claim.
+  if (id === 'fee-break-even') {
+    const after = r.breakEvenFees - s.fees, level = Math.abs(after) < .005;
+    return 'Only your claim. ' + usd(s.fees) + ' in fees takes it from ' + (r.breakEvenFees ? usd(r.breakEvenFees) + ' behind holding' : 'level with holding')
+      + ' to ' + (level ? 'level with it' : usd(Math.abs(after)) + (after > 0 ? ' behind' : ' ahead')) + '. Holding is tokens in a wallet: it earns no fees.';
+  }
+  return 'A fall in ETH. Only a lower price takes holding below your ' + usd(s.investment) + ' start. Fees can then bring your claim level with holding, and both are still worth less than you started with.';
 }
 
 // Round claims read as round numbers: 1.25 ETH + 2,500 USDC, then 0.8839 ETH + 3,535.53 USDC.
@@ -107,6 +112,16 @@ export function lossProfitReasoning(outcome) {
         ? 'No fees are counted here. At the starting price your claim holds its starting tokens and matches holding without any fee income.'
         : 'No fees are counted in this comparison. The gap comes from the changed tokens; it is not a fee charged to you.',
     },
+  };
+}
+
+// Lesson 5 starts where lesson 4 ended: the price has moved and the claim trails holding.
+export function feePrediction(setup, result) {
+  const gap = result.breakEvenFees;
+  return {
+    question: 'ETH is at ' + usd(setup.futurePrice) + ' and your claim is ' + (gap ? usd(gap) + ' behind holding' : 'level with holding') + '. Then it earns '
+      + (setup.fees ? usd(setup.fees) + ' in ' : '') + 'trading fees. Which bar grows?',
+    choices: [['toward-target', 'Only my claim'], ['both-earn', 'Both bars'], ['already-counted', 'Neither. Fees are already in my claim’s value.']],
   };
 }
 

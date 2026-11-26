@@ -41,12 +41,58 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   for (let i = 0; i < 3 && !(await text('learn-variation-label')).includes('1 of 3'); i++) await click('learn-variation');
   assert.equal(await evaluate("document.getElementById('liquidity-task-price').checkVisibility()"), true, 'Start with the construction task.');
   assert.equal(await evaluate("document.getElementById('comparison-profit').checkVisibility()"), false, 'The worked verdict does not answer the opening prediction.');
+  // The challenge comes first, on the figure from lessons 4 and 5. Its question,
+  // the panel and the check questions wait below it.
+  const visible = selector => evaluate(`document.querySelector(${JSON.stringify(selector)}).checkVisibility()`);
+  const order = (first, second) => evaluate(`Boolean(document.querySelector(${JSON.stringify(first)}).compareDocumentPosition(document.querySelector(${JSON.stringify(second)})) & Node.DOCUMENT_POSITION_FOLLOWING)`);
+  assert.equal(await evaluate("document.getElementById('learn-essential').hasAttribute('data-pool-first')"), true);
+  assert.equal(await order('.learning-application-scene .benchmark-figure', '#liquidity-task-price'), true, 'The figure comes before its sliders.');
+  assert.equal(await order('#liquidity-task-fees', '.scene-prediction-question'), true, 'The question follows the challenge as a first step.');
+  assert.equal(await evaluate("document.querySelector('.challenge-scene .scene-prediction-invite').textContent"), 'Need a first step?');
+  assert.equal(await text('learn-prediction-question'), 'Which change in the ETH price would you try first?');
+  for (const id of ['learn-run', 'learn-setup', 'learn-explanation']) assert.equal(await visible('#' + id), false, id + ' is not part of the pool-first layout.');
+  assert.equal(await visible('#challenge-outcome'), false);
+  assert.equal(await hidden('learn-results'), true);
+  assert.equal(await hidden('learn-assessment'), true);
+  assert.deepEqual(await evaluate("['liquidity-task-at', 'liquidity-task-hold', 'liquidity-task-hold-tokens', 'liquidity-task-claim', 'liquidity-task-claim-tokens'].map(id => document.getElementById(id).textContent)"),
+    ['ETH at $2,000.00', '$5,000.00', '1.25 ETH + 2,500 USDC', '$5,000.00', '1.25 ETH + 2,500 USDC']);
+  assert.equal(await evaluate("document.querySelector('.learning-application-scene .scene-key').textContent"), 'Dashed = your $5,000.00 start. Striped = fees.');
+  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('.learning-application-scene .scene-shortcut'), button => button.textContent)"),
+    ['Lower', 'Start', 'Higher', 'Match holding for me', 'Show an example', 'Start again']);
+  assert.equal(await evaluate("document.getElementById('liquidity-task-fees').closest('.scene-price-control').contains(document.getElementById('liquidity-task-match'))"), true, 'The match button sits with the fee slider it moves.');
   await fill('liquidity-task-price', '1300');
   await reload();
   assert.equal(await taskPrice(), '1300', 'An unrevealed construction survives reopening the lesson.');
-  await click('learn-run');
-  assert.equal(await taskPrice(), '1300', 'Opening the worked example preserves the learner’s selected price.');
+  assert.equal(await hidden('learn-results'), true);
+  // Solving the challenge is its outcome: the rest opens under it without moving
+  // the sliders or taking focus.
+  const sliderTops = () => evaluate("['liquidity-task-price', 'liquidity-task-fees'].map(id => Math.round(document.getElementById(id).getBoundingClientRect().top + scrollY))");
+  const beforeSolving = await sliderTops();
+  await evaluate("document.getElementById('liquidity-task-match').focus()");
+  await click('liquidity-task-match');
+  assert.equal(await hidden('liquidity-task-solved'), false);
+  assert.deepEqual(await sliderTops(), beforeSolving, 'Solving the challenge moves neither slider.');
+  assert.equal(await evaluate('document.activeElement.id'), 'liquidity-task-match', 'Solving keeps focus where the reader is working.');
+  assert.equal(await hidden('learn-results'), false);
+  assert.equal(await hidden('learn-assessment'), false);
+  assert.equal(await visible('#challenge-outcome'), true);
+  assert.equal(await text('learn-results-title'), 'Go further');
+  assert.match(await text('learn-prediction-feedback'), /^What happens\s*A fall in ETH\. Only a lower price takes holding below your \$5,000\.00 start\./);
+  assert.equal(await text('challenge-outcome-title'), 'Two results, not one');
+  assert.match(await text('challenge-why'), /^Matching holding and making money are two different results\./);
+  assert.equal(await evaluate("document.getElementById('challenge-outcome').contains(document.querySelector('#learn-scene .learn-pitfall'))"), true, 'The pitfall sits in the panel it warns about.');
+  assert.equal(await order('#liquidity-task-fees', '#learn-prediction-feedback'), true);
+  assert.equal(await order('#learn-prediction-feedback', '#challenge-outcome'), true);
+  assert.equal(await evaluate("document.getElementById('learn-worked-comparison').open"), false, 'The worked example stays an optional extra.');
+  assert.equal(await evaluate("document.querySelector('#learn-worked-comparison > summary').textContent"), 'See a worked example');
+  assert.equal(await text('learn-explore'), 'Open the same example in Experiment ↗');
+  assert.equal(await taskPrice(), '1300', 'The outcome preserves the learner’s selected price.');
+  assert.equal((await draft()).ran, true);
+  await reload();
+  assert.equal(await hidden('learn-results'), false, 'A solved challenge reopens with its outcome.');
+  assert.equal(await hidden('liquidity-task-solved'), false);
   await click('liquidity-task-reset');
+  assert.equal(await hidden('learn-results'), false, 'Starting again keeps what has been opened.');
   const original = await draft();
   const completedBefore = (await progress()).completed;
   const working = await isolated();
@@ -89,9 +135,9 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.equal((await draft()).taskChecked, false);
   await click('learn-check');
   assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
-  assert.equal(await text('liquidity-task-lp-value'), '$4,375.00');
-  assert.equal(await text('liquidity-task-hold-value'), '$4,375.00');
-  assert.equal(await text('liquidity-task-start-value'), '$5,000.00');
+  assert.equal(await text('liquidity-task-claim'), '$4,375.00');
+  assert.equal(await text('liquidity-task-hold'), '$4,375.00');
+  assert.equal(await text('liquidity-task-claim-tokens'), '1.4434 ETH + 2,165.06 USDC + fees', 'The claim’s value includes its fees, and the line under its bar says so.');
   assert.ok((await progress()).completed.includes('final-challenge'));
   const completedAfter = (await progress()).completed;
   assert.equal((await draft()).taskChecked, true);
@@ -120,8 +166,8 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   await click('liquidity-task-match');
   await click('learn-check');
   assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
-  assert.equal(await text('liquidity-task-lp-value'), '$3,750.00');
-  assert.equal(await text('liquidity-task-hold-value'), '$3,750.00');
+  assert.equal(await text('liquidity-task-claim'), '$3,750.00');
+  assert.equal(await text('liquidity-task-hold'), '$3,750.00');
   assert.equal(await handoff(), originalHandoff);
   assert.deepEqual((await draft()).inputs, original.inputs);
   const taskBeforeExploration = await draft();
@@ -139,16 +185,18 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.equal(await hidden('liquidity-task-solved'), true);
   await fill('liquidity-task-price', '1500');
   assert.deepEqual(await goals(), ['false', 'true']);
-  assert.equal(await text('liquidity-task-finding'), 'LP + fees is $44.87 below holding. Holding is $625.00 below the starting capital.');
+  assert.equal(await text('liquidity-task-finding'), 'Your claim is $44.87 behind holding. Holding is $625.00 below your start.');
+  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#liquidity-task-goals li'), item => item.textContent.replace(/\\s+/g, ' ').trim())"),
+    ['○ Not yet: Your claim matches holding −$44.87', '✓ Met: Both are below your start −$625.00'], 'Each goal shows the amount that decides it.');
   await fill('liquidity-task-fees', '40');
   assert.equal(await fee(), '$40.00', 'An amount reached in one jump is used as given.');
-  assert.equal(await text('liquidity-task-finding'), 'LP + fees is $4.87 below holding. Holding is $625.00 below the starting capital.');
+  assert.equal(await text('liquidity-task-finding'), 'Your claim is $4.87 behind holding. Holding is $625.00 below your start.');
   await key('liquidity-task-fees', 'ArrowRight');
   assert.equal(await fee(), '$44.87', 'An arrow step that crosses the matching amount stops on it.');
   assert.ok(Math.abs((await draft()).task.fees - 44.8729810778068) < 1e-9, 'The slider settles on the exact amount, not a rounded one.');
   assert.deepEqual(await goals(), ['true', 'true']);
   assert.equal(await hidden('liquidity-task-solved'), false);
-  assert.match(await text('liquidity-task-solved'), /^Solved\. The pool position and holding are both worth \$4,375\.00, which is \$625\.00 less than you started with\./);
+  assert.match(await text('liquidity-task-solved'), /^Solved\. Your claim and holding are both worth \$4,375\.00, which is \$625\.00 less than you started with\. Fees closed the gap to holding\. They did not undo the price fall\.$/);
   assert.equal(await hidden('learn-feedback'), true, 'Solving the task does not check the written answers.');
   await key('liquidity-task-fees', 'ArrowRight');
   assert.equal(await fee(), '$49.87', 'The next step moves on from the matching amount.');
@@ -170,6 +218,17 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
     await click('liquidity-task-reset');
     await reduceMotion({ call, evaluate });
     try {
+      // Nothing above either slider changes height while they move: the goals tick
+      // in place, and the solved message opens below the fee slider.
+      const tops = () => evaluate("['liquidity-task-price', 'liquidity-task-fees'].map(id => Math.round(document.getElementById(id).getBoundingClientRect().top + scrollY))");
+      const resting = await tops();
+      for (const [price, fees] of [['1000', '0'], ['1000', '250'], ['1500', '44.8729810778068'], ['4000', '500'], ['2000', '0']]) {
+        await fill('liquidity-task-price', price); await fill('liquidity-task-fees', fees);
+        assert.deepEqual(await tops(), resting, `At ${width}px, ETH at ${price} with ${fees} in fees moves neither slider.`);
+      }
+      assert.equal(await evaluate("Array.from(document.querySelectorAll('#liquidity-task-goals li')).every(item => item.scrollWidth <= item.clientWidth + 1 && Array.from(item.children).every(part => part.getBoundingClientRect().right <= item.getBoundingClientRect().right + 1))"), true, 'Each goal fits its row.');
+      // The tokens always fit on their one line; the note about fees shows only where it fits beside them.
+      assert.equal(await evaluate("(() => { const line = document.getElementById('liquidity-task-claim-tokens'), box = line.getBoundingClientRect(); return line.firstElementChild.getBoundingClientRect().right <= box.right + .5 && box.height < 30; })()"), true, 'The line under the claim fits.');
       await key('liquidity-task-price', 'End');
       assert.equal(await taskPrice(), '4000');
       await key('liquidity-task-price', 'Home');

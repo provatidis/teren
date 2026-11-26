@@ -1,5 +1,16 @@
 # Release history
 
+## 1.66.0 · 2026-11-27
+
+- Liquidity lessons 5 and 7 now follow the layout of lessons 1 to 4, on the two bars from lesson 4: holding and your claim, with a dashed line at what you started with.
+- Lesson 5 holds ETH at the moved price and asks a new question: your claim is behind holding, then it earns fees. Which bar grows? Showing the outcome plays the fees onto your claim. A third bar shows the gap to holding and how much of it the fees have covered, because on the dollar scale the fees themselves are a sliver. A saved answer to the earlier question is cleared; completed lessons stay completed.
+- The fee slider appears with the outcome, directly under the bars. It settles on the amount that matches holding when the thumb comes close, and **Match holding** sets it exactly. One panel names that amount as the break-even fees and says they are not a forecast.
+- Lesson 7 opens with the challenge itself: pick a price and a fee income so that your claim matches holding and both are worth less than you started with. Two goals sit under the bars, each with the amount that decides it, and tick as you reach them.
+- The lesson’s question now follows the challenge as an optional first step. Solving the challenge, or showing the answer to that question, opens one panel on why matching holding and making money are two different results. The check questions follow it.
+- In both lessons the line under your claim’s bar says when its value includes fees.
+- Lesson 7’s worked example is still there as an optional extra under **Go further**, in the lesson’s own names. The setup box and the explanation button are gone from both lessons.
+- Lessons 3 to 7 now use one set of names: your claim, holding, your start, impermanent loss for the gap to holding before fees, and break-even fees for the fees that close it. Lesson 6 keeps its earlier layout.
+
 ## 1.65.0 · 2026-11-26
 
 - Liquidity lesson 4 now follows the layout of lessons 1 to 3. Two bars come first: holding, the same tokens left in your wallet, and your claim in the pool. Each shows its dollar value and the tokens behind it. The question sits under them, and showing the outcome plays the price move on the bars.

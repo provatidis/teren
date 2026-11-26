@@ -24,7 +24,7 @@ Keep the evidence needed for a question beside it, and name the situation being 
 | Loss versus profit | Dollar profit means beating holding; withdrawal erases or charges the holding gap. | Explain the swaps behind the changed exposure, then choose the original-token benchmark for a fictional dashboard or consider withdrawal. Reasoning follows the selected price, including an unchanged price. |
 | Break-even fees | Matching holding once locks in the result; a required fee target predicts earnings. | Distinguish the total fee target from the amount still needed. Then hold earned USDC fees fixed while ETH moves farther from its starting price. |
 | Range boundaries | Outside means liquidation, no earlier fees, or no price exposure. | Predict all-USDC, all-ETH and mixed principal across the three fresh variations; distinguish eligibility for swaps from earned fees. |
-| Final challenge | Matching holding means making a dollar profit; a correct simulation proves safety. | Construct a case that matches holding while both finish below the starting capital, then explain the two comparisons. |
+| Final challenge | Matching holding means making a dollar profit; a correct simulation proves safety. | Construct a case where the claim matches holding while both finish below the start, then explain the two comparisons. |
 | Narrow and wide ranges | Tighter capital concentration always means greater profit; price exposure means a position is trading. | Compare eligibility, follow a price move below one range, and choose each position’s own holding basket. |
 | Fee tiers and APR | The highest charge earns most; a past fee APR fixes future profit; reinvesting guarantees a larger fee share. | Explain a lower-tier pool earning more, interpret yesterday’s APR after competition changes, and distinguish collection from reinvesting while other LPs add more liquidity. |
 | Exits, returns and costs | Inactive means closed or protected; changing bounds refunds losses. | Interpret outside principal values and re-entry; compare leaving a range in place with moving it after a fall before a rebound. |
@@ -141,9 +141,9 @@ The response lesson compares two alternatives from the same 5 ETH / 5,000 USDC l
 
 The loop-stress lesson compares holding the original 5 ETH with a three-round loop: 9.375 ETH and 8,750 USDC debt. Both start with $10,000 after debt, without additional capital or retained borrowed cash. Price changes keep tokens fixed; gain/loss bars extend from the same zero on a fixed dollar scale. The $1,500 question gives $7,500 for holding and $5,312.50 for the loop, whose health factor remains above 1. This separates price loss from liquidation eligibility. The separate Time example uses the original $2,000 price, 0% supply APR and 10% borrow APR with continuous compounding for up to one year; it explicitly shows zero supply interest and growing debt. Those are teaching assumptions, not live rates. Mode changes start fresh examples and never edit the assessed case or accumulate history.
 
-The two fee comparison lessons, Fees & break-even and the Final challenge, share one fixed dollar scale for starting capital, holding the exact starting tokens and LP principal. Assumed cash fees form a separate striped segment; they never change principal or the holding basket. Loss versus profit has its own two-bar figure, described under the pool-first lessons below. Break-even starts at the question price with zero fees, isolating the fee assumption. The final challenge keeps the learner’s constructed position separate from the optional worked example, which has its own **ETH price** and **Assumed fees** controls. **Match holding** selects the exact total fee target at the explored price, not a forecast or a rounded input. Explicit outcome replay and revealed-lesson reload restore the question’s observation; opening its explanation preserves the explored prices and fees. Range-width or variation changes invalidate answers to the changed case, while revised predictions preserve them.
+Loss versus profit, Fees & break-even and the Final challenge share one two-bar figure: holding and your claim on a fixed dollar scale, each with its tokens underneath and a dashed line at the starting value. They are described under the pool-first lessons below. Fees are a striped segment on the claim’s bar; they never change the claim’s tokens or holding. **Match holding** sets the exact break-even fees at the chosen price, not a forecast or a rounded input. Variation changes invalidate answers to the changed case, while revised predictions preserve them.
 
-The final challenge opens with a construction task that uses the same comparison bars as the worked example. Learners choose a price and use **Match holding** to construct an example where both strategies remain below their starting capital. A broad range of lower prices works, with named shortcuts and **Show an example** available. The task checks the resulting state and a conceptual explanation; it does not require a particular click sequence or infer understanding from motion. Task inputs and its checked state survive reload separately from the fixed observation. Editing them clears current feedback and sharing eligibility until checked again, while earlier lesson completion remains. The result card and Experiment link keep the worked observation's assumptions. Financial models and recorded evidence remain unchanged.
+The final challenge is a construction task on that figure. Learners choose a price and a fee income so that the claim matches holding and both are below the start. A broad range of lower prices works, and **Match holding for me** and **Show an example** are available. The task checks the resulting state and a conceptual explanation; it does not require a particular click sequence or infer understanding from motion. Task inputs and the checked state survive reload. Editing them clears current feedback and sharing eligibility until checked again, while earlier lesson completion remains. One worked example, ETH at the question price with the question’s fees, stays available as an optional disclosure with its own **ETH price** and **Fees** controls. The check questions, the result card and the Experiment link use that example’s numbers. Financial models and recorded evidence remain unchanged.
 
 ## Extending the patterns
 
@@ -161,7 +161,7 @@ Each visual should replace repeated setup/result prose, retain essential assumpt
 
 A prediction makes an expectation explicit. It is visible, ungraded and deliberately skippable. Removing arithmetic and long introductory text supports this step; it does not require hiding it. Explanations and changed-situation checks remain the completion criteria, and direct Experiment access serves people who already have a question. Evaluate reviews against that sequence, including people who choose to see the outcome first.
 
-## Liquidity lessons 1 to 4: pool first
+## Liquidity lessons 1 to 5 and 7: pool first
 
 [Lesson 1](https://teren.sh/learn.html#lesson=swap-impact) is the reference for how a lesson moves from seeing to doing. Links from its pilot (`&layout=play`) still open it.
 
@@ -195,9 +195,25 @@ Lesson 2 uses two names: share, a percentage of the pool, and claim, the tokens 
 3. **Name the gap.** One panel calls the gap to holding impermanent loss, shows it as a percentage at the chosen price and says it is a comparison, not a charge. It does not say why the gap exists.
 4. **Apply it.** The first check question asks why, with three plausible causes. The tokens under each bar are the evidence: holding has the same half-and-half start, so the split cannot be the cause. The second question is a dashboard that reports one comparison only, or a withdrawal.
 
-Lesson 4 uses three names: your start, holding, and your claim. Lessons 5 and 7 keep the shared fee comparison and its question-first layout.
+Lesson 4 uses three names: your start, holding, and your claim.
 
-Anything above a slider keeps its height while the slider moves, so the slider stays under a dragging thumb. Lines whose numbers follow the slider use a label and a value in fixed columns or stay on one line, and sentences above a slider do not contain those numbers. Lessons 5 to 7 keep the question-first layout with their setup box.
+[Lesson 5](https://teren.sh/learn.html#lesson=fee-break-even) adds fees to the same two bars and holds the price still.
+
+1. **See fees arrive.** The bars open at the moved price, with the claim behind holding. The question gives the gap and a fee amount and asks which bar grows: only the claim, both, or neither because fees are already in the claim’s value. The reveal plays the fees onto the claim as a striped segment, and the verdict says how far behind holding the claim still is.
+2. **Drag the fees.** The slider sits under the bars and a third bar: the gap to holding, filling as fees cover it. On the dollar scale the fees are a sliver, so the gap gets a scale of its own. The thumb settles on the amount that matches holding when it comes close, and a shortcut sets it exactly.
+3. **Name the amount.** One panel calls it the break-even fees, gives it in dollars and as a share of the start, and says the fees here are an amount the reader chooses. Recorded fee evidence stays one disclosure away in the same panel.
+4. **Apply it.** The first check question asks what the break-even fees tell you: what would match holding at this price, what the price move produced, or what is waiting to be collected. The second holds the earned fees fixed while ETH moves farther from its starting price and asks whether the claim still matches holding.
+
+[Lesson 7](https://teren.sh/learn.html#lesson=final-challenge) is the reverse of the others: the reader does the thing first.
+
+1. **Take the challenge.** The same two bars come first, at the starting price with no fees. Under them are two goals, each one line with the amount that decides it: the claim matches holding, and both are below the start. A price slider and a fee slider follow. The goals tick in place and a solved message opens below the sliders, so nothing above a slider moves.
+2. **Ask for a first step.** The lesson’s question, which price move to try first, follows the challenge and is optional. Its answer opens under the sliders and leaves the challenge as the reader left it.
+3. **Read why.** Solving the challenge or showing that answer opens one panel: matching holding and making money are two different results. It holds the pitfall too. Solving does not move focus or the page.
+4. **Apply it.** The first check question describes a different case, the one lesson 5 showed, and asks how fees affect the comparison with holding. The second asks what the fees covered in the reader’s own example. Completion needs a solved challenge and both answers.
+
+Lessons 3 to 7 use one set of names: your claim, holding, your start, impermanent loss for the gap to holding before fees, and break-even fees for the fees that close it. Lesson 7’s optional worked example uses them too.
+
+Anything above a slider keeps its height while the slider moves, so the slider stays under a dragging thumb. Lines whose numbers follow the slider use a label and a value in fixed columns or stay on one line, and sentences above a slider do not contain those numbers. Lesson 6 keeps the question-first layout with its setup box.
 
 ## Observation plan
 

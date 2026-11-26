@@ -68,8 +68,9 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   }
   await restoreQuestion(evaluate,'fee-break-even',{futurePrice:4000,fees:100});
   await navigate(base + 'learn.html#lesson=fee-break-even');
-  await choose('learn-prediction','toward-target'); await click('learn-run');
-  assert.match(await text('learn-explanation'),/total fee target is \$428.93[\s\S]*\$328.93 additional/);
+  await choose('learn-prediction','toward-target'); await click('learn-reveal');
+  assert.match(await text('learn-prediction-feedback'),/Only your claim\. \$100\.00 in fees takes it from \$428\.93 behind holding to \$328\.93 behind/);
+  assert.match(await text('fee-why'),/break-even fees: \$428\.93 at this price/);
   await choose('learn-reason','assumption'); await choose('learn-application','gap-reopens'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   const checkedFeeDraft = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");

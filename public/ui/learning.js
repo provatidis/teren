@@ -2,8 +2,8 @@ import { saveLearningLocation } from '../data/learning-location.js';
 import { focusSceneOutcome, createPredictionPrompt, markPredictionRevealed, foldPrediction, sceneNode } from '../lib/lesson-scene.js';
 import { createTokenBalanceScene, createRangeBoundaryScene } from '../lib/liquidity-lesson-scenes.js';
 import { createFoundationScene } from '../lib/foundation-lesson-scenes.js';
-import { createComparisonScene, comparisonQuestion } from '../lib/comparison-lesson-scene.js';
-import { createBenchmarkScene } from '../lib/benchmark-lesson-scene.js';
+import { createComparisonScene } from '../lib/comparison-lesson-scene.js';
+import { createBenchmarkScene, createFeeScene } from '../lib/benchmark-lesson-scene.js';
 import { createLiquidityApplication } from '../lib/liquidity-application-scene.js';
 import { stageForLesson } from '../learning/example-path.js';
 import { DEEPER_READING } from '../learning/deeper-reading.js';
@@ -24,14 +24,14 @@ import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
 import { resultCardBlob } from '../lib/result-card.js';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
-import { tokenBalanceNarration, lossProfitReasoning, rangeBoundaryNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding, deeperPoolQuestion, depositPrediction, priceMovePrediction, benchmarkPrediction } from '../lib/lesson-narration.js';
+import { tokenBalanceNarration, lossProfitReasoning, rangeBoundaryNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding, deeperPoolQuestion, depositPrediction, priceMovePrediction, benchmarkPrediction, feePrediction } from '../lib/lesson-narration.js';
 
 function finalReason(outcome) {
   const r = outcome.result;
-  if (Math.abs(r.difference) < 1e-8) return 'The fees in this example exactly cover the gap between principal and holding.';
+  if (Math.abs(r.difference) < 1e-8) return 'The fees in that case exactly cover the gap to holding.';
   return r.difference > 0
-    ? 'The fees in this example more than cover the principal shortfall against holding.'
-    : 'The fees in this example do not cover the principal shortfall against holding.';
+    ? 'The fees in that case more than cover the gap to holding.'
+    : 'The fees in that case do not cover the gap to holding.';
 }
 
 export function initLearning() {
@@ -39,15 +39,17 @@ export function initLearning() {
   const predictionFeedbackElement = $('learn-prediction-feedback');
   const predictionField = $('learn-prediction-field'), controls = $('learn-controls');
   let lessonScene, applicationScene;
-  // Lessons 1 to 4 put the figure before the question and reveal the outcome in
-  // place. Links from lesson 1's pilot (&layout=play) still open it.
-  const POOL_FIRST = ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit'];
+  // Lessons 1 to 5 put the figure before the question and reveal the outcome in
+  // place. Lesson 7 puts its challenge first and reveals when it is solved.
+  // Links from lesson 1's pilot (&layout=play) still open it.
+  const POOL_FIRST = ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit', 'fee-break-even', 'final-challenge'];
   let poolFirst = false;
-  // Lessons 2 to 4 ask their prediction in the setup's own numbers.
+  // Lessons 2 to 5 ask their prediction in the setup's own numbers.
   const predictionCopy = () => lesson.id === 'pool-share' ? depositPrediction(draft.inputs)
     : lesson.id === 'token-balances' ? { question: priceMovePrediction(draft.inputs), choices: lesson.predictions }
       : lesson.id === 'loss-vs-profit' ? benchmarkPrediction(draft.inputs)
-        : { question: lesson.prediction, choices: lesson.predictions };
+        : lesson.id === 'fee-break-even' ? feePrediction(draft.inputs, runLesson(lesson.id, draft.inputs, draft.variant).result)
+          : { question: lesson.prediction, choices: lesson.predictions };
   const pitfallElement = $('learn-pitfall');
   const foundationLesson = () => ['swap-impact', 'pool-share'].includes(lesson?.id);
   const comparisonLesson = () => ['loss-vs-profit', 'fee-break-even', 'final-challenge'].includes(lesson?.id);
@@ -121,25 +123,31 @@ export function initLearning() {
     const s = draft.inputs;
     if (lesson.id === 'swap-impact') return formatTokenQuantity(s.amount, 4) + ' ETH swap';
     if (lesson.id === 'pool-share') return formatTokenQuantity(s.depositEth, 4) + ' ETH deposit';
-    return 'ETH at ' + usd(s.futurePrice) + (['fee-break-even', 'final-challenge'].includes(lesson.id) ? ' · ' + usd(s.fees) + ' in fees' : '');
+    // Lesson 5 holds the price still: its question is about the fees.
+    if (lesson.id === 'fee-break-even') return usd(s.fees) + ' in fees';
+    return 'ETH at ' + usd(s.futurePrice) + (lesson.id === 'final-challenge' ? ' · ' + usd(s.fees) + ' in fees' : '');
   }
   function explanationLabel() {
-    if (lesson.id === 'final-challenge') return 'Compare with the worked example ↓';
     const s = draft.inputs;
     return 'Explain the ' + (foundationLesson() ? questionLabel() : usd(s.futurePrice) + ' outcome') + ' ↓';
   }
   function renderPrediction() {
     renderPredictionFeedback(predictionFeedbackElement, predictionCopy().choices, draft.prediction, outcome.prediction,
-      (lesson.id === 'final-challenge' ? '' : questionLabel() + ': ') + lessonFinding(lesson.id, outcome));
+      (['final-challenge', 'fee-break-even'].includes(lesson.id) ? '' : questionLabel() + ': ') + lessonFinding(lesson.id, outcome));
     markPredictionRevealed(predictionField);
-    if (poolFirst) foldPrediction(predictionField, 'Your prediction for ' + (foundationLesson() ? 'the ' : '') + questionLabel());
+    if (poolFirst) foldPrediction(predictionField, lesson.id === 'final-challenge' ? 'Your answer on the price move'
+      : 'Your prediction for ' + (foundationLesson() ? 'the ' : '') + questionLabel());
   }
   function prepareChallenge(input) {
-    applicationScene = createLiquidityApplication(input, draft.task, value => {
+    applicationScene = createLiquidityApplication(input, draft.task, (value, solved) => {
       draft.task = value; draft.taskChecked = false;
       clearUnderstandingFeedback('learn');
       $('learn-feedback').hidden = true; $('learn-continue').hidden = true; $('learn-share').hidden = true;
-      clearCard(); persist();
+      clearCard();
+      // Solving the challenge is its outcome: the verdict, the explanation and the
+      // questions appear under it. Nothing above the sliders moves, and focus stays put.
+      if (solved && !draft.ran) { draft.ran = true; lessonScene.showQuestion(); renderResults(); }
+      persist();
     });
     draft.task = applicationScene.value();
     $('learn-application-task').replaceChildren(applicationScene.element);
@@ -148,6 +156,8 @@ export function initLearning() {
     const s = draft.inputs;
     renderLessonSetup($('learn-setup'), liquidityLessonSetup(lesson.id, s));
     const hasTask = lesson.id === 'final-challenge';
+    // The challenge comes before its question; other lessons have no task.
+    if (hasTask) $('learn-application-task').after($('learn-scene')); else $('learn-application-task').before($('learn-scene'));
     $('learn-application-task').hidden = !hasTask;
     $('learn-worked-comparison').hidden = !hasTask;
     $('learn-worked-comparison').open = false;
@@ -159,24 +169,41 @@ export function initLearning() {
     $('learn-model').textContent = model + ' · Illustrative inputs · USDC = $1';
     if (visualLesson()) {
       $('learn-prediction-question').textContent = poolFirst ? predictionCopy().question
-        : lesson.id === 'range-boundaries' ? 'At ' + usd(s.futurePrice) + ', which tokens will the position’s principal hold?'
-        : comparisonQuestion(lesson.id, s);
+        : 'At ' + usd(s.futurePrice) + ', which tokens will the position’s principal hold?';
       const prediction = createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) });
       prediction.querySelector('.scene-prediction-show').id = 'learn-reveal';
       lessonScene = foundationLesson() ? createFoundationScene(lesson.id, s, draft.variant, prediction, { explanation: lesson.explanation })
         : lesson.id === 'loss-vs-profit' ? createBenchmarkScene(s, prediction, { explanation: lesson.explanation })
-        : comparisonLesson() ? createComparisonScene(lesson.id, s, hasTask ? null : prediction)
+        : lesson.id === 'fee-break-even' ? createFeeScene(s, prediction, { explanation: lesson.explanation })
+        : hasTask ? createComparisonScene(s)
         : lesson.id === 'range-boundaries' ? createRangeBoundaryScene(s, prediction)
         : createTokenBalanceScene(s, prediction, { explanation: lesson.explanation });
       $('learn-prediction-home').replaceChildren();
       if (hasTask) {
-        $('learn-scene').replaceChildren(prediction);
-        $('learn-worked-scene').replaceChildren(lessonScene.element);
+        // The worked example stays an optional comparison under "Go further". The
+        // lesson's own scene is the challenge above, its question and one panel.
+        const worked = lessonScene;
+        $('learn-worked-scene').replaceChildren(worked.element);
+        const frame = sceneNode('div', undefined, 'lesson-scene challenge-scene');
+        const panel = sceneNode('section', undefined, 'foundation-outcome'); panel.id = 'challenge-outcome';
+        panel.setAttribute('aria-labelledby', 'challenge-outcome-title');
+        const heading = sceneNode('h4', 'Two results, not one'); heading.id = 'challenge-outcome-title';
+        const why = sceneNode('p', lesson.explanation, 'foundation-why'); why.id = 'challenge-why';
+        panel.append(heading, '\n', why); panel.hidden = true;
+        // The challenge is already in hand, so its question reads as a first step.
+        prediction.querySelector('.scene-prediction-invite').textContent = 'Need a first step?';
+        frame.append(prediction, '\n', panel);
+        $('learn-scene').replaceChildren(frame);
+        // The answer opens where the question is, below the sliders: the challenge
+        // figure above it stays where the reader left it.
+        lessonScene = { element: frame, figure: frame, verdictBefore: prediction,
+          showQuestion() { panel.hidden = false; worked.showQuestion(); } };
       } else $('learn-scene').replaceChildren(lessonScene.element);
       if (poolFirst) {
         // The verdict sits right under the figure and its control, the pitfall joins
         // the panel it warns about, and one note holds the assumptions.
-        (lessonScene.verdictAfter || lessonScene.element.querySelector('.scene-player')).after(predictionFeedbackElement);
+        if (lessonScene.verdictBefore) lessonScene.verdictBefore.before(predictionFeedbackElement);
+        else (lessonScene.verdictAfter || lessonScene.element.querySelector('.scene-player')).after(predictionFeedbackElement);
         lessonScene.element.querySelector('.foundation-outcome').append(pitfallElement);
         const about = sceneNode('details', undefined, 'learn-about-example');
         about.append(sceneNode('summary', 'About this example'),
@@ -185,8 +212,10 @@ export function initLearning() {
               + (lesson.id === 'pool-share' ? ' Each deposit size you explore starts from the same pool. The later trade pays a 0.3% fee. Claims use proportional ownership before withdrawal rounding.'
                 : ' Each trade size you explore starts from the same pool.')
             : 'You start with ' + usd(s.investment) + ', half in ETH and half in USDC, at ' + usd(s.initialPrice) + ' per ETH. '
-              + (lesson.id === 'loss-vs-profit' ? 'Holding keeps those tokens in your wallet. Each price you explore is a separate outcome, as if traders had already brought the pool’s price to the market’s. Fees are left out here; the next lesson adds them.'
-                : 'Each price you explore is compared with that same start, as if traders had already brought the pool’s price to the market’s. Fees are left out.'))),
+              + (hasTask ? 'Holding keeps those tokens in your wallet. Each price you pick is a separate outcome, as if traders had already brought the pool’s price to the market’s. Fees are cash you choose, added to your claim. Gas and other costs are left out.'
+                : lesson.id === 'loss-vs-profit' ? 'Holding keeps those tokens in your wallet. Each price you explore is a separate outcome, as if traders had already brought the pool’s price to the market’s. Fees are left out here; the next lesson adds them.'
+                : lesson.id === 'fee-break-even' ? 'ETH has moved to ' + usd(s.futurePrice) + ' and stays there while you change the fees. Fees are cash you choose, added to your claim after any protocol share. Gas and other costs are left out.'
+                  : 'Each price you explore is compared with that same start, as if traders had already brought the pool’s price to the market’s. Fees are left out.'))),
           sceneNode('p', $('learn-variation-label').textContent + '. Try another variation for new ' + (foundationLesson() ? 'pool balances' : 'prices') + '.'));
         lessonScene.element.append(about);
       }
@@ -273,7 +302,7 @@ export function initLearning() {
       if (s.fees) visual.push(bar('LP + ' + usd(s.fees) + ' assumed fees', r.lpValue / max * 100, usd(r.lpValue)));
     }
     $('learn-metrics').replaceChildren(...metrics); $('learn-visual').replaceChildren(...visual);
-    $('learn-results-title').textContent = poolFirst ? 'Go further' : lesson.id === 'final-challenge' ? 'A worked comparison · ' + questionLabel() : questionLabel();
+    $('learn-results-title').textContent = poolFirst ? 'Go further' : questionLabel();
     renderPrediction();
     const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
     const lossCopy = lesson.id === 'loss-vs-profit' ? lossProfitReasoning(outcome) : null;
@@ -287,7 +316,7 @@ export function initLearning() {
     choices('learn-reasons', 'learn-reason', reasons, draft.reason);
     $('learn-application-context').textContent = applicationCopy.context;
     $('learn-reason-context').textContent = lesson.id === 'final-challenge'
-      ? 'In the worked example, the position has ' + usd(s.fees) + ' in fees against a gap of ' + usd(r.breakEvenFees) + ' before fees.'
+      ? 'A different case: ETH moved to ' + usd(s.futurePrice) + '. The claim has ' + usd(s.fees) + ' in fees against a gap to holding of ' + usd(r.breakEvenFees) + '.'
       : applicationCopy.reasonContext || '';
     $('learn-reason-context').hidden = !$('learn-reason-context').textContent;
     renderQuestionEvidence($('learn-application-evidence'), applicationCopy.evidence);
@@ -313,7 +342,7 @@ export function initLearning() {
     if (lesson.id === 'swap-impact') $('learn-explore-note').textContent = 'In your independent sandbox, compare two trade sizes before executing either. Watch how price impact changes.';
     else if (lesson.id === 'loss-vs-profit') $('learn-explore-note').textContent = 'Try adding fees in Experiment. Find a positive dollar return that still trails holding the starting tokens.';
     else if (lesson.id === 'final-challenge') {
-      $('learn-explore').textContent = 'Explore the worked example in Experiment ↗';
+      $('learn-explore').textContent = 'Open the same example in Experiment ↗';
       $('learn-explore-note').textContent = 'Opens the ' + usd(s.futurePrice) + ' ETH example with ' + usd(s.fees) + ' in fees.';
     }
     else if (lesson.id === 'range-boundaries') $('learn-explore-note').textContent = 'Move ETH below, inside and above the bounds. Watch which token remains and when swaps can use the position.';
@@ -367,7 +396,7 @@ export function initLearning() {
     $('learn-metrics').hidden = visualLesson(); $('learn-visual').hidden = visualLesson();
     $('learn-experiment-title').textContent = {
       'swap-impact': 'Follow the swap', 'pool-share': 'Watch your pool share', 'token-balances': 'Watch your claim',
-      'loss-vs-profit': 'Profit compared with what?', 'fee-break-even': 'Fees and the holding benchmark', 'final-challenge': 'Start with the same tokens', 'range-boundaries': 'Watch the price cross your range',
+      'loss-vs-profit': 'Profit compared with what?', 'fee-break-even': 'Can fees close the gap?', 'final-challenge': 'Your challenge', 'range-boundaries': 'Watch the price cross your range',
     }[lesson.id] || 'Your experiment';
     $('learn-results-title').after(predictionFeedbackElement);
     if (lesson.id === 'range-boundaries') {

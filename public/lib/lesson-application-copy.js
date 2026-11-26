@@ -127,28 +127,28 @@ export function lessonApplicationCopy(id, outcome) {
   if (id === 'fee-break-even') return {...base,
     label: 'After matching holding',
     context: (application.fees === 0
-      ? 'At the unchanged starting price, the LP matches holding without fees. ETH then rises.'
-      : 'Suppose the LP has earned exactly enough USDC fees to match holding. ETH then moves farther from its starting price.')
+      ? 'At the unchanged starting price, your claim matches holding without fees. ETH then rises.'
+      : 'Suppose your claim has earned exactly its break-even fees, so it is level with holding. ETH then moves farther from its starting price.')
       + ' No new fees arrive, and no one adds or removes liquidity. Costs are excluded.',
     evidence: {
       title: 'The next price move',
       rows: [
         ['Starting ETH price', usd(s.initialPrice)],
-        [application.fees === 0 ? 'ETH price when LP matched holding' : 'ETH price when fees covered the gap', usd(s.futurePrice)],
+        [application.fees === 0 ? 'ETH price when your claim matched holding' : 'ETH price when fees covered the gap', usd(s.futurePrice)],
         ['Later ETH price', usd(application.futurePrice)],
       ],
       note: application.fees === 0 ? 'There are no fees in this example. USDC stays at $1.' : 'The earned fees stay as USDC. USDC stays at $1.',
     },
-    question: application.fees === 0 ? 'After ETH rises, how does the LP compare with holding?' : 'Do those same earned fees keep the LP level with holding?',
-    choices: [['gap-reopens', 'The LP falls behind holding.'], ['still-matches', 'The LP keeps matching holding.'], ['now-ahead', 'The LP moves ahead of holding.']],
+    question: application.fees === 0 ? 'After ETH rises, how does your claim compare with holding?' : 'Do those same earned fees keep your claim level with holding?',
+    choices: [['gap-reopens', 'My claim falls behind holding.'], ['still-matches', 'My claim stays level with holding.'], ['now-ahead', 'My claim moves ahead of holding.']],
     hint: 'The USDC fees have not changed. Consider what moving farther from the starting price does to the gap before fees.',
     feedbackByChoice: {
       'still-matches': 'Matching holding at one price does not lock in that result. The larger price move widens the gap before fees, while the earned USDC stays unchanged.',
-      'now-ahead': 'A further price move is not extra fee income. Here it widens the shortfall against holding, and no new fees arrive to cover it.',
+      'now-ahead': 'A further price move is not extra fee income. Here it widens the gap to holding, and no new fees arrive to cover it.',
     },
     feedback: application.fees === 0
-      ? 'The LP now trails holding. Swaps leave it with less ETH as ETH rises, so it gains less from the rise than the original holding basket. There are no fees to cover that gap.'
-      : 'The gap reopens. Moving farther from the starting price widens the shortfall before fees in this model. The same USDC fee balance no longer covers it.'};
+      ? 'Your claim now trails holding. Traders leave it with less ETH as ETH rises, so it gains less from the rise than holding does. There are no fees to cover that gap.'
+      : 'The gap reopens. Moving farther from the starting price widens the gap before fees, so the break-even fees are now larger. The same USDC fee balance no longer covers them.'};
   if (id === 'range-boundaries' && outcome.variant === 2) return {...base,
     label: 'ETH falls below the range',
     context: 'ETH reaches the lower bound, ' + usd(application.futurePrice) + '. The position’s principal is now all ETH. Liquidity stays deposited; fees are excluded.',
@@ -184,13 +184,13 @@ export function lessonApplicationCopy(id, outcome) {
     feedback: 'Just inside the upper bound, a small amount of ETH remains beside the USDC. The position can earn when swaps use its liquidity; being inside does not itself create fees.'};
   return {...base,
     label: 'Match holding while losing dollars',
-    context: 'Think back to the price and fees you chose for your own position.',
-    question: 'When your position matches holding below the starting budget, what have its fees covered?',
-    choices: [['relative-gap','The shortfall against holding, while a dollar loss remains in both strategies.'],['capital-restored','The entire loss from the starting capital, because LP now matches holding.'],['earned-target','A recorded fee payment that proves this position can recover its loss.']],
+    context: 'Think back to the price and fees you chose in your own example.',
+    question: 'When your claim matches holding below your start, what have its fees covered?',
+    choices: [['relative-gap','The gap to holding. A dollar loss remains on both sides.'],['capital-restored','The whole loss since the start, because the claim now matches holding.'],['earned-target','A recorded fee payment that proves this claim can recover its loss.']],
     hint: 'Try a price below the start, then use Match holding. The bars keep both comparisons visible.',
     feedbackByChoice: {
-      'capital-restored': 'Holding itself is below the starting budget in your example. Matching it closes the relative gap but leaves that dollar loss.',
+      'capital-restored': 'Holding itself is below your start in your example. Matching it closes the gap to holding but leaves that dollar loss.',
       'earned-target': 'You chose the fees in this example. Matching holding shows what that amount would cover; it does not show that any trades paid it.',
     },
-    feedback: 'Matching holding closes the relative gap. Holding itself can be below the starting capital, so both can still lose dollars. The fees in this task are an assumption, not recorded earnings.'};
+    feedback: 'Matching holding closes the gap to holding. Holding itself can be below your start, so both can still lose dollars. The fees in this task are an amount you chose, not recorded earnings.'};
 }

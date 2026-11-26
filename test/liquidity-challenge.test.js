@@ -68,5 +68,5 @@ test('checked task state survives reload independently from the worked question'
 test('corrective feedback addresses fixed-token claims and collectible-fee confusion', () => {
   const feedback = id => LESSONS.find(lesson => lesson.id === id).reasonFeedbackByChoice;
   assert.match(lessonReasonFeedback('pool-share',{},'eth',feedback('pool-share')),/does not set aside your original tokens/);
-  assert.match(lessonReasonFeedback('fee-break-even',{},'compound',feedback('fee-break-even')),/not a collectable balance/);
+  assert.match(lessonReasonFeedback('fee-break-even',{},'compound',feedback('fee-break-even')),/not a balance you can collect/);
 });

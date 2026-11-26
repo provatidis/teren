@@ -51,18 +51,20 @@ export const LESSONS = [
     takeaway: 'Say what you compare with: your start, or holding. The gap to holding is impermanent loss.',
   },
   {
-    id: 'fee-break-even', completion: 'You separated an assumed fee amount from fees actually earned.', protocol: 'Uniswap v2-style', title: 'Fees needed to match holding', short: 'Fees & break-even', concept: 'Fee income', skill: 'Distinguish a fee target from assumed and earned fees.',
-    intro: 'You could have kept the same ETH and USDC in your wallet. See how trading fees change the comparison with providing liquidity.',
-    prediction: 'At a fixed ETH price, how do fees count toward catching up with holding?',
-    predictions: [['toward-target', 'They reduce any remaining shortfall. The original fee target stays the same.'], ['lower-target', 'They lower the original fee target as well as reducing any shortfall.'], ['both-earn', 'They add the same value to the position and to holding.']],
-    reasoning: 'What does the break-even fee target describe?',
-    reasons: [['assumption', 'The fee income needed to match the starting holding basket.'], ['guarantee', 'The fee income estimated from this particular price change.'], ['compound', 'The fee income available to collect after this price change.']],
+    id: 'fee-break-even', completion: 'You separated the fees a claim would need from the fees it earns.', protocol: 'Uniswap v2-style', title: 'Fees needed to match holding', short: 'Fees & break-even', concept: 'Fee income', skill: 'Distinguish a fee target from assumed and earned fees.',
+    intro: 'A price move leaves your claim behind holding. See how much in trading fees it takes to catch up.',
+    // The question carries the lesson's own price, gap and fees: see feePrediction.
+    prediction: 'Your claim earns trading fees. Which bar grows?',
+    predictions: [['toward-target', 'Only my claim'], ['both-earn', 'Both bars'], ['already-counted', 'Neither. Fees are already in my claim’s value.']],
+    reasoning: 'What do the break-even fees tell you?',
+    reasons: [['assumption', 'How much fee income would match holding at this price.'], ['guarantee', 'How much fee income this price move produced.'], ['compound', 'How much fee income is waiting to be collected.']],
     reasonFeedbackByChoice: {
-      guarantee: 'A price change determines this comparison’s gap, not how many fee-paying swaps happened. The target tells you what would be needed, not what is likely to be earned.',
-      compound: 'The target is not a collectable balance. Actual fees need a record of trading and the position’s share of active liquidity.',
+      guarantee: 'A price move sets the gap to holding, not how many fee-paying trades happened. Break-even fees say what would be needed, not what was earned.',
+      compound: 'Break-even fees are not a balance you can collect. What a claim actually earns depends on the trading the pool saw and its share of the liquidity.',
     },
-    explanation: 'Break-even fees answer “what would be needed?” Earning that amount depends on actual trading, active liquidity and the time path. The cash fees you enter stay fixed in this example; gas, incentives and compounding are excluded.',
-    takeaway: 'Required fees and expected fees are different numbers.',
+    // The scene puts the lesson's own break-even amount in front of this sentence.
+    explanation: 'Whether a pool pays that much depends on how much trading it sees and for how long. The fees here are an amount you choose, not a record of earnings.',
+    takeaway: 'Break-even fees say what would be needed. They do not say what you will earn.',
   },
   {
     id: 'range-boundaries', completion: 'You connected range position, token ownership and eligibility to earn fees.', protocol: 'Uniswap v3-style', title: 'Token balances at range boundaries', short: 'Concentrated liquidity', concept: 'Ranges', skill: 'Identify the token held at either range boundary.',
@@ -79,16 +81,16 @@ export const LESSONS = [
   },
   {
     id: 'final-challenge', completion: 'You built an example where matching holding still leaves a dollar loss.', protocol: 'Uniswap v2-style', title: 'Can you match holding and still lose dollars?', short: 'Final challenge', concept: 'Apply what you learned', skill: 'Build your own example.',
-    intro: 'Start with the same ETH and USDC in the pool and in your wallet. Find a price and fee amount that leave the two strategies tied, each worth less than you started with.',
+    intro: 'Use what you know. Pick a price and a fee income so that your claim matches holding, and both are worth less than you started with.',
     prediction: 'Which change in the ETH price would you try first?',
     predictions: [['lower-price', 'A fall in ETH.'], ['higher-price', 'A rise in ETH.'], ['same-price', 'Leave ETH at its starting price.']],
     reasoning: 'How do fees affect this comparison with holding?',
-    reasons: [['total', 'Compare the fee contribution with the principal shortfall against holding.'], ['fees', 'Any fee income puts the LP ahead of its original holding basket.'], ['deposit-loss', 'Compare fees with the LP’s dollar loss from the original deposit.']],
+    reasons: [['total', 'Compare the fees with the gap to holding.'], ['fees', 'Any fee income puts the claim ahead of holding.'], ['deposit-loss', 'Compare the fees with the claim’s dollar loss since the start.']],
     reasonFeedbackByChoice: {
-      fees: 'Fees can close some of the gap without closing all of it. Their contribution must be compared with the shortfall before fees.',
-      'deposit-loss': 'The original dollar deposit is a different benchmark. To match holding, fees must cover the gap to the value of the starting ETH and USDC at the selected price.',
+      fees: 'Fees can close some of the gap without closing all of it. They have to be compared with the gap to holding before fees.',
+      'deposit-loss': 'What you started with is a different comparison. To match holding, fees must cover the gap to what the starting ETH and USDC are worth at that price.',
     },
-    explanation: 'The result depends on the price and fees you enter. Swaps change the token mix; fees add to its value. The entered fees are hypothetical, not a record of earnings. Gas, protocol-specific execution and the trading path are excluded.',
+    explanation: 'Matching holding and making money are two different results. Fees can close the gap to holding. They cannot undo what a price fall does to the tokens on both sides. To judge a result, say what you compare with, what you assumed and what you left out.',
     takeaway: 'A useful conclusion names the benchmark, assumptions and missing information.',
   },
 ];

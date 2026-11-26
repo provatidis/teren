@@ -1,13 +1,13 @@
 import { sceneNode as node } from './lesson-scene.js';
 import { usd } from './format.js';
 
-// Shared by the worked observation and the separately assessed application.
+// The bars of lesson 7's optional worked example.
 export function createComparisonBars(input, { prefix = 'comparison' } = {}) {
   const figure = node('figure', undefined, 'comparison-figure');
   const title = node('figcaption', '', 'scene-figure-title'); title.id = prefix + '-title';
   const rows = {};
   figure.append(title);
-  for (const [key, label] of [['start', 'Starting capital'], ['hold', 'Holding starting tokens'], ['lp', 'LP + assumed fees']]) {
+  for (const [key, label] of [['start', 'Your start'], ['hold', 'Holding'], ['lp', 'Your claim']]) {
     const row = node('div', undefined, 'comparison-row'); row.dataset.comparison = key;
     const heading = node('div', undefined, 'comparison-heading');
     const value = node('strong'); value.id = prefix + '-' + key + '-value';
@@ -28,7 +28,7 @@ export function createComparisonBars(input, { prefix = 'comparison' } = {}) {
       row.principal.style.width = (key === 'lp' ? r.lpBeforeFees : value) / state.ceiling * 100 + '%';
       row.fee.style.width = (key === 'lp' ? r.fees : 0) / state.ceiling * 100 + '%';
     }
-    parts.textContent = 'Solid: ' + usd(r.lpBeforeFees) + ' principal · Striped: ' + usd(r.fees) + ' assumed fees';
+    parts.textContent = 'Solid: ' + usd(r.lpBeforeFees) + ' in tokens · Striped: ' + usd(r.fees) + ' in fees';
   }
   return { figure, draw };
 }

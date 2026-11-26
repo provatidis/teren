@@ -27,6 +27,16 @@
 .benchmark-figure [data-benchmark=hold] .scene-token-fill { background: #a9c7f5; }
 .benchmark-figure [data-benchmark=claim] .scene-token-fill { background: #e5bd85; }
 .benchmark-figure .scene-token-detail { white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums; }
+/* Fees sit on the end of the claim's bar as a striped segment, as in the lab charts. */
+.benchmark-figure .scene-token-track { display: flex; }
+.benchmark-figure .scene-token-fill { flex: none; }
+.benchmark-figure .benchmark-fees { background: repeating-linear-gradient(135deg, #e5bd85 0 3px, #49381f 3px 6px); }
+.benchmark-figure [data-benchmark=claim] .benchmark-fees { border-radius: 0 4px 4px 0; }
+.benchmark-figure [data-benchmark=claim] .scene-token-fill:has(+ .benchmark-fees) { border-radius: 4px 0 0 4px; }
+.benchmark-figure .benchmark-gap { height: 10px; margin: 4px 0 6px; }
+.benchmark-figure .benchmark-gap .benchmark-fees { border-radius: 4px; }
+.fee-scene #fee-earned > strong { min-width: 19ch; }
+.fee-scene .fee-context { margin: 16px 0 0; }
 .benchmark-figure .foundation-fact { grid-template-columns: minmax(0, 1fr) auto; }
 .benchmark-figure .foundation-fact > strong { min-width: 10ch; text-align: right; }
 .benchmark-figure .scene-token-row + .foundation-fact { margin-top: 10px; }
@@ -38,6 +48,26 @@
   .benchmark-figure .foundation-fact > strong { min-width: 0; text-align: left; }
 }
 @media (max-width: 360px) {
+  .fee-scene #fee-earned { grid-template-columns: minmax(0, 1fr); }
+  .fee-scene #fee-earned > strong { min-width: 0; text-align: left; }
   .benchmark-place { display: none; }
   .benchmark-figure .scene-token-heading { font-size: 15px; }
 }
+/* The note that a claim's value includes fees shows only where it fits on the
+   line: otherwise it wraps below the line's fixed height and is clipped. */
+.benchmark-figure .benchmark-with-fees { display: flex; flex-wrap: wrap; height: 1.7em; }
+.benchmark-figure .benchmark-with-fees > span { white-space: pre; }
+/* Lesson 7: the challenge sits directly in its card, above its question. Each goal
+   is one line with the amount that decides it, so ticking a goal moves nothing. */
+#learn-essential[data-pool-first] .learning-application-scene { margin: 4px 0 0; padding: 0; border: 0; background: none; }
+.learning-application-scene .benchmark-figure { margin-top: 12px; }
+.learning-application-scene .learning-task-goals { display: grid; gap: 2px; margin: 10px 0 4px; }
+/* A goal may take two lines on a narrow phone or in a wide font. A fixed amount
+   column and one weight keep those line breaks where they are while a slider moves. */
+.learning-application-scene .learning-task-goals li { display: grid; grid-template-columns: 1.3em minmax(0, 1fr) 10.5ch; gap: 0 4px; align-items: center; white-space: normal; line-height: 1.45; padding: 3px 0; font-weight: 400; }
+.learning-application-scene .learning-task-goals li > strong { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.learning-application-scene .scene-price-control .scene-question-scope:empty { display: none; }
+.learning-application-scene .learning-task-solved { margin: 14px 0 0; }
+.learning-application-scene .learning-task-hints { margin-top: 14px; }
+.challenge-scene { margin-top: 18px; }
+.challenge-scene > .learn-prediction-feedback { margin: 0 0 14px; }
