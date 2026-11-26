@@ -23,7 +23,7 @@ import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
 import { resultCardBlob } from '../lib/result-card.js';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
-import { tokenBalanceNarration, lossProfitReasoning, rangeBoundaryNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding, deeperPoolQuestion, depositPrediction } from '../lib/lesson-narration.js';
+import { tokenBalanceNarration, lossProfitReasoning, rangeBoundaryNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding, deeperPoolQuestion, depositPrediction, priceMovePrediction } from '../lib/lesson-narration.js';
 
 function finalReason(outcome) {
   const r = outcome.result;
@@ -38,12 +38,14 @@ export function initLearning() {
   const predictionFeedbackElement = $('learn-prediction-feedback');
   const predictionField = $('learn-prediction-field'), controls = $('learn-controls');
   let lessonScene, applicationScene;
-  // Lessons 1 and 2 put the pool before the question and reveal the outcome in
+  // Lessons 1 to 3 put the figure before the question and reveal the outcome in
   // place. Links from lesson 1's pilot (&layout=play) still open it.
-  const POOL_FIRST = ['swap-impact', 'pool-share'];
+  const POOL_FIRST = ['swap-impact', 'pool-share', 'token-balances'];
   let poolFirst = false;
-  // Lesson 2 asks its prediction in the setup's own numbers.
-  const predictionCopy = () => lesson.id === 'pool-share' ? depositPrediction(draft.inputs) : { question: lesson.prediction, choices: lesson.predictions };
+  // Lessons 2 and 3 ask their prediction in the setup's own numbers.
+  const predictionCopy = () => lesson.id === 'pool-share' ? depositPrediction(draft.inputs)
+    : lesson.id === 'token-balances' ? { question: priceMovePrediction(draft.inputs), choices: lesson.predictions }
+      : { question: lesson.prediction, choices: lesson.predictions };
   const pitfallElement = $('learn-pitfall');
   const foundationLesson = () => ['swap-impact', 'pool-share'].includes(lesson?.id);
   const comparisonLesson = () => ['loss-vs-profit', 'fee-break-even', 'final-challenge'].includes(lesson?.id);
@@ -128,7 +130,7 @@ export function initLearning() {
     renderPredictionFeedback(predictionFeedbackElement, predictionCopy().choices, draft.prediction, outcome.prediction,
       (lesson.id === 'final-challenge' ? '' : questionLabel() + ': ') + lessonFinding(lesson.id, outcome));
     markPredictionRevealed(predictionField);
-    if (poolFirst) foldPrediction(predictionField, 'Your prediction for the ' + questionLabel());
+    if (poolFirst) foldPrediction(predictionField, 'Your prediction for ' + (foundationLesson() ? 'the ' : '') + questionLabel());
   }
   function prepareChallenge(input) {
     applicationScene = createLiquidityApplication(input, draft.task, value => {
@@ -154,32 +156,33 @@ export function initLearning() {
     const model = lesson.protocol + (lesson.id === 'range-boundaries' ? ' · Price range' : ['swap-impact', 'pool-share'].includes(lesson.id) ? ' · Virtual pool' : ' · Full-range 50/50');
     $('learn-model').textContent = model + ' · Illustrative inputs · USDC = $1';
     if (visualLesson()) {
-      $('learn-prediction-question').textContent = foundationLesson() ? predictionCopy().question
+      $('learn-prediction-question').textContent = poolFirst ? predictionCopy().question
         : lesson.id === 'range-boundaries' ? 'At ' + usd(s.futurePrice) + ', which tokens will the position’s principal hold?'
-        : comparisonLesson() ? comparisonQuestion(lesson.id, s)
-        : 'If ETH moves to ' + usd(s.futurePrice) + ', will your liquidity hold less, more, or the same ETH?';
+        : comparisonQuestion(lesson.id, s);
       const prediction = createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) });
       prediction.querySelector('.scene-prediction-show').id = 'learn-reveal';
       lessonScene = foundationLesson() ? createFoundationScene(lesson.id, s, draft.variant, prediction, { explanation: lesson.explanation })
         : comparisonLesson() ? createComparisonScene(lesson.id, s, hasTask ? null : prediction)
         : lesson.id === 'range-boundaries' ? createRangeBoundaryScene(s, prediction)
-        : createTokenBalanceScene(s, prediction);
+        : createTokenBalanceScene(s, prediction, { explanation: lesson.explanation });
       $('learn-prediction-home').replaceChildren();
       if (hasTask) {
         $('learn-scene').replaceChildren(prediction);
         $('learn-worked-scene').replaceChildren(lessonScene.element);
       } else $('learn-scene').replaceChildren(lessonScene.element);
       if (poolFirst) {
-        // The verdict sits right under the pool and its replay, the pitfall joins
-        // the comparison it warns about, and one note holds the assumptions.
-        lessonScene.element.querySelector('.scene-player').after(predictionFeedbackElement);
+        // The verdict sits right under the figure and its control, the pitfall joins
+        // the panel it warns about, and one note holds the assumptions.
+        (lessonScene.verdictAfter || lessonScene.element.querySelector('.scene-player')).after(predictionFeedbackElement);
         lessonScene.element.querySelector('.foundation-outcome').append(pitfallElement);
         const about = sceneNode('details', undefined, 'learn-about-example');
         about.append(sceneNode('summary', 'About this example'),
-          sceneNode('p', lesson.protocol + ' pool with illustrative inputs. USDC = $1. ' + liquidityLessonSetup(lesson.id, s).assumptions
-            + (lesson.id === 'pool-share' ? ' Each deposit size you explore starts from the same pool. The later trade pays a 0.3% fee. Claims use proportional ownership before withdrawal rounding.'
-              : ' Each trade size you explore starts from the same pool.')),
-          sceneNode('p', $('learn-variation-label').textContent + '. Try another variation for new pool balances.'));
+          sceneNode('p', lesson.protocol + ' pool with illustrative inputs. USDC = $1. ' + (lesson.id === 'token-balances'
+            ? 'You start with ' + usd(s.investment) + ', half in ETH and half in USDC, at ' + usd(s.initialPrice) + ' per ETH. Each price you explore is compared with that same start, as if traders had already brought the pool’s price to the market’s. Fees are left out.'
+            : liquidityLessonSetup(lesson.id, s).assumptions
+              + (lesson.id === 'pool-share' ? ' Each deposit size you explore starts from the same pool. The later trade pays a 0.3% fee. Claims use proportional ownership before withdrawal rounding.'
+                : ' Each trade size you explore starts from the same pool.'))),
+          sceneNode('p', $('learn-variation-label').textContent + '. Try another variation for new ' + (lesson.id === 'token-balances' ? 'prices' : 'pool balances') + '.'));
         lessonScene.element.append(about);
       }
       $('learn-run').textContent = explanationLabel();
@@ -269,13 +272,13 @@ export function initLearning() {
     renderPrediction();
     const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
     const lossCopy = lesson.id === 'loss-vs-profit' ? lossProfitReasoning(outcome) : null;
-    $('learn-explanation').textContent = (tokenCopy ? tokenCopy.exchange + (tokenCopy.direction === 'same' ? '' : ' Trading to align pool and market prices is called arbitrage.') + ' Neither token is created by the pool.' : null)
-      || (lesson.id === 'range-boundaries' ? rangeBoundaryNarration(outcome) : null)
+    // Pool-first lessons keep their one explanation in the scene's panel.
+    $('learn-explanation').textContent = (lesson.id === 'range-boundaries' ? rangeBoundaryNarration(outcome) : null)
       || benchmarkNarration(lesson.id, outcome) || lesson.explanation;
     const depthCopy = lesson.id === 'swap-impact' ? deeperPoolQuestion(outcome) : null;
     $('learn-reason-question').textContent = lossCopy?.reasoning || tokenCopy?.reasoning || depthCopy?.reasoning || lesson.reasoning;
-    const reasons = lossCopy?.reasons || lesson.reasons.map(([id, copy]) => [id, tokenCopy && id === 'rebalance' ? tokenCopy.correctReason
-      : lesson.id === 'final-challenge' && id === 'total' ? finalReason(outcome) : copy]);
+    const reasons = lossCopy?.reasons || tokenCopy?.reasons
+      || lesson.reasons.map(([id, copy]) => [id, lesson.id === 'final-challenge' && id === 'total' ? finalReason(outcome) : copy]);
     choices('learn-reasons', 'learn-reason', reasons, draft.reason);
     $('learn-application-context').textContent = applicationCopy.context;
     $('learn-reason-context').textContent = lesson.id === 'final-challenge'
@@ -358,7 +361,7 @@ export function initLearning() {
     $('learn-setup').hidden = false;
     $('learn-metrics').hidden = visualLesson(); $('learn-visual').hidden = visualLesson();
     $('learn-experiment-title').textContent = {
-      'swap-impact': 'Follow the swap', 'pool-share': 'Watch your pool share', 'token-balances': 'Watch the token mix',
+      'swap-impact': 'Follow the swap', 'pool-share': 'Watch your pool share', 'token-balances': 'Watch your claim',
       'loss-vs-profit': 'Profit compared with what?', 'fee-break-even': 'Fees and the holding benchmark', 'final-challenge': 'Start with the same tokens', 'range-boundaries': 'Watch the price cross your range',
     }[lesson.id] || 'Your experiment';
     $('learn-results-title').after(predictionFeedbackElement);
@@ -386,7 +389,7 @@ export function initLearning() {
     const reasoningFeedback = lessonReasonFeedback(lesson.id, outcome, draft.reason, lesson.reasonFeedbackByChoice);
     const applicationFeedback = draft.application ? (applicationCopy.feedbackByChoice?.[draft.application] || applicationCopy.feedback) : 'Choose an answer. ' + applicationCopy.hint;
     renderUnderstandingFeedback('learn', [
-      { container: 'learn-reasons', selected: draft.reason, correct: check.reasoning, explanation: check.reasoning && !['loss-vs-profit', 'swap-impact'].includes(lesson.id) ? lesson.takeaway : reasoningFeedback },
+      { container: 'learn-reasons', selected: draft.reason, correct: check.reasoning, explanation: check.reasoning && !['loss-vs-profit', 'swap-impact', 'token-balances'].includes(lesson.id) ? lesson.takeaway : reasoningFeedback },
       { container: 'learn-applications', selected: draft.application, correct: check.application, explanation: applicationFeedback },
     ]);
     $('learn-feedback-copy').textContent = check.passed ? lesson.completion : 'Read the feedback beside the task or question, then try again.';
@@ -407,10 +410,10 @@ export function initLearning() {
       } else focusLearningFeedback('learn');
     }
   }
-  // The pool is already on screen: keep it there while the swap plays, and
+  // The figure is already on screen: keep it there while the outcome plays, and
   // scroll only as far as the verdict under it needs.
   function revealInPlace() {
-    const pool = $('learn-scene').querySelector('.foundation-pool');
+    const pool = lessonScene.figure || $('learn-scene').querySelector('.foundation-pool');
     const feedback = predictionFeedbackElement;
     feedback.tabIndex = -1;
     feedback.classList.add('scene-outcome-focus');

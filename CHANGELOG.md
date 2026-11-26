@@ -1,5 +1,14 @@
 # Release history
 
+## 1.64.0 · 2026-11-26
+
+- Liquidity lesson 3 now follows the layout of lessons 1 and 2. Your claim, the tokens behind your share, comes first with the question under it. Showing the outcome plays the price move on the bars you are looking at.
+- The price slider appears with the outcome, right under the bars it moves. Each bar shows how much it gained or lost since the start. The setup box and the separate explanation button are gone.
+- The question names the move, such as “ETH rises from $2,000.00 to $4,000.00”. The verdict answers it first, then shows your claim before and after.
+- One panel under the verdict explains who changes your claim: traders, buying from the pool when it is cheaper than the market and selling to it when it pays more. The caution about yield sits in the same panel.
+- The first check question is new. The market price has moved, but nobody has traded with the pool yet: what does your claim hold? Each answer’s feedback uses your claim’s own amounts. A saved answer to the earlier question is cleared; completed lessons stay completed.
+- The lesson says “your claim” where it used to say “the LP” or “the position”, matching lesson 2.
+
 ## 1.63.0 · 2026-11-26
 
 - Liquidity lesson 2 now follows lesson 1’s layout. The pool comes first with the question under it, and showing the outcome plays your deposit where you are looking. The pool lists your share and your claim, the tokens that share is worth.

@@ -1,4 +1,13 @@
 // Shared controls for lesson scenes. Financial state stays in the existing models.
+
+// A revealed or replayed action plays the change from the previous state, slowly
+// enough to follow. Text, values and final widths are written at once; only
+// painting is delayed and eased, and reduced motion skips it.
+export const ACTION_MS = 900;
+export const ACTION_EASING = 'cubic-bezier(.45, 0, .2, 1)';
+// After a reveal, give the eye a moment to land on the figure first.
+export const REVEAL_DELAY_MS = 400;
+
 export function sceneNode(tag, copy, className) {
   const element = document.createElement(tag);
   if (copy !== undefined) element.textContent = copy;

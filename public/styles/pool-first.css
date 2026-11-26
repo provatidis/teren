@@ -1,10 +1,19 @@
-/* Liquidity lesson 1 puts the pool first. The question sits under the pool, the
-   swap is revealed in place, and the verdict appears between them. The pool's own
-   labels carry the setup, so the framing lines and the setup box are not shown. */
+/* Liquidity lessons 1 to 3 put the figure first. The question sits under it, the
+   outcome is revealed in place, and the verdict appears between them. The figure's
+   own labels carry the setup, so the framing lines and the setup box are not shown. */
 #learn-essential[data-pool-first] :is(#learn-level, #learn-skill, #learn-setup, .learn-experiment-footer, #learn-run, #learn-input-status,
   #learn-explanation, #learn-results > .eyebrow, #learn-assessment > .eyebrow) { display: none; }
 #learn-essential[data-pool-first] .lesson-scene .foundation-pool { margin-top: 4px; }
-#learn-essential[data-pool-first] .foundation-scene > .learn-prediction-feedback { margin: 4px 0 0; }
+#learn-essential[data-pool-first] .lesson-scene > .learn-prediction-feedback { margin: 4px 0 0; }
+/* Lesson 3: the claim's caption keeps the price on its right, and each bar's change
+   sits on one line, so nothing above the slider can rewrap while the price moves. */
+#learn-essential[data-pool-first] .token-scene .scene-token-figure { margin-top: 4px; }
+.token-scene-title { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.token-scene-title > span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.token-scene .scene-token-detail { white-space: nowrap; overflow: hidden; }
+.token-scene .scene-token-detail > span:first-child { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.token-scene .scene-question-scope:empty { display: none; }
+.token-scene > .learn-prediction-feedback + .scene-prediction { margin-top: 14px; }
 .learn-about-example { margin: 18px 0 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
 .learn-about-example summary { display: flex; align-items: center; min-height: 44px; color: var(--text); cursor: pointer; }
 .learn-about-example p { margin: 4px 0 8px; }

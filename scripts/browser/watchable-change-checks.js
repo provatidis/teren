@@ -2,13 +2,13 @@ import assert from 'node:assert/strict';
 import { motionSettled, reduceMotion } from './motion-settled.js';
 
 const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
-const fills = ".foundation-pool .scene-token-fill";
 // Read every played bar in the same task as the action, before any time passes.
-const playedBars = `Array.from(document.querySelectorAll('${fills}'), fill => {
+const played = fills => `Array.from(document.querySelectorAll('${fills}'), fill => {
   const animation = fill.getAnimations().find(item => item instanceof CSSTransition === false);
   const frames = animation?.effect.getKeyframes() || [];
   return animation ? { from: frames[0].width, to: frames.at(-1).width, final: fill.style.width, delay: animation.effect.getTiming().delay, duration: animation.effect.getTiming().duration } : null;
 })`;
+const playedBars = played('.foundation-pool .scene-token-fill'), playedClaim = played('.scene-token-figure .scene-token-fill');
 const act = (evaluate, script) => evaluate(`(() => { ${script}; return { bars: ${playedBars}, top: document.querySelector('.foundation-balances').getBoundingClientRect().top, y: scrollY }; })()`);
 
 // The learner can watch the swap: the page lands first, then the balances move
@@ -67,6 +67,24 @@ export async function checkFoundationMotion({ evaluate, navigate, base, call }) 
     assert.equal(trade.top, steady, 'The trade changes the lines under the bars without pushing the bars.');
     await motionSettled(evaluate);
 
+    // Lesson 3: the revealed price move plays the claim from its starting amounts.
+    // The slider and the verdict appear under the claim without moving it, and
+    // the slider takes the bars back as soon as it is used.
+    await navigate(base + 'learn.html#lesson=token-balances');
+    await evaluate("(b => scrollBy(0, b.bottom - innerHeight + 40))(document.getElementById('learn-reveal').getBoundingClientRect())");
+    const claimTop = "(r => r.top + scrollY)(document.querySelector('.scene-token-figure').getBoundingClientRect())";
+    const claimAt = await evaluate(claimTop);
+    const move = await evaluate(`(() => { document.getElementById('learn-reveal').click();
+      return { bars: ${playedClaim}, top: document.querySelector('.scene-token-figure').getBoundingClientRect().top, eth: document.getElementById('token-scene-eth').textContent }; })()`);
+    assert.ok(move.bars.every(bar => bar && bar.from !== bar.to && bar.to === bar.final), 'The reveal plays each token from its starting amount to the result.');
+    assert.ok(move.bars.every(bar => bar.delay >= 300 && bar.duration >= 700), 'The price move waits for the page to land, then plays slowly enough to follow.');
+    assert.equal(await evaluate(claimTop), claimAt, 'The slider and the verdict appear without moving the claim.');
+    assert.ok(move.top > 60 && move.top < 844 - 320, 'The claim is on the screen that the page lands on.');
+    assert.equal(move.eth, '0.8839 ETH', 'Values are final at once.');
+    await evaluate("(slider => { slider.value = '1000'; slider.dispatchEvent(new Event('input', { bubbles: true })); })(document.getElementById('token-scene-price'))");
+    assert.deepEqual(await evaluate(playedClaim), [null, null], 'Using the slider ends the played move.');
+    await motionSettled(evaluate);
+
     await navigate(base + 'learn.html#lesson=swap-impact');
     await reduceMotion({ call, evaluate });
     const reduced = await act(evaluate, "document.getElementById('learn-reveal').click()");
@@ -77,7 +95,7 @@ export async function checkFoundationMotion({ evaluate, navigate, base, call }) 
     await call('Emulation.setEmulatedMedia', { features: [] });
     await evaluate(`${saved === null ? `localStorage.removeItem('${progressKey}')` : `localStorage.setItem('${progressKey}', ${JSON.stringify(saved)})`}`);
   }
-  console.log('PASS: the swap plays after the page lands, bars hold their place, Replay plays start to end and reduced motion skips it');
+  console.log('PASS: the swap, deposit and price move play after the page lands, bars hold their place, Replay plays start to end and reduced motion skips it');
 }
 
 // Presets, drags and chart taps put prices a person would type into the fields.

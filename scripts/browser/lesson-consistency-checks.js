@@ -23,7 +23,7 @@ async function restoreQuestion(evaluate, id, changes, savedAnswers = {}) {
 export async function checkLessonConsistency({ evaluate, click, fill, text, navigate, base, call, nextEvent }) {
   const choose = (name, value) => evaluate(`document.querySelector('input[name="${name}"][value="${value}"]').click()`);
   await navigate(base + 'learn.html#lesson=token-balances');
-  await choose('learn-prediction','less'); await click('learn-run');
+  await choose('learn-prediction','less'); await click('learn-reveal');
   await choose('learn-reason','rebalance'); await choose('learn-application','original-mix'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   const entries = await evaluate("performance.getEntriesByType('resource').map(entry=>entry.name)");
@@ -34,7 +34,9 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
     assert.ok(entries.some(url=>url.endsWith('/' + expected)), path + ' must load its canonical build identity.');
     if (manifest) assert.ok(!entries.some(url=>url.endsWith('/' + path)), path + ' must not mix hashed and unversioned modules.');
   }
-  for (const [price, prediction, direction] of [[4000,'less','less ETH and more USDC'],[1000,'more','more ETH and less USDC'],[2000,'same','both token quantities stay the same']]) {
+  for (const [price, prediction, direction, verdict, correction] of [[4000,'less','less ETH and more USDC',/Less ETH\. Traders bought ETH from the pool/,/does not watch the market[\s\S]*0\.8839 ETH \+ 3,535\.53 USDC/],
+    [1000,'more','more ETH and less USDC',/More ETH\. Traders sold ETH to the pool/,/does not watch the market[\s\S]*1\.7678 ETH \+ 1,767\.77 USDC/],
+    [2000,'same','Both token amounts stay the same',/The same ETH\. The price has not moved/,/does not hold its amounts fixed/]]) {
     const completedBefore = await evaluate("JSON.stringify(JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).completed)");
     const legacyAnswers = price === 1000 ? { prediction, answer: '123.45', reason: 'rebalance', application: 'original-mix', ran: true } : {};
     await restoreQuestion(evaluate,'token-balances',{futurePrice:price},legacyAnswers);
@@ -49,13 +51,13 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
       assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),false);
       assert.equal(await evaluate("JSON.stringify(JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).completed)"),completedBefore,'Restoring an old numeric answer preserves completion.');
     }
-    await choose('learn-prediction',prediction); await click('learn-run');
+    await choose('learn-prediction',prediction); await click('learn-reveal');
     assert.equal(await evaluate("JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['token-balances'].inputs.futurePrice"),price,'The lesson retains the legacy custom question.');
-    assert.ok((await text('learn-explanation')).includes(direction));
+    assert.match(await text('learn-prediction-feedback'),verdict);
+    assert.ok((await text('token-scene-exchange')).includes(direction));
     await choose('learn-application','original-mix'); await choose('learn-reason','automatic'); await click('learn-check');
     assert.equal(await text('learn-feedback-title'),'Review your answers.');
-    assert.match(await text('learn-reasons-feedback'),/Tokens change hands through trades/);
-    assert.ok((await text('learn-reasons-feedback')).includes(direction));
+    assert.match(await text('learn-reasons-feedback'),correction);
     assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),true);
     if (price === 2000) {
       assert.match(await text('learn-reason-question'),/stay the same/);
@@ -100,9 +102,9 @@ export async function checkMobileLessonConsistency({ evaluate, click, fill, text
     await call('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:true});
     await restoreQuestion(evaluate,'token-balances',{futurePrice:4000});
     await navigate(base + 'learn.html#lesson=token-balances');
-    await evaluate("document.querySelector('input[name=learn-prediction][value=less]').click()"); await click('learn-run');
+    await evaluate("document.querySelector('input[name=learn-prediction][value=less]').click()"); await click('learn-reveal');
     await evaluate("document.querySelector('input[name=learn-application][value=original-mix]').click()"); await evaluate("document.querySelector('input[name=learn-reason][value=automatic]').click()"); await click('learn-check');
-    assert.match(await text('learn-reasons-feedback'),/less ETH and more USDC/);
+    assert.match(await text('learn-reasons-feedback'),/does not watch the market[\s\S]*0\.8839 ETH \+ 3,535\.53 USDC/);
     assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);
   }
   await call('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});

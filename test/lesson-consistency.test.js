@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { LESSONS } from '../public/learning/liquidity-essentials.js';
 import { lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
 import { checkLessonUnderstanding } from '../public/models/lesson-application.js';
-import { tokenBalanceNarration, benchmarkNarration, lessonReasonFeedback } from '../public/lib/lesson-narration.js';
+import { tokenBalanceNarration, claimText, benchmarkNarration, lessonReasonFeedback } from '../public/lib/lesson-narration.js';
 import { lessonWalkthrough } from '../public/lib/lesson-walkthrough.js';
 import { readFile } from 'node:fs/promises';
 import { validatePositionPeriod } from '../public/data/position-period.js';
@@ -15,24 +15,36 @@ test('rising, falling and unchanged prices agree with the explanation and never 
   for (let variant = 0; variant < 3; variant++) for (const factor of [.5, 1, 2]) {
     const setup = lessonSetup('token-balances', variant), input = {futurePrice: setup.initialPrice * factor};
     const result = runLesson('token-balances', input, variant), copy = tokenBalanceNarration(result);
+    const start = claimText(result.result.held), now = claimText(result.result.pooled);
     assert.equal(result.prediction, factor < 1 ? 'more' : factor > 1 ? 'less' : 'same');
     assert.equal(copy.direction, factor < 1 ? 'down' : factor > 1 ? 'up' : 'same');
     if (factor > 1) {
       assert.ok(result.result.pooled.eth < result.result.held.eth && result.result.pooled.usdc > result.result.held.usdc);
-      assert.match(copy.correctReason, /exchange USDC for ETH.*less ETH and more USDC/);
+      assert.match(copy.exchange, /buy ETH from the pool.*less ETH and more USDC/);
     } else if (factor < 1) {
       assert.ok(result.result.pooled.eth > result.result.held.eth && result.result.pooled.usdc < result.result.held.usdc);
-      assert.match(copy.correctReason, /exchange ETH for USDC.*more ETH and less USDC/);
+      assert.match(copy.exchange, /sell ETH to the pool.*more ETH and less USDC/);
     } else {
       assert.deepEqual(result.result.pooled, result.result.held);
       assert.match(copy.reasoning, /stay the same/); assert.match(copy.correctReason, /no price change/);
       assert.match(lessonWalkthrough('token-balances', result)[2][0], /unchanged/);
     }
+    // The check question steps outside the scene: the market moved and nobody has traded yet.
+    if (factor !== 1) {
+      assert.match(copy.reasoning, new RegExp('market price ' + (factor > 1 ? 'jumps' : 'drops') + ' to .*nobody has traded with the pool yet'));
+      assert.equal(copy.correctReason, 'Still ' + start + '. Only a trade changes it.');
+      assert.ok(copy.reasons.find(([id]) => id === 'automatic')[1].startsWith('Already ' + now + '.'));
+      assert.ok(copy.feedbackByChoice.automatic.includes(now) && copy.feedbackByChoice.rebalance.includes(start));
+    }
+    assert.deepEqual(copy.reasons.map(([id]) => id), ['rebalance', 'automatic', 'drift']);
     assert.match(copy.explanation, /neither ETH nor USDC is created/);
-    assert.equal(checkLessonUnderstanding('token-balances', input, variant, 'automatic').reasoning, false);
-    assert.equal(checkLessonUnderstanding('token-balances', input, variant, 'ownership-share').reasoning, false);
-    assert.match(lessonReasonFeedback('token-balances', result, 'ownership-share'), /ownership share stays fixed/);
-    assert.match(lessonReasonFeedback('token-balances', result, 'automatic'), /Tokens change hands through trades/);
+    for (const wrong of ['automatic', 'drift']) {
+      assert.equal(checkLessonUnderstanding('token-balances', input, variant, wrong).reasoning, false);
+      assert.equal(lessonReasonFeedback('token-balances', result, wrong), copy.feedbackByChoice[wrong]);
+    }
+    assert.match(lessonReasonFeedback('token-balances', result, 'drift'), /Time alone changes nothing in a pool/);
+    assert.match(lessonReasonFeedback('token-balances', result, 'automatic'), factor === 1 ? /does not hold its amounts fixed/ : /does not watch the market/);
+    assert.equal(lessonReasonFeedback('token-balances', result, 'rebalance'), copy.feedbackByChoice.rebalance);
   }
 });
 test('all foundation distractors are rejected and explain the misconception in every variation', () => {

@@ -33,8 +33,8 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     await navigate(base + 'learn.html#lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0, 'Only the visual explores amounts, prices and fees.');
     await choose('learn-prediction', id === 'swap-impact' ? 'same' : prediction);
-    // Lessons 1 and 2 reveal the outcome from the question; they have no separate explanation button.
-    const poolFirst = ['swap-impact', 'pool-share'].includes(id);
+    // Lessons 1 to 3 reveal the outcome from the question; they have no separate explanation button.
+    const poolFirst = ['swap-impact', 'pool-share', 'token-balances'].includes(id);
     await click(poolFirst ? 'learn-reveal' : 'learn-run');
     if (poolFirst) assert.equal(await evaluate("document.getElementById('learn-run').checkVisibility()"), false);
     assert.equal(await evaluate("document.getElementById('learn-results').hidden"), false);

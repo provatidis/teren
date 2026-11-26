@@ -66,26 +66,26 @@ export function lessonApplicationCopy(id, outcome) {
     feedback: 'USDC enters and ETH leaves. Your share stays the same, and your claim changes with the pool’s balances.'};
   if (id === 'token-balances' && outcome.variant === 1) return {...base,
     label: 'After ETH falls',
-    context: 'ETH falls to ' + usd(application.next.setup.futurePrice) + '. The model now shows more ETH in the LP, but a lower total dollar value. No fees are included.',
-    question: 'How can it hold more ETH and still lose dollar value?',
-    choices: [['more-eth-less-value', 'Swaps added ETH as its price fell; more units do not mean more dollars.'], ['earned-eth', 'The extra ETH is yield that will restore the original dollar value.'], ['withdraw-loss', 'The lower dollar value becomes a loss only after withdrawal.']],
+    context: 'ETH falls to ' + usd(application.next.setup.futurePrice) + '. Your claim now holds more ETH, but it is worth fewer dollars than at the start. No fees are included.',
+    question: 'How can your claim hold more ETH and be worth less?',
+    choices: [['more-eth-less-value', 'Traders sold it ETH as the price fell. More ETH is not more dollars.'], ['earned-eth', 'The extra ETH is yield that will restore the starting dollar value.'], ['withdraw-loss', 'The lower dollar value becomes a loss only after withdrawal.']],
     hint: 'Token quantity and the price of each token are different parts of value.',
     feedbackByChoice: {
-      'earned-eth': 'No fees are included. The extra ETH came from traders exchanging ETH for the pool’s USDC, while each ETH became cheaper.',
+      'earned-eth': 'No fees are included. The extra ETH came from traders selling ETH to the pool for its USDC, while each ETH became cheaper.',
       'withdraw-loss': 'The tokens are already worth less at this price. Withdrawing would move them to your wallet; it would not cause the price loss.',
     },
-    feedback: 'Traders sold ETH into the pool as its price fell. The LP holds more ETH and less USDC, but the cheaper ETH leaves the position worth less in dollars.'};
+    feedback: 'Traders sold ETH to the pool as its price fell. Your claim holds more ETH and less USDC, and each ETH is now cheaper, so the claim is worth fewer dollars.'};
   if (id === 'token-balances') return {...base,
     label: 'ETH returns to its starting price',
-    context: 'ETH moves away from its starting price, then returns to ' + usd(s.initialPrice) + '. Keep the same liquidity, with no fees, deposits or withdrawals, and let swaps align the pool price again.',
-    question: 'What happens to the position’s token amounts?',
-    choices: [['original-mix','They return to the original ETH and USDC amounts.'],['last-mix','They keep the mix reached before the price returned.'],['extra-tokens','They end with more of both tokens because the price moved twice.']],
-    hint: 'The token mix follows the price in this fee-free model, in both directions.',
+    context: 'ETH moves away from its starting price, then returns to ' + usd(s.initialPrice) + '. Nobody deposits or withdraws, no fees are counted, and traders bring the pool’s price back to the market’s.',
+    question: 'What happens to your claim?',
+    choices: [['original-mix','It returns to its starting ETH and USDC amounts.'],['last-mix','It keeps the mix it reached before the price returned.'],['extra-tokens','It ends with more of both tokens, because the price moved twice.']],
+    hint: 'Your claim follows the price in this fee-free model, in both directions.',
     feedbackByChoice: {
-      'last-mix': 'Swaps continue as price returns. With the same liquidity and no fees, the original price brings back the original mix.',
-      'extra-tokens': 'Price movement is not a payment to the LP. In this fee-free case, the return journey reverses the earlier exchange of tokens.',
+      'last-mix': 'Traders keep trading as the price returns. With the same share and no fees, the starting price brings back the starting amounts.',
+      'extra-tokens': 'A price move is not a payment to you. In this fee-free case, the return journey reverses the earlier exchange of tokens.',
     },
-    feedback: 'At the original price, the same liquidity holds its original token amounts in this model. Swaps reverse the earlier change in mix. This does not promise that a real price will return.'};
+    feedback: 'At the starting price, your claim holds its starting amounts again in this model. Trades reverse the earlier change. This does not promise that a real price will return.'};
   if (id === 'loss-vs-profit' && application.kind === 'dashboard-benchmark') {
     const r = application.next.result;
     const comparison = Math.abs(r.difference) < 1e-8 ? 'The total matches holding.'
