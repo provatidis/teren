@@ -26,9 +26,10 @@ export function createBenchmarkFigure(input, { prefix = 'benchmark', ceiling = i
     const start = node('span', undefined, 'scene-token-start');
     start.style.left = input.investment / ceiling * 100 + '%';
     track.append(fill, ...(fees ? [fees] : []), start);
-    const tokens = node('p', undefined, 'scene-token-detail'); tokens.id = prefix + '-' + name + '-tokens';
+    const tokens = node('p', undefined, 'scene-token-detail' + (fees ? ' benchmark-with-fees' : '')); tokens.id = prefix + '-' + name + '-tokens';
     // The claim's value includes its fees, so the line under the bar names them too.
     // The amount is beside the fee slider; there is no room for it on this line.
+    // Where even the note does not fit, it wraps out of view: see pool-first.css.
     const mix = node('span'), feeNote = fees ? node('span', '', 'benchmark-fee-note') : null;
     tokens.append(mix, ...(fees ? [feeNote] : []));
     row.append(heading, '\n', track, '\n', tokens); figure.append('\n', row);

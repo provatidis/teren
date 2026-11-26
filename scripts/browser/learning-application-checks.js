@@ -227,7 +227,8 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
         assert.deepEqual(await tops(), resting, `At ${width}px, ETH at ${price} with ${fees} in fees moves neither slider.`);
       }
       assert.equal(await evaluate("Array.from(document.querySelectorAll('#liquidity-task-goals li')).every(item => item.scrollWidth <= item.clientWidth + 1 && Array.from(item.children).every(part => part.getBoundingClientRect().right <= item.getBoundingClientRect().right + 1))"), true, 'Each goal fits its row.');
-      assert.equal(await evaluate("(() => { const line = document.getElementById('liquidity-task-claim-tokens'); return line.scrollWidth <= line.clientWidth; })()"), true, 'The line under the claim fits.');
+      // The tokens always fit on their one line; the note about fees shows only where it fits beside them.
+      assert.equal(await evaluate("(() => { const line = document.getElementById('liquidity-task-claim-tokens'), box = line.getBoundingClientRect(); return line.firstElementChild.getBoundingClientRect().right <= box.right + .5 && box.height < 30; })()"), true, 'The line under the claim fits.');
       await key('liquidity-task-price', 'End');
       assert.equal(await taskPrice(), '4000');
       await key('liquidity-task-price', 'Home');

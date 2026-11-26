@@ -52,7 +52,7 @@ export const LESSONS = [
   },
   {
     id: 'fee-break-even', completion: 'You separated the fees a claim would need from the fees it earns.', protocol: 'Uniswap v2-style', title: 'Fees needed to match holding', short: 'Fees & break-even', concept: 'Fee income', skill: 'Distinguish a fee target from assumed and earned fees.',
-    intro: 'A price move leaves your claim behind holding. Trading fees are what you earn in return. See how much it would take to catch up.',
+    intro: 'A price move leaves your claim behind holding. See how much in trading fees it takes to catch up.',
     // The question carries the lesson's own price, gap and fees: see feePrediction.
     prediction: 'Your claim earns trading fees. Which bar grows?',
     predictions: [['toward-target', 'Only my claim'], ['both-earn', 'Both bars'], ['already-counted', 'Neither. Fees are already in my claim’s value.']],
