@@ -38,6 +38,11 @@ export function initLearning() {
   const predictionFeedbackElement = $('learn-prediction-feedback');
   const predictionField = $('learn-prediction-field'), controls = $('learn-controls');
   let lessonScene, applicationScene;
+  // Pilot: lesson 1 with the pool first. Only its own link opens it; Home and
+  // the lesson list keep the usual layout.
+  const PILOT_LESSON = 'swap-impact';
+  let playFirst = false;
+  const showRan = () => $('learn-essential').toggleAttribute('data-ran', Boolean(draft?.ran));
   const foundationLesson = () => ['swap-impact', 'pool-share'].includes(lesson?.id);
   const comparisonLesson = () => ['loss-vs-profit', 'fee-break-even', 'final-challenge'].includes(lesson?.id);
   const visualLesson = () => foundationLesson() || ['token-balances', 'range-boundaries'].includes(lesson?.id) || comparisonLesson();
@@ -151,7 +156,7 @@ export function initLearning() {
         : comparisonLesson() ? comparisonQuestion(lesson.id, s)
         : 'If ETH moves to ' + usd(s.futurePrice) + ', will your liquidity hold less, more, or the same ETH?';
       const prediction = createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) });
-      lessonScene = foundationLesson() ? createFoundationScene(lesson.id, s, draft.variant, prediction)
+      lessonScene = foundationLesson() ? createFoundationScene(lesson.id, s, draft.variant, prediction, { playFirst })
         : comparisonLesson() ? createComparisonScene(lesson.id, s, hasTask ? null : prediction)
         : lesson.id === 'range-boundaries' ? createRangeBoundaryScene(s, prediction)
         : createTokenBalanceScene(s, prediction);
@@ -160,6 +165,17 @@ export function initLearning() {
         $('learn-scene').replaceChildren(prediction);
         $('learn-worked-scene').replaceChildren(lessonScene.element);
       } else $('learn-scene').replaceChildren(lessonScene.element);
+      if (playFirst) {
+        // The verdict sits right under the pool it describes, and the assumptions
+        // that used to frame the lesson move into one note at the end.
+        lessonScene.element.querySelector('.foundation-pool').after(predictionFeedbackElement);
+        const about = sceneNode('details', undefined, 'learn-about-example');
+        about.append(sceneNode('summary', 'About this example'),
+          sceneNode('p', lesson.protocol + ' pool with illustrative inputs. USDC = $1. ' + liquidityLessonSetup(lesson.id, s).assumptions
+            + ' Each trade size you explore starts from the same pool.'),
+          sceneNode('p', $('learn-variation-label').textContent + '. Try another variation for new pool balances.'));
+        lessonScene.element.append(about);
+      }
       $('learn-run').textContent = explanationLabel();
     } else {
       $('learn-prediction-home').replaceChildren(createPredictionPrompt(predictionField, { selected: draft.prediction, onShow: () => showResult() }));
@@ -169,6 +185,7 @@ export function initLearning() {
     clearUnderstandingFeedback('learn');
     predictionFeedbackElement.textContent = '';
     draft.ran = false; draft.answer = ''; draft.reason = ''; draft.application = ''; outcome = null; applicationCopy = null;
+    showRan();
     draft.task = null; draft.taskChecked = false;
     $('learn-results').hidden = true; $('learn-assessment').hidden = true; $('learn-feedback').hidden = true; $('learn-share').hidden = true; $('learn-continue').hidden = true;
     choices('learn-reasons', 'learn-reason', lesson.reasons, '');
@@ -298,10 +315,13 @@ export function initLearning() {
     $('learn-page-subtitle').textContent = 'Explore Uniswap v2-style full-range pools and Uniswap v3-style price ranges with interactive examples.';
     const params = new URLSearchParams(location.hash.slice(1));
     const requested = params.get('lesson');
-    const valid = LESSON_IDS.includes(requested) && params.getAll('lesson').length === 1 && [...params.keys()].every(key => key === 'lesson');
+    const pilot = requested === PILOT_LESSON && params.getAll('layout').length === 1 && params.get('layout') === 'play';
+    const valid = LESSON_IDS.includes(requested) && params.getAll('lesson').length === 1 && [...params.keys()].every(key => key === 'lesson' || (pilot && key === 'layout'));
     const id = valid ? requested : progress.lastLesson;
     $('learn-route-note').hidden = !location.hash || valid;
     lesson = LESSONS.find(item => item.id === id);
+    playFirst = valid && pilot;
+    $('learn-essential').toggleAttribute('data-play-first', playFirst);
     saveLearningLocation('learn.html#lesson=' + id);
     const index = LESSON_IDS.indexOf(id);
     draft = progress.drafts[id] || { variant: 0, inputs: lessonSetup(id), prediction: '', answer: '', reason: '', application: '', choiceSeed: newChoiceSeed(), ran: false };
@@ -341,7 +361,7 @@ export function initLearning() {
     } else {
       $('learn-controls-home').replaceChildren(controls);
     }
-    renderControls(); updateSetup(); updateProgress();
+    renderControls(); updateSetup(); updateProgress(); showRan();
     if (draft.ran) {
       if (visualLesson()) lessonScene.showQuestion();
       renderResults();
@@ -379,12 +399,28 @@ export function initLearning() {
       } else focusLearningFeedback('learn');
     }
   }
+  // The pool is already on screen: keep it there while the swap plays, and
+  // scroll only as far as the verdict under it needs.
+  function revealInPlace() {
+    const pool = $('learn-scene').querySelector('.foundation-pool');
+    const feedback = predictionFeedbackElement;
+    feedback.tabIndex = -1;
+    feedback.classList.add('scene-outcome-focus');
+    feedback.focus({ preventScroll: true });
+    const top = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    const poolTop = pool.getBoundingClientRect().top - top;
+    const below = feedback.getBoundingClientRect().bottom + 16 - innerHeight;
+    const delta = poolTop < 0 ? poolTop : Math.min(Math.max(below, 0), poolTop);
+    if (delta) scrollBy({ top: delta, behavior: 'instant' });
+  }
   function showResult(sceneFirst = false) {
     draft.prediction = selection('learn-prediction');
     if (sceneFirst && visualLesson()) lessonScene.showQuestion(true);
     if (!draft.ran) { draft.ran = true; renderResults(); }
     else renderPrediction();
     persist();
+    showRan();
+    if (sceneFirst && playFirst) { revealInPlace(); return; }
     if (sceneFirst && visualLesson()) { focusSceneOutcome($('learn-scene')); return; }
     const title = $('learn-results-title');
     title.tabIndex = -1; title.focus({ preventScroll: true });

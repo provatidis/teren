@@ -161,6 +161,12 @@ Each visual should replace repeated setup/result prose, retain essential assumpt
 
 A prediction makes an expectation explicit. It is visible, ungraded and deliberately skippable. Removing arithmetic and long introductory text supports this step; it does not require hiding it. Explanations and changed-situation checks remain the completion criteria, and direct Experiment access serves people who already have a question. Evaluate reviews against that sequence, including people who choose to see the outcome first.
 
+## Pilot: play-first lesson 1
+
+[`learn.html#lesson=swap-impact&layout=play`](https://teren.sh/learn.html#lesson=swap-impact&layout=play) opens liquidity lesson 1 with the pool first. The question sits under the pool, and the swap plays with the pool on screen. The verdict appears between them. The skill line, the protocol line and the setup box are dropped; the pool's own labels and the "Ready to swap" line carry the setup. One "About this example" note holds the assumptions. Steps, the trade-size slider and the explanation appear once the swap has been shown. Only this link opens the pilot: Home, the lesson list and every other lesson keep the usual layout, and progress is shared.
+
+To compare, give one person the pilot link and another [the usual link](https://teren.sh/learn.html#lesson=swap-impact). Observe where they hesitate or stop scrolling, whether they predict or skip, whether they notice the bars change, and whether they move the trade-size slider unprompted. Afterwards, ask why the 10 ETH trade got a worse price per ETH than the 1 ETH trade. Roll the layout out only if it clearly helps; otherwise remove it.
+
 ## Observation plan
 
 Automated tests establish calculation and interaction consistency in their covered cases. Research and public questions inform which misconceptions to address. The owner's informal feedback from experienced friends is encouraging, but no documented observation sessions yet establish improved understanding or repeat use. [The current review](review.md#evidence-and-what-it-establishes) summarizes those distinct evidence types.
