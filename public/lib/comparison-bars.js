@@ -2,12 +2,12 @@ import { sceneNode as node } from './lesson-scene.js';
 import { usd } from './format.js';
 
 // Shared by the worked observation and the separately assessed application.
-export function createComparisonBars(input, { prefix = 'comparison', withFees = true } = {}) {
+export function createComparisonBars(input, { prefix = 'comparison' } = {}) {
   const figure = node('figure', undefined, 'comparison-figure');
   const title = node('figcaption', '', 'scene-figure-title'); title.id = prefix + '-title';
   const rows = {};
   figure.append(title);
-  for (const [key, label] of [['start', 'Starting capital'], ['hold', 'Holding starting tokens'], ['lp', withFees ? 'LP + assumed fees' : 'LP before fees']]) {
+  for (const [key, label] of [['start', 'Starting capital'], ['hold', 'Holding starting tokens'], ['lp', 'LP + assumed fees']]) {
     const row = node('div', undefined, 'comparison-row'); row.dataset.comparison = key;
     const heading = node('div', undefined, 'comparison-heading');
     const value = node('strong'); value.id = prefix + '-' + key + '-value';
@@ -18,7 +18,7 @@ export function createComparisonBars(input, { prefix = 'comparison', withFees = 
     track.append(principal, fee); row.append(heading, '\n', track);
     rows[key] = { value, principal, fee }; figure.append('\n', row);
   }
-  const parts = node('p', '', 'comparison-parts'); parts.id = prefix + '-parts'; parts.hidden = !withFees;
+  const parts = node('p', '', 'comparison-parts'); parts.id = prefix + '-parts';
   figure.append('\n', parts);
   function draw(state) {
     const r = state.result;

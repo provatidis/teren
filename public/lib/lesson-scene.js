@@ -8,6 +8,21 @@ export const ACTION_EASING = 'cubic-bezier(.45, 0, .2, 1)';
 // After a reveal, give the eye a moment to land on the figure first.
 export const REVEAL_DELAY_MS = 400;
 
+// A slider-driven figure plays its revealed outcome once: each bar moves from
+// the width it had to the width already written. The played move owns its bars,
+// so the shared short easing (motion.css) steps aside until the slider is used.
+export function playRevealedBars(figure, fills, before) {
+  if (!matchMedia('(prefers-reduced-motion: no-preference)').matches) return;
+  figure.dataset.motion = 'true';
+  fills.forEach((fill, i) => fill.animate([{ width: before[i] }, { width: fill.style.width }],
+    { duration: ACTION_MS, delay: REVEAL_DELAY_MS, easing: ACTION_EASING, fill: 'backwards' }));
+}
+// The slider owns the bars again.
+export function endPlayedBars(figure) {
+  for (const animation of figure.getAnimations({ subtree: true })) animation.cancel();
+  figure.dataset.motion = 'false';
+}
+
 export function sceneNode(tag, copy, className) {
   const element = document.createElement(tag);
   if (copy !== undefined) element.textContent = copy;

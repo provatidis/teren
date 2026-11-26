@@ -24,7 +24,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     ['swap-impact','less','deeper','quote-received'],
     ['pool-share','less','ownership','diluted-same-claim'],
     ['token-balances','less','rebalance','original-mix'],
-    ['loss-vs-profit','gain','traded-mix','holding-basket'],
+    ['loss-vs-profit','less','traded-mix','holding-basket'],
     ['fee-break-even','toward-target','assumption','gap-reopens'],
     ['range-boundaries','usdc','path','both-inside'],
     ['final-challenge','lower-price','total','relative-gap'],
@@ -33,8 +33,8 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     await navigate(base + 'learn.html#lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0, 'Only the visual explores amounts, prices and fees.');
     await choose('learn-prediction', id === 'swap-impact' ? 'same' : prediction);
-    // Lessons 1 to 3 reveal the outcome from the question; they have no separate explanation button.
-    const poolFirst = ['swap-impact', 'pool-share', 'token-balances'].includes(id);
+    // Lessons 1 to 4 reveal the outcome from the question; they have no separate explanation button.
+    const poolFirst = ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit'].includes(id);
     await click(poolFirst ? 'learn-reveal' : 'learn-run');
     if (poolFirst) assert.equal(await evaluate("document.getElementById('learn-run').checkVisibility()"), false);
     assert.equal(await evaluate("document.getElementById('learn-results').hidden"), false);

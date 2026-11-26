@@ -13,6 +13,6 @@
   ) { transition: width .28s cubic-bezier(.2, .7, .3, 1), left .28s cubic-bezier(.2, .7, .3, 1); }
 }
 /* A revealed or replayed lesson action animates its own bars over a longer time
-   (lib/foundation-lesson-scenes.js, lib/liquidity-lesson-scenes.js); the short
-   easing above would override it. */
-:root :is(.foundation-pool, .scene-token-figure)[data-motion=true] :is(.scene-token-fill, .foundation-owned) { transition: none; }
+   (playRevealedBars in lib/lesson-scene.js, lib/foundation-lesson-scenes.js);
+   the short easing above would override it. */
+:root figure[data-motion=true] :is(.scene-token-fill, .foundation-owned) { transition: none; }

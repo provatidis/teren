@@ -60,7 +60,8 @@ test('benchmark explanations follow actual profit, total targets and additional 
   for (let variant = 0; variant < 3; variant++) for (const factor of [.5, 1, 2]) {
     const base = lessonSetup('loss-vs-profit', variant), price = base.initialPrice * factor;
     const loss = runLesson('loss-vs-profit', {futurePrice: price}, variant);
-    assert.equal(loss.prediction, factor < 1 ? 'loss' : 'gain');
+    // Before fees the claim trails holding whenever the price has moved, either way.
+    assert.equal(loss.prediction, factor === 1 ? 'same' : 'less');
     assert.ok(benchmarkNarration('loss-vs-profit', loss).includes('before-fee shortfall'));
     if (factor === 1) assert.equal(loss.result.breakEvenFees, 0);
     const fees = runLesson('fee-break-even', {futurePrice: price, fees: 0}, variant);

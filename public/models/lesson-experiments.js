@@ -64,7 +64,8 @@ export function runLesson(id, input, variant = 0) {
   const result = calculateScenario(setup);
   const conclusions = {
     'token-balances': { prediction: result.pooled.eth < result.held.eth ? 'less' : result.pooled.eth > result.held.eth ? 'more' : 'same', reason: 'rebalance' },
-    'loss-vs-profit': { prediction: result.lpReturn >= 0 ? 'gain' : 'loss', reason: 'traded-mix' },
+    // Before fees the claim is worth less than holding at every price but the starting one.
+    'loss-vs-profit': { prediction: result.lpBeforeFees < result.holdValue ? 'less' : 'same', reason: 'traded-mix' },
     'fee-break-even': { prediction: 'toward-target', reason: 'assumption' },
     'final-challenge': { prediction: 'lower-price', reason: 'total' },
   };
