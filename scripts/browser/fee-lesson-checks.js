@@ -34,7 +34,7 @@ export async function checkFeeLesson({ evaluate, click, fill, text, navigate, re
   await click('learn-reveal');
   assert.equal(await evaluate("document.getElementById('learn-prediction-feedback').dataset.state"), 'skipped');
   assert.deepEqual(await evaluate(shownParts), ['#fee-amount', '#fee-invite', '#fee-outcome']);
-  assert.deepEqual(await evaluate(figureText), ['ETH at $4,000.00', '$7,500.00', '$7,171.07', '0.8839 ETH + 3,535.53 USDC', 'Gap covered: $100.00 of $428.93', 'Against holding: −$328.93']);
+  assert.deepEqual(await evaluate(figureText), ['ETH at $4,000.00', '$7,500.00', '$7,171.07', '0.8839 ETH + 3,535.53 USDC + fees', 'Gap covered: $100.00 of $428.93', 'Against holding: −$328.93']);
   assert.match(await gapBar(), /^23\.3\d+%$/, 'The fees fill their share of the gap.');
   assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('.fee-scene .scene-shortcut'), button => [button.textContent, button.getAttribute('aria-pressed')])"),
     [['The question · $100', 'true'], ['Match holding', 'false']]);
@@ -52,7 +52,7 @@ export async function checkFeeLesson({ evaluate, click, fill, text, navigate, re
 
   // Exploring: the shortcut lands exactly on the break-even fees; more than that puts the claim ahead.
   await evaluate("Array.from(document.querySelectorAll('.fee-scene .scene-shortcut')).find(button => button.textContent === 'Match holding').click()");
-  assert.deepEqual(await evaluate(figureText), ['ETH at $4,000.00', '$7,500.00', '$7,500.00', '0.8839 ETH + 3,535.53 USDC', 'Gap covered: $428.93 of $428.93', 'Against holding: $0.00']);
+  assert.deepEqual(await evaluate(figureText), ['ETH at $4,000.00', '$7,500.00', '$7,500.00', '0.8839 ETH + 3,535.53 USDC + fees', 'Gap covered: $428.93 of $428.93', 'Against holding: $0.00']);
   assert.equal(await text('fee-copy'), 'Level with holding. $428.93 in fees closes the gap at this price.');
   assert.equal(await gapBar(), '100%');
   await fill('fee-amount', '500');

@@ -81,16 +81,16 @@ export const LESSONS = [
   },
   {
     id: 'final-challenge', completion: 'You built an example where matching holding still leaves a dollar loss.', protocol: 'Uniswap v2-style', title: 'Can you match holding and still lose dollars?', short: 'Final challenge', concept: 'Apply what you learned', skill: 'Build your own example.',
-    intro: 'Start with the same ETH and USDC in the pool and in your wallet. Find a price and fee amount that leave the two strategies tied, each worth less than you started with.',
+    intro: 'Use what you know. Pick a price and a fee income so that your claim matches holding, and both are worth less than you started with.',
     prediction: 'Which change in the ETH price would you try first?',
     predictions: [['lower-price', 'A fall in ETH.'], ['higher-price', 'A rise in ETH.'], ['same-price', 'Leave ETH at its starting price.']],
     reasoning: 'How do fees affect this comparison with holding?',
-    reasons: [['total', 'Compare the fee contribution with the principal shortfall against holding.'], ['fees', 'Any fee income puts the LP ahead of its original holding basket.'], ['deposit-loss', 'Compare fees with the LP’s dollar loss from the original deposit.']],
+    reasons: [['total', 'Compare the fees with the gap to holding.'], ['fees', 'Any fee income puts the claim ahead of holding.'], ['deposit-loss', 'Compare the fees with the claim’s dollar loss since the start.']],
     reasonFeedbackByChoice: {
-      fees: 'Fees can close some of the gap without closing all of it. Their contribution must be compared with the shortfall before fees.',
-      'deposit-loss': 'The original dollar deposit is a different benchmark. To match holding, fees must cover the gap to the value of the starting ETH and USDC at the selected price.',
+      fees: 'Fees can close some of the gap without closing all of it. They have to be compared with the gap to holding before fees.',
+      'deposit-loss': 'What you started with is a different comparison. To match holding, fees must cover the gap to what the starting ETH and USDC are worth at that price.',
     },
-    explanation: 'The result depends on the price and fees you enter. Swaps change the token mix; fees add to its value. The entered fees are hypothetical, not a record of earnings. Gas, protocol-specific execution and the trading path are excluded.',
+    explanation: 'Matching holding and making money are two different results. Fees can close the gap to holding. They cannot undo what a price fall does to the tokens on both sides. To judge a result, say what you compare with, what you assumed and what you left out.',
     takeaway: 'A useful conclusion names the benchmark, assumptions and missing information.',
   },
 ];

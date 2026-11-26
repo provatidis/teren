@@ -184,13 +184,13 @@ export function lessonApplicationCopy(id, outcome) {
     feedback: 'Just inside the upper bound, a small amount of ETH remains beside the USDC. The position can earn when swaps use its liquidity; being inside does not itself create fees.'};
   return {...base,
     label: 'Match holding while losing dollars',
-    context: 'Think back to the price and fees you chose for your own position.',
-    question: 'When your position matches holding below the starting budget, what have its fees covered?',
-    choices: [['relative-gap','The shortfall against holding, while a dollar loss remains in both strategies.'],['capital-restored','The entire loss from the starting capital, because LP now matches holding.'],['earned-target','A recorded fee payment that proves this position can recover its loss.']],
+    context: 'Think back to the price and fees you chose in your own example.',
+    question: 'When your claim matches holding below your start, what have its fees covered?',
+    choices: [['relative-gap','The gap to holding. A dollar loss remains on both sides.'],['capital-restored','The whole loss since the start, because the claim now matches holding.'],['earned-target','A recorded fee payment that proves this claim can recover its loss.']],
     hint: 'Try a price below the start, then use Match holding. The bars keep both comparisons visible.',
     feedbackByChoice: {
-      'capital-restored': 'Holding itself is below the starting budget in your example. Matching it closes the relative gap but leaves that dollar loss.',
+      'capital-restored': 'Holding itself is below your start in your example. Matching it closes the gap to holding but leaves that dollar loss.',
       'earned-target': 'You chose the fees in this example. Matching holding shows what that amount would cover; it does not show that any trades paid it.',
     },
-    feedback: 'Matching holding closes the relative gap. Holding itself can be below the starting capital, so both can still lose dollars. The fees in this task are an assumption, not recorded earnings.'};
+    feedback: 'Matching holding closes the gap to holding. Holding itself can be below your start, so both can still lose dollars. The fees in this task are an amount you chose, not recorded earnings.'};
 }

@@ -44,7 +44,7 @@ Run `BROWSER_CHECKS=lending-links npm run test:browser` to check that lesson exa
 
 For focused LST target-comparison checks, `BROWSER_CHECKS=lst-comparison npm run test:browser` covers shared conditions, unavailable targets, boundary recovery, both exits, persistence and narrow layouts. The full suite includes these checks.
 
-Run `BROWSER_CHECKS=watch npm run test:browser` for the first four liquidity lessons’ pool-first layout, the actions in lessons 1 and 2, lesson 4’s full walk, and the range lab’s picked prices. It checks that a revealed or replayed swap, deposit or price move plays from its starting state after the page has landed, that the bars keep their place, that the slider stays put during a touch drag at 320px, and that reduced motion skips the movement. The full suite includes these checks.
+Run `BROWSER_CHECKS=watch npm run test:browser` for the pool-first layout of liquidity lessons 1 to 5, the actions in lessons 1 and 2, the full walks of lessons 4 and 5, and the range lab’s picked prices. `BROWSER_CHECKS=learning-tasks` covers lesson 7: its challenge, its optional worked example and the fee context. It checks that a revealed or replayed swap, deposit or price move plays from its starting state after the page has landed, that the bars keep their place, that the slider stays put during a touch drag at 320px, and that reduced motion skips the movement. The full suite includes these checks.
 
 For a focused lesson check, `BROWSER_CHECKS=predictions npm run test:browser` exercises the lesson starting setups, prediction controls, keyboard skipping and progress restoration at desktop and mobile sizes. The full suite remains the release gate.
 

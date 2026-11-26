@@ -162,3 +162,25 @@ test('lesson 5 asks which bar fees grow, in the lesson’s own numbers, and says
   const flat = runLesson('fee-break-even', { ...base, futurePrice: base.initialPrice, fees: 0 });
   assert.match(feePrediction(flat.setup, flat.result).question, /your claim is level with holding\. Then it earns trading fees\. Which bar grows\?$/);
 });
+
+test('lesson 7 is a challenge in the lesson’s names: the question is a first step and the verdict says why a fall is needed', async () => {
+  const lesson = LESSONS.find(item => item.id === 'final-challenge');
+  assert.equal(lesson.prediction, 'Which change in the ETH price would you try first?');
+  assert.deepEqual(lesson.predictions.map(([id]) => id), ['lower-price', 'higher-price', 'same-price']);
+  assert.match(lesson.intro, /^Use what you know\. Pick a price and a fee income so that your claim matches holding, and both are worth less than you started with\.$/);
+  assert.match(lesson.explanation, /^Matching holding and making money are two different results\./);
+  for (const variant of [0, 1, 2]) {
+    const outcome = runLesson('final-challenge', lessonSetup('final-challenge', variant), variant);
+    assert.equal(outcome.prediction, 'lower-price');
+    assert.equal(outcome.reason, 'total');
+    assert.equal(lessonFinding('final-challenge', outcome), 'A fall in ETH. Only a lower price takes holding below your ' + usd(outcome.setup.investment)
+      + ' start. Fees can then bring your claim level with holding, and both are still worth less than you started with.');
+  }
+  // One set of names from lessons 3 to 5: your claim, holding, your start.
+  const copy = JSON.stringify([lesson.intro, lesson.reasoning, lesson.reasons, lesson.reasonFeedbackByChoice, lesson.explanation])
+    + await readFile(new URL('../public/lib/liquidity-application-scene.js', import.meta.url), 'utf8')
+    + await readFile(new URL('../public/lib/comparison-lesson-scene.js', import.meta.url), 'utf8')
+    + await readFile(new URL('../public/lib/comparison-bars.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(copy, /starting capital|starting budget|LP \+ fees|LP \+ assumed|pool position|principal shortfall|hypothetical/i);
+  assert.match(copy, /Your claim/);
+});

@@ -25,7 +25,7 @@ export function lessonFinding(id, outcome) {
     return 'Only your claim. ' + usd(s.fees) + ' in fees takes it from ' + (r.breakEvenFees ? usd(r.breakEvenFees) + ' behind holding' : 'level with holding')
       + ' to ' + (level ? 'level with it' : usd(Math.abs(after)) + (after > 0 ? ' behind' : ' ahead')) + '. Holding is tokens in a wallet: it earns no fees.';
   }
-  return 'A lower ETH price makes the original ETH and USDC worth less in dollars. Matching that basket with fees can leave both strategies below the starting budget.';
+  return 'A fall in ETH. Only a lower price takes holding below your ' + usd(s.investment) + ' start. Fees can then bring your claim level with holding, and both are still worth less than you started with.';
 }
 
 // Round claims read as round numbers: 1.25 ETH + 2,500 USDC, then 0.8839 ETH + 3,535.53 USDC.

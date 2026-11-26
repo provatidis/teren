@@ -27,8 +27,12 @@ export function createBenchmarkFigure(input, { prefix = 'benchmark', ceiling = i
     start.style.left = input.investment / ceiling * 100 + '%';
     track.append(fill, ...(fees ? [fees] : []), start);
     const tokens = node('p', undefined, 'scene-token-detail'); tokens.id = prefix + '-' + name + '-tokens';
+    // The claim's value includes its fees, so the line under the bar names them too.
+    // The amount is beside the fee slider; there is no room for it on this line.
+    const mix = node('span'), feeNote = fees ? node('span', '', 'benchmark-fee-note') : null;
+    tokens.append(mix, ...(fees ? [feeNote] : []));
     row.append(heading, '\n', track, '\n', tokens); figure.append('\n', row);
-    return { value, fill, fees, tokens };
+    return { value, fill, fees, tokens: mix, feeNote };
   });
   const values = {};
   for (const [name, label] of facts) {
@@ -49,5 +53,6 @@ export function createBenchmarkFigure(input, { prefix = 'benchmark', ceiling = i
       claim.value.textContent = usd(withFees ? result.lpValue : result.lpBeforeFees);
       hold.tokens.textContent = claimText(result.held);
       claim.tokens.textContent = claimText(result.pooled);
+      if (claim.feeNote) claim.feeNote.textContent = result.fees > 0 ? ' + fees' : '';
     } };
 }

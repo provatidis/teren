@@ -57,10 +57,8 @@ export async function checkFeeContext({ evaluate, click, fill, text, navigate, b
   assert.equal(await evaluate("Array.from(document.querySelectorAll('[id]')).map(x=>x.id).length===new Set(Array.from(document.querySelectorAll('[id]')).map(x=>x.id)).size"), true);
   for (const id of ['fee-break-even', 'final-challenge']) {
     await navigate(base + 'learn.html#lesson=' + id);
-    if (id === 'final-challenge') {
-      await click('learn-run');
-      await evaluate("document.querySelector('#learn-worked-comparison > summary').click()");
-    } else await click('learn-reveal');
+    await click('learn-reveal');
+    if (id === 'final-challenge') await evaluate("document.querySelector('#learn-worked-comparison > summary').click()");
     const before = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");
     // Lesson 5's fee context sits in its panel; the verdict is what must not change.
     const scopeId = id === 'final-challenge' ? 'comparison-scope' : 'learn-prediction-feedback';

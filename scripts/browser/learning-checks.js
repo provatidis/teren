@@ -33,8 +33,8 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     await navigate(base + 'learn.html#lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0, 'Only the visual explores amounts, prices and fees.');
     await choose('learn-prediction', id === 'swap-impact' ? 'same' : prediction);
-    // Lessons 1 to 5 reveal the outcome from the question; they have no separate explanation button.
-    const poolFirst = ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit', 'fee-break-even'].includes(id);
+    // Lessons 1 to 5 and 7 reveal the outcome from the question; they have no separate explanation button.
+    const poolFirst = id !== 'range-boundaries';
     await click(poolFirst ? 'learn-reveal' : 'learn-run');
     if (poolFirst) assert.equal(await evaluate("document.getElementById('learn-run').checkVisibility()"), false);
     assert.equal(await evaluate("document.getElementById('learn-results').hidden"), false);
@@ -125,7 +125,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate("document.getElementById('learn-card-image').src"),cardSource);
   assert.equal(await evaluate("document.getElementById('learn-share').hidden"),false);
   assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"),beforeReadingCard,'Reading preserves the final task, checked answers and completion.');
-  await evaluate("Array.from(document.querySelectorAll('.comparison-modes button')).find(button=>button.textContent==='Assumed fees').click()");
+  await evaluate("Array.from(document.querySelectorAll('.comparison-modes button')).find(button=>button.textContent==='Fees').click()");
   await fill('comparison-fees', '500');
   await choose('learn-prediction', 'higher-price');
   assert.equal(await evaluate("document.getElementById('learn-prediction-feedback').dataset.state"), 'different');
@@ -139,8 +139,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate("JSON.stringify(JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['final-challenge'].task)"), taskBefore);
   assert.equal(await evaluate("JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['final-challenge'].taskChecked"), true);
   assert.equal(await evaluate("document.getElementById('learn-share-url').value"), link);
-  await click('learn-run');
-  assert.equal(await evaluate("document.getElementById('comparison-fees').value"), '500', 'Reading the explanation keeps the explored fees.');
+  assert.equal(await evaluate("document.getElementById('comparison-fees').value"), '500', 'A revised prediction keeps the explored fees.');
   assert.equal(await evaluate("document.getElementById('learn-card-preview').hidden"), false);
   assert.match(await text('learn-worked-steps'),/100.00/);
   assert.match(await text('learn-worked-steps'),/328.93/);
@@ -156,7 +155,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate("document.getElementById('learn-card-preview').hidden"), true);
   assert.equal(await evaluate("document.getElementById('learn-share').hidden"), true);
   assert.equal(await evaluate("document.querySelector('#learn-answer, #learn-calculation, #learn-calculation-check')"),null);
-  assert.equal(await evaluate("document.getElementById('learn-run').disabled"), false, 'The visual challenge permits explanation without a prediction.');
+  assert.equal(await evaluate("document.getElementById('learn-reveal').disabled"), false, 'The challenge shows its answer without a prediction.');
   assert.equal(await text('learn-progress-count'), '7 of 7 done');
   await reload();
   assert.equal(await text('learn-variation-label'), 'Variation 2 of 3');
@@ -167,7 +166,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   await evaluate("Storage.prototype.setItem=function(){throw new DOMException('Full','QuotaExceededError')}");
   await click('learn-variation');
   assert.match(await text('learn-storage'), /Saving is unavailable/);
-  await choose('learn-prediction','higher-price'); await click('learn-run');
+  await choose('learn-prediction','higher-price'); await click('learn-reveal');
   assert.equal(await evaluate("document.getElementById('learn-results').hidden"), false);
   assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), savedLearn);
   assert.equal(await evaluate("localStorage.getItem('defi-sandbox-v1')"), sandbox);

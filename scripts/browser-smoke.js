@@ -283,7 +283,9 @@ try {
     return;
   }
   if (process.env.BROWSER_CHECKS === 'learning-tasks') {
+    await checkComparisonLessons({ evaluate, click, fill, text, navigate, reload, base, call });
     await checkLearningApplications({ evaluate, click, fill, text, navigate, reload, base, call });
+    await checkFeeContext({ evaluate, click, fill, text, navigate, base, call, nextEvent });
     assert.deepEqual(errors, [], 'No uncaught browser errors');
     return;
   }

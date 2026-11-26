@@ -53,3 +53,21 @@
   .benchmark-place { display: none; }
   .benchmark-figure .scene-token-heading { font-size: 15px; }
 }
+@media (max-width: 340px) { .benchmark-fee-note { display: none; } }
+/* Lesson 7: the challenge sits directly in its card, above its question. Each goal
+   is one line with the amount that decides it, so ticking a goal moves nothing. */
+#learn-essential[data-pool-first] .learning-application-scene { margin: 4px 0 0; padding: 0; border: 0; background: none; }
+.learning-application-scene .benchmark-figure { margin-top: 12px; }
+.learning-application-scene .learning-task-goals { display: grid; gap: 2px; margin: 10px 0 4px; }
+.learning-application-scene .learning-task-goals li { display: grid; grid-template-columns: 1.3em minmax(0, 1fr) auto; gap: 0 4px; line-height: 1.7; }
+.learning-application-scene .learning-task-goals li > strong { font-variant-numeric: tabular-nums; text-align: right; }
+/* On the narrowest phones a goal takes two lines. A fixed amount column and one
+   weight keep those line breaks where they are while a slider moves. */
+@media (max-width: 360px) {
+  .learning-application-scene .learning-task-goals li { grid-template-columns: 1.3em minmax(0, 1fr) 9.5ch; white-space: normal; line-height: 1.45; padding: 2px 0; font-weight: 400; }
+}
+.learning-application-scene .scene-price-control .scene-question-scope:empty { display: none; }
+.learning-application-scene .learning-task-solved { margin: 14px 0 0; }
+.learning-application-scene .learning-task-hints { margin-top: 14px; }
+.challenge-scene { margin-top: 18px; }
+.challenge-scene > .learn-prediction-feedback { margin: 0 0 14px; }
