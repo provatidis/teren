@@ -48,7 +48,8 @@ export async function checkBenchmarkLesson({ evaluate, click, fill, text, naviga
   // The panel names the cause for both directions, so it stays true wherever the slider is.
   assert.match(await text('benchmark-why'), /As ETH rises, traders buy ETH from the pool\. As it falls, they sell ETH to it\. Holding makes neither trade/);
   assert.deepEqual(await evaluate("['benchmark-why', 'learn-pitfall'].map(id => document.getElementById(id).closest('#benchmark-outcome') !== null && document.getElementById(id).checkVisibility())"), [true, true]);
-  assert.match(await text('learn-results-title'), /Go further/);
+  assert.match(await text('learn-results-title'), /Look closer/);
+  assert.deepEqual([await text('learn-explore-question'), await text('learn-explore')], ['Compared with what?', 'Open this example in the full-range lab ↗']);
   assert.notEqual(await saved(), before);
   const revealed = await saved();
 

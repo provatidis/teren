@@ -42,7 +42,8 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   assert.match(await text('token-scene-why'), /This is called arbitrage/);
   assert.deepEqual(await evaluate("['token-scene-why', 'learn-pitfall'].map(id => document.getElementById(id).closest('#token-scene-outcome') !== null && document.getElementById(id).checkVisibility())"), [true, true]);
   assert.deepEqual(await evaluate("['#learn-run', '#learn-explanation', '#learn-setup'].filter(id => document.querySelector(id).checkVisibility())"), [], 'There is no separate explanation button or repeated paragraph.');
-  assert.match(await text('learn-results-title'), /Go further/);
+  assert.match(await text('learn-results-title'), /Look closer/);
+  assert.deepEqual([await text('learn-explore-question'), await text('learn-explore')], ['Move the price away and back. What returns?', 'Open this example in the full-range lab ↗']);
   assert.notEqual(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), saved);
   const revealed = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");
   // Any slider input ends a played reveal, so compare frames the slider has drawn.

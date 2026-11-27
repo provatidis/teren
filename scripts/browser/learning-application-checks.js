@@ -76,7 +76,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.equal(await hidden('learn-results'), false);
   assert.equal(await hidden('learn-assessment'), false);
   assert.equal(await visible('#challenge-outcome'), true);
-  assert.equal(await text('learn-results-title'), 'Go further');
+  assert.equal(await text('learn-results-title'), 'Look closer');
   assert.match(await text('learn-prediction-feedback'), /^What happens\s*A fall in ETH\. Only a lower price takes holding below your \$5,000\.00 start\./);
   assert.equal(await text('challenge-outcome-title'), 'Two results, not one');
   assert.match(await text('challenge-why'), /^Matching holding and making money are two different results\./);
@@ -85,7 +85,9 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.equal(await order('#learn-prediction-feedback', '#challenge-outcome'), true);
   assert.equal(await evaluate("document.getElementById('learn-worked-comparison').open"), false, 'The worked example stays an optional extra.');
   assert.equal(await evaluate("document.querySelector('#learn-worked-comparison > summary').textContent"), 'See a worked example');
-  assert.equal(await text('learn-explore'), 'Open the same example in Experiment ↗');
+  // The lab link opens the reader's own example, with the price and fees on the sliders.
+  assert.equal(await text('learn-explore'), 'Open your example in the full-range lab ↗');
+  assert.match(await handoff(), /future=1300/);
   assert.equal(await taskPrice(), '1300', 'The outcome preserves the learner’s selected price.');
   assert.equal((await draft()).ran, true);
   await reload();
@@ -96,13 +98,15 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   const original = await draft();
   const completedBefore = (await progress()).completed;
   const working = await isolated();
-  const originalHandoff = await handoff();
+  const originalShare = await evaluate("document.getElementById('learn-share-url').value");
   const originalObservation = await observed();
   assert.equal(await taskPrice(), '2000');
   assert.equal(await hidden('learn-application-task'), false);
   assert.equal(await text('learn-application-context'), 'Think back to the price and fees you chose in your own example.');
   assert.equal(await text('learn-check'), 'Check this setup and answer →');
-  assert.match(originalHandoff, /future=4000/);
+  // After Start again the link is back at the starting price with no fees; the result card keeps the worked example.
+  assert.match(await handoff(), /future=2000.*fees=0(&|$)/);
+  assert.match(originalShare, /future=4000.*fees=100/);
   await noDuplicateIds();
 
   await choose('application', 'relative-gap');
@@ -116,7 +120,8 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   await click('liquidity-task-example');
   assert.equal(await taskPrice(), '1500');
   assert.equal(await observed(), originalObservation);
-  assert.equal(await handoff(), originalHandoff);
+  assert.match(await handoff(), /future=1500/, 'The lab link follows the example on the sliders.');
+  assert.equal(await evaluate("document.getElementById('learn-share-url').value"), originalShare);
   assert.deepEqual((await draft()).inputs, original.inputs);
   await choose('application', 'capital-restored');
   await click('learn-check');
@@ -167,14 +172,16 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.equal(await text('learn-feedback-title'), 'Challenge done.');
   assert.equal(await text('liquidity-task-claim'), '$3,750.00');
   assert.equal(await text('liquidity-task-hold'), '$3,750.00');
-  assert.equal(await handoff(), originalHandoff);
+  assert.match(await handoff(), /future=1000/);
+  const ownHandoff = await handoff();
   assert.deepEqual((await draft()).inputs, original.inputs);
   const taskBeforeExploration = await draft();
   const taskResult = await text('liquidity-task-finding');
   await fill('comparison-price', '3000');
   assert.equal(await text('liquidity-task-finding'), taskResult);
   assert.deepEqual(await draft(), taskBeforeExploration, 'Observe exploration does not edit the assessed task.');
-  assert.equal(await handoff(), originalHandoff);
+  assert.equal(await handoff(), ownHandoff, 'Exploring the worked example does not move the link to the reader’s own example.');
+  assert.equal(await evaluate("document.getElementById('learn-share-url').value"), originalShare);
   assert.deepEqual(await isolated(), working);
   // The two goals and the solved state follow the sliders at once, before any check.
   const goals = () => evaluate("Array.from(document.querySelectorAll('#liquidity-task-goals li'), item => item.dataset.met)");

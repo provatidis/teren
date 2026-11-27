@@ -1,5 +1,16 @@
 # Release history
 
+## 1.69.0 · 2026-11-27
+
+- A prediction that differs from the outcome is now answered with what it would need to be true, in one sentence: “More ETH” would be true if ETH had fallen. It replaces “You expected: More ETH.” It names a condition and does not guess why you chose it.
+- Three labels in the liquidity lessons use the site’s own words: **What do you expect?** above a prediction, **What does this tell you?** above the question, and **Look closer** above the link to a lab. The first of these now reads the same in every chapter.
+- Under **Look closer**, each lesson gives one question to take into a lab, and the link names the lab it opens. Each question is one that lab can answer. Two changed for that reason: lesson 3 now asks what returns when the price moves away and back, and lesson 5 asks whether a match with holding survives a further price move.
+- Lesson 7’s lab link opens your own example, with the price and fees on its sliders, and asks whether it still matches holding once costs are counted. The result card keeps the worked example.
+- Lessons 5 and 6 end on “you need a record”. Once answered, they link to the recorded case **Fees over time**.
+- The swap sandbox has a line beside its slippage control: keep the amount you pay fixed, change the tolerance, and see which number moves. This is where lesson 1’s cut question about slippage now lives.
+- Lesson 1’s verdict is shorter, so it fits on a phone screen with the pool: “Less. The pool pays 18,132.22 USDC, not 20,000: an average price of $1,813.22 per ETH.”
+- The browser checks now report how much each lesson shows on a phone. With the outcome open, a lesson has 340 to 460 words and runs to about three and a half screens, down from 410 to 510 words and about four screens.
+
 ## 1.68.0 · 2026-11-27
 
 - Every liquidity lesson now asks one question after its figure, where it asked two. The question kept is the one that takes the lesson’s idea to a case the figure does not show.

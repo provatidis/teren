@@ -24,7 +24,7 @@ import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
 import { resultCardBlob } from '../lib/result-card.js';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
-import { rangePrediction, benchmarkNarration, lessonFinding, tradePrediction, depositPrediction, priceMovePrediction, benchmarkPrediction, feePrediction } from '../lib/lesson-narration.js';
+import { rangePrediction, benchmarkNarration, lessonFinding, predictionNote, tradePrediction, depositPrediction, priceMovePrediction, benchmarkPrediction, feePrediction } from '../lib/lesson-narration.js';
 
 export function initLearning() {
   const $ = id => document.getElementById(id);
@@ -116,7 +116,9 @@ export function initLearning() {
   }
   function renderPrediction() {
     renderPredictionFeedback(predictionFeedbackElement, predictionCopy().choices, draft.prediction, outcome.prediction,
-      (['final-challenge', 'fee-break-even'].includes(lesson.id) ? '' : questionLabel() + ': ') + lessonFinding(lesson.id, outcome));
+      (['final-challenge', 'fee-break-even'].includes(lesson.id) ? '' : questionLabel() + ': ') + lessonFinding(lesson.id, outcome),
+      // A prediction that differs is answered with what it would need to be true.
+      predictionNote(lesson.id, outcome, draft.prediction));
     markPredictionRevealed(predictionField);
     if (poolFirst) foldPrediction(predictionField, lesson.id === 'final-challenge' ? 'Your answer on the price move'
       : 'Your prediction for ' + (foundationLesson() ? 'the ' : '') + questionLabel());
@@ -130,6 +132,8 @@ export function initLearning() {
       // Solving the challenge is its outcome: the verdict, the explanation and the
       // questions appear under it. Nothing above the sliders moves, and focus stays put.
       if (solved && !draft.ran) { draft.ran = true; lessonScene.showQuestion(); renderResults(); }
+      // The lab link carries the reader's own example, so it follows the sliders.
+      else if (outcome) renderHandoff();
       persist();
     });
     draft.task = applicationScene.value();
@@ -162,7 +166,7 @@ export function initLearning() {
         : createTokenBalanceScene(s, prediction, { explanation: lesson.explanation });
       $('learn-prediction-home').replaceChildren();
       if (hasTask) {
-        // The worked example stays an optional comparison under "Go further". The
+        // The worked example stays an optional comparison under "Look closer". The
         // lesson's own scene is the challenge above, its question and one panel.
         const worked = lessonScene;
         $('learn-worked-scene').replaceChildren(worked.element);
@@ -278,7 +282,7 @@ export function initLearning() {
       if (s.fees) visual.push(bar('LP + ' + usd(s.fees) + ' assumed fees', r.lpValue / max * 100, usd(r.lpValue)));
     }
     $('learn-metrics').replaceChildren(...metrics); $('learn-visual').replaceChildren(...visual);
-    $('learn-results-title').textContent = poolFirst ? 'Go further' : questionLabel();
+    $('learn-results-title').textContent = poolFirst ? 'Look closer' : questionLabel();
     renderPrediction();
     // Pool-first lessons keep their one explanation in the scene's panel.
     $('learn-explanation').textContent = benchmarkNarration(lesson.id, outcome) || lesson.explanation;
@@ -295,21 +299,32 @@ export function initLearning() {
     $('learn-results').hidden = false; $('learn-assessment').hidden = false;
     $('learn-run').textContent = visualLesson() ? explanationLabel() : 'Run again →';
     $('learn-input-status').textContent = '';
+    renderHandoff();
+  }
+  // "Look closer": one question to take into a lab, and a link that names the
+  // lab it opens. Each question is one that lab can answer, and every reader
+  // gets the same link whatever they predicted.
+  function renderHandoff() {
+    const s = outcome.setup, r = outcome.result;
     const home = new URL('liquidity.html', location.href);
+    // The challenge opens the reader's own example. Its result card keeps the worked one.
+    const own = lesson.id === 'final-challenge' && draft.task ? { ...s, futurePrice: draft.task.price, fees: draft.task.fees } : s;
     if (lesson.id === 'range-boundaries') home.hash = rangeHash(r);
-    else if (r) home.hash = scenarioHash(s);
+    else if (r) home.hash = scenarioHash(own);
     else home.hash = 'swap-sandbox';
-    $('learn-explore').href = home.href;
-    $('learn-explore').textContent = r ? 'Explore the question setup in Experiment ↗' : 'Open the swap sandbox ↗';
-    $('learn-explore-note').textContent = r ? 'Opens the question’s price, starting tokens and fees in a new tab.' : 'Opens your independent swap sandbox in a new tab; its existing virtual balances are preserved.';
-    if (lesson.id === 'swap-impact') $('learn-explore-note').textContent = 'In your independent sandbox, compare two trade sizes before executing either. Watch how price impact changes.';
-    else if (lesson.id === 'loss-vs-profit') $('learn-explore-note').textContent = 'Try adding fees in Experiment. Find a positive dollar return that still trails holding the starting tokens.';
-    else if (lesson.id === 'final-challenge') {
-      $('learn-explore').textContent = 'Open the same example in Experiment ↗';
-      $('learn-explore-note').textContent = 'Opens the ' + usd(s.futurePrice) + ' ETH example with ' + usd(s.fees) + ' in fees.';
-    }
-    else if (lesson.id === 'range-boundaries') $('learn-explore-note').textContent = 'Opens this range in a new tab. Move its ends and the price, and see where it runs out of a token.';
-    if (r && lesson.id === 'final-challenge') $('learn-share-url').value = home.href;
+    const [question, link, note] = {
+      'swap-impact': ['How big is my trade against the pool?', 'Open the swap sandbox ↗', 'Compare two trade sizes there before executing either. It opens in a new tab and keeps its own balances.'],
+      'pool-share': ['What do I own now?', 'Open the swap sandbox ↗', 'Add liquidity there, make a trade, then compare what you could withdraw with what you put in. It opens in a new tab.'],
+      'token-balances': ['Move the price away and back. What returns?', 'Open this example in the full-range lab ↗', 'Opens ETH at ' + usd(s.futurePrice) + ' with your starting tokens, in a new tab.'],
+      'loss-vs-profit': ['Compared with what?', 'Open this example in the full-range lab ↗', 'Add fees there and find a gain on your start that still trails holding. It opens in a new tab.'],
+      'fee-break-even': ['Match holding, then move the price. Does the match hold?', 'Open this example in the full-range lab ↗', 'Opens ETH at ' + usd(s.futurePrice) + ' with ' + usd(s.fees) + ' in fees, in a new tab.'],
+      'range-boundaries': ['What happens past the edge?', 'Open this range in the range lab ↗', 'Move its ends and the price there, and see where it runs out of a token. It opens in a new tab.'],
+      'final-challenge': ['Does your example still match holding once costs are counted?', 'Open your example in the full-range lab ↗', 'Opens ETH at ' + usd(own.futurePrice) + ' with ' + usd(own.fees) + ' in fees, in a new tab. Add the costs there.'],
+    }[lesson.id];
+    $('learn-explore-question').textContent = question;
+    $('learn-explore').href = home.href; $('learn-explore').textContent = link;
+    $('learn-explore-note').textContent = note;
+    if (r && lesson.id === 'final-challenge') $('learn-share-url').value = new URL('liquidity.html' + scenarioHash(s), location.href).href;
   }
   function loadLesson() {
     clearUnderstandingFeedback('learn');
@@ -329,7 +344,7 @@ export function initLearning() {
     poolFirst = POOL_FIRST.includes(id);
     $('learn-essential').toggleAttribute('data-pool-first', poolFirst);
     $('learn-explore').before(pitfallElement);
-    $('learn-check-title').textContent = poolFirst ? 'Use what you saw' : 'Explain the result and apply the idea';
+    $('learn-check-title').textContent = poolFirst ? 'What does this tell you?' : 'Explain the result and apply the idea';
     saveLearningLocation('learn.html#lesson=' + id);
     const index = LESSON_IDS.indexOf(id);
     draft = progress.drafts[id] || { variant: 0, inputs: lessonSetup(id), prediction: '', answer: '', application: '', choiceSeed: newChoiceSeed(), ran: false };
@@ -384,6 +399,8 @@ export function initLearning() {
     const taskFeedback = applicationScene?.showFeedback();
     $('learn-continue').hidden = !check.passed;
     $('learn-share').hidden = !(check.passed && lesson.id === 'final-challenge');
+    // Lessons 5 and 6 end on "you need a record". The site has one.
+    $('learn-record').hidden = !['fee-break-even', 'range-boundaries'].includes(lesson.id);
     if (check.passed) {
       if (!progress.completed.includes(lesson.id)) progress.completed.push(lesson.id);
       const index = LESSON_IDS.indexOf(lesson.id);

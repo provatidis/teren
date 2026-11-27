@@ -1,7 +1,7 @@
 import { orderedLearningChoices, predictionFeedback } from './learning-choices.js';
 
-export function renderPredictionFeedback(element, choices, selected, actual, finding) {
-  const copy = predictionFeedback(choices, selected, actual, finding);
+export function renderPredictionFeedback(element, choices, selected, actual, finding, note) {
+  const copy = predictionFeedback(choices, selected, actual, finding, note);
   const hasPrediction = choices.some(([id]) => id === selected);
   element.dataset.state = hasPrediction ? selected === actual ? 'match' : 'different' : 'skipped';
   const heading = hasPrediction ? copy.slice(0, copy.indexOf('.') + 1) : 'What happens';

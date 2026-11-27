@@ -42,7 +42,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
   assert.equal(await text('foundation-average'), 'Average price you receive: $1,813.22 per ETH');
   assert.equal(await text('foundation-pool-price'), 'Pool price after the swap: $1,653.34 per ETH');
   assert.equal(await text('foundation-execution-2'), '1,813.22');
-  assert.match(await text('learn-prediction-feedback'), /Less\. The pool pays 18,132\.22 USDC for the whole trade, an average price of \$1,813\.22 per ETH\. At the starting pool price of \$2,000\.00, 10 ETH would be worth 20,000 USDC\./);
+  assert.match(await text('learn-prediction-feedback'), /10 ETH swap: Less\. The pool pays 18,132\.22 USDC, not 20,000: an average price of \$1,813\.22 per ETH\.$/);
   assert.doesNotMatch(await text('learn-prediction-feedback'), /\blos[est]/i, 'The difference is in the quote; it is not called a loss.');
   assert.deepEqual(await evaluate("[document.querySelector('.scene-prediction').dataset.folded, document.querySelector('.scene-prediction-recap span').textContent, document.querySelector('.scene-prediction-recap button').textContent]"),
     ['true', 'Your prediction for the 10 ETH swap', 'Change']);
@@ -53,7 +53,10 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
   assert.deepEqual(await evaluate("['learn-prediction-feedback', 'foundation-why', 'learn-pitfall'].map(id => document.getElementById(id).closest('#learn-scene') !== null && document.getElementById(id).checkVisibility())"), [true, true, true],
     'The verdict, one explanation and the pitfall sit with the pool and its comparison.');
   assert.deepEqual(await evaluate("['#learn-explanation', '#learn-results > .eyebrow', '#learn-assessment > .eyebrow'].filter(id => document.querySelector(id).checkVisibility())"), []);
-  assert.deepEqual([await text('learn-results-title'), await text('learn-check-title')], ['Go further', 'Use what you saw']);
+  assert.deepEqual([await text('learn-results-title'), await text('learn-check-title')], ['Look closer', 'What does this tell you?']);
+  assert.equal(await evaluate("document.querySelector('.scene-prediction-invite').textContent"), 'What do you expect?');
+  // One question to take into the lab, and a link that names the lab it opens.
+  assert.deepEqual([await text('learn-explore-question'), await text('learn-explore')], ['How big is my trade against the pool?', 'Open the swap sandbox ↗']);
   const initial = await saved();
   await key('foundation-amount', 'End');
   assert.equal(await text('foundation-execution-2'), '1,330.66');
@@ -111,8 +114,10 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     assert.equal(await shown('#foundation-amount'), false);
     await choose('learn-prediction', 'more'); await click('learn-reveal');
     assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked')"), null, 'Changing the actual question still starts a fresh answer.');
-    assert.match(await text('learn-prediction-feedback'), new RegExp('The pool pays ' + quote.replace('.', '\\.') + ' USDC for the whole trade[\\s\\S]*' + amount + ' ETH would be worth ' + worth + ' USDC\\.'));
-    assert.match(await text('learn-prediction-feedback'), /You expected: More than /);
+    assert.match(await text('learn-prediction-feedback'), new RegExp(amount + ' ETH swap: Less\\. The pool pays ' + quote.replace('.', '\\.') + ' USDC, not ' + worth + ': an average price of '));
+    // A prediction that differs is answered with what it would need to be true.
+    assert.match(await text('learn-prediction-feedback'), new RegExp('“More than ' + worth + ' USDC” would be true if selling ETH raised the pool’s price\\.$'));
+    assert.doesNotMatch(await text('learn-prediction-feedback'), /You expected/);
     assert.match(await text('learn-application-context'), new RegExp('You sell ' + amount + ' ETH into each'));
     await choose('learn-application', 'equal'); await click('learn-check');
     assert.ok((await text('learn-applications-feedback')).includes('it would quote ' + deeper + ' USDC, against ' + quote + ' USDC here'));
@@ -185,6 +190,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     assert.match(await text('learn-applications-feedback'), /^That’s right\.[\s\S]*You own a smaller share of a larger pool\./);
     const checked = await saved();
     assert.equal(await evaluate("document.getElementById('learn-explore').href"), base + 'liquidity.html#swap-sandbox', 'Foundations retain their independent sandbox handoff.');
+    assert.deepEqual([await text('learn-explore-question'), await text('learn-explore')], ['What do I own now?', 'Open the swap sandbox ↗']);
     await fill('foundation-amount', '1');
     assert.equal(await saved(), checked);
     await reload();

@@ -18,11 +18,13 @@ export function orderedLearningChoices(values, seed, group) {
 }
 
 // Predictions invite comparison; only the explanation/application checks score progress.
-export function predictionFeedback(choices, selected, actual, finding) {
+// A lesson may pass a note for a prediction that differs: what that answer
+// would need to be true. It then stands in place of "You expected".
+export function predictionFeedback(choices, selected, actual, finding, note) {
   const sentence = text => /[.!?]$/.test(text) ? text : text + '.';
   const expected = choices.find(([id]) => id === selected)?.[1];
   const result = finding || 'In this setup: ' + sentence(choices.find(([id]) => id === actual)[1]);
   if (!expected) return result;
   if (selected === actual) return 'Your prediction matches. ' + result;
-  return 'The result differs from your prediction. ' + result + ' You expected: ' + sentence(expected);
+  return 'The result differs from your prediction. ' + result + ' ' + (note || 'You expected: ' + sentence(expected));
 }
