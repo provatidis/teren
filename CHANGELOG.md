@@ -1,5 +1,12 @@
 # Release history
 
+## 1.66.1 · 2026-11-27
+
+- Lesson 5’s question now says its starting point is your claim before any fees. A claim includes every fee its pool has taken in, so without that the question could not be answered with confidence.
+- The answer “Neither. Fees are already in my claim’s value.” is gone: it marked a true statement wrong. In its place is a belief that is false, that the fees go to whoever runs the pool.
+- The verdict now says why only your claim grows: traders pay fees into the pool, so your share of them is part of your claim.
+- A saved answer to the earlier wording is cleared; completed lessons stay completed.
+
 ## 1.66.0 · 2026-11-27
 
 - Liquidity lessons 5 and 7 now follow the layout of lessons 1 to 4, on the two bars from lesson 4: holding and your claim, with a dashed line at what you started with.

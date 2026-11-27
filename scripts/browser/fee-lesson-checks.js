@@ -24,8 +24,8 @@ export async function checkFeeLesson({ evaluate, click, fill, text, navigate, re
   assert.equal(await evaluate("Boolean(document.querySelector('.benchmark-figure').compareDocumentPosition(document.querySelector('.scene-prediction')) & Node.DOCUMENT_POSITION_FOLLOWING)"), true, 'The figure comes before its question.');
   assert.deepEqual(await evaluate(shownParts), [], 'Before the outcome there is one thing to do: answer or skip the question.');
   assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"),
-    'ETH is at $4,000.00 and your claim is $428.93 behind holding. Then it earns $100.00 in trading fees. Which bar grows?');
-  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#learn-predictions label'), label => label.textContent.trim())"), ['Only my claim', 'Both bars', 'Neither. Fees are already in my claim’s value.']);
+    'ETH is at $4,000.00. Before any fees, your claim is $428.93 behind holding. Then it earns $100.00 in trading fees. Which bar grows?');
+  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#learn-predictions label'), label => label.textContent.trim())"), ['Only my claim', 'Both bars', 'Neither. The fees go to whoever runs the pool.']);
   // The figure opens where lesson 4 ended, with no fees.
   assert.deepEqual(await evaluate(figureText), ['ETH at $4,000.00', '$7,500.00', '$7,071.07', '0.8839 ETH + 3,535.53 USDC', 'Gap covered: $0.00 of $428.93', 'Against holding: −$428.93']);
   assert.equal(await gapBar(), '0%');
@@ -38,7 +38,7 @@ export async function checkFeeLesson({ evaluate, click, fill, text, navigate, re
   assert.match(await gapBar(), /^23\.3\d+%$/, 'The fees fill their share of the gap.');
   assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('.fee-scene .scene-shortcut'), button => [button.textContent, button.getAttribute('aria-pressed')])"),
     [['The question · $100', 'true'], ['Match holding', 'false']]);
-  assert.match(await text('learn-prediction-feedback'), /Only your claim\. \$100\.00 in fees takes it from \$428\.93 behind holding to \$328\.93 behind\. Holding is tokens in a wallet: it earns no fees\./);
+  assert.match(await text('learn-prediction-feedback'), /Only your claim\. Traders pay fees into the pool, so your share of them is part of your claim\. \$100\.00 takes it from \$428\.93 behind holding to \$328\.93 behind\. Holding is tokens in a wallet: it earns no fees\./);
   assert.deepEqual(await evaluate("[document.querySelector('.scene-prediction').dataset.folded, document.querySelector('.scene-prediction-recap span').textContent]"), ['true', 'Your prediction for $100.00 in fees']);
   assert.equal(await text('fee-invite'), 'Now drag the fees. How much does your claim need to match holding?');
   assert.deepEqual(await evaluate(`(order => order.map((id, i) => i === 0 || Boolean(document.querySelector(order[i - 1]).compareDocumentPosition(document.querySelector(id)) & Node.DOCUMENT_POSITION_FOLLOWING)))(
@@ -61,7 +61,7 @@ export async function checkFeeLesson({ evaluate, click, fill, text, navigate, re
   assert.equal(await evaluate("document.querySelector('.benchmark-figure').outerHTML"), start, 'No fees shows the starting figure again.');
   assert.equal(await evaluate("document.getElementById('fee-hold').textContent"), '$7,500.00', 'Holding never moves with fees.');
   assert.equal(await saved(), revealed, 'Exploration must not change the fixed question or progress.');
-  assert.match(await text('learn-prediction-feedback'), /\$100\.00 in fees/, 'The verdict stays with the question’s fees.');
+  assert.match(await text('learn-prediction-feedback'), /\$100\.00 takes it from/, 'The verdict stays with the question’s fees.');
   // A single arrow step that would cross the break-even amount stops on it.
   await fill('fee-amount', '427');
   await evaluate("document.getElementById('fee-amount').focus()");
