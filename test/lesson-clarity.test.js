@@ -145,12 +145,12 @@ test('lesson 5 asks which bar fees grow, in the lesson’s own numbers, and says
   for (const variant of [0, 1, 2]) {
     const outcome = runLesson('fee-break-even', lessonSetup('fee-break-even', variant), variant), { result, setup } = outcome;
     const { question, choices } = feePrediction(setup, result);
-    assert.ok(question.startsWith('ETH is at ' + usd(setup.futurePrice) + ' and your claim is ' + usd(result.breakEvenFees) + ' behind holding. Then it earns ' + usd(setup.fees) + ' in trading fees.'), question);
+    assert.ok(question.startsWith('ETH is at ' + usd(setup.futurePrice) + '. Before any fees, your claim is ' + usd(result.breakEvenFees) + ' behind holding. Then it earns ' + usd(setup.fees) + ' in trading fees.'), question);
     assert.deepEqual(choices, lesson.predictions);
     assert.equal(outcome.prediction, 'toward-target');
     assert.equal(choices[0][0], outcome.prediction);
     const finding = lessonFinding('fee-break-even', outcome), after = result.breakEvenFees - setup.fees;
-    assert.ok(finding.startsWith('Only your claim. ' + usd(setup.fees) + ' in fees takes it from ' + usd(result.breakEvenFees) + ' behind holding to ' + usd(Math.abs(after)) + (after > 0 ? ' behind.' : ' ahead.')), finding);
+    assert.ok(finding.startsWith('Only your claim. Traders pay fees into the pool, so your share of them is part of your claim. ' + usd(setup.fees) + ' takes it from ' + usd(result.breakEvenFees) + ' behind holding to ' + usd(Math.abs(after)) + (after > 0 ? ' behind.' : ' ahead.')), finding);
     assert.match(finding, /Holding is tokens in a wallet: it earns no fees\.$/);
   }
   // Variations cover fees that fall short of the gap and fees that pass it.
@@ -160,7 +160,10 @@ test('lesson 5 asks which bar fees grow, in the lesson’s own numbers, and says
   const base = lessonSetup('fee-break-even'), gap = runLesson('fee-break-even', base).result.breakEvenFees;
   assert.match(lessonFinding('fee-break-even', runLesson('fee-break-even', { ...base, fees: gap })), /to level with it\./);
   const flat = runLesson('fee-break-even', { ...base, futurePrice: base.initialPrice, fees: 0 });
-  assert.match(feePrediction(flat.setup, flat.result).question, /your claim is level with holding\. Then it earns trading fees\. Which bar grows\?$/);
+  assert.match(feePrediction(flat.setup, flat.result).question, /Before any fees, your claim is level with holding\. Then it earns trading fees\. Which bar grows\?$/);
+  // A claim includes the fees its pool has taken in, so no answer may mark that true statement wrong.
+  assert.doesNotMatch(JSON.stringify(lesson.predictions), /already in my claim/);
+  assert.deepEqual(lesson.predictions.map(([, label]) => label), ['Only my claim', 'Both bars', 'Neither. The fees go to whoever runs the pool.']);
 });
 
 test('lesson 7 is a challenge in the lesson’s names: the question is a first step and the verdict says why a fall is needed', async () => {

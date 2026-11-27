@@ -22,7 +22,8 @@ export function lessonFinding(id, outcome) {
   // Lesson 5's verdict answers which bar grew, then says where the fees leave the claim.
   if (id === 'fee-break-even') {
     const after = r.breakEvenFees - s.fees, level = Math.abs(after) < .005;
-    return 'Only your claim. ' + usd(s.fees) + ' in fees takes it from ' + (r.breakEvenFees ? usd(r.breakEvenFees) + ' behind holding' : 'level with holding')
+    // Fees are not paid out beside the claim: they land in the pool the claim is a share of.
+    return 'Only your claim. Traders pay fees into the pool, so your share of them is part of your claim. ' + usd(s.fees) + ' takes it from ' + (r.breakEvenFees ? usd(r.breakEvenFees) + ' behind holding' : 'level with holding')
       + ' to ' + (level ? 'level with it' : usd(Math.abs(after)) + (after > 0 ? ' behind' : ' ahead')) + '. Holding is tokens in a wallet: it earns no fees.';
   }
   return 'A fall in ETH. Only a lower price takes holding below your ' + usd(s.investment) + ' start. Fees can then bring your claim level with holding, and both are still worth less than you started with.';
@@ -116,12 +117,16 @@ export function lossProfitReasoning(outcome) {
 }
 
 // Lesson 5 starts where lesson 4 ended: the price has moved and the claim trails holding.
+// The question says its starting point has no fees in it yet. A claim includes
+// every fee the pool has taken in, so without that the reader cannot tell whether
+// the fees are new. Each wrong answer is a belief that is false, not a true
+// statement about pools attached to the wrong bar.
 export function feePrediction(setup, result) {
   const gap = result.breakEvenFees;
   return {
-    question: 'ETH is at ' + usd(setup.futurePrice) + ' and your claim is ' + (gap ? usd(gap) + ' behind holding' : 'level with holding') + '. Then it earns '
+    question: 'ETH is at ' + usd(setup.futurePrice) + '. Before any fees, your claim is ' + (gap ? usd(gap) + ' behind holding' : 'level with holding') + '. Then it earns '
       + (setup.fees ? usd(setup.fees) + ' in ' : '') + 'trading fees. Which bar grows?',
-    choices: [['toward-target', 'Only my claim'], ['both-earn', 'Both bars'], ['already-counted', 'Neither. Fees are already in my claim’s value.']],
+    choices: [['toward-target', 'Only my claim'], ['both-earn', 'Both bars'], ['runner-keeps', 'Neither. The fees go to whoever runs the pool.']],
   };
 }
 

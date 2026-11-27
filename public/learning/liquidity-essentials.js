@@ -55,7 +55,7 @@ export const LESSONS = [
     intro: 'A price move leaves your claim behind holding. See how much in trading fees it takes to catch up.',
     // The question carries the lesson's own price, gap and fees: see feePrediction.
     prediction: 'Your claim earns trading fees. Which bar grows?',
-    predictions: [['toward-target', 'Only my claim'], ['both-earn', 'Both bars'], ['already-counted', 'Neither. Fees are already in my claim’s value.']],
+    predictions: [['toward-target', 'Only my claim'], ['both-earn', 'Both bars'], ['runner-keeps', 'Neither. The fees go to whoever runs the pool.']],
     reasoning: 'What do the break-even fees tell you?',
     reasons: [['assumption', 'How much fee income would match holding at this price.'], ['guarantee', 'How much fee income this price move produced.'], ['compound', 'How much fee income is waiting to be collected.']],
     reasonFeedbackByChoice: {
