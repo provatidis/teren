@@ -20,16 +20,17 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate('location.hash'), '#lesson=range-boundaries');
   assert.equal(await evaluate("document.getElementById('learn-route-note').hidden"), true);
   const choose = (name, value) => evaluate("document.querySelector('input[name=\"" + name + "\"][value=\"" + value + "\"]').click()");
+  // One prediction and one question after the figure in every lesson.
   const cases = [
-    ['swap-impact','less','deeper','quote-received'],
-    ['pool-share','less','ownership','diluted-same-claim'],
-    ['token-balances','less','rebalance','original-mix'],
-    ['loss-vs-profit','less','traded-mix','holding-basket'],
-    ['fee-break-even','toward-target','assumption','gap-reopens'],
-    ['range-boundaries','usdc','path','narrow-out'],
-    ['final-challenge','lower-price','total','relative-gap'],
+    ['swap-impact','less','deeper','Lesson 1 done.'],
+    ['pool-share','less','same-tokens','Lesson 2 done.'],
+    ['token-balances','less','rebalance','Lesson 3 done.'],
+    ['loss-vs-profit','less','both-right','Lesson 4 done.'],
+    ['fee-break-even','toward-target','record','Lesson 5 done.'],
+    ['range-boundaries','usdc','path','Lesson 6 done.'],
+    ['final-challenge','lower-price','relative-gap','Challenge done.'],
   ];
-  for (const [id, prediction, reason, application] of cases) {
+  for (const [id, prediction, application, done] of cases) {
     await navigate(base + 'learn.html#lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0, 'Only the visual explores amounts, prices and fees.');
     await choose('learn-prediction', id === 'swap-impact' ? 'same' : prediction);
@@ -62,35 +63,31 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     if(id==='fee-break-even') assert.match(await text('learn-worked-steps'),/428.93[\s\S]*328.93/);
     if(id==='range-boundaries') assert.match(await text('learn-worked-steps'),/5,116.06/);
     assert.equal(await evaluate("document.querySelectorAll('#learn-assessment-form input[type=number]').length"),0);
-    await choose('learn-reason', reason);
+    assert.deepEqual(await evaluate("[document.querySelectorAll('#learn-assessment-form fieldset').length, document.querySelectorAll('input[name=learn-reason]').length, document.getElementById('learn-hint-text').textContent.length > 20]"), [1, 0, true], id + ': one question, with its hint');
     await choose('learn-application', application);
     if (id === 'swap-impact') {
-      for (const phrase of ['18,132.22 USDC','9.07%','0.5%']) assert.ok((await text('learn-application-evidence')).includes(phrase));
-      await choose('learn-application','quote-misread');
-      await click('learn-check');
-      assert.match(await text('learn-applications-feedback'), /Price impact and slippage tolerance are different/);
+      await choose('learn-application', 'equal'); await click('learn-check');
+      assert.equal(await text('learn-feedback-title'), 'Review your answer.');
+      assert.match(await text('learn-applications-feedback'), /^Not quite[\s\S]*price moves as you trade[\s\S]*19,743\.16 USDC, against 18,132\.22 USDC here/);
       assert.equal(await text('learn-progress-count'), '0 of 7 done');
+      assert.equal(await evaluate("document.getElementById('learn-continue').hidden"), true);
       await choose('learn-application', application);
-      await choose('learn-reason', 'equal'); await click('learn-check');
-      assert.match(await text('learn-reasons-feedback'), /price moves as you trade[\s\S]*19,743\.16 USDC, against 18,132\.22 USDC here/);
-      assert.equal(await text('learn-progress-count'), '0 of 7 done');
-      await choose('learn-reason', reason);
     }
     if (id === 'final-challenge') await click('liquidity-task-example');
     await click('learn-check');
-    assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+    assert.equal(await text('learn-feedback-title'), done);
+    assert.match(await text('learn-applications-feedback'), /^That’s right\./);
     assert.equal(await evaluate("document.getElementById('learn-continue').hidden"), false);
-    const order = await evaluate("Array.from(document.querySelectorAll('input[name=learn-reason],input[name=learn-application]')).map(input=>input.value).join(',')");
+    const order = await evaluate("Array.from(document.querySelectorAll('input[name=learn-application]')).map(input=>input.value).join(',')");
     const completedDraft = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");
     await evaluate("document.querySelector('#learn-deeper > summary').click();document.querySelector('#learn-deeper > summary').click()");
     assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"),completedDraft,'Reading after completion preserves the checked answers and final task.');
     assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),false);
-    assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
+    assert.equal(await text('learn-feedback-title'),done);
     await reload();
     assert.equal(await evaluate("document.querySelector('#learn-answer, #learn-calculation, #learn-calculation-check')"),null);
-    assert.equal(await evaluate("document.querySelector('input[name=learn-reason]:checked').value"),reason);
     assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked').value"),application);
-    assert.equal(await evaluate("Array.from(document.querySelectorAll('input[name=learn-reason],input[name=learn-application]')).map(input=>input.value).join(',')"),order);
+    assert.equal(await evaluate("Array.from(document.querySelectorAll('input[name=learn-application]')).map(input=>input.value).join(',')"),order);
     assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), false);
     if (id === 'range-boundaries') {
       const linked = await evaluate("document.getElementById('learn-explore').href");
@@ -133,7 +130,6 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
   assert.equal(await evaluate("document.getElementById('learn-card-preview').hidden"), false, 'Exploration and a revised prediction preserve the completed question card.');
   assert.equal(await evaluate("document.getElementById('learn-card-image').src"), cardSource);
   assert.equal(await evaluate("document.getElementById('learn-share').hidden"), false);
-  assert.equal(await evaluate("document.querySelector('input[name=learn-reason]:checked').value"), 'total');
   assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked').value"), 'relative-gap');
   assert.equal(await evaluate("JSON.stringify(JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['final-challenge'].task)"), taskBefore);
   assert.equal(await evaluate("JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['final-challenge'].taskChecked"), true);
@@ -197,10 +193,9 @@ export async function checkMobileLearning({ evaluate, click, fill, text, navigat
   assert.equal(await evaluate("document.querySelectorAll('#learn-deeper input').length"),0);
   assert.equal(await evaluate("document.querySelector('#learn-answer, #learn-calculation, #learn-calculation-check')"),null);
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'),true);
-  await evaluate("document.querySelector('input[name=learn-application][value=narrow-out]').click()");
-  await evaluate("document.querySelector('input[name=learn-reason][value=path]').click()");
+  await evaluate("document.querySelector('input[name=learn-application][value=path]').click()");
   await click('learn-check');
-  assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
+  assert.equal(await text('learn-feedback-title'),'Lesson 6 done.');
     assert.equal(await text('learn-current-chapter'), 'Essentials');
     assert.equal(await text('learn-current-progress'), await text('learn-progress-count'));
     assert.equal(await evaluate('document.activeElement.id'), 'learn-feedback');

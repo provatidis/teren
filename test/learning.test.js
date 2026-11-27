@@ -5,6 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LESSON_IDS, VARIANTS, lessonSetup, runLesson, validateLessonInputs } from '../public/models/lesson-experiments.js';
 import { LESSONS } from '../public/learning/liquidity-essentials.js';
+import { lessonApplicationCopy } from '../public/lib/lesson-application-copy.js';
 import { LEARNING_KEY, emptyProgress, parseProgress, readProgress, saveProgress } from '../public/data/learning-progress.js';
 const close = (actual, expected, tolerance = 1e-6) => assert.ok(Math.abs(actual - expected) <= tolerance, actual + ' differs from ' + expected);
 
@@ -14,7 +15,10 @@ test('every lesson and transfer variation produces a finite, answerable exercise
     const inputs = lessonSetup(lesson.id, variant), result = runLesson(lesson.id, inputs, variant);
     assert.ok(Number.isFinite(result.out ?? result.share ?? result.result.lpValue));
     assert.ok(lesson.predictions.some(([id]) => id === result.prediction));
-    assert.ok(lesson.reasons.some(([id]) => id === result.reason));
+    // One question follows the figure, with exactly one right answer among its choices.
+    const question = lessonApplicationCopy(lesson.id, { ...result, variant });
+    assert.equal(question.choices.filter(([id]) => id === question.expected).length, 1);
+    assert.equal('reason' in result, false);
   }
 });
 test('swap lesson reproduces the reference 1 ETH quote and larger orders get greater impact', () => {
@@ -74,7 +78,6 @@ test('range exercise labels exact boundaries and does not infer earlier fees', (
     const r = runLesson('range-boundaries', { futurePrice: price, width: 0.1 });
     assert.equal(r.prediction, expected);
     if (share !== null) close(r.result.finalEthPercent, share);
-    assert.equal(r.reason, 'path');
   }
   const tight = runLesson('range-boundaries', { futurePrice: 2200, width: 0.05 });
   const wide = runLesson('range-boundaries', { futurePrice: 2200, width: 0.5 });

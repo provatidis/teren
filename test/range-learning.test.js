@@ -95,9 +95,9 @@ test('every existing subject has a plain visible pitfall, and the fee-target que
   for(const entry of Object.values(POOL_PITFALLS)){assert.ok(entry.title&&entry.copy);assert.equal(new URL(entry.url).protocol,'https:');assert.doesNotMatch(entry.copy,/÷|×|√/);}
   assert.match(POOL_PITFALLS['swap-impact'].copy,/larger trade needs its own quote/);assert.match(POOL_PITFALLS['loss-vs-profit'].copy,/Waiting does not guarantee/);
   assert.match(POOL_PITFALLS['range-boundaries'].copy,/stops earning new swap fees while inactive/);assert.match(POOL_PITFALLS['between-samples'].copy,/require trades/);
-  assert.match(LESSONS.find(item=>item.id==='fee-break-even').reasoning,/break-even fees/);
+  assert.match(LESSONS.find(item=>item.id==='fee-break-even').explanation,/an amount you choose, not a record of earnings/);
   assert.doesNotMatch(LESSONS.find(item=>item.id==='pool-share').prediction,/÷|×|percent|divide/);
-  for(const lesson of [...LESSONS,...APPLIED_LESSONS]){
+  for(const lesson of APPLIED_LESSONS){
     const counts=lesson.reasons.map(([,copy])=>copy.split(/\s+/).length);
     assert.ok(Math.max(...counts)-Math.min(...counts)<=7,lesson.id+': answer length should not give away the correct choice');
   }

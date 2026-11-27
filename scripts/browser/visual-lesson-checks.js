@@ -17,7 +17,7 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   await resetVariation('learn');
   // Lesson 3 shows the claim first. Before the outcome there is one thing to do: answer or skip.
   const shownParts = "['#learn-run', '#learn-setup', '#token-scene-price', '#token-scene-invite', '#token-scene-outcome'].filter(id => document.querySelector(id)?.checkVisibility())";
-  assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), 'ETH rises from $2,000.00 to $4,000.00. Will your claim hold less, more, or the same ETH?');
+  assert.equal(await evaluate("document.querySelector('.scene-prediction-question').textContent"), 'ETH rises from $2,000.00 to $4,000.00, and traders bring the pool’s price up with it. Will your claim hold less, more, or the same ETH?');
   assert.equal(await evaluate("Boolean(document.querySelector('.scene-token-figure').compareDocumentPosition(document.querySelector('.scene-prediction')) & Node.DOCUMENT_POSITION_FOLLOWING)"), true, 'The claim comes before its question.');
   assert.deepEqual(await evaluate(shownParts), []);
   assert.deepEqual([await text('token-scene-at'), await text('token-scene-eth'), await text('token-scene-usdc'), await text('token-scene-eth-change')],
@@ -60,21 +60,25 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), revealed, 'Exploration must not edit the question or progress.');
   assert.match(await text('learn-prediction-feedback'), /ETH at \$4,000\.00/, 'The verdict stays with the question’s price.');
   assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked')===null"), true);
-  // The check question steps outside the scene: the market has moved and nobody has traded yet.
-  assert.equal(await text('learn-reason-question'), 'ETH’s market price jumps to $4,000.00, but nobody has traded with the pool yet. What does your claim hold?');
-  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('input[name=learn-reason]'), input => input.value).sort()"), ['automatic', 'drift', 'rebalance']);
-  await choose('learn-reason', 'drift'); await choose('learn-application', 'original-mix'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Review your answers.');
-  assert.match(await text('learn-reasons-feedback'), /Time alone changes nothing in a pool[\s\S]*still 1\.25 ETH \+ 2,500 USDC/);
-  await choose('learn-reason', 'rebalance'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
-  assert.match(await text('learn-reasons-feedback'), /The pool has no price feed[\s\S]*still 1\.25 ETH \+ 2,500 USDC[\s\S]*first trader to notice buys it/);
+  // The question steps outside the scene: the market has moved and nobody has traded yet.
+  assert.deepEqual([await text('learn-application-context'), await text('learn-application-question')],
+    ['ETH’s market price jumps to $4,000.00, but nobody has traded with the pool yet.', 'Have your claim’s tokens changed?']);
+  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('input[name=learn-application]'), input => input.value).sort()"), ['automatic', 'drift', 'rebalance']);
+  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#learn-applications label'), label => label.textContent.trim()).sort()"),
+    ['No. Still 1.25 ETH + 2,500 USDC. Nothing has moved in or out.', 'Partly. Something in between: the pool drifts toward the market price.', 'Yes. Already 0.8839 ETH + 3,535.53 USDC. The pool follows the market price.']);
+  assert.equal(await evaluate("document.querySelectorAll('#learn-assessment-form fieldset').length"), 1);
+  await choose('learn-application', 'drift'); await click('learn-check');
+  assert.equal(await text('learn-feedback-title'), 'Review your answer.');
+  assert.match(await text('learn-applications-feedback'), /Time alone changes nothing in a pool[\s\S]*still 1\.25 ETH \+ 2,500 USDC/);
+  await choose('learn-application', 'rebalance'); await click('learn-check');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 3 done.');
+  assert.match(await text('learn-applications-feedback'), /The pool has no price feed[\s\S]*still 1\.25 ETH \+ 2,500 USDC[\s\S]*first trader to notice buys it/);
   const link = await evaluate("document.getElementById('learn-explore').href");
   await fill('token-scene-price', '1000');
   assert.equal(await evaluate("document.getElementById('learn-explore').href"), link);
   assert.match(link, /future=4000/);
   await reload();
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.', 'Optional predictions must stay optional on restoration.');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 3 done.', 'Optional predictions must stay optional on restoration.');
   assert.deepEqual([await evaluate("document.getElementById('token-scene-price').value"), await text('token-scene-at'), await evaluate("document.getElementById('token-scene-outcome').checkVisibility()")],
     ['4000', 'ETH at $4,000.00', true], 'A restored lesson shows its outcome and the slider at the question’s price.');
 

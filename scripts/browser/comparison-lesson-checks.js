@@ -16,12 +16,15 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
   // Lesson 7 keeps one worked example as an optional extra under "Go further".
   // Lessons 4 and 5 and the challenge itself use the shared figure: see
   // benchmark-lesson-checks.js, fee-lesson-checks.js and learning-application-checks.js.
-  const id = 'final-challenge', reason = 'total', application = 'relative-gap';
+  const id = 'final-challenge', application = 'relative-gap';
   const reveal = () => click('learn-reveal');
   const openWorked = () => evaluate("document.querySelector('#learn-worked-comparison > summary').click()");
   const explored = () => evaluate("({price:document.getElementById('comparison-price').value,fees:document.getElementById('comparison-fees').value,profit:document.getElementById('comparison-profit').textContent,holding:document.getElementById('comparison-holding').textContent})");
   await navigate(base + 'learn.html#lesson=' + id); await reset();
   assert.equal(await evaluate("document.querySelector('.scene-prediction-question').checkVisibility()"), true);
+  // The first step has one true answer: holding falls below the start only when ETH falls.
+  assert.deepEqual(await evaluate("[document.querySelector('.scene-prediction-question').textContent, ...Array.from(document.querySelectorAll('#learn-predictions label'), label => label.textContent.trim())]"),
+    ['Which price move can leave holding worth less than your start?', 'A fall in ETH', 'A rise in ETH', 'Either one']);
   assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0, 'The question has no sliders of its own.');
   assert.equal(await evaluate("document.getElementById('learn-worked-comparison').checkVisibility()"), false, 'The worked example waits until the answer is shown.');
   await reveal();
@@ -61,20 +64,25 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
   await reveal();
   assert.equal(await evaluate("document.getElementById('comparison-price').value"), '4000');
   assert.equal(await evaluate("document.getElementById('comparison-fees').value"), '100');
-  assert.equal(await text('learn-reason-context'), 'A different case: ETH moved to $4,000.00. The claim has $100.00 in fees against a gap to holding of $428.93.');
-  const questionEvidence = await text('learn-application-evidence');
-  assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), true);
-  await choose('learn-reason', reason); await choose('learn-application', application);
+  // One question follows the challenge, with two answers. It is about the reader's own example.
+  const asked = [await text('learn-application-context'), await text('learn-application-question')];
+  assert.deepEqual(asked, ['Think back to the price and fees you chose in your own example.', 'When your claim matches holding below your start, what have its fees covered?']);
+  assert.deepEqual(await evaluate("[document.querySelectorAll('#learn-assessment-form fieldset').length, Array.from(document.querySelectorAll('input[name=learn-application]'), input => input.value).sort().join(), document.getElementById('learn-check').textContent]"),
+    [1, 'capital-restored,relative-gap', 'Check this setup and answer →']);
+  assert.equal(await evaluate("document.getElementById('learn-reason-context')"), null);
+  await choose('learn-application', 'capital-restored');
   await click('liquidity-task-example');
   await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.deepEqual([await text('learn-feedback-title'), await text('learn-feedback-copy')], ['Review your answer.', 'Read the feedback beside the task or question, then try again.']);
+  assert.match(await text('learn-applications-feedback'), /Holding itself is below your start in your example/);
+  await choose('learn-application', application); await click('learn-check');
+  assert.equal(await text('learn-feedback-title'), 'Challenge done.');
   const task = await evaluate("JSON.stringify(JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['final-challenge']?.task)");
   const taskFeedback = await text('liquidity-task-feedback');
   await choose('learn-prediction', 'lower-price');
-  assert.equal(await evaluate("document.querySelector('input[name=learn-reason]:checked').value"), reason);
   assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked').value"), application);
   assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), false);
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.equal(await text('learn-feedback-title'), 'Challenge done.');
   assert.equal(await evaluate("JSON.stringify(JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['final-challenge'].task)"), task);
   assert.equal(await evaluate("JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['final-challenge'].taskChecked"), true);
   assert.equal(await evaluate("document.getElementById('liquidity-task-feedback').hidden"), false);
@@ -86,10 +94,10 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
   assert.match(link, /future=4000/);
   assert.match(link, /fees=100/);
   await fill('comparison-price', '1000');
-  assert.equal(await text('learn-application-evidence'), questionEvidence);
+  assert.deepEqual([await text('learn-application-context'), await text('learn-application-question')], asked);
   assert.equal(await evaluate("document.getElementById('learn-explore').href"), link);
   await reload();
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.equal(await text('learn-feedback-title'), 'Challenge done.');
   assert.equal(await evaluate("document.getElementById('comparison-price').value"), '4000');
   assert.equal(await evaluate("document.getElementById('comparison-fees').value"), '100');
   assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked').value"), 'lower-price');
@@ -110,7 +118,6 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
   assert.match(await evaluate("document.getElementById('learn-explore').href"), /future=2033.25.*fees=123.45/);
   assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0);
   assert.equal(await text('learn-explore-note'), 'Opens the $2,033.25 ETH example with $123.45 in fees.');
-  assert.match(await text('learn-reason-context'), /^A different case: ETH moved to \$2,033\.25\. The claim has \$123\.45 in fees/);
   console.log('PASS: fractional legacy question prices and fees survive editor removal without snapping and retain their exact handoff');
 
   await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });

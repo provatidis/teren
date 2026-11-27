@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { lessonSetup, runLesson } from '../../public/models/lesson-experiments.js';
 import { usd } from '../../public/lib/format.js';
+import { lessonApplicationCopy } from '../../public/lib/lesson-application-copy.js';
 import { motionSettled, reduceMotion } from './motion-settled.js';
 
 const settle = evaluate => evaluate('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
@@ -44,6 +45,8 @@ export async function checkBenchmarkLesson({ evaluate, click, fill, text, naviga
     ['.benchmark-figure', '#benchmark-invite', '#benchmark-price', '#learn-prediction-feedback', '.scene-prediction-recap', '#benchmark-outcome', '.learn-about-example'])`), Array(7).fill(true));
   assert.equal(await text('benchmark-copy'), 'At this price your claim is worth 5.72% less than holding.');
   assert.match(await text('benchmark-why'), /never beats holding[\s\S]*impermanent loss[\s\S]*a comparison, not a charge/);
+  // The panel names the cause for both directions, so it stays true wherever the slider is.
+  assert.match(await text('benchmark-why'), /As ETH rises, traders buy ETH from the pool\. As it falls, they sell ETH to it\. Holding makes neither trade/);
   assert.deepEqual(await evaluate("['benchmark-why', 'learn-pitfall'].map(id => document.getElementById(id).closest('#benchmark-outcome') !== null && document.getElementById(id).checkVisibility())"), [true, true]);
   assert.match(await text('learn-results-title'), /Go further/);
   assert.notEqual(await saved(), before);
@@ -69,37 +72,37 @@ export async function checkBenchmarkLesson({ evaluate, click, fill, text, naviga
   assert.equal(await saved(), revealed, 'Exploration must not change the fixed question or progress.');
   assert.match(await text('learn-prediction-feedback'), /ETH at \$4,000\.00/, 'The verdict stays with the question’s price.');
 
-  // The check questions: the cause of the gap, then a dashboard that reports only one comparison.
-  assert.equal(await text('learn-reason-question'), 'When ETH rises, why does your claim gain less than holding?');
-  const questionEvidence = await text('learn-application-evidence');
-  for (const phrase of ['Original deposit', '$5,000.00', 'Position tokens, excluding fees', '$7,071.07', 'Fees, held separately', '$180.00', '$7,251.07']) assert.ok(questionEvidence.includes(phrase));
-  assert.match(await evaluate("document.querySelector('#learn-application-evidence a').href"), /future=4000.*fees=180/);
-  assert.equal(await evaluate("document.querySelector('#learn-application-evidence a').target"), '_blank');
+  // The question: two true readings of one claim. Each wrong answer folds them into one.
+  const asked = await text('learn-application-context');
+  assert.equal(asked, 'Your dashboard says you are up 41.42% on what you started with. Another view says you are 5.72% behind holding.');
+  assert.equal(await text('learn-application-question'), 'Can both be right?');
+  assert.equal(await evaluate("document.querySelectorAll('#learn-assessment-form fieldset').length"), 1);
   await fill('benchmark-price', '3000');
-  assert.equal(await text('learn-application-evidence'), questionEvidence, 'Exploring a price must not rewrite the dashboard question.');
-  await choose('learn-reason', 'same-exposure'); await choose('learn-application', 'original-deposit'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Review your answers.');
-  assert.match(await text('learn-reasons-feedback'), /Holding starts with the same half-and-half split, so the split cannot explain the difference/);
-  assert.match(await text('learn-applications-feedback'), /dollar return already shown/);
-  await choose('learn-reason', 'traded-mix'); await choose('learn-application', 'holding-basket'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
-  assert.match(await text('learn-reasons-feedback'), /Traders bought ETH from the pool as it rose, so your claim holds less ETH\. Holding keeps the exact ETH and USDC you started with\./);
-  // A prediction chosen afterwards keeps the checked answers.
+  assert.equal(await text('learn-application-context'), asked, 'Exploring a price must not rewrite the question.');
+  await choose('learn-application', 'gap-only'); await click('learn-check');
+  assert.equal(await text('learn-feedback-title'), 'Review your answer.');
+  assert.match(await text('learn-applications-feedback'), /Being behind holding is not a loss of money\. Your claim is worth \$2,071\.07 more than you started with\. Holding would be worth \$428\.93 more still\./);
+  await choose('learn-application', 'profit-only'); await click('learn-check');
+  assert.match(await text('learn-applications-feedback'), /rose from \$5,000\.00 to \$7,071\.07\. Holding the same tokens rose further, to \$7,500\.00\./);
+  await choose('learn-application', 'both-right'); await click('learn-check');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 4 done.');
+  assert.match(await text('learn-applications-feedback'), /^That’s right\.\s*Against the \$5,000\.00 you started with, your claim is up \$2,071\.07\. Against holding, worth \$7,500\.00, it is \$428\.93 behind\. Say what you compare with: your start, or holding\.$/);
+  // A prediction chosen afterwards keeps the checked answer.
   await evaluate("document.querySelector('.scene-prediction-recap button').click()");
   await choose('learn-prediction', 'less');
   assert.match(await text('learn-prediction-feedback'), /^Your prediction matches/);
-  assert.deepEqual(await evaluate("['learn-reason', 'learn-application'].map(name => document.querySelector('input[name=' + name + ']:checked').value)"), ['traded-mix', 'holding-basket']);
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked').value"), 'both-right');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 4 done.');
   const link = await evaluate("document.getElementById('learn-explore').href");
   assert.match(link, /future=4000/); assert.match(link, /fees=0/);
   await fill('benchmark-price', '1000');
   assert.equal(await evaluate("document.getElementById('learn-explore').href"), link);
   await reload();
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 4 done.');
   assert.deepEqual([await evaluate("document.getElementById('benchmark-price').value"), await text('benchmark-at'), await evaluate("document.querySelector('input[name=learn-prediction]:checked').value")],
     ['4000', 'ETH at $4,000.00', 'less'], 'A restored lesson shows its outcome and the slider at the question’s price.');
 
-  // Every variation shows the model's own values; each has its own second question.
+  // Every variation shows the model's own values and asks the same idea, worded for its direction.
   for (let variant = 0; variant < 3; variant++) {
     if (variant) { await click('learn-variation'); await click('learn-reveal'); }
     const question = runLesson('loss-vs-profit', lessonSetup('loss-vs-profit', variant), variant);
@@ -107,15 +110,21 @@ export async function checkBenchmarkLesson({ evaluate, click, fill, text, naviga
     assert.equal(await text('benchmark-claim'), usd(question.result.lpBeforeFees));
     assert.ok((await evaluate("document.querySelector('.benchmark-figure .scene-key').textContent")).includes(usd(question.setup.investment)));
     assert.match(await text('learn-prediction-feedback'), /: Less\. Your claim is worth/);
+    const copy = lessonApplicationCopy('loss-vs-profit', question), wrong = Object.fromEntries(copy.choices);
+    assert.equal(await text('learn-application-context'), copy.context);
+    assert.match(copy.context, variant === 1 ? /^Your dashboard says you are down 29\.29% on what you started with\. Another view says you are 5\.72% behind holding\.$/ : /^Your dashboard says you are up /);
+    assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#learn-applications label'), label => label.textContent.trim()).sort()"), copy.choices.map(([, label]) => label).sort());
     if (variant === 1) {
-      assert.equal(await text('learn-application-label'), 'Withdrawing the position');
-      assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), true);
-      assert.equal(await text('learn-reason-question'), 'When ETH falls, why does your claim lose more than holding?');
-      await choose('learn-reason', question.reason); await choose('learn-application', 'gap-unchanged'); await click('learn-check');
-      assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+      // ETH fell: the claim is down and behind, by different amounts. Holding fell too.
+      assert.equal(wrong['profit-only'], 'No. A claim that is down 29.29% is 29.29% behind holding.');
+      await choose('learn-application', 'profit-only'); await click('learn-check');
+      assert.match(await text('learn-applications-feedback'), /Holding fell too: it is worth \$2,250\.00, down from \$3,000\.00\. Your claim, at \$2,121\.32, is \$128\.68 behind that, which is 5\.72%\./);
+      await choose('learn-application', 'both-right'); await click('learn-check');
+      assert.equal(await text('learn-feedback-title'), 'Lesson 4 done.');
+      assert.match(await text('learn-applications-feedback'), /your claim is down \$878\.68\. Against holding, worth \$2,250\.00, it is \$128\.68 behind\./);
     } else if (variant === 2) {
-      await choose('learn-reason', question.reason); await choose('learn-application', 'holding-basket'); await click('learn-check');
-      assert.match(await text('learn-applications-feedback'), /48.47 ahead of holding/);
+      await choose('learn-application', 'both-right'); await click('learn-check');
+      assert.match(await text('learn-applications-feedback'), /your claim is up \$1,348\.47\. Against holding, worth \$7,500\.00, it is \$151\.53 behind\./);
     }
   }
   console.log('PASS: lesson 4 shows holding and the claim first, reveals in place, never lets the claim beat holding before fees, keeps exploration apart from the question and restores completion');
@@ -178,7 +187,6 @@ export async function checkBenchmarkLesson({ evaluate, click, fill, text, naviga
         await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
       } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
       assert.equal(await evaluate("document.getElementById('benchmark-price').value"), await evaluate("document.getElementById('benchmark-price').max"));
-      assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), false);
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
     }
     // Reduced motion shows the outcome at once.

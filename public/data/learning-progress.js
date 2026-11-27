@@ -17,20 +17,18 @@ export function parseProgress(value) {
       const inputs = validateLessonInputs(id, draft.inputs, draft.variant);
       const revisions = essentialQuestionRevisions(id, draft.variant);
       const samePrediction = (draft.predictionRevision ?? 1) === revisions.prediction;
-      const sameReason = (draft.reasonRevision ?? 1) === revisions.reason;
       const sameApplication = (draft.applicationRevision ?? 1) === revisions.application;
       clean.drafts[id] = { variant: draft.variant, inputs,
         prediction: samePrediction && typeof draft.prediction === 'string' && draft.prediction.length <= 16 ? draft.prediction : '',
         answer: typeof draft.answer === 'string' && draft.answer.length <= 32 ? draft.answer : '',
-        reason: sameReason && typeof draft.reason === 'string' && draft.reason.length <= 24 ? draft.reason : '',
         application: sameApplication && typeof draft.application === 'string' && draft.application.length <= 24 ? draft.application : '',
-        predictionRevision: revisions.prediction, reasonRevision: revisions.reason, applicationRevision: revisions.application,
+        predictionRevision: revisions.prediction, applicationRevision: revisions.application,
         choiceSeed: validChoiceSeed(draft.choiceSeed) ? draft.choiceSeed : null,
         ran: draft.ran === true };
       if (id === 'final-challenge') {
         const task = sameApplication ? challengeSetup(inputs, draft.task) : null;
         clean.drafts[id].task = task;
-        clean.drafts[id].taskChecked = Boolean(task && sameReason && sameApplication && draft.taskChecked === true);
+        clean.drafts[id].taskChecked = Boolean(task && sameApplication && draft.taskChecked === true);
       }
     } catch { /* Ignore an invalid exercise without losing other progress. */ }
   }

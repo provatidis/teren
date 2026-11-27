@@ -10,7 +10,6 @@ import { stageForLesson } from '../learning/example-path.js';
 import { DEEPER_READING } from '../learning/deeper-reading.js';
 import { lessonWalkthrough } from '../lib/lesson-walkthrough.js';
 import { renderLessonSetup, liquidityLessonSetup } from '../lib/lesson-setup.js';
-import { renderQuestionEvidence } from '../lib/lesson-question-evidence.js';
 import { LESSONS } from '../learning/liquidity-essentials.js';
 import { LESSON_IDS, VARIANTS, lessonSetup, runLesson } from '../models/lesson-experiments.js';
 import { checkLessonUnderstanding, essentialQuestionRevisions } from '../models/lesson-application.js';
@@ -25,15 +24,7 @@ import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
 import { resultCardBlob } from '../lib/result-card.js';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
-import { tokenBalanceNarration, lossProfitReasoning, rangePrediction, benchmarkNarration, lessonReasonFeedback, lessonFinding, deeperPoolQuestion, depositPrediction, priceMovePrediction, benchmarkPrediction, feePrediction } from '../lib/lesson-narration.js';
-
-function finalReason(outcome) {
-  const r = outcome.result;
-  if (Math.abs(r.difference) < 1e-8) return 'The fees in that case exactly cover the gap to holding.';
-  return r.difference > 0
-    ? 'The fees in that case more than cover the gap to holding.'
-    : 'The fees in that case do not cover the gap to holding.';
-}
+import { rangePrediction, benchmarkNarration, lessonFinding, tradePrediction, depositPrediction, priceMovePrediction, benchmarkPrediction, feePrediction } from '../lib/lesson-narration.js';
 
 export function initLearning() {
   const $ = id => document.getElementById(id);
@@ -45,8 +36,9 @@ export function initLearning() {
   // Links from lesson 1's pilot (&layout=play) still open it.
   const POOL_FIRST = ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit', 'fee-break-even', 'range-boundaries', 'final-challenge'];
   let poolFirst = false;
-  // Lessons 2 to 6 ask their prediction in the setup's own numbers.
-  const predictionCopy = () => lesson.id === 'pool-share' ? depositPrediction(draft.inputs)
+  // Lessons 1 to 6 ask their prediction in the setup's own numbers.
+  const predictionCopy = () => lesson.id === 'swap-impact' ? tradePrediction(draft.inputs)
+    : lesson.id === 'pool-share' ? depositPrediction(draft.inputs)
     : lesson.id === 'token-balances' ? { question: priceMovePrediction(draft.inputs), choices: lesson.predictions }
       : lesson.id === 'loss-vs-profit' ? benchmarkPrediction(draft.inputs)
         : lesson.id === 'fee-break-even' ? feePrediction(draft.inputs, runLesson(lesson.id, draft.inputs, draft.variant).result)
@@ -103,7 +95,7 @@ export function initLearning() {
   function choices(container, name, values, selected) {
     learningChoices($(container),{name,values,selected,seed:draft.choiceSeed,group:lesson.id+name,shuffle:name!=='learn-prediction',onChange:value=>{
       if(name==='learn-prediction') {draft.prediction=value;$('learn-run').disabled=false;if(draft.ran)renderPrediction();}
-      else {draft[name==='learn-application'?'application':'reason']=value;draft.taskChecked=false;clearUnderstandingFeedback('learn');$('learn-feedback').hidden=true;$('learn-continue').hidden=true;$('learn-share').hidden=true;clearCard();}
+      else {draft.application=value;draft.taskChecked=false;clearUnderstandingFeedback('learn');$('learn-feedback').hidden=true;$('learn-continue').hidden=true;$('learn-share').hidden=true;clearCard();}
       persist();
     }});
   }
@@ -220,18 +212,6 @@ export function initLearning() {
       $('learn-prediction-home').replaceChildren(createPredictionPrompt(predictionField, { selected: draft.prediction, onShow: () => showResult() }));
     }
   }
-  function invalidate() {
-    clearUnderstandingFeedback('learn');
-    predictionFeedbackElement.textContent = '';
-    draft.ran = false; draft.answer = ''; draft.reason = ''; draft.application = ''; outcome = null; applicationCopy = null;
-    draft.task = null; draft.taskChecked = false;
-    $('learn-results').hidden = true; $('learn-assessment').hidden = true; $('learn-feedback').hidden = true; $('learn-share').hidden = true; $('learn-continue').hidden = true;
-    choices('learn-reasons', 'learn-reason', lesson.reasons, '');
-    $('learn-input-status').textContent = visualLesson()
-      ? 'Question setup changed. Explore the new example, then open its explanation.'
-      : 'Setup changed. Predict, then run the updated experiment.';
-    $('learn-run').textContent = visualLesson() ? explanationLabel() : 'Run experiment →'; clearCard();
-  }
   const metric=learningMetric;
   function bar(label, percentValue, detail) {
     const row = document.createElement('div'); row.className = 'learn-bar-row';
@@ -300,24 +280,12 @@ export function initLearning() {
     $('learn-metrics').replaceChildren(...metrics); $('learn-visual').replaceChildren(...visual);
     $('learn-results-title').textContent = poolFirst ? 'Go further' : questionLabel();
     renderPrediction();
-    const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
-    const lossCopy = lesson.id === 'loss-vs-profit' ? lossProfitReasoning(outcome) : null;
     // Pool-first lessons keep their one explanation in the scene's panel.
     $('learn-explanation').textContent = benchmarkNarration(lesson.id, outcome) || lesson.explanation;
-    const depthCopy = lesson.id === 'swap-impact' ? deeperPoolQuestion(outcome) : null;
-    $('learn-reason-question').textContent = lossCopy?.reasoning || tokenCopy?.reasoning || depthCopy?.reasoning || lesson.reasoning;
-    const reasons = lossCopy?.reasons || tokenCopy?.reasons
-      || lesson.reasons.map(([id, copy]) => [id, lesson.id === 'final-challenge' && id === 'total' ? finalReason(outcome) : copy]);
-    choices('learn-reasons', 'learn-reason', reasons, draft.reason);
+    // One question follows the figure: its case, the question, and a hint.
     $('learn-application-context').textContent = applicationCopy.context;
-    $('learn-reason-context').textContent = lesson.id === 'final-challenge'
-      ? 'A different case: ETH moved to ' + usd(s.futurePrice) + '. The claim has ' + usd(s.fees) + ' in fees against a gap to holding of ' + usd(r.breakEvenFees) + '.'
-      : applicationCopy.reasonContext || '';
-    $('learn-reason-context').hidden = !$('learn-reason-context').textContent;
-    renderQuestionEvidence($('learn-application-evidence'), applicationCopy.evidence);
     const hasTask = lesson.id === 'final-challenge';
-    $('learn-application-label').textContent = applicationCopy.label || 'Build an example';
-    $('learn-check').textContent = hasTask ? 'Check this setup and answers →' : 'Check answers →';
+    $('learn-check').textContent = hasTask ? 'Check this setup and answer →' : 'Check answer →';
     $('learn-application-question').textContent = applicationCopy.question;
     if (!applicationCopy.choices.some(([id]) => id === draft.application)) draft.application = '';
     choices('learn-applications', 'learn-application', applicationCopy.choices, draft.application);
@@ -364,20 +332,18 @@ export function initLearning() {
     $('learn-check-title').textContent = poolFirst ? 'Use what you saw' : 'Explain the result and apply the idea';
     saveLearningLocation('learn.html#lesson=' + id);
     const index = LESSON_IDS.indexOf(id);
-    draft = progress.drafts[id] || { variant: 0, inputs: lessonSetup(id), prediction: '', answer: '', reason: '', application: '', choiceSeed: newChoiceSeed(), ran: false };
+    draft = progress.drafts[id] || { variant: 0, inputs: lessonSetup(id), prediction: '', answer: '', application: '', choiceSeed: newChoiceSeed(), ran: false };
     const revisions = essentialQuestionRevisions(id, draft.variant);
-    draft.predictionRevision = revisions.prediction; draft.reasonRevision = revisions.reason; draft.applicationRevision = revisions.application;
+    draft.predictionRevision = revisions.prediction; draft.applicationRevision = revisions.application;
     if (!validChoiceSeed(draft.choiceSeed)) draft.choiceSeed = newChoiceSeed();
     draft.application ||= '';
     if (!lesson.predictions.some(([value]) => value === draft.prediction)) draft.prediction = '';
-    if (!lesson.reasons.some(([value]) => value === draft.reason)) draft.reason = '';
 
     $('learn-level').textContent = lesson.protocol + ' · ' + stageForLesson(lesson.id).title;
     $('learn-lesson-title').textContent = lesson.title; document.title = lesson.short + ' · Teren Learn';
     $('learn-lesson-number').textContent = index === 6 ? 'FINAL CHALLENGE · 7 OF 7' : 'LESSON ' + (index + 1) + ' OF 7';
     $('learn-concept').textContent = lesson.concept; $('learn-skill').textContent = lesson.skill;
     $('learn-intro').textContent = lesson.intro; $('learn-prediction-question').textContent = lesson.prediction;
-    $('learn-reason-question').textContent = lesson.reasoning;
     $('learn-hint').open = false;
     $('learn-deeper').open = false; $('learn-math').open = false;
     $('learn-takeaway').textContent = lesson.takeaway;
@@ -385,7 +351,6 @@ export function initLearning() {
     $('learn-results').hidden = true; $('learn-assessment').hidden = true; $('learn-feedback').hidden = true; $('learn-share').hidden = true; $('learn-continue').hidden = true;
     $('learn-input-status').textContent = ''; $('learn-run').disabled = false; $('learn-run').textContent = 'Run experiment →';
     choices('learn-predictions', 'learn-prediction', predictionCopy().choices, draft.prediction);
-    choices('learn-reasons', 'learn-reason', lesson.reasons, draft.reason);
     $('learn-scene').hidden = !visualLesson();
     $('learn-setup').hidden = false;
     $('learn-metrics').hidden = visualLesson(); $('learn-visual').hidden = visualLesson();
@@ -399,23 +364,23 @@ export function initLearning() {
     if (draft.ran) {
       if (visualLesson()) lessonScene.showQuestion();
       renderResults();
-      if ((id !== 'final-challenge' || draft.taskChecked) && checkLessonUnderstanding(id, draft.inputs, draft.variant, draft.reason, draft.application, draft.task).passed) showCheck(false);
+      if ((id !== 'final-challenge' || draft.taskChecked) && checkLessonUnderstanding(id, draft.inputs, draft.variant, draft.application, draft.task).passed) showCheck(false);
     }
     persist();
     return true;
   }
   function showCheck(save = true) {
-    const check = checkLessonUnderstanding(lesson.id, draft.inputs, draft.variant, draft.reason, draft.application, draft.task);
+    const check = checkLessonUnderstanding(lesson.id, draft.inputs, draft.variant, draft.application, draft.task);
     if (applicationScene && save) draft.taskChecked = true;
     $('learn-feedback').hidden = false; $('learn-feedback').className = 'learn-feedback ' + (check.passed ? 'learn-pass' : 'learn-retry');
-    $('learn-feedback-title').textContent = check.passed ? 'Both answers are correct.' : check.reasoning && check.application ? 'Review your setup.' : 'Review your answers.';
-    const reasoningFeedback = lessonReasonFeedback(lesson.id, outcome, draft.reason, lesson.reasonFeedbackByChoice);
+    // The answer's own feedback says whether it is right. This box says where the lesson stands.
+    const position = LESSON_IDS.indexOf(lesson.id);
+    $('learn-feedback-title').textContent = check.passed ? (position === 6 ? 'Challenge done.' : 'Lesson ' + (position + 1) + ' done.') : check.application ? 'Review your setup.' : 'Review your answer.';
     const applicationFeedback = draft.application ? (applicationCopy.feedbackByChoice?.[draft.application] || applicationCopy.feedback) : 'Choose an answer. ' + applicationCopy.hint;
     renderUnderstandingFeedback('learn', [
-      { container: 'learn-reasons', selected: draft.reason, correct: check.reasoning, explanation: check.reasoning && !['loss-vs-profit', 'swap-impact', 'token-balances'].includes(lesson.id) ? lesson.takeaway : reasoningFeedback },
       { container: 'learn-applications', selected: draft.application, correct: check.application, explanation: applicationFeedback },
     ]);
-    $('learn-feedback-copy').textContent = check.passed ? lesson.completion : 'Read the feedback beside the task or question, then try again.';
+    $('learn-feedback-copy').textContent = check.passed ? lesson.completion : applicationScene ? 'Read the feedback beside the task or question, then try again.' : 'Read the feedback under your answer, then try again.';
     const taskFeedback = applicationScene?.showFeedback();
     $('learn-continue').hidden = !check.passed;
     $('learn-share').hidden = !(check.passed && lesson.id === 'final-challenge');
@@ -428,7 +393,7 @@ export function initLearning() {
     updateProgress();
     if (save) {
       persist();
-      if (!check.demonstration && check.reasoning && check.application) {
+      if (!check.demonstration && check.application) {
         taskFeedback.focus({ preventScroll: true }); taskFeedback.scrollIntoView({ block: 'center', behavior: 'instant' });
       } else focusLearningFeedback('learn');
     }
@@ -460,10 +425,10 @@ export function initLearning() {
     title.scrollIntoView({ block: 'start', behavior: 'instant' });
   }
   $('learn-run').addEventListener('click', () => showResult());
-  $('learn-assessment-form').addEventListener('submit', event => { event.preventDefault(); if (!draft.ran) return; draft.reason = selection('learn-reason'); draft.application = selection('learn-application'); showCheck(); });
+  $('learn-assessment-form').addEventListener('submit', event => { event.preventDefault(); if (!draft.ran) return; draft.application = selection('learn-application'); showCheck(); });
   function changeVariation() {
     const variant = (draft.variant + 1) % VARIANTS;
-    draft = { variant, inputs: lessonSetup(lesson.id, variant), prediction: '', answer: '', reason: '', application: '', choiceSeed: newChoiceSeed(), ran: false };
+    draft = { variant, inputs: lessonSetup(lesson.id, variant), prediction: '', answer: '', application: '', choiceSeed: newChoiceSeed(), ran: false };
     progress.drafts[lesson.id] = draft; loadLesson();
     $('learn-lesson-title').focus({ preventScroll: true }); $('learn-lesson-title').scrollIntoView({ block: 'start', behavior: 'instant' });
   }
@@ -474,7 +439,7 @@ export function initLearning() {
     catch { $('learn-card-status').textContent = 'Select and copy the scenario link below.'; $('learn-share-url').focus(); $('learn-share-url').select(); }
   });
   $('learn-create-card').addEventListener('click', async () => {
-    if (lesson.id !== 'final-challenge' || !outcome || !draft.taskChecked || !checkLessonUnderstanding(lesson.id, draft.inputs, draft.variant, draft.reason, draft.application, draft.task).passed) return;
+    if (lesson.id !== 'final-challenge' || !outcome || !draft.taskChecked || !checkLessonUnderstanding(lesson.id, draft.inputs, draft.variant, draft.application, draft.task).passed) return;
     const token = generation; $('learn-card-status').textContent = 'Creating your result card…';
     try {
       const blob = await resultCardBlob(outcome.setup, new URL('liquidity.html', location.href).href);
