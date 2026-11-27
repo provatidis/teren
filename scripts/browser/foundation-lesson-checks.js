@@ -71,6 +71,27 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
   await evaluate("document.querySelector('.scene-prediction-recap button').click()");
   assert.equal(await shown('.scene-prediction input'), true, 'Change opens the choices again.');
   assert.equal(await evaluate("document.activeElement.name"), 'learn-prediction');
+  // Arrow keys select each answer as they move. The answers stay open while a
+  // keyboard user moves through them, and the verdict follows. Enter folds them.
+  const before = await evaluate("document.querySelector('input[name=learn-prediction]:checked')?.value || ''");
+  const press = async (key, code, windowsVirtualKeyCode, text) => {
+    await call('Input.dispatchKeyEvent', { type: 'keyDown', key, code, windowsVirtualKeyCode, ...(text ? { text, unmodifiedText: text } : {}) });
+    await call('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode });
+  };
+  const visited = new Set();
+  for (let i = 0; i < 2; i++) {
+    await press('ArrowDown', 'ArrowDown', 40);
+    const [folded, name, checked, value, verdict] = await evaluate("[document.querySelector('.scene-prediction').dataset.folded, document.activeElement.name, document.activeElement.checked, document.activeElement.value, document.getElementById('learn-prediction-feedback').textContent]");
+    assert.deepEqual([folded, name, checked], ['false', 'learn-prediction', true], 'An arrow key moves to the next answer and leaves the answers open.');
+    assert.equal(verdict.startsWith('Your prediction matches'), value === 'less', 'The verdict follows the answer.');
+    visited.add(value);
+  }
+  assert.equal(visited.size, 2, 'Two arrow presses reach two different answers.');
+  await press('Enter', 'Enter', 13, '\r');
+  assert.deepEqual(await evaluate("[document.querySelector('.scene-prediction').dataset.folded, document.activeElement.id]"), ['true', 'learn-prediction-feedback'], 'Enter confirms the answer and folds the choices.');
+  // Put back the answer the rest of this check expects, and open the choices again.
+  if (before) await choose('learn-prediction', before);
+  await evaluate("document.querySelector('.scene-prediction-recap button').click()");
   await click('learn-reveal');
   assert.equal(await evaluate("document.getElementById('foundation-amount').value"), '10');
   assert.equal(await stage(), '1', 'Showing the question outcome again restores its amount.');

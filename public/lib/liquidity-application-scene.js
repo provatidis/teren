@@ -3,7 +3,8 @@ import { comparisonSceneState } from './comparison-scene-state.js';
 import { createBenchmarkFigure } from './benchmark-figure.js';
 import { createFeeExplorer } from './fee-explorer.js';
 import { createSceneExplorer, sceneNode as node } from './lesson-scene.js';
-import { usd, signedUSD } from './format.js';
+import { usd } from './format.js';
+import { challengeGoals, challengeFeedback } from './challenge-guidance.js';
 
 // Lesson 7's challenge: the reader picks a price and a fee income on the figure
 // from lessons 4 and 5. Two goals tick as they are met, and the solved state
@@ -54,9 +55,9 @@ export function createLiquidityApplication(input, saved, onChange) {
     const start = r.holdValue - input.investment;
     finding.textContent = 'Your claim ' + (state.versusHolding === 'equal' ? 'matches holding' : 'is ' + amount(r.difference) + (r.difference < 0 ? ' behind' : ' ahead of') + ' holding')
       + '. Holding ' + (Math.abs(start) < 1e-8 ? 'matches your start.' : 'is ' + amount(start) + ' ' + (start < 0 ? 'below' : 'above') + ' your start.');
-    const check = checkLiquidityChallenge(input, current), passed = check.passed;
-    showMatches(check.matchesHolding, small(r.difference) ? usd(0) : signedUSD(r.difference));
-    showBelow(check.belowStart, small(start) ? usd(0) : signedUSD(start));
+    const passed = checkLiquidityChallenge(input, current).passed, goals = challengeGoals(input, current);
+    showMatches(goals.matches.met, goals.matches.amount);
+    showBelow(goals.below.met, goals.below.amount);
     solved.hidden = !passed;
     solvedCopy.textContent = passed ? 'Your claim and holding are both worth ' + usd(r.holdValue) + ', which is ' + usd(-start)
       + ' less than you started with. Fees closed the gap to holding. They did not undo the price fall.' : '';
@@ -92,12 +93,10 @@ export function createLiquidityApplication(input, saved, onChange) {
     element, figure: figure.figure,
     value: () => ({ ...current }),
     showFeedback() {
-      const result = checkLiquidityChallenge(input, current);
-      feedback.dataset.state = result.passed ? 'match' : 'different';
-      feedbackCopy.textContent = result.passed
-        ? 'Your claim and holding are worth the same amount. Both have lost dollars.'
-        : !result.belowStart ? 'Find a price where both end below your start. Matching holding at the starting price does not meet that part of the task.'
-          : 'Both are below your start. Change the fee income until your claim meets holding.';
+      // It names the condition that failed and the control that changes it.
+      const { state, copy } = challengeFeedback(input, current);
+      feedback.dataset.state = state;
+      feedbackCopy.textContent = copy;
       feedback.hidden = false;
       return feedback;
     },

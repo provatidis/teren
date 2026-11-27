@@ -1,5 +1,11 @@
 # Release history
 
+## 1.70.1 · 2026-11-27
+
+- **Lesson 7** now says which goal failed and which control changes it. With ETH at $1,980 and $500 in fees, holding is $25 below your start but your claim is $474.94 above it. The goal line showed “−$25.00” and the check told you to find another price. It now shows “+$474.94”, the amount that decides the goal, and says: “Holding is already $25.00 below your start. Your fees put your claim $474.94 above it. Lower the fees until your claim meets holding.”
+- **Lesson 6**’s feedback on the right answer no longer says that weeks of trading pay more than one move. Time alone does not settle that. It now says what the end can and cannot show: the tokens you end with show what your claim holds; to know what it earned, you need a record of its fees.
+- **Keyboard.** After **Change**, arrow keys move through the answers to a prediction without folding them away, and the verdict follows. Enter, Space or moving to another control folds them. A click folds them at once, as before, now also on the answer already chosen.
+
 ## 1.70.0 · 2026-11-27
 
 A second outside read of the lessons found three defects and two sentences that said more than the lessons can show.

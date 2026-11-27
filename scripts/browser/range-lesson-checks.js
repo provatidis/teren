@@ -99,7 +99,7 @@ export async function checkRangeLesson({ evaluate, click, fill, text, navigate, 
   assert.match(await text('learn-applications-feedback'), /The range decides at which prices your claim can earn[\s\S]*how much trading happens inside it/);
   await choose('learn-application', 'path'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'), 'Lesson 6 done.');
-  assert.match(await text('learn-applications-feedback'), /^That’s right\.[\s\S]*only trades inside your range pay your claim[\s\S]*The tokens you end with are the same either way, so they cannot show it\.$/);
+  assert.match(await text('learn-applications-feedback'), /^That’s right\.[\s\S]*only trades inside your range pay your claim\. The tokens you end with show what your claim holds, not the trades that paid it\. To know what it earned, you need a record of its fees over that time\.$/);
   await evaluate("document.querySelector('.scene-prediction-recap button').click()");
   await choose('learn-prediction', 'usdc');
   assert.match(await text('learn-prediction-feedback'), /^Your prediction matches/);
