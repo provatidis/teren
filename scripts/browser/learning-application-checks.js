@@ -42,14 +42,14 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.equal(await evaluate("document.getElementById('liquidity-task-price').checkVisibility()"), true, 'Start with the construction task.');
   assert.equal(await evaluate("document.getElementById('comparison-profit').checkVisibility()"), false, 'The worked verdict does not answer the opening prediction.');
   // The challenge comes first, on the figure from lessons 4 and 5. Its question,
-  // the panel and the check questions wait below it.
+  // the panel and the one question after it wait below it.
   const visible = selector => evaluate(`document.querySelector(${JSON.stringify(selector)}).checkVisibility()`);
   const order = (first, second) => evaluate(`Boolean(document.querySelector(${JSON.stringify(first)}).compareDocumentPosition(document.querySelector(${JSON.stringify(second)})) & Node.DOCUMENT_POSITION_FOLLOWING)`);
   assert.equal(await evaluate("document.getElementById('learn-essential').hasAttribute('data-pool-first')"), true);
   assert.equal(await order('.learning-application-scene .benchmark-figure', '#liquidity-task-price'), true, 'The figure comes before its sliders.');
   assert.equal(await order('#liquidity-task-fees', '.scene-prediction-question'), true, 'The question follows the challenge as a first step.');
   assert.equal(await evaluate("document.querySelector('.challenge-scene .scene-prediction-invite').textContent"), 'Need a first step?');
-  assert.equal(await text('learn-prediction-question'), 'Which change in the ETH price would you try first?');
+  assert.equal(await text('learn-prediction-question'), 'Which price move can leave holding worth less than your start?');
   for (const id of ['learn-run', 'learn-setup', 'learn-explanation']) assert.equal(await visible('#' + id), false, id + ' is not part of the pool-first layout.');
   assert.equal(await visible('#challenge-outcome'), false);
   assert.equal(await hidden('learn-results'), true);
@@ -100,19 +100,18 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   const originalObservation = await observed();
   assert.equal(await taskPrice(), '2000');
   assert.equal(await hidden('learn-application-task'), false);
-  assert.equal(await text('learn-application-label'), 'Match holding while losing dollars');
-  assert.equal(await text('learn-check'), 'Check this setup and answers →');
+  assert.equal(await text('learn-application-context'), 'Think back to the price and fees you chose in your own example.');
+  assert.equal(await text('learn-check'), 'Check this setup and answer →');
   assert.match(originalHandoff, /future=4000/);
   await noDuplicateIds();
 
-  await choose('reason', 'total');
   await choose('application', 'relative-gap');
   await click('learn-check');
   assert.equal(await text('learn-feedback-title'), 'Review your setup.');
   assert.equal(await evaluate('document.activeElement.id'), 'liquidity-task-feedback');
   assert.equal(await hidden('learn-continue'), true);
   assert.equal(await hidden('learn-share'), true);
-  assert.deepEqual((await progress()).completed, completedBefore, 'Correct choices alone do not complete the default task.');
+  assert.deepEqual((await progress()).completed, completedBefore, 'A correct answer alone does not complete the default task.');
 
   await click('liquidity-task-example');
   assert.equal(await taskPrice(), '1500');
@@ -121,7 +120,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.deepEqual((await draft()).inputs, original.inputs);
   await choose('application', 'capital-restored');
   await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Review your answers.');
+  assert.equal(await text('learn-feedback-title'), 'Review your answer.');
   assert.equal(await evaluate("document.getElementById('liquidity-task-feedback').dataset.state"), 'match');
   assert.equal(await hidden('learn-continue'), true, 'Showing an example does not replace explaining it.');
   assert.deepEqual((await progress()).completed, completedBefore);
@@ -134,7 +133,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.equal(await hidden('learn-continue'), true);
   assert.equal((await draft()).taskChecked, false);
   await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.equal(await text('learn-feedback-title'), 'Challenge done.');
   assert.equal(await text('liquidity-task-claim'), '$4,375.00');
   assert.equal(await text('liquidity-task-hold'), '$4,375.00');
   assert.equal(await text('liquidity-task-claim-tokens'), '1.4434 ETH + 2,165.06 USDC + fees', 'The claim’s value includes its fees, and the line under its bar says so.');
@@ -143,7 +142,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.equal((await draft()).taskChecked, true);
   await reload();
   assert.equal(await hidden('learn-feedback'), false);
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.equal(await text('learn-feedback-title'), 'Challenge done.');
   assert.equal(await hidden('learn-continue'), false);
   assert.equal(await taskPrice(), '1500');
   assert.deepEqual((await draft()).inputs, original.inputs);
@@ -165,7 +164,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.equal(await text('learn-feedback-title'), 'Review your setup.', 'The prior fee amount does not automatically match a new price.');
   await click('liquidity-task-match');
   await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.equal(await text('learn-feedback-title'), 'Challenge done.');
   assert.equal(await text('liquidity-task-claim'), '$3,750.00');
   assert.equal(await text('liquidity-task-hold'), '$3,750.00');
   assert.equal(await handoff(), originalHandoff);
@@ -197,7 +196,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   assert.deepEqual(await goals(), ['true', 'true']);
   assert.equal(await hidden('liquidity-task-solved'), false);
   assert.match(await text('liquidity-task-solved'), /^Solved\. Your claim and holding are both worth \$4,375\.00, which is \$625\.00 less than you started with\. Fees closed the gap to holding\. They did not undo the price fall\.$/);
-  assert.equal(await hidden('learn-feedback'), true, 'Solving the task does not check the written answers.');
+  assert.equal(await hidden('learn-feedback'), true, 'Solving the task does not check the answer.');
   await key('liquidity-task-fees', 'ArrowRight');
   assert.equal(await fee(), '$49.87', 'The next step moves on from the matching amount.');
   assert.equal(await hidden('liquidity-task-solved'), true);
@@ -239,7 +238,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
       assert.equal(await taskPrice(), '1000');
       await key('liquidity-task-match', 'Enter');
       await click('learn-check');
-      assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+      assert.equal(await text('learn-feedback-title'), 'Challenge done.');
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
       assert.equal(await evaluate("document.querySelector('.learning-application-scene').getAnimations({subtree:true}).length"), 0);
       assert.ok(await evaluate("document.getElementById('liquidity-task-price').getBoundingClientRect().height >= 44"));
@@ -247,7 +246,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
       await noDuplicateIds();
       await reload();
       assert.equal(await taskPrice(), '1000');
-      assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+      assert.equal(await text('learn-feedback-title'), 'Challenge done.');
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
     } finally { await call('Emulation.setEmulatedMedia', { features: [] }); }
   }

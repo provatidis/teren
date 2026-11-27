@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
-import { lessonFinding, lessonReasonFeedback, rangePrediction, priceMovePrediction, tokenBalanceNarration, benchmarkPrediction, lossProfitReasoning, feePrediction } from '../public/lib/lesson-narration.js';
+import { lessonFinding, rangePrediction, priceMovePrediction, untradedMarketQuestion, benchmarkPrediction, feePrediction, tradePrediction } from '../public/lib/lesson-narration.js';
 import { lessonApplicationCopy } from '../public/lib/lesson-application-copy.js';
 import { rangePositionState, rangeSceneState } from '../public/lib/liquidity-scene-state.js';
 import { managementCase } from '../public/models/range-decisions.js';
@@ -19,11 +19,18 @@ import { fmt, usd } from '../public/lib/format.js';
 test('findings track changed price directions and the average price rather than the starting pool price', () => {
   const swap = runLesson('swap-impact', lessonSetup('swap-impact'));
   const finding = lessonFinding('swap-impact', swap);
-  assert.match(finding, /starting pool price of \$2,000\.00, 10 ETH is worth 20,000 USDC/);
-  assert.match(finding, /quotes 18,132\.22 USDC for the whole trade, an average price of \$1,813\.22 per ETH/);
-  // The difference is already in the quote. Calling it a loss would teach the
-  // confusion the wallet question clears up.
+  // The verdict answers "less, the same, or more" first, in the question's own amounts.
+  assert.match(finding, /^Less\. The pool pays 18,132\.22 USDC for the whole trade, an average price of \$1,813\.22 per ETH\./);
+  assert.match(finding, /At the starting pool price of \$2,000\.00, 10 ETH would be worth 20,000 USDC\.$/);
+  // The difference is already in the quote, so it is not called a loss.
   assert.doesNotMatch(finding, /\blos[est]/i);
+  for (const variant of [0, 1, 2]) {
+    const setup = lessonSetup('swap-impact', variant), { question, choices } = tradePrediction(setup), worth = fmt(setup.amount * setup.initialPrice, 0) + ' USDC';
+    assert.equal(question, 'You sell ' + setup.amount + ' ETH. At the starting pool price that is worth ' + worth + '. Will the pool pay you less, the same, or more?');
+    assert.deepEqual(choices, [['less', 'Less than ' + worth], ['same', 'Exactly ' + worth], ['more', 'More than ' + worth]]);
+    const outcome = runLesson('swap-impact', setup, variant);
+    assert.equal(outcome.prediction, 'less'); assert.ok(outcome.out < setup.amount * setup.initialPrice);
+  }
   // Lesson 3's verdict answers the question first, then shows the claim before and after.
   for (const [price, text] of [[1000, /^More ETH\. Traders sold ETH to the pool.*from 1\.25 ETH \+ 2,500 USDC to 1\.7678 ETH \+ 1,767\.77 USDC\.$/],
     [2000, /^The same ETH\..*nobody had a reason to trade\. Your claim is still 1\.25 ETH \+ 2,500 USDC\.$/],
@@ -79,27 +86,28 @@ test('lesson 6 names the move against the range, and its verdict says what the c
   assert.deepEqual([0, 1, 2].map(variant => runLesson('range-boundaries', lessonSetup('range-boundaries', variant), variant).prediction), ['usdc', 'eth', 'both']);
 });
 
-test('lesson 6 uses the names of lessons 3 to 5, and its check questions cannot be read off the figure', () => {
+test('lesson 6 uses the names of lessons 3 to 5, and its question cannot be read off the figure', () => {
   const lesson = LESSONS.find(item => item.id === 'range-boundaries');
   assert.equal(lesson.intro, 'Here your liquidity works only inside a price range you choose. See what your claim holds when ETH leaves it.');
-  const texts = [lesson.intro, lesson.prediction, lesson.reasoning, lesson.explanation, lesson.takeaway, lesson.completion, ...lesson.reasons.map(([, copy]) => copy), ...Object.values(lesson.reasonFeedbackByChoice)];
+  const texts = [lesson.intro, lesson.prediction, lesson.explanation, lesson.takeaway, lesson.completion];
   for (const variant of [0, 1, 2]) {
     const outcome = { ...runLesson('range-boundaries', lessonSetup('range-boundaries', variant), variant), variant }, copy = lessonApplicationCopy('range-boundaries', outcome);
-    texts.push(rangePrediction(outcome.setup, outcome.result), lessonFinding('range-boundaries', outcome), copy.label, copy.context, copy.question, copy.hint, copy.feedback,
-      ...copy.choices.map(([, text]) => text), ...Object.values(copy.feedbackByChoice), lessonReasonFeedback('range-boundaries', outcome, 'zero'));
+    texts.push(rangePrediction(outcome.setup, outcome.result), lessonFinding('range-boundaries', outcome), copy.context, copy.question, copy.hint, copy.feedback,
+      ...copy.choices.map(([, text]) => text), ...Object.values(copy.feedbackByChoice));
     assert.equal(copy.choices[0][0], copy.expected);
-    if (variant < 2) {
-      // A second, narrower range at a price between the two ranges' ends.
-      const { application } = copy, { setup } = outcome, up = variant === 0;
-      assert.equal(application.kind, 'narrower-range');
-      assert.equal(application.next.result.state, 'inside');
-      assert.equal(application.narrow.state, up ? 'above' : 'below');
-      assert.equal(application.narrow.pooled[up ? 'eth' : 'usdc'], 0);
-      assert.ok(Math.abs(application.narrow.upperPrice - application.narrow.lowerPrice - setup.initialPrice * setup.width) < 1e-9, 'Half as wide as the reader’s range.');
-      assert.ok(copy.context.includes(usd(application.narrow.lowerPrice) + '–' + usd(application.narrow.upperPrice)) && copy.context.includes('inside your range, ' + (up ? 'above' : 'below') + ' theirs'), copy.context);
-      assert.equal(copy.choices[0][1], 'Yours holds both tokens. Theirs is all ' + (up ? 'USDC' : 'ETH') + ' and has stopped trading.');
-    } else assert.match(copy.feedback, /not a stop-loss order and not a loan/);
+    // The same idea in every variation: the end fixes the tokens, not the fees
+    // earned on the way. The slider shows end states only, so it cannot answer this.
+    assert.equal(copy.application.kind, 'path-fees');
+    assert.equal(copy.question, 'Did it earn the same fees?');
+    const { pooled } = outcome.result;
+    const ends = variant === 0 ? fmt(pooled.usdc, 2) + ' USDC' : variant === 1 ? fmt(pooled.eth, 4) + ' ETH' : fmt(pooled.eth, 4) + ' ETH + ' + fmt(pooled.usdc, 2) + ' USDC';
+    assert.equal(copy.context, 'ETH can reach ' + usd(outcome.setup.futurePrice) + ' in one move, or after weeks of moving up and down inside your range. Either way your claim ends as ' + ends + '.');
+    // The verdict above it names the same end amounts.
+    assert.ok(lessonFinding('range-boundaries', outcome).includes(variant === 2 ? ends : ends + '.'), copy.context);
   }
+  // A saved setup at the starting price still reads plainly.
+  const base = lessonSetup('range-boundaries');
+  assert.match(lessonApplicationCopy('range-boundaries', { ...runLesson('range-boundaries', { ...base, futurePrice: base.initialPrice }), variant: 0 }).context, /^ETH can stay at \$2,000\.00, or return to it after weeks/);
   const copy = texts.join(' ');
   assert.doesNotMatch(copy, /position|principal|boundary|bound\b|liquidity stays|LP\b/i);
   assert.match(copy, /your claim/i); assert.match(copy, /your range/);
@@ -135,25 +143,30 @@ test('the historical contrast preserves the full record and its final assessed e
 test('lesson 3 names its price move in the question and checks an idea its scene cannot show', () => {
   const questions = [0, 1, 2].map(variant => priceMovePrediction(lessonSetup('token-balances', variant)));
   assert.deepEqual(questions, [
-    'ETH rises from $2,000.00 to $4,000.00. Will your claim hold less, more, or the same ETH?',
-    'ETH falls from $1,500.00 to $750.00. Will your claim hold less, more, or the same ETH?',
-    'ETH rises from $3,000.00 to $4,500.00. Will your claim hold less, more, or the same ETH?',
+    'ETH rises from $2,000.00 to $4,000.00, and traders bring the pool’s price up with it. Will your claim hold less, more, or the same ETH?',
+    'ETH falls from $1,500.00 to $750.00, and traders bring the pool’s price down with it. Will your claim hold less, more, or the same ETH?',
+    'ETH rises from $3,000.00 to $4,500.00, and traders bring the pool’s price up with it. Will your claim hold less, more, or the same ETH?',
   ]);
+  // The condition now sits in the question, so the intro does not repeat it.
+  assert.equal(LESSONS.find(item => item.id === 'token-balances').intro, 'Watch what a price move does to your claim, the tokens behind your share.');
   assert.match(priceMovePrediction({ initialPrice: 2000, futurePrice: 2000 }), /^ETH stays at \$2,000\.00\./);
   for (const variant of [0, 1, 2]) {
-    const copy = tokenBalanceNarration(runLesson('token-balances', lessonSetup('token-balances', variant), variant));
+    const copy = untradedMarketQuestion(runLesson('token-balances', lessonSetup('token-balances', variant), variant));
     // The slider always shows a pool that traders have already brought to the
     // market price, so a pool nobody has traded with yet is a new situation.
-    assert.match(copy.reasoning, /nobody has traded with the pool yet/);
+    assert.match(copy.context, /nobody has traded with the pool yet\.$/);
+    assert.equal(copy.question, 'Have your claim’s tokens changed?');
+    // The right answer claims only what is true here: deposits and fees change a pool too.
+    assert.doesNotMatch(copy.choices[0][1], /Only a trade/);
     // The lesson's one explanation must not hand over the answer word for word.
     const lesson = LESSONS.find(item => item.id === 'token-balances');
-    for (const [, answer] of copy.reasons) assert.ok(!lesson.explanation.includes(answer.split('. ')[1]), answer);
-    const words = copy.reasons.map(([, answer]) => answer.split(' ').length);
+    for (const [, answer] of copy.choices) assert.ok(!lesson.explanation.includes(answer.split('. ')[1]), answer);
+    const words = copy.choices.map(([, answer]) => answer.split(' ').length);
     assert.ok(Math.max(...words) - Math.min(...words) <= 3, 'answers are of similar length: ' + words);
   }
 });
 
-test('lesson 4 asks about holding in the lesson’s own numbers and leaves the cause to its check question', () => {
+test('lesson 4 asks about holding in the lesson’s own numbers and names the cause in its panel', () => {
   const lesson = LESSONS.find(item => item.id === 'loss-vs-profit');
   for (const variant of [0, 1, 2]) for (const factor of [.5, 1, 1.5, 2]) {
     const base = lessonSetup('loss-vs-profit', variant);
@@ -171,14 +184,11 @@ test('lesson 4 asks about holding in the lesson’s own numbers and leaves the c
       assert.ok(finding.startsWith('Less. Your claim is worth ' + usd(result.lpBeforeFees) + ', which is ' + usd(result.breakEvenFees) + ' less than holding'), finding);
       assert.match(finding, factor > 1 ? /It is still \$[\d,.]+ more than the \$[\d,.]+ you started with\.$/ : / and \$[\d,.]+ less than the \$[\d,.]+ you started with\.$/);
     }
-    // The explanation names the gap and leaves its cause to the check question.
-    const correct = lossProfitReasoning(outcome).reasons[0][1];
-    assert.ok(!lesson.explanation.includes(correct));
-    assert.doesNotMatch(lesson.explanation, /bought ETH|sold ETH|holds less ETH|holds more ETH/);
-    const words = lossProfitReasoning(outcome).reasons.map(([, answer]) => answer.split(' ').length);
-    assert.ok(Math.max(...words) - Math.min(...words) <= 5, 'answers are of similar length: ' + words);
   }
+  // The panel gives the cause for both directions, so it holds wherever the slider is.
+  assert.match(lesson.explanation, /never beats holding\. As ETH rises, traders buy ETH from the pool\. As it falls, they sell ETH to it\. Holding makes neither trade/);
   assert.match(lesson.explanation, /never beats holding[\s\S]*impermanent loss[\s\S]*a comparison, not a charge/);
+  assert.doesNotMatch(lesson.explanation, /tokens under each bar show why/);
   assert.doesNotMatch(lesson.intro, /fall behind|behind holding|trails/);
 });
 
@@ -208,21 +218,28 @@ test('lesson 5 asks which bar fees grow, in the lesson’s own numbers, and says
   assert.deepEqual(lesson.predictions.map(([, label]) => label), ['Only my claim', 'Both bars', 'Neither. The fees go to whoever runs the pool.']);
 });
 
-test('lesson 7 is a challenge in the lesson’s names: the question is a first step and the verdict says why a fall is needed', async () => {
+test('lesson 7 is a challenge in the lesson’s names: its first step has one true answer and the verdict says why a fall is needed', async () => {
   const lesson = LESSONS.find(item => item.id === 'final-challenge');
-  assert.equal(lesson.prediction, 'Which change in the ETH price would you try first?');
-  assert.deepEqual(lesson.predictions.map(([id]) => id), ['lower-price', 'higher-price', 'same-price']);
+  // "Which would you try first" had no wrong answer, so it could not be marked.
+  assert.equal(lesson.prediction, 'Which price move can leave holding worth less than your start?');
+  assert.deepEqual(lesson.predictions, [['lower-price', 'A fall in ETH'], ['higher-price', 'A rise in ETH'], ['either', 'Either one']]);
   assert.match(lesson.intro, /^Use what you know\. Pick a price and a fee income so that your claim matches holding, and both are worth less than you started with\.$/);
   assert.match(lesson.explanation, /^Matching holding and making money are two different results\./);
   for (const variant of [0, 1, 2]) {
     const outcome = runLesson('final-challenge', lessonSetup('final-challenge', variant), variant);
     assert.equal(outcome.prediction, 'lower-price');
-    assert.equal(outcome.reason, 'total');
+    // Holding is below the start only after a fall, so "a rise" and "either one" are false.
+    const { setup } = outcome, holding = price => runLesson('final-challenge', { ...setup, futurePrice: price, fees: 0 }, variant).result.holdValue;
+    assert.ok(holding(setup.initialPrice * .5) < setup.investment && holding(setup.initialPrice * 2) > setup.investment);
     assert.equal(lessonFinding('final-challenge', outcome), 'A fall in ETH. Only a lower price takes holding below your ' + usd(outcome.setup.investment)
       + ' start. Fees can then bring your claim level with holding, and both are still worth less than you started with.');
   }
   // One set of names from lessons 3 to 5: your claim, holding, your start.
-  const copy = JSON.stringify([lesson.intro, lesson.reasoning, lesson.reasons, lesson.reasonFeedbackByChoice, lesson.explanation])
+  const question = lessonApplicationCopy('final-challenge', { ...runLesson('final-challenge', lessonSetup('final-challenge')), variant: 0 });
+  // Two plausible answers are enough. Collecting fees is never introduced in these lessons.
+  assert.deepEqual(question.choices.map(([id]) => id), ['relative-gap', 'capital-restored']);
+  assert.doesNotMatch(JSON.stringify(question), /collect/i);
+  const copy = JSON.stringify([lesson.intro, lesson.prediction, lesson.predictions, lesson.explanation, question])
     + await readFile(new URL('../public/lib/liquidity-application-scene.js', import.meta.url), 'utf8')
     + await readFile(new URL('../public/lib/comparison-lesson-scene.js', import.meta.url), 'utf8')
     + await readFile(new URL('../public/lib/comparison-bars.js', import.meta.url), 'utf8');

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { LESSONS } from '../public/learning/liquidity-essentials.js';
 import { lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
 import { checkLessonUnderstanding } from '../public/models/lesson-application.js';
-import { tokenBalanceNarration, claimText, benchmarkNarration, lessonReasonFeedback } from '../public/lib/lesson-narration.js';
+import { tokenBalanceNarration, untradedMarketQuestion, claimText, benchmarkNarration } from '../public/lib/lesson-narration.js';
+import { lessonApplicationCopy } from '../public/lib/lesson-application-copy.js';
 import { lessonWalkthrough } from '../public/lib/lesson-walkthrough.js';
 import { readFile } from 'node:fs/promises';
 import { validatePositionPeriod } from '../public/data/position-period.js';
@@ -14,7 +15,7 @@ import { APPLIED_LESSONS } from '../public/learning/applied-liquidity.js';
 test('rising, falling and unchanged prices agree with the explanation and never accept token creation', () => {
   for (let variant = 0; variant < 3; variant++) for (const factor of [.5, 1, 2]) {
     const setup = lessonSetup('token-balances', variant), input = {futurePrice: setup.initialPrice * factor};
-    const result = runLesson('token-balances', input, variant), copy = tokenBalanceNarration(result);
+    const result = runLesson('token-balances', input, variant), copy = tokenBalanceNarration(result), question = untradedMarketQuestion(result);
     const start = claimText(result.result.held), now = claimText(result.result.pooled);
     assert.equal(result.prediction, factor < 1 ? 'more' : factor > 1 ? 'less' : 'same');
     assert.equal(copy.direction, factor < 1 ? 'down' : factor > 1 ? 'up' : 'same');
@@ -26,34 +27,40 @@ test('rising, falling and unchanged prices agree with the explanation and never 
       assert.match(copy.exchange, /sell ETH to the pool.*more ETH and less USDC/);
     } else {
       assert.deepEqual(result.result.pooled, result.result.held);
-      assert.match(copy.reasoning, /stay the same/); assert.match(copy.correctReason, /no price change/);
+      assert.match(question.question, /stay the same/); assert.match(question.choices[0][1], /no price change/);
       assert.match(lessonWalkthrough('token-balances', result)[2][0], /unchanged/);
     }
-    // The check question steps outside the scene: the market moved and nobody has traded yet.
+    // The question steps outside the scene: the market moved and nobody has traded yet.
     if (factor !== 1) {
-      assert.match(copy.reasoning, new RegExp('market price ' + (factor > 1 ? 'jumps' : 'drops') + ' to .*nobody has traded with the pool yet'));
-      assert.equal(copy.correctReason, 'Still ' + start + '. Only a trade changes it.');
-      assert.ok(copy.reasons.find(([id]) => id === 'automatic')[1].startsWith('Already ' + now + '.'));
-      assert.ok(copy.feedbackByChoice.automatic.includes(now) && copy.feedbackByChoice.rebalance.includes(start));
+      assert.match(question.context, new RegExp('market price ' + (factor > 1 ? 'jumps' : 'drops') + ' to .*nobody has traded with the pool yet'));
+      assert.equal(question.choices[0][1], 'No. Still ' + start + '. Nothing has moved in or out.');
+      assert.ok(question.choices.find(([id]) => id === 'automatic')[1].startsWith('Yes. Already ' + now + '.'));
+      assert.ok(question.feedbackByChoice.automatic.includes(now) && question.feedbackByChoice.rebalance.includes(start));
     }
-    assert.deepEqual(copy.reasons.map(([id]) => id), ['rebalance', 'automatic', 'drift']);
+    assert.deepEqual(question.choices.map(([id]) => id), ['rebalance', 'automatic', 'drift']);
     assert.match(copy.explanation, /neither ETH nor USDC is created/);
+    // The lesson's question is this one, with its feedback for every answer.
+    const asked = lessonApplicationCopy('token-balances', { ...result, variant });
+    assert.equal(asked.expected, 'rebalance'); assert.deepEqual(asked.choices, question.choices);
     for (const wrong of ['automatic', 'drift']) {
-      assert.equal(checkLessonUnderstanding('token-balances', input, variant, wrong).reasoning, false);
-      assert.equal(lessonReasonFeedback('token-balances', result, wrong), copy.feedbackByChoice[wrong]);
+      assert.equal(checkLessonUnderstanding('token-balances', input, variant, wrong).passed, false);
+      assert.equal(asked.feedbackByChoice[wrong], question.feedbackByChoice[wrong]);
     }
-    assert.match(lessonReasonFeedback('token-balances', result, 'drift'), /Time alone changes nothing in a pool/);
-    assert.match(lessonReasonFeedback('token-balances', result, 'automatic'), factor === 1 ? /does not hold its amounts fixed/ : /does not watch the market/);
-    assert.equal(lessonReasonFeedback('token-balances', result, 'rebalance'), copy.feedbackByChoice.rebalance);
+    assert.equal(checkLessonUnderstanding('token-balances', input, variant, 'rebalance').passed, true);
+    assert.match(question.feedbackByChoice.drift, /Time alone changes nothing in a pool/);
+    assert.match(question.feedbackByChoice.automatic, factor === 1 ? /does not hold its amounts fixed/ : /does not watch the market/);
+    assert.ok(question.hint);
   }
 });
-test('all foundation distractors are rejected and explain the misconception in every variation', () => {
+test('every wrong answer is rejected and has its own feedback in every variation', () => {
   for (const lesson of LESSONS) for (let variant = 0; variant < 3; variant++) {
-    const inputs = lessonSetup(lesson.id, variant), result = runLesson(lesson.id, inputs, variant);
-    for (const [reason] of lesson.reasons) {
-      assert.equal(checkLessonUnderstanding(lesson.id, inputs, variant, reason).reasoning, reason === result.reason);
-      if (reason !== result.reason) assert.doesNotMatch(lessonReasonFeedback(lesson.id, result, reason, lesson.reasonFeedbackByChoice), /^Choose an explanation/);
+    const inputs = lessonSetup(lesson.id, variant), result = { ...runLesson(lesson.id, inputs, variant), variant };
+    const copy = lessonApplicationCopy(lesson.id, result);
+    for (const [answer] of copy.choices) {
+      assert.equal(checkLessonUnderstanding(lesson.id, inputs, variant, answer).application, answer === copy.expected);
+      if (answer !== copy.expected) assert.ok(copy.feedbackByChoice[answer], lesson.id + ' ' + answer);
     }
+    assert.ok(copy.feedbackByChoice[copy.expected] || copy.feedback, lesson.id);
   }
 });
 test('benchmark explanations follow actual profit, total targets and additional fees including no price change', () => {
@@ -78,7 +85,8 @@ test('range boundary questions and predictions agree across all widths and varia
       const result = runLesson('range-boundaries', {futurePrice: initialPrice * factor, width}, variant);
       assert.equal(result.prediction, prediction);
       if (share !== null) assert.equal(result.result.finalEthPercent, share);
-      assert.equal(checkLessonUnderstanding('range-boundaries', result.setup, variant, 'zero').reasoning, false);
+      assert.equal(checkLessonUnderstanding('range-boundaries', result.setup, variant, 'same-end').passed, false);
+      assert.equal(checkLessonUnderstanding('range-boundaries', result.setup, variant, 'path').passed, true);
     }
   }
 });

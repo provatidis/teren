@@ -79,49 +79,54 @@ export async function checkRangeLesson({ evaluate, click, fill, text, navigate, 
   assert.equal(await saved(), revealed, 'Exploration must not change the fixed question or progress.');
   assert.match(await text('learn-prediction-feedback'), /ETH at \$2,400\.00: Only USDC\./, 'The verdict stays with the question’s price.');
 
-  // The check questions: one about fees, one about a range the figure does not show.
-  assert.equal(await text('learn-reason-question'), 'What does the price ETH ends at tell you about your claim’s fees?');
-  assert.equal(await text('learn-application-label'), 'A narrower range');
-  assert.equal(await text('learn-application-context'), 'Someone else starts with the same $5,000.00 at the same price, in a narrower range: $1,900.00–$2,100.00. ETH is now $2,160.00: inside your range, above theirs.');
-  assert.equal(await text('learn-application-question'), 'What do the two claims hold?');
-  await choose('learn-reason', 'zero'); await choose('learn-application', 'narrow-keeps'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Review your answers.');
-  assert.match(await text('learn-reasons-feedback'), /It does not say it earned nothing on the way/);
-  assert.match(await text('learn-applications-feedback'), /A narrower range trades faster, not less[\s\S]*Theirs ran out at \$2,100\.00/);
-  await choose('learn-reason', 'fixed'); await choose('learn-application', 'both-hold'); await click('learn-check');
-  assert.match(await text('learn-reasons-feedback'), /The width decides at which prices your claim can trade/);
-  assert.match(await text('learn-applications-feedback'), /Their range ends at \$2,100\.00, and their last ETH went there/);
-  await choose('learn-reason', 'path'); await choose('learn-application', 'narrow-out'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  // The question: the end fixes the tokens, not the fees earned on the way. The slider
+  // shows end states only, so it cannot answer this.
+  const asked = await text('learn-application-context');
+  assert.equal(asked, 'ETH can reach $2,400.00 in one move, or after weeks of moving up and down inside your range. Either way your claim ends as 5,116.06 USDC.');
+  assert.equal(await text('learn-application-question'), 'Did it earn the same fees?');
+  assert.equal(await evaluate("document.querySelectorAll('#learn-assessment-form fieldset').length"), 1);
+  await fill('boundary-price', '2100');
+  assert.equal(await text('learn-application-context'), asked, 'Exploring a price must not rewrite the question.');
+  await choose('learn-application', 'same-end'); await click('learn-check');
+  assert.equal(await text('learn-feedback-title'), 'Review your answer.');
+  assert.match(await text('learn-applications-feedback'), /The end fixes which tokens your claim holds[\s\S]*the two paths did not have the same trades/);
+  await choose('learn-application', 'range-only'); await click('learn-check');
+  assert.match(await text('learn-applications-feedback'), /The range decides at which prices your claim can earn[\s\S]*how much trading happens inside it/);
+  await choose('learn-application', 'path'); await click('learn-check');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 6 done.');
+  assert.match(await text('learn-applications-feedback'), /^That’s right\.[\s\S]*only trades inside your range pay your claim[\s\S]*The tokens you end with are the same either way, so they cannot show it\.$/);
   await evaluate("document.querySelector('.scene-prediction-recap button').click()");
   await choose('learn-prediction', 'usdc');
   assert.match(await text('learn-prediction-feedback'), /^Your prediction matches/);
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.', 'A prediction chosen afterwards keeps the checked answers.');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 6 done.', 'A prediction chosen afterwards keeps the checked answer.');
   assert.match(await evaluate("document.getElementById('learn-explore').href"), /liquidity\.html#/);
   assert.equal(await text('learn-explore-note'), 'Opens this range in a new tab. Move its ends and the price, and see where it runs out of a token.');
   await reload();
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 6 done.');
   assert.deepEqual([await evaluate("document.getElementById('boundary-price').value"), await text('boundary-where'), await evaluate("document.querySelector('input[name=learn-prediction]:checked').value")],
     ['2400', 'Above your range', 'usdc'], 'A restored lesson shows its outcome and the slider at the question’s price.');
 
   // The variations end above, below and inside the range, with the model's own values.
+  // All three ask the same question, about the same idea, with their own end amounts.
   const expected = [
-    ['Above your range', /Only USDC\.[\s\S]*the upper end of your range/, 'A narrower range'],
-    ['Below your range', /Only ETH\. On the way down, traders sold ETH to your claim and took USDC\. The last USDC went at \$1,350\.00, the lower end of your range\. Below it nothing trades, so your claim stays at 2\.0567 ETH\./, 'A narrower range'],
-    ['Inside your range', /ETH and USDC\. \$3,150\.00 is inside your range, so traders are still swapping against your claim\.[\s\S]*less ETH and more USDC than at the start\./, 'ETH falls below your range'],
+    ['Above your range', /Only USDC\.[\s\S]*the upper end of your range/, 'ETH can reach $2,400.00 in one move, or after weeks of moving up and down inside your range. Either way your claim ends as 5,116.06 USDC.'],
+    ['Below your range', /Only ETH\. On the way down, traders sold ETH to your claim and took USDC\. The last USDC went at \$1,350\.00, the lower end of your range\. Below it nothing trades, so your claim stays at 2\.0567 ETH\./, 'ETH can reach $1,275.00 in one move, or after weeks of moving up and down inside your range. Either way your claim ends as 2.0567 ETH.'],
+    ['Inside your range', /ETH and USDC\. \$3,150\.00 is inside your range, so traders are still swapping against your claim\.[\s\S]*less ETH and more USDC than at the start\./, 'ETH can reach $3,150.00 in one move, or after weeks of moving up and down inside your range. Either way your claim ends as 0.4586 ETH + 4,660.72 USDC.'],
   ];
   for (let variant = 0; variant < 3; variant++) {
     if (variant) { await click('learn-variation'); await click('learn-reveal'); }
     const { result, setup } = runLesson('range-boundaries', lessonSetup('range-boundaries', variant), variant);
     assert.deepEqual(await evaluate(figureText), ['ETH at ' + usd(setup.futurePrice), expected[variant][0], fmt(result.pooled.eth, 4) + ' ETH', fmt(result.pooled.usdc, 2) + ' USDC']);
     assert.match(await text('learn-prediction-feedback'), expected[variant][1]);
-    assert.equal(await text('learn-application-label'), expected[variant][2]);
+    assert.equal(await text('learn-application-context'), expected[variant][2]);
+    assert.equal(await text('learn-application-question'), 'Did it earn the same fees?');
     assert.equal(await evaluate("document.documentElement.scrollWidth <= innerWidth"), true);
   }
   assert.equal(await text('boundary-invite'), 'Now drag the price out of your range. Where do the bars stop?', 'Inside the range the invitation points outward.');
-  assert.match(await text('learn-application-context'), /ETH reaches \$2,700\.00, the lower end of your range\. Your claim is now all ETH\./);
+  // Below the range the figure itself shows the ETH amount staying put: the panel says the amounts stay as they are.
+  assert.match(await text('boundary-why'), /Outside the range nothing trades: the amounts stay as they are and no new fees come in\./);
   await click('learn-variation'); await click('learn-variation'); await click('learn-reveal');
-  assert.match(await text('learn-application-context'), /narrower range: \$1,425\.00–\$1,575\.00\. ETH is now \$1,380\.00: inside your range, below theirs\./);
+  assert.match(await text('learn-application-context'), /^ETH can reach \$1,275\.00 in one move/);
 
   // A range width saved by the earlier editor still loads, with its own range and domain.
   await evaluate("{const progress=JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1'));Object.assign(progress.drafts['range-boundaries'].inputs,{width:.5});localStorage.setItem('degenerator-learning-liquidity-v1',JSON.stringify(progress));}");
@@ -130,7 +135,7 @@ export async function checkRangeLesson({ evaluate, click, fill, text, navigate, 
   assert.match(await evaluate("document.querySelector('.scene-prediction-question').textContent"), /^ETH falls from \$1,500\.00 to \$1,275\.00, still inside your range\./);
   assert.equal(await evaluate("(slider => Number(slider.min) < 750 && Number(slider.max) > 2250)(document.getElementById('boundary-price'))"), true);
   await reset();
-  console.log('PASS: lesson 6 opens on the claim inside its range, moves the price across it, holds one token past either end, keeps exploration apart from the question, asks about a narrower range and restores completion');
+  console.log('PASS: lesson 6 opens on the claim inside its range, moves the price across it, holds one token past either end, keeps exploration apart from the question, asks whether the end shows the fees and restores completion');
 
   const progressKey = 'degenerator-learning-liquidity-v1';
   const kept = await saved();

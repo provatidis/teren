@@ -69,26 +69,29 @@ export async function checkFeeLesson({ evaluate, click, fill, text, navigate, re
   await call('Input.dispatchKeyEvent', { type: 'keyUp', key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39 });
   assert.equal(await text('fee-against-gap'), 'Against holding: $0.00', 'A keyboard step settles on the exact amount.');
 
-  // The check questions.
-  assert.equal(await text('learn-reason-question'), 'What do the break-even fees tell you?');
-  const evidence = await text('learn-application-evidence');
-  for (const phrase of ['Starting ETH price', '$2,000.00', 'fees covered the gap', '$4,000.00', 'Later ETH price', '$6,000.00']) assert.ok(evidence.includes(phrase));
+  // The question: what the figure can and cannot tell you. Its fees are an amount the reader sets.
+  const asked = await text('learn-application-context');
+  assert.equal(asked, 'Enter more than $428.93 in fees and the figure shows your claim ahead of holding.');
+  assert.equal(await text('learn-application-question'), 'What would you need before saying a real claim beat holding?');
+  assert.equal(await evaluate("document.querySelectorAll('#learn-assessment-form fieldset').length"), 1);
   await fill('fee-amount', '250');
-  assert.equal(await text('learn-application-evidence'), evidence, 'Exploring fees must not change the evidence beside the application.');
-  await choose('learn-reason', 'compound'); await choose('learn-application', 'still-matches'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Review your answers.');
-  assert.match(await text('learn-reasons-feedback'), /not a balance you can collect/);
-  assert.match(await text('learn-applications-feedback'), /Matching holding at one price does not lock in that result/);
-  await choose('learn-reason', 'assumption'); await choose('learn-application', 'gap-reopens'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.equal(await text('learn-application-context'), asked, 'Exploring fees must not rewrite the question.');
+  await choose('learn-application', 'figure'); await click('learn-check');
+  assert.equal(await text('learn-feedback-title'), 'Review your answer.');
+  assert.match(await text('learn-applications-feedback'), /cannot show whether any pool paid that amount/);
+  await choose('learn-application', 'fee-rate'); await click('learn-check');
+  assert.match(await text('learn-applications-feedback'), /The 0\.3% fee is the rate each trade pays[\s\S]*how much trading the pool saw/);
+  await choose('learn-application', 'record'); await click('learn-check');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 5 done.');
+  assert.match(await text('learn-applications-feedback'), /^That’s right\.[\s\S]*an amount you chose[\s\S]*Its costs count too, and this figure leaves them out\.$/);
   await evaluate("document.querySelector('.scene-prediction-recap button').click()");
   await choose('learn-prediction', 'toward-target');
   assert.match(await text('learn-prediction-feedback'), /^Your prediction matches/);
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.', 'A prediction chosen afterwards keeps the checked answers.');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 5 done.', 'A prediction chosen afterwards keeps the checked answer.');
   const link = await evaluate("document.getElementById('learn-explore').href");
   assert.match(link, /future=4000/); assert.match(link, /fees=100/);
   await reload();
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+  assert.equal(await text('learn-feedback-title'), 'Lesson 5 done.');
   assert.deepEqual([await evaluate("document.getElementById('fee-amount').value"), await text('fee-earned'), await evaluate("document.querySelector('input[name=learn-prediction]:checked').value")],
     ['100', 'Gap covered: $100.00 of $428.93', 'toward-target'], 'A restored lesson shows its outcome and the slider at the question’s fees.');
 
@@ -99,6 +102,13 @@ export async function checkFeeLesson({ evaluate, click, fill, text, navigate, re
     assert.deepEqual([await text('fee-hold'), await text('fee-claim'), await text('fee-earned')], [usd(result.holdValue), usd(result.lpValue), 'Gap covered: ' + usd(setup.fees) + ' of ' + usd(result.breakEvenFees)]);
     assert.match(await text('learn-prediction-feedback'), variant === 2 ? /to \$98\.47 ahead\./ : /behind\. Holding is tokens/);
     assert.equal(await evaluate("document.documentElement.scrollWidth <= innerWidth"), true);
+    // The amount the question names can be reached on this variation's own slider, and the figure then shows the claim ahead.
+    assert.equal(await text('learn-application-context'), 'Enter more than ' + usd(result.breakEvenFees) + ' in fees and the figure shows your claim ahead of holding.');
+    const top = Number(await evaluate("document.getElementById('fee-amount').max"));
+    assert.ok(top > result.breakEvenFees + 1, 'variation ' + (variant + 1) + ': the fee slider stops at ' + top);
+    await fill('fee-amount', String(Math.ceil(result.breakEvenFees) + 1));
+    assert.match(await text('fee-against-gap'), /^Against holding: \+\$/);
+    await fill('fee-amount', String(setup.fees));
   }
   console.log('PASS: lesson 5 opens on the gap to holding, adds fees to the claim alone, lands exactly on the break-even fees, keeps exploration apart from the question and restores completion');
 
@@ -155,7 +165,6 @@ export async function checkFeeLesson({ evaluate, click, fill, text, navigate, re
         await call('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
       } finally { await call('Emulation.setTouchEmulationEnabled', { enabled: false }); }
       assert.equal(Number(await evaluate("document.getElementById('fee-amount').value")), Number(await evaluate("document.getElementById('fee-amount').max")));
-      assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), false);
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
     }
     // Reduced motion shows the outcome at once.

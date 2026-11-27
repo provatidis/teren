@@ -1,87 +1,45 @@
-import { runLesson } from './lesson-experiments.js';
+import { runLesson, lessonSetup } from './lesson-experiments.js';
 import { checkLiquidityChallenge } from './liquidity-challenge.js';
-import { calculateScenario } from './cp50-v1.js';
-import { calculateRange } from './cl-range-v1.js';
 
 // Missing revisions describe the original questions. Keep completed lessons,
 // but do not reuse an answer when the question it answered has changed.
+// Since 1.68.0 one question follows each figure. Lessons 1 to 6 ask a new or
+// reworded one in every variation. The challenge keeps its question, so a
+// saved answer and the reader's own example stay.
 export function essentialQuestionRevisions(id, variant) {
-  const changed = ['loss-vs-profit', 'fee-break-even', 'final-challenge'].includes(id)
-    || (['swap-impact', 'token-balances'].includes(id) && variant === 1)
-    || (['pool-share', 'range-boundaries'].includes(id) && variant > 0);
   return {
-    prediction: id === 'fee-break-even' ? 4 : ['final-challenge', 'pool-share', 'loss-vs-profit'].includes(id) || (id === 'range-boundaries' && variant > 0) ? 2 : 1,
-    reason: id === 'token-balances' ? 4 : id === 'final-challenge' ? 3 : ['loss-vs-profit', 'swap-impact'].includes(id) ? 2 : 1,
-    // Lesson 6's first two variations ask about a narrower range beside the reader's own.
-    application: id === 'swap-impact' ? 3 : id === 'pool-share' ? [2, 3, 2][variant] : id === 'loss-vs-profit' && variant !== 1 ? 4
-      : id === 'range-boundaries' ? [2, 3, 2][variant]
-      : ['loss-vs-profit', 'fee-break-even'].includes(id) ? 3 : changed ? 2 : 1,
+    prediction: id === 'fee-break-even' ? 4 : id === 'final-challenge' ? 3 : id === 'range-boundaries' && variant === 0 ? 1 : 2,
+    application: id === 'final-challenge' ? 2 : 5,
   };
 }
 
-// Construct the changed situation using the same calculations as the lesson.
+// The question after the figure takes the lesson's idea to a case the figure
+// does not show, built with the same calculations as the lesson.
 export function lessonApplication(id, outcome) {
-  const s = outcome.setup;
-  if (id === 'swap-impact') {
-    const tolerance = 0.5;
-    return {kind: 'wallet-quote', quote: outcome.out, impact: outcome.impact, tolerance,
-      minimumReceived: outcome.out * (1 - tolerance / 100),
-      startingValue: s.amount * s.initialPrice,
-      expected: 'quote-received'};
-  }
-  // The lesson's scene already shows a trader selling ETH, so no variation asks
-  // about that again. Each one changes the situation.
-  if (id === 'pool-share') return {kind: ['later-deposit', 'later-withdrawal', 'reverse-swap'][outcome.variant ?? 0],
-    expected: ['diluted-same-claim', 'larger-same-claim', 'reverse-swap'][outcome.variant ?? 0]};
-  if (id === 'token-balances') {
-    if (outcome.variant === 1) {
-      const next = runLesson(id, {futurePrice: s.initialPrice / 2}, outcome.variant);
-      return {kind: 'more-tokens-less-value', next, expected: 'more-eth-less-value'};
-    }
-    const next = runLesson(id, {futurePrice: s.initialPrice}, outcome.variant);
-    return {kind: 'price-return', next, expected: 'original-mix'};
-  }
-  if (id === 'loss-vs-profit' && outcome.variant !== 1) {
-    const fees = outcome.variant === 2 ? 200 : 180;
-    const setup = {...s, fees};
-    const next = {setup, result: calculateScenario(setup)};
-    return {kind: 'dashboard-benchmark', fees, next,
-      allEthValue: s.investment / s.initialPrice * s.futurePrice, expected: 'holding-basket'};
-  }
+  const variant = outcome.variant ?? 0;
+  if (id === 'swap-impact') return {kind: 'deeper-pool', deeperOut: outcome.deeperOut, expected: 'deeper'};
+  // The scene already shows a trade changing the tokens behind a fixed share.
+  // Here another provider changes the share and the tokens stay.
+  if (id === 'pool-share') return {kind: variant === 1 ? 'later-withdrawal' : 'later-deposit', expected: 'same-tokens'};
+  if (id === 'token-balances') return {kind: 'untraded-market', expected: 'rebalance'};
   if (id === 'loss-vs-profit') {
-    const futurePrice = s.futurePrice < s.initialPrice ? s.initialPrice * 2 : s.initialPrice / 2;
-    const next = runLesson(id, {futurePrice}, outcome.variant);
-    return {kind: 'withdrawal-gap', futurePrice, next, expected: 'gap-unchanged'};
+    // Two true readings of one claim: against the deposit and against holding.
+    // A saved setup at the starting price has neither to show, so it borrows
+    // the variation's own price move.
+    const gapShare = result => result.breakEvenFees / result.holdValue;
+    const moved = gapShare(outcome.result) >= 5e-5 ? outcome : runLesson(id, {futurePrice: lessonSetup(id, variant).futurePrice}, variant);
+    return {kind: 'two-views', setup: moved.setup, result: moved.result,
+      returnPercent: (moved.result.lpBeforeFees / moved.setup.investment - 1) * 100,
+      behindPercent: gapShare(moved.result) * 100, expected: 'both-right'};
   }
-  if (id === 'fee-break-even') {
-    const fees = outcome.result.breakEvenFees;
-    const futurePrice = s.futurePrice < s.initialPrice ? s.futurePrice / 2 : s.futurePrice * 1.5;
-    const setup = {...s, futurePrice, fees};
-    const next = {setup, result: calculateScenario(setup)};
-    return {kind: 'moving-fee-target', fees, futurePrice, next,
-      expected: next.result.difference < 0 ? 'gap-reopens' : next.result.difference > 0 ? 'now-ahead' : 'still-matches'};
-  }
-  if (id === 'range-boundaries') {
-    if (outcome.variant === 2) {
-      const futurePrice = s.initialPrice * (1 - s.width);
-      return {kind: 'lower-edge', futurePrice, next: runLesson(id, {futurePrice, width: s.width}, outcome.variant), expected: 'eth-owned'};
-    }
-    // A second claim with half the range, at a price between the two ranges' ends:
-    // inside the reader's range, past the narrower one. The scene cannot show it.
-    const side = outcome.variant === 1 ? -1 : 1, narrowWidth = s.width / 2;
-    const futurePrice = s.initialPrice * (1 + side * s.width * .8);
-    const next = runLesson(id, {futurePrice, width: s.width}, outcome.variant);
-    const narrow = calculateRange({...s, futurePrice, lowerPrice: s.initialPrice * (1 - narrowWidth), upperPrice: s.initialPrice * (1 + narrowWidth), fees: 0, fullRangeFees: 0});
-    if (next.result.state !== 'inside' || narrow.state !== (side > 0 ? 'above' : 'below')) throw new Error('The narrower range must end before this price.');
-    return {kind: 'narrower-range', futurePrice, next, narrow, expected: 'narrow-out'};
-  }
+  if (id === 'fee-break-even') return {kind: 'fee-evidence', gap: outcome.result.breakEvenFees, expected: 'record'};
+  if (id === 'range-boundaries') return {kind: 'path-fees', state: outcome.result.state, expected: 'path'};
   if (id === 'final-challenge') return {kind: 'construct-example', expected: 'relative-gap'};
   throw new Error('Choose a supported application exercise.');
 }
-export function checkLessonUnderstanding(id, input, variant, reason, answer, task) {
+export function checkLessonUnderstanding(id, input, variant, answer, task) {
   const outcome = {...runLesson(id, input, variant), variant};
-  const application = lessonApplication(id, outcome);
-  const reasoning = reason === outcome.reason, applied = answer === application.expected;
+  const applied = answer === lessonApplication(id, outcome).expected;
   const demonstration = id !== 'final-challenge' || checkLiquidityChallenge(outcome.setup, task).passed;
-  return {reasoning, application: applied, demonstration, passed: reasoning && applied && demonstration};
+  return {application: applied, demonstration, passed: applied && demonstration};
 }

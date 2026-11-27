@@ -42,7 +42,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
   assert.equal(await text('foundation-average'), 'Average price you receive: $1,813.22 per ETH');
   assert.equal(await text('foundation-pool-price'), 'Pool price after the swap: $1,653.34 per ETH');
   assert.equal(await text('foundation-execution-2'), '1,813.22');
-  assert.match(await text('learn-prediction-feedback'), /starting pool price of \$2,000\.00, 10 ETH is worth 20,000 USDC\. The pool quotes 18,132\.22 USDC for the whole trade/);
+  assert.match(await text('learn-prediction-feedback'), /Less\. The pool pays 18,132\.22 USDC for the whole trade, an average price of \$1,813\.22 per ETH\. At the starting pool price of \$2,000\.00, 10 ETH would be worth 20,000 USDC\./);
   assert.doesNotMatch(await text('learn-prediction-feedback'), /\blos[est]/i, 'The difference is in the quote; it is not called a loss.');
   assert.deepEqual(await evaluate("[document.querySelector('.scene-prediction').dataset.folded, document.querySelector('.scene-prediction-recap span').textContent, document.querySelector('.scene-prediction-recap button').textContent]"),
     ['true', 'Your prediction for the 10 ETH swap', 'Change']);
@@ -71,31 +71,37 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
   await click('learn-reveal');
   assert.equal(await evaluate("document.getElementById('foundation-amount').value"), '10');
   assert.equal(await stage(), '1', 'Showing the question outcome again restores its amount.');
-  assert.match(await text('learn-reason-question'), /ten times as much of each token\. You sell 10 ETH into each\./);
-  await choose('learn-reason', 'shallow'); await choose('learn-application', 'quote-received'); await click('learn-check');
-  assert.match(await text('learn-reasons-feedback'), /works against you[\s\S]*This pool quotes 18,132\.22 USDC; the deeper pool would quote 19,743\.16 USDC\./);
-  await choose('learn-reason', 'deeper'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
-  assert.match(await text('learn-reasons-feedback'), /10% of this pool’s ETH and 1% of the deeper pool’s[\s\S]*19,743\.16 USDC/);
+  // One question follows the figure: its case, the question, a hint and one button.
+  assert.match(await text('learn-application-context'), /ten times as much of each token\. You sell 10 ETH into each\.$/);
+  assert.equal(await text('learn-application-question'), 'Which pool gives you more USDC, and why?');
+  assert.deepEqual(await evaluate("[document.querySelectorAll('#learn-assessment-form fieldset').length, document.getElementById('learn-check').textContent, document.getElementById('learn-hint-text').textContent]"),
+    [1, 'Check answer →', 'Compare the swap with how much each pool holds.']);
+  assert.deepEqual(await evaluate("['learn-reasons', 'learn-reason-question', 'learn-application-label', 'learn-application-evidence'].filter(id => document.getElementById(id))"), [], 'The second question and its labels are gone.');
+  await choose('learn-application', 'shallow'); await click('learn-check');
+  assert.deepEqual([await text('learn-feedback-title'), await text('learn-feedback-copy')], ['Review your answer.', 'Read the feedback under your answer, then try again.']);
+  assert.match(await text('learn-applications-feedback'), /works against you[\s\S]*This pool quotes 18,132\.22 USDC; the deeper pool would quote 19,743\.16 USDC\./);
+  await choose('learn-application', 'deeper'); await click('learn-check');
+  // The answer's own feedback says it is right; the box under it says where the lesson stands.
+  assert.equal(await text('learn-feedback-title'), 'Lesson 1 done.');
+  assert.match(await text('learn-applications-feedback'), /^That’s right\.[\s\S]*10% of this pool’s ETH and 1% of the deeper pool’s[\s\S]*19,743\.16 USDC/);
   {
     const checked = await saved();
     const link = await evaluate("document.getElementById('learn-explore').href");
     assert.equal(link, base + 'liquidity.html#swap-sandbox', 'Foundations retain their independent sandbox handoff.');
-    const evidence = await text('learn-application-evidence');
+    const asked = await text('learn-application-context');
     await fill('foundation-amount', '1');
-    assert.equal(await text('learn-application-evidence'), evidence, 'The quoted wallet case stays fixed while the scene explores a different trade.');
+    assert.equal(await text('learn-application-context'), asked, 'The question keeps its own trade while the scene explores a different one.');
     assert.equal(await saved(), checked);
     await reload();
-    assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+    assert.equal(await text('learn-feedback-title'), 'Lesson 1 done.');
     assert.equal(await evaluate("document.getElementById('foundation-amount').value"), '10');
     assert.equal(await evaluate("document.querySelector('.scene-prediction').dataset.folded"), 'true', 'A returning learner sees the folded question.');
     await choose('learn-prediction', 'less');
     assert.match(await text('learn-prediction-feedback'), /^Your prediction matches\./);
     assert.equal(await evaluate("document.querySelector('.scene-prediction').dataset.folded"), 'true');
     assert.equal(await evaluate("document.querySelector('.scene-prediction-recap button').textContent"), 'Change');
-    assert.equal(await evaluate("document.querySelector('input[name=learn-reason]:checked').value"), 'deeper');
-    assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked').value"), 'quote-received');
-    assert.equal(await text('learn-feedback-title'), 'Both answers are correct.', 'Revising an expectation does not erase understanding checks.');
+    assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked').value"), 'deeper');
+    assert.equal(await text('learn-feedback-title'), 'Lesson 1 done.', 'Revising an expectation does not erase the answered question.');
   }
   for (const [variant, amount, worth, quote, deeper] of [[1, 5, '7,500', '6,799.58', '7,403.69'], [2, 20, '60,000', '54,396.65', '59,229.48']]) {
     await click('learn-variation');
@@ -104,11 +110,12 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     assert.equal(await stage(), '0');
     assert.equal(await shown('#foundation-amount'), false);
     await choose('learn-prediction', 'more'); await click('learn-reveal');
-    assert.equal(await evaluate("document.querySelector('input[name=learn-reason]:checked')"), null, 'Changing the actual question still starts fresh answers.');
-    assert.match(await text('learn-prediction-feedback'), new RegExp(amount + ' ETH is worth ' + worth + ' USDC\\. The pool quotes ' + quote.replace('.', '\\.') + ' USDC'));
-    assert.match(await text('learn-reason-question'), new RegExp('You sell ' + amount + ' ETH into each'));
-    await choose('learn-reason', 'equal'); await click('learn-check');
-    assert.ok((await text('learn-reasons-feedback')).includes('it would quote ' + deeper + ' USDC, against ' + quote + ' USDC here'));
+    assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked')"), null, 'Changing the actual question still starts a fresh answer.');
+    assert.match(await text('learn-prediction-feedback'), new RegExp('The pool pays ' + quote.replace('.', '\\.') + ' USDC for the whole trade[\\s\\S]*' + amount + ' ETH would be worth ' + worth + ' USDC\\.'));
+    assert.match(await text('learn-prediction-feedback'), /You expected: More than /);
+    assert.match(await text('learn-application-context'), new RegExp('You sell ' + amount + ' ETH into each'));
+    await choose('learn-application', 'equal'); await click('learn-check');
+    assert.ok((await text('learn-applications-feedback')).includes('it would quote ' + deeper + ' USDC, against ' + quote + ' USDC here'));
   }
 
   // Lesson 2 follows the same pattern, with one more step: a later trade beside the pool.
@@ -168,37 +175,42 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     await click('learn-reveal');
     assert.equal(await evaluate("document.getElementById('foundation-amount').value"), '5');
     assert.equal(await stage(), '1', 'Showing the question outcome again restores its amount.');
-    assert.deepEqual([await text('learn-application-label'), await text('learn-application-question')], ['Another provider deposits', 'What happens to your share and your claim?'], 'The application is a new situation, not the trade the scene already showed.');
-    await choose('learn-reason', 'ownership'); await choose('learn-application', 'fixed-share'); await click('learn-check');
-    assert.match(await text('learn-applications-feedback'), /your share of all LP tokens falls/);
-    await choose('learn-application', 'diluted-same-claim'); await click('learn-check');
-    assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+    // The scene showed a trade changing the tokens behind a fixed share. The question is the other case.
+    assert.deepEqual([await text('learn-application-context'), await text('learn-application-question')],
+      ['Another provider adds both tokens in the pool’s current ratio. Nobody trades. Your share gets smaller.', 'What happens to the tokens you could withdraw right now?']);
+    await choose('learn-application', 'follow-pool'); await click('learn-check');
+    assert.match(await text('learn-applications-feedback'), /back their own claim, not yours[\s\S]*your share falls exactly as the pool grows/);
+    await choose('learn-application', 'same-tokens'); await click('learn-check');
+    assert.equal(await text('learn-feedback-title'), 'Lesson 2 done.');
+    assert.match(await text('learn-applications-feedback'), /^That’s right\.[\s\S]*You own a smaller share of a larger pool\./);
     const checked = await saved();
     assert.equal(await evaluate("document.getElementById('learn-explore').href"), base + 'liquidity.html#swap-sandbox', 'Foundations retain their independent sandbox handoff.');
     await fill('foundation-amount', '1');
     assert.equal(await saved(), checked);
     await reload();
-    assert.equal(await text('learn-feedback-title'), 'Both answers are correct.');
+    assert.equal(await text('learn-feedback-title'), 'Lesson 2 done.');
     assert.equal(await evaluate("document.getElementById('foundation-amount').value"), '5');
     assert.equal(await evaluate("document.querySelector('.scene-prediction').dataset.folded"), 'true');
     await choose('learn-prediction', 'less');
     assert.match(await text('learn-prediction-feedback'), /^Your prediction matches\./);
-    assert.equal(await evaluate("document.querySelector('input[name=learn-reason]:checked').value"), 'ownership');
-    assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked').value"), 'diluted-same-claim');
-    assert.equal(await text('learn-feedback-title'), 'Both answers are correct.', 'Revising an expectation does not erase understanding checks.');
+    assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked').value"), 'same-tokens');
+    assert.equal(await text('learn-feedback-title'), 'Lesson 2 done.', 'Revising an expectation does not erase the answered question.');
   }
-  for (const [variant, price, choice, label] of [[1, '$1,500.00', '16.67%, my 10 ETH out of the 60 ETH it will hold', 'Another provider withdraws'], [2, '$3,000.00', '9.09%, my 20 ETH out of the 220 ETH it will hold', 'A trader buys ETH']]) {
+  // Every variation asks the same idea: a provider joins or leaves, and the tokens stay.
+  for (const [variant, price, choice, asked] of [[1, '$1,500.00', '16.67%, my 10 ETH out of the 60 ETH it will hold', /^Another provider withdraws their share of both tokens\. Nobody trades\. Your share gets larger\.$/],
+    [2, '$3,000.00', '9.09%, my 20 ETH out of the 220 ETH it will hold', /^Another provider adds both tokens in the pool’s current ratio\. Nobody trades\. Your share gets smaller\.$/]]) {
     await click('learn-variation');
     assert.match(await text('learn-variation-label'), new RegExp('Variation ' + (variant + 1)));
     assert.equal(await evaluate("document.getElementById('learn-results').hidden"), true);
     assert.equal(await evaluate("document.querySelector('#learn-predictions label').textContent.trim()"), choice);
     await click('learn-reveal');
-    assert.equal(await evaluate("document.querySelector('input[name=learn-reason]:checked')"), null, 'Changing the actual question still starts fresh answers.');
+    assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked')"), null, 'Changing the actual question still starts a fresh answer.');
     assert.equal(await text('foundation-pool-price'), 'Pool price: ' + price + ' per ETH');
     const share = await text('foundation-pool-share');
     await click('foundation-later-show');
     assert.equal(await text('foundation-pool-share'), share);
-    assert.equal(await text('learn-application-label'), label);
+    assert.match(await text('learn-application-context'), asked);
+    assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('input[name=learn-application]'), input => input.value).sort()"), ['follow-pool', 'follow-share', 'same-tokens']);
   }
   assert.equal(await evaluate("localStorage.getItem('defi-sandbox-v1')"), sandbox);
   await navigate(base + 'learn.html#lesson=range-boundaries');
@@ -227,10 +239,6 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
       await click('learn-reveal');
       if (!swap) await click('foundation-later-show');
       assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      if (swap) {
-        assert.equal(await evaluate("document.getElementById('learn-application-evidence').hidden"), false);
-        assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'), true);
-      }
       const sceneHeight = await evaluate("document.getElementById('foundation-replay').getBoundingClientRect().bottom-document.querySelector('.foundation-pool').getBoundingClientRect().top");
       const available = await evaluate("innerHeight-document.querySelector('.topbar').getBoundingClientRect().height");
       assert.ok(sceneHeight > 0 && sceneHeight <= available, `${id} at ${width}px: pool state and its action need ${sceneHeight}px; available ${available}px.`);

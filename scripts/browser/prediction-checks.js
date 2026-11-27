@@ -15,12 +15,14 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
       else setTimeout(check, 25);
     }; check();
   })`);
+  // The liquidity essentials ask one question after the figure; the other chapters ask two.
   const nonvisual = {
-    'range-boundaries': ['path', 'narrow-out'], 'fee-tiers': ['active-swaps', 'more-volume'],
+    'range-boundaries': [null, 'path'], 'fee-tiers': ['active-swaps', 'more-volume'],
     'range-management': ['asset', 'automatic'], 'fees-over-time': ['growth', 'same'],
     'between-samples': ['returned', 'edge-placement'], 'period-vs-holding': ['price-returned', 'smaller-lead'],
-    'final-challenge': ['total', 'relative-gap'],
+    'final-challenge': [null, 'relative-gap'],
   };
+  const done = id => ({ 'range-boundaries': 'Lesson 6 done.', 'final-challenge': 'Challenge done.' })[id] || 'Both answers are correct.';
   try {
     for (const width of [1440, 390]) {
       await call('Emulation.setDeviceMetricsOverride', { width, height: 1000, deviceScaleFactor: 1, mobile: width < 750 });
@@ -70,7 +72,11 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         assert.equal(await evaluate(`document.getElementById('${prefix}-prediction-feedback').dataset.state`), 'skipped');
         assert.equal(await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').querySelector('button').textContent`), 'Show the outcome again ↓');
         assert.equal(await evaluate(`document.getElementById('${prefix}-continue').hidden`), true, 'Viewing alone does not complete a lesson');
-        if (id !== 'period-vs-holding') {
+        if (prefix === 'learn') {
+          // The case is its own sentence above the one question: no extra label.
+          assert.ok((await text('learn-application-context')).trim().length > 20, route + ': the question states its case');
+          assert.equal(await evaluate("document.querySelectorAll('#learn-assessment-form fieldset').length"), 1, route + ': one question follows the figure');
+        } else if (id !== 'period-vs-holding') {
           const label = await text(prefix + '-application-label');
           assert.ok(label.trim().length > 4, route + ': name the next situation');
           assert.doesNotMatch(label, /APPLY|THOUGHT EXPERIMENT|CHANGE THE SITUATION/);
@@ -82,22 +88,22 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         assert.equal(evidenceFits, true, route + ': question evidence fits and has an accessible heading');
         if (nonvisual[id]) {
           for (const [group, value] of [['reason', nonvisual[id][0]], ['application', nonvisual[id][1]]]) {
-            await evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);
+            if (value) await evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);
           }
           if (id === 'final-challenge') {
             await click('learn-check');
-            assert.equal(await text('learn-feedback-title'),'Review your setup.','Correct choices alone do not complete the construction task.');
+            assert.equal(await text('learn-feedback-title'),'Review your setup.','A correct answer alone does not complete the construction task.');
             assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),true);
             await click('liquidity-task-example');
           }
           await click(prefix + '-check');
-          assert.equal(await text(prefix + '-feedback-title'), 'Both answers are correct.');
+          assert.equal(await text(prefix + '-feedback-title'), done(id));
         }
         await reload(); await ready();
         assert.equal(await evaluate(`document.getElementById('${result}').hidden`), false, route + ': skipped outcomes restore');
         assert.equal(await evaluate(`document.querySelector('${selector} input:checked') === null`), true);
         assert.equal(await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').querySelector('button').textContent`), 'Show the outcome again ↓', route + ': restored controls distinguish returning from first reveal');
-        if (nonvisual[id]) assert.equal(await text(prefix + '-feedback-title'), 'Both answers are correct.', 'Skipped completion restores');
+        if (nonvisual[id]) assert.equal(await text(prefix + '-feedback-title'), done(id), 'Skipped completion restores');
       }
     }
   } finally {

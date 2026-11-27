@@ -49,25 +49,23 @@ export function runLesson(id, input, variant = 0) {
     // at the same starting price and fee.
     const deeperOut = Number(amountOut(BigInt(setup.amount) * 10n ** 18n, BigInt(setup.reserveEth * DEEPER_POOL) * 10n ** 18n, BigInt(reserveUsdc * DEEPER_POOL) * 10n ** 6n)) / 1e6;
     return { setup, variant, out, smallOut, deeperOut, impact, afterEth: setup.reserveEth + setup.amount, afterUsdc: reserveUsdc - out,
-      prediction: 'less', reason: 'deeper' };
+      prediction: 'less' };
   }
   if (id === 'pool-share') {
     const percent = setup.depositEth / (setup.reserveEth + setup.depositEth) * 100;
-    return { setup, variant, share: percent, usdcDeposit: setup.depositEth * setup.initialPrice,
-      prediction: 'less', reason: 'ownership' };
+    return { setup, variant, share: percent, usdcDeposit: setup.depositEth * setup.initialPrice, prediction: 'less' };
   }
   if (id === 'range-boundaries') {
     const result = calculateRange({ ...setup, lowerPrice: setup.initialPrice * (1 - setup.width), upperPrice: setup.initialPrice * (1 + setup.width), fullRangeFees: 0 });
-    return { setup, variant, result, prediction: result.pooled.eth === 0 ? 'usdc' : result.pooled.usdc === 0 ? 'eth' : 'both',
-      reason: 'path' };
+    return { setup, variant, result, prediction: result.pooled.eth === 0 ? 'usdc' : result.pooled.usdc === 0 ? 'eth' : 'both' };
   }
   const result = calculateScenario(setup);
-  const conclusions = {
-    'token-balances': { prediction: result.pooled.eth < result.held.eth ? 'less' : result.pooled.eth > result.held.eth ? 'more' : 'same', reason: 'rebalance' },
+  const predictions = {
+    'token-balances': result.pooled.eth < result.held.eth ? 'less' : result.pooled.eth > result.held.eth ? 'more' : 'same',
     // Before fees the claim is worth less than holding at every price but the starting one.
-    'loss-vs-profit': { prediction: result.lpBeforeFees < result.holdValue ? 'less' : 'same', reason: 'traded-mix' },
-    'fee-break-even': { prediction: 'toward-target', reason: 'assumption' },
-    'final-challenge': { prediction: 'lower-price', reason: 'total' },
+    'loss-vs-profit': result.lpBeforeFees < result.holdValue ? 'less' : 'same',
+    'fee-break-even': 'toward-target',
+    'final-challenge': 'lower-price',
   };
-  return { setup, variant, result, ...conclusions[id] };
+  return { setup, variant, result, prediction: predictions[id] };
 }

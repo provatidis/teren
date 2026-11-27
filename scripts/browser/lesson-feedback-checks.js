@@ -4,7 +4,8 @@ import { motionSettled } from './motion-settled.js';
 export async function checkLessonFeedback({ evaluate, click, fill, text, navigate, reload, base, call }) {
   const choose = (prefix, group, value) => evaluate(`document.querySelector('input[name="${prefix}-${group}"][value="${value}"]').click()`);
   const cases = [
-    ['learn.html#lesson=swap-impact', 'learn', 'same', 'less', 'deeper', 'quote-received', 'learn-reasons', 'learn-applications', 'learn-reveal'],
+    // The liquidity essentials ask one question after the figure; the other chapters still ask two.
+    ['learn.html#lesson=swap-impact', 'learn', 'same', 'less', null, 'deeper', null, 'learn-applications', 'learn-reveal'],
     ['learn.html#manage=fee-tiers', 'manage', 'pool-deposits', 'active-volume', 'active-swaps', 'more-volume', 'manage-reasons', 'manage-applications', 'manage-reveal'],
     ['learn.html#applied=period-vs-holding', 'applied', 'start-dollars', 'two-values', 'price-returned', 'smaller-lead', 'applied-reasons', 'applied-applications', 'applied-reveal'],
     ['lending.html#lesson=conditions', 'lend', 'higher', 'lower', 'interest', 'backing-faster', 'lend-reason-choices', 'lend-application-choices', 'lend-reveal'],
@@ -32,10 +33,10 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
       assert.equal(await evaluate(`document.getElementById('${prefix}-prediction-feedback').dataset.state`), 'match');
       assert.notEqual(await evaluate(`getComputedStyle(document.getElementById('${prefix}-prediction-feedback')).borderLeftColor`), wrongColor);
       assert.doesNotMatch(await text(prefix + '-prediction-feedback'), /In this setup:/, 'The finding explains an outcome, rather than echoing an option fragment.');
-      await choose(prefix, 'reason', reason);
+      if (reason) await choose(prefix, 'reason', reason);
       await evaluate(`document.querySelector('#${applications} input:not([value="${application}"])').click()`);
       await click(prefix + '-check');
-      assert.equal(await evaluate(`document.getElementById('${reasons}-feedback').dataset.state`), 'match');
+      if (reason) assert.equal(await evaluate(`document.getElementById('${reasons}-feedback').dataset.state`), 'match');
       assert.equal(await evaluate(`document.getElementById('${applications}-feedback').dataset.state`), 'different');
       assert.equal(await evaluate('document.activeElement.id'), applications + '-feedback');
       const correction = await evaluate(`(() => {
@@ -55,9 +56,11 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
       await choose(prefix, 'application', application);
       assert.equal(await evaluate(`document.querySelector('[data-check="${prefix}"]') === null`), true, 'Changing an answer clears stale feedback.');
       await click(prefix + '-check');
-      assert.equal(await text(prefix + '-feedback-title'), 'Both answers are correct.');
+      const done = reason ? 'Both answers are correct.' : 'Lesson 1 done.';
+      assert.equal(await text(prefix + '-feedback-title'), done);
+      if (!reason) assert.match(await text(applications + '-feedback'), /^That’s right\./);
       await reload(); await ready();
-      assert.equal(await text(prefix + '-feedback-title'), 'Both answers are correct.');
+      assert.equal(await text(prefix + '-feedback-title'), done);
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
     }
     await navigate(base + 'learn.html#lesson=range-boundaries');

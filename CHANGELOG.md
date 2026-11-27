@@ -1,5 +1,19 @@
 # Release history
 
+## 1.68.0 · 2026-11-27
+
+- Every liquidity lesson now asks one question after its figure, where it asked two. The question kept is the one that takes the lesson’s idea to a case the figure does not show.
+- Lesson 1’s prediction is in the pool’s own numbers: “You sell 10 ETH. At the starting pool price that is worth 20,000 USDC. Will the pool pay you less, the same, or more?” The question about a wallet’s slippage tolerance has left the lesson.
+- Lesson 2 asks what happens to the tokens you could withdraw when another provider joins or leaves the pool. All three variations ask it.
+- Lesson 3’s prediction now says that traders bring the pool’s price along with the market. Without that, “the same ETH” was a fair answer. Its question asks whether your claim’s tokens have changed before anyone has traded.
+- Lesson 4 has a new question: your dashboard says you are up 41.42% on what you started with, and another view says you are 5.72% behind holding. Can both be right? Where ETH falls, it is worded for a claim that is down. The panel now says why the gap opens.
+- Lesson 5 asks what you would need before saying a real claim beat holding. The fees in its figure are an amount you choose.
+- Lesson 6 asks whether two paths to the same end earn the same fees, in all three variations.
+- Lesson 7’s first step asks which price move can leave holding worth less than your start. Asking which move to “try first” had no wrong answer. Its question now has two answers.
+- Every wrong answer is false in the case asked. No answer is given away by its length, and every question has a hint and feedback for each answer.
+- A lesson is complete after one right answer, plus the solved task in lesson 7. The box under your answer says where the lesson stands: “Lesson 4 done.”
+- Saved answers to replaced questions are cleared. Completed lessons stay completed, and the challenge keeps its answer and your own example.
+
 ## 1.67.0 · 2026-11-27
 
 - Liquidity lesson 6 now follows the layout of the other six lessons: the figure first, the question under it, and the outcome played in place.
