@@ -81,7 +81,9 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     [1, 'Check answer →', 'Compare the swap with how much each pool holds.']);
   assert.deepEqual(await evaluate("['learn-reasons', 'learn-reason-question', 'learn-application-label', 'learn-application-evidence'].filter(id => document.getElementById(id))"), [], 'The second question and its labels are gone.');
   await choose('learn-application', 'shallow'); await click('learn-check');
-  assert.deepEqual([await text('learn-feedback-title'), await text('learn-feedback-copy')], ['Review your answer.', 'Read the feedback under your answer, then try again.']);
+  // The feedback under the answer is the whole reply to a wrong answer, and it takes focus.
+  assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), true, 'A wrong answer is answered under the answer, with no second box.');
+  assert.equal(await evaluate('document.activeElement.id'), 'learn-applications-feedback');
   assert.match(await text('learn-applications-feedback'), /works against you[\s\S]*This pool quotes 18,132\.22 USDC; the deeper pool would quote 19,743\.16 USDC\./);
   await choose('learn-application', 'deeper'); await click('learn-check');
   // The answer's own feedback says it is right; the box under it says where the lesson stands.
@@ -116,7 +118,7 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
     assert.equal(await evaluate("document.querySelector('input[name=learn-application]:checked')"), null, 'Changing the actual question still starts a fresh answer.');
     assert.match(await text('learn-prediction-feedback'), new RegExp(amount + ' ETH swap: Less\\. The pool pays ' + quote.replace('.', '\\.') + ' USDC, not ' + worth + ': an average price of '));
     // A prediction that differs is answered with what it would need to be true.
-    assert.match(await text('learn-prediction-feedback'), new RegExp('“More than ' + worth + ' USDC” would be true if selling ETH raised the pool’s price\\.$'));
+    assert.match(await text('learn-prediction-feedback'), new RegExp('“More than ' + worth + ' USDC” would be true at an average above \\$[\\d,]+\\.00 per ETH, fee included\\.$'));
     assert.doesNotMatch(await text('learn-prediction-feedback'), /You expected/);
     assert.match(await text('learn-application-context'), new RegExp('You sell ' + amount + ' ETH into each'));
     await choose('learn-application', 'equal'); await click('learn-check');

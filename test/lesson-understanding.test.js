@@ -41,8 +41,10 @@ test('every lesson asks one answerable question after its figure, independently 
     assert.equal(checkLessonUnderstanding(id,input,variant,copy.expected).passed,id!=='final-challenge');
     assert.deepEqual(Object.keys(checkLessonUnderstanding(id,input,variant,copy.expected,task)).sort(),['application','demonstration','passed']);
     assert.deepEqual(input,before);
-    // Its case, the question, a hint, and feedback for the right answer.
-    assert.ok(copy.context && copy.question && copy.hint && (copy.feedbackByChoice[copy.expected] || copy.feedback), id);
+    // Its case, the question, a hint, and feedback for the right answer. The
+    // challenge's case is the reader's own example, so it sets none up in words.
+    assert.equal(Boolean(copy.context), id !== 'final-challenge');
+    assert.ok(copy.question && copy.hint && (copy.feedbackByChoice[copy.expected] || copy.feedback), id);
     assert.ok(copy.choices.length === 3 || id === 'final-challenge' && copy.choices.length === 2);
     assert.doesNotMatch(JSON.stringify(copy),/NaN|undefined|Infinity/);
   }

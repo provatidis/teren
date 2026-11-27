@@ -54,7 +54,8 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
   assert.match(await text('token-scene-exchange'), /Traders sell ETH to the pool and take USDC out\. Your claim holds more ETH and less USDC\./);
   await fill('token-scene-price', '2000');
   assert.equal(await evaluate("document.querySelector('.scene-token-figure').outerHTML"), start, 'The starting price shows the starting claim again.');
-  assert.match(await text('token-scene-exchange'), /nobody has a reason to trade/);
+  // No trade is needed to close a gap. That is not a claim that nobody trades.
+  assert.equal(await text('token-scene-exchange'), 'The pool’s price already matches the market’s, so no trade is needed to bring them together. Both token amounts stay the same.');
   await key('token-scene-price', 'End');
   assert.equal(await evaluate("document.querySelector('.scene-token-figure').outerHTML"), figure);
   await fill('token-scene-price', '1000');
@@ -69,7 +70,7 @@ export async function checkVisualLessonPilots({ evaluate, click, fill, text, nav
     ['No. Still 1.25 ETH + 2,500 USDC. Nothing has moved in or out.', 'Partly. Something in between: the pool drifts toward the market price.', 'Yes. Already 0.8839 ETH + 3,535.53 USDC. The pool follows the market price.']);
   assert.equal(await evaluate("document.querySelectorAll('#learn-assessment-form fieldset').length"), 1);
   await choose('learn-application', 'drift'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Review your answer.');
+  assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), true, 'A wrong answer is answered under the answer, with no second box.');
   assert.match(await text('learn-applications-feedback'), /Time alone changes nothing in a pool[\s\S]*still 1\.25 ETH \+ 2,500 USDC/);
   await choose('learn-application', 'rebalance'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'), 'Lesson 3 done.');

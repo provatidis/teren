@@ -6,7 +6,7 @@ export const LESSONS = [
     // The question and its choices name the lesson's own amounts: see tradePrediction.
     prediction: 'You sell ETH to the pool. Will it pay you less, the same, or more than the starting pool price?',
     predictions: [['less', 'Less'], ['same', 'The same'], ['more', 'More']],
-    explanation: 'Each ETH you sell moves the pool price down a little, so the next one sells for less. A larger trade moves it further, and the average price you receive falls. These averages include the 0.3% swap fee.',
+    explanation: 'Each ETH you sell moves the pool price down a little, so the next one sells for less. These averages include the 0.3% swap fee.',
     takeaway: 'A quote is for one trade size against one pool’s balances. The starting pool price alone cannot tell you what you will receive.',
   },
   {
@@ -53,7 +53,7 @@ export const LESSONS = [
     // The question carries the lesson's own prices and range: see rangePrediction.
     prediction: 'ETH moves against your range. What does your claim hold then?',
     predictions: [['eth', 'Only ETH'], ['both', 'ETH and USDC'], ['usdc', 'Only USDC']],
-    explanation: 'Inside your range your claim trades as it would in a pool that covers every price, only faster: a rising price turns your ETH into USDC, and a falling price does the reverse. At either end of the range it runs out of one token. Outside the range nothing trades: the amounts stay as they are and no new fees come in.',
+    explanation: 'Inside your range your claim trades as it would in a pool that covers every price, only faster: a rising price turns your ETH into USDC, and a falling price does the reverse. At either end of the range it runs out of one token. Outside the range your claim does not trade: its amounts stay as they are and no new fees come in.',
     takeaway: 'Where ETH ends tells you which tokens your claim holds. What it earned on the way needs records.',
   },
   {

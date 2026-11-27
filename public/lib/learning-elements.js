@@ -22,7 +22,8 @@ export function focusLearningFeedback(prefix) {
   const field = feedback.closest('fieldset');
   let target = field || feedback;
   const context = field?.previousElementSibling;
-  if (context?.classList.contains('learn-application-setup')) {
+  // A question with no case above it keeps its own box hidden: scroll to the question.
+  if (context?.classList.contains('learn-application-setup') && !context.hidden) {
     const topInset = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
     if (field.getBoundingClientRect().bottom - context.getBoundingClientRect().top <= innerHeight - topInset - 48) target = context;
   }

@@ -77,8 +77,11 @@ export async function checkFeeLesson({ evaluate, click, fill, text, navigate, re
   await fill('fee-amount', '250');
   assert.equal(await text('learn-application-context'), asked, 'Exploring fees must not rewrite the question.');
   await choose('learn-application', 'figure'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Review your answer.');
-  assert.match(await text('learn-applications-feedback'), /cannot show whether any pool paid that amount/);
+  assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), true, 'A wrong answer is answered under the answer, with no second box.');
+  assert.match(await text('learn-applications-feedback'), /The figure is ahead because of the fee amount you entered\. It cannot show what a real claim earned\.$/);
+  // A reader who took the figure as proof needs the recorded case most: it follows the feedback on any answer.
+  assert.deepEqual(await evaluate("(link => [link.checkVisibility(), link.textContent, link.getAttribute('href'), link.previousElementSibling.id])(document.getElementById('learn-record'))"),
+    [true, 'See the fees one recorded range earned →', '#applied=fees-over-time', 'learn-applications-feedback']);
   await choose('learn-application', 'fee-rate'); await click('learn-check');
   assert.match(await text('learn-applications-feedback'), /The 0\.3% fee is the rate each trade pays[\s\S]*how much trading the pool saw/);
   await choose('learn-application', 'record'); await click('learn-check');

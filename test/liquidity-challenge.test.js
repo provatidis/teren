@@ -6,6 +6,8 @@ import { checkLiquidityChallenge, challengeSetup, matchChallengeHolding } from '
 import { parseProgress } from '../public/data/learning-progress.js';
 import { runLesson } from '../public/models/lesson-experiments.js';
 import { lessonApplicationCopy } from '../public/lib/lesson-application-copy.js';
+import { calculateScenario } from '../public/models/cp50-v1.js';
+import { usd } from '../public/lib/format.js';
 
 test('the challenge accepts many loss-making matched cases and requires both comparisons', () => {
   for (let variant = 0; variant < 3; variant++) {
@@ -68,8 +70,46 @@ test('checked task state survives reload independently from the worked question'
 test('corrective feedback names what each wrong answer overlooks', () => {
   const copy = id => lessonApplicationCopy(id, runLesson(id, lessonSetup(id)));
   assert.match(copy('pool-share').feedbackByChoice['follow-pool'], /back their own claim, not yours/);
-  assert.match(copy('fee-break-even').feedbackByChoice.figure, /cannot show whether any pool paid that amount/);
+  // It stays with the reader's claim. It does not switch to what a pool paid.
+  assert.equal(copy('fee-break-even').feedbackByChoice.figure, 'The figure is ahead because of the fee amount you entered. It cannot show what a real claim earned.');
   assert.match(copy('fee-break-even').feedback, /an amount you chose[\s\S]*Its costs count too, and this figure leaves them out\.$/);
   assert.match(copy('range-boundaries').feedbackByChoice['same-end'], /the two paths did not have the same trades/);
-  assert.match(copy('final-challenge').feedbackByChoice['capital-restored'], /leaves that dollar loss/);
+  // With no example yet, the challenge's feedback makes no claim about one.
+  assert.equal(copy('final-challenge').feedbackByChoice['capital-restored'], 'Matching holding closes the gap to holding. When holding itself is below your start, that dollar loss remains.');
+});
+
+test('the challenge’s feedback on the wrong answer describes the reader’s own example as it stands', () => {
+  for (let variant = 0; variant < 3; variant++) {
+    const outcome = runLesson('final-challenge', lessonSetup('final-challenge', variant), variant), s = outcome.setup;
+    const wrong = task => lessonApplicationCopy('final-challenge', outcome, task).feedbackByChoice['capital-restored'];
+    const at = task => calculateScenario({ ...s, futurePrice: task.price, fees: task.fees });
+    // Solved: both bars meet below the start, and the loss it names is the one on screen.
+    const solved = matchChallengeHolding(s, s.initialPrice * .75), held = at(solved).holdValue;
+    assert.equal(wrong(solved), 'In your example your claim and holding are both worth ' + usd(held) + ', which is ' + usd(s.investment - held)
+      + ' less than you started with. Fees closed the gap to holding. That loss remains.');
+    // Below the start and not matching yet, with no fees or with far too many.
+    for (const fees of [0, s.investment / 2]) {
+      const task = { price: s.initialPrice * .75, fees };
+      assert.equal(checkLiquidityChallenge(s, task).matchesHolding, false);
+      assert.equal(wrong(task), 'In your example holding is worth ' + usd(held) + ', which is ' + usd(s.investment - held)
+        + ' less than you started with. A claim that matches it is worth the same, so the gap to holding closes and that loss remains.');
+    }
+    // At or above the start holding has lost nothing: it must never be told it has.
+    for (const [price, where] of [[s.initialPrice, 'at'], [s.initialPrice * 1.5, 'above'], [s.initialPrice * 2, 'above']]) {
+      for (const task of [{ price, fees: 0 }, matchChallengeHolding(s, price)]) {
+        assert.ok(at(task).holdValue >= s.investment - .01);
+        const text = wrong(task);
+        assert.equal(text, 'In your example holding is ' + where + ' your start, so there is no loss on screen to cover. Choose a lower price. A claim that matches holding there is still worth less than you started with.');
+        assert.doesNotMatch(text, /below your start/);
+      }
+    }
+    // A value the task cannot hold falls back to the general statement.
+    for (const task of [undefined, null, {}, { price: s.initialPrice * 3, fees: 0 }, { price: s.initialPrice, fees: -1 }]) {
+      assert.equal(wrong(task), 'Matching holding closes the gap to holding. When holding itself is below your start, that dollar loss remains.');
+    }
+    // The question, its answers and its hint do not depend on the example.
+    const plain = lessonApplicationCopy('final-challenge', outcome), moved = lessonApplicationCopy('final-challenge', outcome, solved);
+    assert.deepEqual([moved.question, moved.choices, moved.hint, moved.feedback, moved.context], [plain.question, plain.choices, plain.hint, plain.feedback, '']);
+    assert.equal(plain.hint, 'When the two bars line up, where are they relative to the dashed starting line?');
+  }
 });

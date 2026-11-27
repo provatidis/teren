@@ -1,4 +1,5 @@
 import { lessonApplication } from '../models/lesson-application.js';
+import { checkLiquidityChallenge } from '../models/liquidity-challenge.js';
 import { usd, fmt } from './format.js';
 import { deeperPoolQuestion, untradedMarketQuestion } from './lesson-narration.js';
 
@@ -6,7 +7,8 @@ import { deeperPoolQuestion, untradedMarketQuestion } from './lesson-narration.j
 // figure does not show, in the lesson's own numbers. Every wrong answer is a
 // belief that is false in that case, never a true statement placed under the
 // wrong verdict. Each question has a hint and feedback for every answer.
-export function lessonApplicationCopy(id, outcome) {
+// task: the reader's own example in the challenge, when they have one.
+export function lessonApplicationCopy(id, outcome, task) {
   const application = lessonApplication(id, outcome), s = outcome.setup;
   const base = {application, expected: application.expected};
   if (id === 'swap-impact') return {...base, ...deeperPoolQuestion(outcome)};
@@ -63,19 +65,20 @@ export function lessonApplicationCopy(id, outcome) {
     choices: [['record', 'A record of the fees it actually earned.'], ['figure', 'Nothing more. The figure already shows it ahead.'], ['fee-rate', 'The pool’s 0.3% fee. It fixes what a claim earns.']],
     hint: 'Ask where the fee amount in this figure came from.',
     feedbackByChoice: {
-      figure: 'The figure shows what follows from the fee amount you entered. It cannot show whether any pool paid that amount.',
+      figure: 'The figure is ahead because of the fee amount you entered. It cannot show what a real claim earned.',
       'fee-rate': 'The 0.3% fee is the rate each trade pays. What a claim earns also depends on how much trading the pool saw and on the claim’s share of the pool.',
     },
     feedback: 'The fees in this figure are an amount you chose. To say a real claim beat holding, you need the fees it actually earned over that time. Its costs count too, and this figure leaves them out.'};
   if (id === 'range-boundaries') {
-    // The end state fixes the tokens. It says nothing about the trades on the way.
+    // The end state fixes the tokens. It says nothing about the trades on the way,
+    // so the question asks what the end can tell you, not which path paid more.
     const pooled = outcome.result.pooled, at = usd(s.futurePrice);
     const ends = pooled.eth === 0 ? fmt(pooled.usdc, 2) + ' USDC' : pooled.usdc === 0 ? fmt(pooled.eth, 4) + ' ETH' : fmt(pooled.eth, 4) + ' ETH + ' + fmt(pooled.usdc, 2) + ' USDC';
     return {...base,
       context: (s.futurePrice === s.initialPrice ? 'ETH can stay at ' + at + ', or return to it after weeks of moving up and down inside your range.'
         : 'ETH can reach ' + at + ' in one move, or after weeks of moving up and down inside your range.') + ' Either way your claim ends as ' + ends + '.',
-      question: 'Did it earn the same fees?',
-      choices: [['path', 'No. More trading inside the range pays more fees.'], ['same-end', 'Yes. The same end means the same fees.'], ['range-only', 'Yes. Fees depend on the range, not on the path.']],
+      question: 'Does ending with the same tokens tell you it earned the same fees?',
+      choices: [['path', 'No. The end does not record the trades on the way.'], ['same-end', 'Yes. The same end means the same fees.'], ['range-only', 'Yes. Fees depend on the range, not on the path.']],
       hint: 'Fees are paid by trades. Ask how much trading each path sends through your range.',
       feedbackByChoice: {
         'same-end': 'The end fixes which tokens your claim holds. Its fees were paid by the trades on the way, and the two paths did not have the same trades.',
@@ -83,13 +86,21 @@ export function lessonApplicationCopy(id, outcome) {
       },
       feedback: 'Fees come from trades, and only trades inside your range pay your claim. Weeks of trading inside the range pay more than one move through it. The tokens you end with are the same either way, so they cannot show it.'};
   }
+  // The reader's own example can sit anywhere when they answer: solved, not yet
+  // matching, or at a price where holding has lost nothing. The feedback on the
+  // wrong answer describes the bars they are looking at.
+  const check = checkLiquidityChallenge(s, task), start = s.investment;
+  const hold = check.valid ? check.result.holdValue : NaN, lost = usd(start - hold);
+  const restored = !check.valid ? 'Matching holding closes the gap to holding. When holding itself is below your start, that dollar loss remains.'
+    : hold >= start - .01 ? 'In your example holding is ' + (hold > start + .01 ? 'above' : 'at') + ' your start, so there is no loss on screen to cover. Choose a lower price. A claim that matches holding there is still worth less than you started with.'
+      : check.matchesHolding ? 'In your example your claim and holding are both worth ' + usd(hold) + ', which is ' + lost + ' less than you started with. Fees closed the gap to holding. That loss remains.'
+        : 'In your example holding is worth ' + usd(hold) + ', which is ' + lost + ' less than you started with. A claim that matches it is worth the same, so the gap to holding closes and that loss remains.';
   return {...base,
-    context: 'Think back to the price and fees you chose in your own example.',
+    // The reader's example is on screen above the question: no case to set up.
+    context: '',
     question: 'When your claim matches holding below your start, what have its fees covered?',
     choices: [['relative-gap', 'The gap to holding. A dollar loss remains on both sides.'], ['capital-restored', 'The whole loss since the start, because the claim now matches holding.']],
-    hint: 'Try a price below the start, then use Match holding. The bars keep both comparisons visible.',
-    feedbackByChoice: {
-      'capital-restored': 'Holding itself is below your start in your example. Matching it closes the gap to holding but leaves that dollar loss.',
-    },
+    hint: 'When the two bars line up, where are they relative to the dashed starting line?',
+    feedbackByChoice: {'capital-restored': restored},
     feedback: 'Matching holding closes the gap to holding. Holding itself can be below your start, so both can still lose dollars. The fees in this task are an amount you chose, not recorded earnings.'};
 }

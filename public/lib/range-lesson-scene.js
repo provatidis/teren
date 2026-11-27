@@ -85,7 +85,7 @@ export function createRangeBoundaryScene(input, prediction, { explanation = '' }
         value.textContent = amount(token, held[token]);
       }
       const only = held.eth === 0 ? 'usdc' : 'eth';
-      copy.textContent = state === 'inside' ? 'Traders are swapping against your claim here. It holds both tokens and can earn fees.'
+      copy.textContent = state === 'inside' ? 'Swaps at this price can use your claim. It holds both tokens and can earn fees.'
         : state === 'upper-edge' ? 'At the upper end the last ETH is sold. One step back inside, your claim holds both tokens again.'
           : state === 'lower-edge' ? 'At the lower end the last USDC is gone. One step back inside, your claim holds both tokens again.'
             : (state === 'above' ? 'Above' : 'Below') + ' your range no one trades against your claim. It stays at ' + amount(only, held[only])

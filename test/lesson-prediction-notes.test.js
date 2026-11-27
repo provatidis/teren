@@ -5,7 +5,7 @@ import { LESSONS } from '../public/learning/liquidity-essentials.js';
 import { predictionNote, tradePrediction, depositPrediction } from '../public/lib/lesson-narration.js';
 import { predictionFeedback } from '../public/lib/learning-choices.js';
 import { scenarioHash, scenarioFromHash } from '../public/lib/scenario-links.js';
-import { fmt } from '../public/lib/format.js';
+import { fmt, usd } from '../public/lib/format.js';
 
 test('a note stands in place of “You expected” only for a prediction that differs', () => {
   const choices = [['more', 'More ETH'], ['less', 'Less ETH']];
@@ -40,7 +40,9 @@ test('each note’s condition is one where that answer is the right one', () => 
     // Lesson 1 names the amount at the starting pool price, which needs a fixed price and no fee.
     const swap = runLesson('swap-impact', lessonSetup('swap-impact', variant), variant), worth = fmt(swap.setup.amount * swap.setup.initialPrice, 0) + ' USDC';
     assert.equal(predictionNote('swap-impact', swap, 'same'), '“Exactly ' + worth + '” would be true at one fixed price with no fee.');
-    assert.equal(predictionNote('swap-impact', swap, 'more'), '“More than ' + worth + '” would be true if selling ETH raised the pool’s price.');
+    // "More" is a claim about the average price received, with the fee in it. It does not invent another pool.
+    assert.equal(predictionNote('swap-impact', swap, 'more'), '“More than ' + worth + '” would be true at an average above ' + usd(swap.setup.initialPrice) + ' per ETH, fee included.');
+    assert.ok(swap.out / swap.setup.amount < swap.setup.initialPrice);
     assert.deepEqual(tradePrediction(swap.setup).choices.map(([, label]) => label), ['Less than ' + worth, 'Exactly ' + worth, 'More than ' + worth]);
     // Lesson 2 quotes the share against the pool as it stood.
     const share = runLesson('pool-share', lessonSetup('pool-share', variant), variant), naive = share.setup.depositEth / share.setup.reserveEth * 100;

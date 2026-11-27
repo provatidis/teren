@@ -1,5 +1,21 @@
 # Release history
 
+## 1.70.0 · 2026-11-27
+
+A second outside read of the lessons found three defects and two sentences that said more than the lessons can show.
+
+- **Lesson 7.** The feedback on the wrong answer always said “Holding itself is below your start in your example”, even when your own example had holding above it. It now describes your example as it stands: solved, not yet matching, or at a price where holding has lost nothing. The hint asks where the two bars sit against the dashed starting line.
+- **Lesson 4, when ETH falls.** The lab instruction asked for a gain on your start that still trails holding. After a fall no fee amount can give one. That variation now asks for the mirror image: “Keep ETH at $750.00. Can fees put your claim ahead of holding while you’re still down on your start?”
+- **Lesson 6.** The link to the range lab opened with an edge of 1650.0000000000002 or 3300.0000000000005. It now opens at 1650 and 3300.
+- **Lesson 6** no longer says “traders are still swapping against your claim” when the price is inside your range. In range means swaps at that price can use your claim. It does not say any are happening. Past the end of your range it now says “your claim does not trade”, where it said “nothing trades”.
+- **Lesson 3** no longer says “nobody has a reason to trade” when the price has not moved. The pool’s price already matches the market’s, so no trade is needed to bring them together.
+- Lesson 6’s question now asks what the end can tell you: “Does ending with the same tokens tell you it earned the same fees?” The answer is that the end does not record the trades on the way.
+- Lesson 5’s feedback stays with your claim: “The figure is ahead because of the fee amount you entered. It cannot show what a real claim earned.”
+- In lessons 5 and 6 the link to the recorded case **Fees over time** now follows the feedback on any answer, not only the right one.
+- Lesson 1’s note for “More than” says what would have to be true of the average price, fee included.
+- Three cuts: the box that said “Read the feedback under your answer, then try again” after a wrong answer in lessons 1 to 6, lesson 7’s “Think back to the price and fees you chose”, and a sentence in lesson 1 that repeated the line above it.
+- New tests check what the earlier ones missed: every lab instruction can be carried out in every variation, no link carries stray decimals, and lesson 7’s feedback is right for every state of your example.
+
 ## 1.69.1 · 2026-11-27
 
 - The new line beside the sandbox’s slippage control now looks like the “Try this” note the sandbox already had, with the same mark and wording.

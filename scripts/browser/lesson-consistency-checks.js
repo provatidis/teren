@@ -36,7 +36,7 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   }
   for (const [price, prediction, direction, verdict, correction] of [[4000,'less','less ETH and more USDC',/Less ETH\. Traders bought ETH from the pool/,/does not watch the market[\s\S]*0\.8839 ETH \+ 3,535\.53 USDC/],
     [1000,'more','more ETH and less USDC',/More ETH\. Traders sold ETH to the pool/,/does not watch the market[\s\S]*1\.7678 ETH \+ 1,767\.77 USDC/],
-    [2000,'same','Both token amounts stay the same',/The same ETH\. The price has not moved/,/does not hold its amounts fixed/]]) {
+    [2000,'same','Both token amounts stay the same',/The same ETH\. The pool’s price already matches the market’s, so no trade was needed to bring them together\./,/does not hold its amounts fixed/]]) {
     const completedBefore = await evaluate("JSON.stringify(JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).completed)");
     // A draft from an earlier version also carries a second answer, which is now ignored.
     const legacyAnswers = price === 1000 ? { prediction, answer: '123.45', reason: 'rebalance', application: 'rebalance', ran: true } : {};
@@ -57,12 +57,12 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
     assert.match(await text('learn-prediction-feedback'),verdict);
     assert.ok((await text('token-scene-exchange')).includes(direction));
     await choose('learn-application','automatic'); await click('learn-check');
-    assert.equal(await text('learn-feedback-title'),'Review your answer.');
+    assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), true, 'A wrong answer is answered under the answer, with no second box.');
     assert.match(await text('learn-applications-feedback'),correction);
     assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),true);
     if (price === 2000) {
       assert.match(await text('learn-application-question'),/stay the same/);
-      assert.match(await text('learn-applications'),/no price change/);
+      assert.match(await text('learn-applications'),/The pool’s price already matches the market’s, so no trade is needed\./);
     } else assert.match(await text('learn-application-context'),/nobody has traded with the pool yet\.$/);
     await choose('learn-application','rebalance'); await click('learn-check');
     assert.equal(await text('learn-feedback-title'),'Lesson 3 done.');

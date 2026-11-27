@@ -32,7 +32,8 @@ test('findings track changed price directions and the average price rather than 
   }
   // Lesson 3's verdict answers the question first, then shows the claim before and after.
   for (const [price, text] of [[1000, /^More ETH\. Traders sold ETH to the pool.*from 1\.25 ETH \+ 2,500 USDC to 1\.7678 ETH \+ 1,767\.77 USDC\.$/],
-    [2000, /^The same ETH\..*nobody had a reason to trade\. Your claim is still 1\.25 ETH \+ 2,500 USDC\.$/],
+    // With no gap to the market no trade is needed. That is not the same as nobody trading.
+    [2000, /^The same ETH\. The pool’s price already matches the market’s, so no trade was needed to bring them together\. Your claim is still 1\.25 ETH \+ 2,500 USDC\.$/],
     [4000, /^Less ETH\. Traders bought ETH from the pool.*from 1\.25 ETH \+ 2,500 USDC to 0\.8839 ETH \+ 3,535\.53 USDC\.$/]]) {
     assert.match(lessonFinding('token-balances', runLesson('token-balances', { futurePrice: price })), text);
   }
@@ -73,11 +74,14 @@ test('lesson 6 names the move against the range, and its verdict says what the c
           assert.ok(finding.startsWith('Only ETH. On the way down, traders sold ETH to your claim and took USDC. The last USDC went at ' + usd(result.lowerPrice) + ', the lower end of your range. '), finding);
           assert.ok(finding.endsWith(fmt(result.pooled.eth, 4) + ' ETH.'), finding);
         } else {
-          assert.ok(finding.startsWith('ETH and USDC. ' + usd(setup.futurePrice) + ' is inside your range, so traders are still swapping against your claim.'), finding);
+          // In range means swaps can use the claim, not that any are happening.
+          assert.ok(finding.startsWith('ETH and USDC. ' + usd(setup.futurePrice) + ' is inside your range, so swaps at this price can still use your claim.'), finding);
           assert.match(finding, factor > 1 ? /less ETH and more USDC than at the start\.$/ : factor < 1 ? /more ETH and less USDC than at the start\.$/ : /its starting tokens\.$/);
         }
-        // Past the range nothing trades; at its very end the claim has only just run out.
-        assert.equal(/nothing trades, so your claim stays at/.test(finding), ['above', 'below'].includes(result.state), finding);
+        // Past the range the claim does not trade; at its very end it has only just run out.
+        // The sentence is about the claim. Other liquidity may still be trading there.
+        assert.equal(/it your claim does not trade, so it stays at/.test(finding), ['above', 'below'].includes(result.state), finding);
+        assert.doesNotMatch(finding, /nothing trades/);
       }
     }
   }
@@ -97,7 +101,9 @@ test('lesson 6 uses the names of lessons 3 to 5, and its question cannot be read
     // The same idea in every variation: the end fixes the tokens, not the fees
     // earned on the way. The slider shows end states only, so it cannot answer this.
     assert.equal(copy.application.kind, 'path-fees');
-    assert.equal(copy.question, 'Did it earn the same fees?');
+    // It asks what the end can tell you, not which path paid more.
+    assert.equal(copy.question, 'Does ending with the same tokens tell you it earned the same fees?');
+    assert.equal(Object.fromEntries(copy.choices).path, 'No. The end does not record the trades on the way.');
     const { pooled } = outcome.result;
     const ends = variant === 0 ? fmt(pooled.usdc, 2) + ' USDC' : variant === 1 ? fmt(pooled.eth, 4) + ' ETH' : fmt(pooled.eth, 4) + ' ETH + ' + fmt(pooled.usdc, 2) + ' USDC';
     assert.equal(copy.context, 'ETH can reach ' + usd(outcome.setup.futurePrice) + ' in one move, or after weeks of moving up and down inside your range. Either way your claim ends as ' + ends + '.');
