@@ -81,7 +81,7 @@ export async function checkBenchmarkLesson({ evaluate, click, fill, text, naviga
   await fill('benchmark-price', '3000');
   assert.equal(await text('learn-application-context'), asked, 'Exploring a price must not rewrite the question.');
   await choose('learn-application', 'gap-only'); await click('learn-check');
-  assert.equal(await text('learn-feedback-title'), 'Review your answer.');
+  assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), true, 'A wrong answer is answered under the answer, with no second box.');
   assert.match(await text('learn-applications-feedback'), /Being behind holding is not a loss of money\. Your claim is worth \$2,071\.07 more than you started with\. Holding would be worth \$428\.93 more still\./);
   await choose('learn-application', 'profit-only'); await click('learn-check');
   assert.match(await text('learn-applications-feedback'), /rose from \$5,000\.00 to \$7,071\.07\. Holding the same tokens rose further, to \$7,500\.00\./);
@@ -115,6 +115,9 @@ export async function checkBenchmarkLesson({ evaluate, click, fill, text, naviga
     assert.equal(await text('learn-application-context'), copy.context);
     assert.match(copy.context, variant === 1 ? /^Your dashboard says you are down 29\.29% on what you started with\. Another view says you are 5\.72% behind holding\.$/ : /^Your dashboard says you are up /);
     assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#learn-applications label'), label => label.textContent.trim()).sort()"), copy.choices.map(([, label]) => label).sort());
+    // The lab instruction is one the reader can carry out. After a fall no fee amount gives a gain that trails holding.
+    assert.equal(await text('learn-explore-note'), variant === 1 ? 'Keep ETH at $750.00. Can fees put your claim ahead of holding while you’re still down on your start? It opens in a new tab.'
+      : 'Add fees there and find a gain on your start that still trails holding. It opens in a new tab.');
     if (variant === 1) {
       // ETH fell: the claim is down and behind, by different amounts. Holding fell too.
       assert.equal(wrong['profit-only'], 'No. A claim that is down 29.29% is 29.29% behind holding.');

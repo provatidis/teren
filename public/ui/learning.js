@@ -21,7 +21,7 @@ import { managementLessonFromHash } from '../lib/management-links.js';
 import { readProgress, saveProgress } from '../data/learning-progress.js';
 import { fmt, usd, signedUSD, percent, formatTokenQuantity } from '../lib/format.js';
 import { scenarioHash } from '../lib/scenario-links.js';
-import { rangeHash } from '../lib/range-links.js';
+import { lessonHandoff } from '../lib/lesson-handoff.js';
 import { resultCardBlob } from '../lib/result-card.js';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
 import { rangePrediction, benchmarkNarration, lessonFinding, predictionNote, tradePrediction, depositPrediction, priceMovePrediction, benchmarkPrediction, feePrediction } from '../lib/lesson-narration.js';
@@ -95,7 +95,7 @@ export function initLearning() {
   function choices(container, name, values, selected) {
     learningChoices($(container),{name,values,selected,seed:draft.choiceSeed,group:lesson.id+name,shuffle:name!=='learn-prediction',onChange:value=>{
       if(name==='learn-prediction') {draft.prediction=value;$('learn-run').disabled=false;if(draft.ran)renderPrediction();}
-      else {draft.application=value;draft.taskChecked=false;clearUnderstandingFeedback('learn');$('learn-feedback').hidden=true;$('learn-continue').hidden=true;$('learn-share').hidden=true;clearCard();}
+      else {draft.application=value;draft.taskChecked=false;clearUnderstandingFeedback('learn');$('learn-feedback').hidden=true;$('learn-continue').hidden=true;$('learn-record').hidden=true;$('learn-share').hidden=true;clearCard();}
       persist();
     }});
   }
@@ -255,7 +255,7 @@ export function initLearning() {
   }
   function renderResults() {
     outcome = runLesson(lesson.id, draft.inputs, draft.variant);
-    applicationCopy = lessonApplicationCopy(lesson.id, outcome);
+    applicationCopy = lessonApplicationCopy(lesson.id, outcome, draft.task);
     const s = outcome.setup, r = outcome.result, metrics = [], visual = [];
     if (lesson.id === 'swap-impact') {
       metrics.push(metric('USDC received', fmt(outcome.out, 2), 'After the 0.3% swap fee'), metric('Price impact', fmt(outcome.impact, 2) + '%', 'Excludes the fee itself'), metric('Average price you receive', usd(outcome.out / s.amount), 'USDC per ETH, including fee'));
@@ -288,6 +288,8 @@ export function initLearning() {
     $('learn-explanation').textContent = benchmarkNarration(lesson.id, outcome) || lesson.explanation;
     // One question follows the figure: its case, the question, and a hint.
     $('learn-application-context').textContent = applicationCopy.context;
+    // The challenge's case is the reader's own example, already on screen.
+    $('learn-application-context').parentElement.hidden = !applicationCopy.context;
     const hasTask = lesson.id === 'final-challenge';
     $('learn-check').textContent = hasTask ? 'Check this setup and answer →' : 'Check answer →';
     $('learn-application-question').textContent = applicationCopy.question;
@@ -302,29 +304,14 @@ export function initLearning() {
     renderHandoff();
   }
   // "Look closer": one question to take into a lab, and a link that names the
-  // lab it opens. Each question is one that lab can answer, and every reader
-  // gets the same link whatever they predicted.
+  // lab it opens. The challenge's link follows the reader's own example.
   function renderHandoff() {
-    const s = outcome.setup, r = outcome.result;
-    const home = new URL('liquidity.html', location.href);
-    // The challenge opens the reader's own example. Its result card keeps the worked one.
-    const own = lesson.id === 'final-challenge' && draft.task ? { ...s, futurePrice: draft.task.price, fees: draft.task.fees } : s;
-    if (lesson.id === 'range-boundaries') home.hash = rangeHash(r);
-    else if (r) home.hash = scenarioHash(own);
-    else home.hash = 'swap-sandbox';
-    const [question, link, note] = {
-      'swap-impact': ['How big is my trade against the pool?', 'Open the swap sandbox ↗', 'Compare two trade sizes there before executing either. It opens in a new tab and keeps its own balances.'],
-      'pool-share': ['What do I own now?', 'Open the swap sandbox ↗', 'Add liquidity there, make a trade, then compare what you could withdraw with what you put in. It opens in a new tab.'],
-      'token-balances': ['Move the price away and back. What returns?', 'Open this example in the full-range lab ↗', 'Opens ETH at ' + usd(s.futurePrice) + ' with your starting tokens, in a new tab.'],
-      'loss-vs-profit': ['Compared with what?', 'Open this example in the full-range lab ↗', 'Add fees there and find a gain on your start that still trails holding. It opens in a new tab.'],
-      'fee-break-even': ['Match holding, then move the price. Does the match hold?', 'Open this example in the full-range lab ↗', 'Opens ETH at ' + usd(s.futurePrice) + ' with ' + usd(s.fees) + ' in fees, in a new tab.'],
-      'range-boundaries': ['What happens past the edge?', 'Open this range in the range lab ↗', 'Move its ends and the price there, and see where it runs out of a token. It opens in a new tab.'],
-      'final-challenge': ['Does your example still match holding once costs are counted?', 'Open your example in the full-range lab ↗', 'Opens ETH at ' + usd(own.futurePrice) + ' with ' + usd(own.fees) + ' in fees, in a new tab. Add the costs there.'],
-    }[lesson.id];
-    $('learn-explore-question').textContent = question;
-    $('learn-explore').href = home.href; $('learn-explore').textContent = link;
-    $('learn-explore-note').textContent = note;
-    if (r && lesson.id === 'final-challenge') $('learn-share-url').value = new URL('liquidity.html' + scenarioHash(s), location.href).href;
+    const handoff = lessonHandoff(lesson.id, outcome, draft.task);
+    const home = new URL('liquidity.html', location.href); home.hash = handoff.hash;
+    $('learn-explore-question').textContent = handoff.question;
+    $('learn-explore').href = home.href; $('learn-explore').textContent = handoff.link;
+    $('learn-explore-note').textContent = handoff.note;
+    if (outcome.result && lesson.id === 'final-challenge') $('learn-share-url').value = new URL('liquidity.html' + scenarioHash(outcome.setup), location.href).href;
   }
   function loadLesson() {
     clearUnderstandingFeedback('learn');
@@ -363,7 +350,7 @@ export function initLearning() {
     $('learn-deeper').open = false; $('learn-math').open = false;
     $('learn-takeaway').textContent = lesson.takeaway;
     $('learn-takeaway').hidden = true;
-    $('learn-results').hidden = true; $('learn-assessment').hidden = true; $('learn-feedback').hidden = true; $('learn-share').hidden = true; $('learn-continue').hidden = true;
+    $('learn-results').hidden = true; $('learn-assessment').hidden = true; $('learn-feedback').hidden = true; $('learn-share').hidden = true; $('learn-continue').hidden = true; $('learn-record').hidden = true;
     $('learn-input-status').textContent = ''; $('learn-run').disabled = false; $('learn-run').textContent = 'Run experiment →';
     choices('learn-predictions', 'learn-prediction', predictionCopy().choices, draft.prediction);
     $('learn-scene').hidden = !visualLesson();
@@ -387,20 +374,25 @@ export function initLearning() {
   function showCheck(save = true) {
     const check = checkLessonUnderstanding(lesson.id, draft.inputs, draft.variant, draft.application, draft.task);
     if (applicationScene && save) draft.taskChecked = true;
-    $('learn-feedback').hidden = false; $('learn-feedback').className = 'learn-feedback ' + (check.passed ? 'learn-pass' : 'learn-retry');
-    // The answer's own feedback says whether it is right. This box says where the lesson stands.
+    // The answer's own feedback says whether it is right, and why. This box says
+    // where the lesson stands: done, or, in the challenge, which part to review.
+    $('learn-feedback').hidden = !check.passed && !applicationScene;
+    $('learn-feedback').className = 'learn-feedback ' + (check.passed ? 'learn-pass' : 'learn-retry');
     const position = LESSON_IDS.indexOf(lesson.id);
     $('learn-feedback-title').textContent = check.passed ? (position === 6 ? 'Challenge done.' : 'Lesson ' + (position + 1) + ' done.') : check.application ? 'Review your setup.' : 'Review your answer.';
+    // The challenge's feedback describes the reader's example as it stands now.
+    if (applicationScene) applicationCopy = lessonApplicationCopy(lesson.id, outcome, draft.task);
     const applicationFeedback = draft.application ? (applicationCopy.feedbackByChoice?.[draft.application] || applicationCopy.feedback) : 'Choose an answer. ' + applicationCopy.hint;
     renderUnderstandingFeedback('learn', [
       { container: 'learn-applications', selected: draft.application, correct: check.application, explanation: applicationFeedback },
     ]);
-    $('learn-feedback-copy').textContent = check.passed ? lesson.completion : applicationScene ? 'Read the feedback beside the task or question, then try again.' : 'Read the feedback under your answer, then try again.';
+    $('learn-feedback-copy').textContent = check.passed ? lesson.completion : 'Read the feedback beside the task or question, then try again.';
     const taskFeedback = applicationScene?.showFeedback();
     $('learn-continue').hidden = !check.passed;
     $('learn-share').hidden = !(check.passed && lesson.id === 'final-challenge');
-    // Lessons 5 and 6 end on "you need a record". The site has one.
-    $('learn-record').hidden = !['fee-break-even', 'range-boundaries'].includes(lesson.id);
+    // Lessons 5 and 6 end on "you need a record". The site has one, and a reader
+    // who answered otherwise needs it most: it follows the feedback on any answer.
+    $('learn-record').hidden = !draft.application || !['fee-break-even', 'range-boundaries'].includes(lesson.id);
     if (check.passed) {
       if (!progress.completed.includes(lesson.id)) progress.completed.push(lesson.id);
       const index = LESSON_IDS.indexOf(lesson.id);

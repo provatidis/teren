@@ -11,14 +11,15 @@ export function lessonFinding(id, outcome) {
     + fmt(outcome.share, 2) + '% of the pool: the same share of its ETH and of its USDC.';
   if (id === 'token-balances') return tokenBalanceNarration(outcome).finding;
   // Lesson 6's verdict answers what the claim holds, then says where the trading stopped.
+  // In range means swaps can use the claim. It does not say any are happening.
   if (id === 'range-boundaries') {
-    if (outcome.prediction === 'both') return 'ETH and USDC. ' + usd(s.futurePrice) + ' is inside your range, so traders are still swapping against your claim. It holds ' + fmt(r.pooled.eth, 4) + ' ETH + ' + fmt(r.pooled.usdc, 2) + ' USDC'
+    if (outcome.prediction === 'both') return 'ETH and USDC. ' + usd(s.futurePrice) + ' is inside your range, so swaps at this price can still use your claim. It holds ' + fmt(r.pooled.eth, 4) + ' ETH + ' + fmt(r.pooled.usdc, 2) + ' USDC'
       + (s.futurePrice === s.initialPrice ? ', its starting tokens.' : ': ' + (s.futurePrice > s.initialPrice ? 'less ETH and more USDC' : 'more ETH and less USDC') + ' than at the start.');
     const up = outcome.prediction === 'usdc', end = usd(up ? r.upperPrice : r.lowerPrice), past = r.state === 'above' || r.state === 'below';
     return (up ? 'Only USDC. On the way up, traders bought ETH from your claim and paid in USDC. The last ETH went at '
       : 'Only ETH. On the way down, traders sold ETH to your claim and took USDC. The last USDC went at ')
       + end + ', the ' + (up ? 'upper' : 'lower') + ' end of your range. '
-      + (past ? (up ? 'Above' : 'Below') + ' it nothing trades, so your claim stays at ' : 'Your claim now holds ')
+      + (past ? (up ? 'Above' : 'Below') + ' it your claim does not trade, so it stays at ' : 'Your claim now holds ')
       + (up ? fmt(r.pooled.usdc, 2) + ' USDC.' : fmt(r.pooled.eth, 4) + ' ETH.');
   }
   // Lesson 4's verdict answers the question, then gives both comparisons.
@@ -50,12 +51,12 @@ export function tokenBalanceNarration(outcome) {
     ? 'Traders buy ETH from the pool and pay in USDC. Your claim holds less ETH and more USDC.'
     : direction === 'down'
       ? 'Traders sell ETH to the pool and take USDC out. Your claim holds more ETH and less USDC.'
-      : 'The price is unchanged, so nobody has a reason to trade. Both token amounts stay the same.';
+      : 'The pool’s price already matches the market’s, so no trade is needed to bring them together. Both token amounts stay the same.';
   const finding = direction === 'up'
     ? 'Less ETH. Traders bought ETH from the pool and paid in USDC, so your claim went from ' + start + ' to ' + now + '.'
     : direction === 'down'
       ? 'More ETH. Traders sold ETH to the pool and took USDC out, so your claim went from ' + start + ' to ' + now + '.'
-      : 'The same ETH. The price has not moved, so nobody had a reason to trade. Your claim is still ' + start + '.';
+      : 'The same ETH. The pool’s price already matches the market’s, so no trade was needed to bring them together. Your claim is still ' + start + '.';
   return { direction, exchange, finding,
     explanation: 'ETH moves from ' + usd(s.initialPrice) + ' to ' + usd(s.futurePrice) + '. ' + exchange + ' Your claim starts at ' + start + ' and ends at ' + now + '. Tokens move through trades; neither ETH nor USDC is created by the pool.' };
 }
@@ -71,12 +72,12 @@ export function untradedMarketQuestion(outcome) {
   const waiting = 'Time alone changes nothing in a pool. Its balances move only when someone trades, deposits or withdraws.';
   if (direction === 'same') return {
     context: 'ETH’s market price has not moved.', question: 'Why do the token amounts stay the same?',
-    choices: [['rebalance', 'With no price change, nobody has a reason to trade with the pool.'], ['automatic', 'The pool keeps its token amounts fixed whatever the price does.'], ['drift', 'The pool needs more time before its amounts adjust.']],
-    hint: 'Ask what would give a trader a reason to trade with the pool.',
+    choices: [['rebalance', 'The pool’s price already matches the market’s, so no trade is needed.'], ['automatic', 'The pool keeps its token amounts fixed whatever the price does.'], ['drift', 'The pool needs more time before its amounts adjust.']],
+    hint: 'Ask what the trades in this lesson were for.',
     feedbackByChoice: {
-      rebalance: 'Traders act on a gap between the pool’s price and the market’s. With no gap there is nothing to trade on, so your claim stays at ' + start + '.',
-      automatic: 'The pool does not hold its amounts fixed: any trade changes them. They stay the same here because the price has not moved, so nobody has a reason to trade.',
-      drift: waiting + ' The price has not moved, so nobody has a reason to.',
+      rebalance: 'The trades in this lesson close a gap between the pool’s price and the market’s. With no gap none is needed, so your claim stays at ' + start + '.',
+      automatic: 'The pool does not hold its amounts fixed: any trade changes them. They stay the same here because the pool’s price already matches the market’s, so no trade is needed to bring them together.',
+      drift: waiting + ' Here no trade is needed: the pool’s price already matches the market’s.',
     } };
   return {
     context: 'ETH’s market price ' + (direction === 'up' ? 'jumps' : 'drops') + ' to ' + usd(s.futurePrice) + ', but nobody has traded with the pool yet.',
@@ -190,7 +191,7 @@ export function predictionNote(id, outcome, selected) {
   if (id === 'swap-impact') {
     const worth = fmt(s.amount * s.initialPrice, 0) + ' USDC';
     return selected === 'same' ? '“Exactly ' + worth + '” would be true at one fixed price with no fee.'
-      : selected === 'more' ? '“More than ' + worth + '” would be true if selling ETH raised the pool’s price.' : '';
+      : selected === 'more' ? '“More than ' + worth + '” would be true at an average above ' + usd(s.initialPrice) + ' per ETH, fee included.' : '';
   }
   if (id === 'pool-share') {
     const naive = s.depositEth / s.reserveEth * 100;

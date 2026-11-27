@@ -27,7 +27,9 @@ test('rising, falling and unchanged prices agree with the explanation and never 
       assert.match(copy.exchange, /sell ETH to the pool.*more ETH and less USDC/);
     } else {
       assert.deepEqual(result.result.pooled, result.result.held);
-      assert.match(question.question, /stay the same/); assert.match(question.choices[0][1], /no price change/);
+      assert.match(question.question, /stay the same/); assert.equal(question.choices[0][1], 'The pool’s price already matches the market’s, so no trade is needed.');
+      // No trade is needed to close a gap. Nothing here says that nobody trades.
+      assert.doesNotMatch(JSON.stringify([copy, question]), /nobody ha[sd] a reason|nothing to trade on/);
       assert.match(lessonWalkthrough('token-balances', result)[2][0], /unchanged/);
     }
     // The question steps outside the scene: the market moved and nobody has traded yet.

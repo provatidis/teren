@@ -102,7 +102,7 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   const originalObservation = await observed();
   assert.equal(await taskPrice(), '2000');
   assert.equal(await hidden('learn-application-task'), false);
-  assert.equal(await text('learn-application-context'), 'Think back to the price and fees you chose in your own example.');
+  assert.deepEqual(await evaluate("(context => [context.textContent, context.parentElement.checkVisibility()])(document.getElementById('learn-application-context'))"), ['', false], 'The example on screen is the case: no line sets one up.');
   assert.equal(await text('learn-check'), 'Check this setup and answer →');
   // After Start again the link is back at the starting price with no fees; the result card keeps the worked example.
   assert.match(await handoff(), /future=2000.*fees=0(&|$)/);
@@ -126,6 +126,9 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   await choose('application', 'capital-restored');
   await click('learn-check');
   assert.equal(await text('learn-feedback-title'), 'Review your answer.');
+  assert.match(await text('learn-applications-feedback'), /both worth \$4,375\.00, which is \$625\.00 less than you started with/);
+  // With no case box above it, the question itself is scrolled into view with its feedback.
+  assert.ok(await evaluate("(box => box.top >= 0 && box.top < innerHeight - 100)(document.querySelector('#learn-assessment-form fieldset').getBoundingClientRect())"), 'The question stays in view after a wrong answer.');
   assert.equal(await evaluate("document.getElementById('liquidity-task-feedback').dataset.state"), 'match');
   assert.equal(await hidden('learn-continue'), true, 'Showing an example does not replace explaining it.');
   assert.deepEqual((await progress()).completed, completedBefore);

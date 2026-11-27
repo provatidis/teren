@@ -67,7 +67,7 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     await choose('learn-application', application);
     if (id === 'swap-impact') {
       await choose('learn-application', 'equal'); await click('learn-check');
-      assert.equal(await text('learn-feedback-title'), 'Review your answer.');
+      assert.equal(await evaluate("document.getElementById('learn-feedback').hidden"), true, 'A wrong answer is answered under the answer, with no second box.');
       assert.match(await text('learn-applications-feedback'), /^Not quite[\s\S]*price moves as you trade[\s\S]*19,743\.16 USDC, against 18,132\.22 USDC here/);
       assert.equal(await text('learn-progress-count'), '0 of 7 done');
       assert.equal(await evaluate("document.getElementById('learn-continue').hidden"), true);

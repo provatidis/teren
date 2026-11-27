@@ -64,9 +64,11 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
   await reveal();
   assert.equal(await evaluate("document.getElementById('comparison-price').value"), '4000');
   assert.equal(await evaluate("document.getElementById('comparison-fees').value"), '100');
-  // One question follows the challenge, with two answers. It is about the reader's own example.
-  const asked = [await text('learn-application-context'), await text('learn-application-question')];
-  assert.deepEqual(asked, ['Think back to the price and fees you chose in your own example.', 'When your claim matches holding below your start, what have its fees covered?']);
+  // One question follows the challenge, with two answers. Its case is the reader's own example, already on screen.
+  assert.deepEqual(await evaluate("(context => [context.textContent, context.parentElement.checkVisibility()])(document.getElementById('learn-application-context'))"), ['', false]);
+  const asked = ['', 'When your claim matches holding below your start, what have its fees covered?'];
+  assert.deepEqual([await text('learn-application-context'), await text('learn-application-question')], asked);
+  assert.equal(await text('learn-hint-text'), 'When the two bars line up, where are they relative to the dashed starting line?');
   assert.deepEqual(await evaluate("[document.querySelectorAll('#learn-assessment-form fieldset').length, Array.from(document.querySelectorAll('input[name=learn-application]'), input => input.value).sort().join(), document.getElementById('learn-check').textContent]"),
     [1, 'capital-restored,relative-gap', 'Check this setup and answer →']);
   assert.equal(await evaluate("document.getElementById('learn-reason-context')"), null);
@@ -74,7 +76,17 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
   await click('liquidity-task-example');
   await click('learn-check');
   assert.deepEqual([await text('learn-feedback-title'), await text('learn-feedback-copy')], ['Review your answer.', 'Read the feedback beside the task or question, then try again.']);
-  assert.match(await text('learn-applications-feedback'), /Holding itself is below your start in your example/);
+  assert.match(await text('learn-applications-feedback'), /In your example your claim and holding are both worth \$4,375\.00, which is \$625\.00 less than you started with\. Fees closed the gap to holding\. That loss remains\.$/);
+  // The feedback follows the bars. With holding above the start it must not say holding is below it.
+  await fill('liquidity-task-price', '3000'); await click('liquidity-task-match');
+  assert.equal(await evaluate("document.getElementById('learn-applications-feedback')"), null, 'Moving the example withdraws the feedback about the earlier one.');
+  await click('learn-check');
+  assert.match(await text('learn-applications-feedback'), /In your example holding is above your start, so there is no loss on screen to cover\. Choose a lower price\./);
+  assert.doesNotMatch(await text('learn-applications-feedback'), /below your start/);
+  await fill('liquidity-task-price', '1500');
+  await click('learn-check');
+  assert.match(await text('learn-applications-feedback'), /In your example holding is worth \$4,375\.00, which is \$625\.00 less than you started with\. A claim that matches it is worth the same/);
+  await click('liquidity-task-example');
   await choose('learn-application', application); await click('learn-check');
   assert.equal(await text('learn-feedback-title'), 'Challenge done.');
   const task = await evaluate("JSON.stringify(JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')).drafts['final-challenge']?.task)");

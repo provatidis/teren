@@ -73,8 +73,10 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         assert.equal(await evaluate(`document.querySelector('${selector}').closest('.scene-prediction').querySelector('button').textContent`), 'Show the outcome again ↓');
         assert.equal(await evaluate(`document.getElementById('${prefix}-continue').hidden`), true, 'Viewing alone does not complete a lesson');
         if (prefix === 'learn') {
-          // The case is its own sentence above the one question: no extra label.
-          assert.ok((await text('learn-application-context')).trim().length > 20, route + ': the question states its case');
+          // The case is its own sentence above the one question: no extra label. The
+          // challenge's case is the reader's own example, so it has no sentence and no empty box.
+          if (route.endsWith('final-challenge')) assert.equal(await evaluate("document.querySelector('#learn-assessment-form .learn-application-setup').checkVisibility()"), false, route + ': no empty box above the question');
+          else assert.ok((await text('learn-application-context')).trim().length > 20, route + ': the question states its case');
           assert.equal(await evaluate("document.querySelectorAll('#learn-assessment-form fieldset').length"), 1, route + ': one question follows the figure');
         } else if (id !== 'period-vs-holding') {
           const label = await text(prefix + '-application-label');
