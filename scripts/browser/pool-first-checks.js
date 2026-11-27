@@ -131,8 +131,27 @@ export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
       await evaluate("document.getElementById('learn-reveal').click()");
       assert.deepEqual(await evaluate(`({ poolFirst: document.getElementById('learn-essential').hasAttribute('data-pool-first'), setup: ${shown('#learn-setup')}, run: ${shown('#learn-run')},
         pitfall: document.getElementById('learn-pitfall').closest('#learn-scene .foundation-outcome') !== null && (${shown('#learn-pitfall')}), title: document.getElementById('learn-check-title').textContent })`),
-        { poolFirst: true, setup: false, run: false, pitfall: true, title: 'Use what you saw' }, id);
+        { poolFirst: true, setup: false, run: false, pitfall: true, title: 'What does this tell you?' }, id);
     }
+
+    // A report, not a limit: how much each lesson shows on a 390px phone once its
+    // outcome is open. The guideline is 350 words, 10 labels and 3 screens.
+    await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+    const sizes = [];
+    for (const id of ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit', 'fee-break-even', 'range-boundaries', 'final-challenge']) {
+      await evaluate(`localStorage.removeItem('${progressKey}')`);
+      await navigate(base + 'learn.html#lesson=' + id);
+      await evaluate(`document.getElementById(${JSON.stringify(id === 'final-challenge' ? 'liquidity-task-example' : 'learn-reveal')}).click()`);
+      if (id === 'pool-share') await evaluate("document.getElementById('foundation-later-show')?.click()");
+      const [words, labels, screens] = await evaluate(`(() => {
+        const lesson = document.getElementById('learn-essential');
+        const labels = [...lesson.querySelectorAll('h2,h3,h4,legend,.eyebrow,summary,.scene-prediction-invite,.foundation-invite,label[for],figcaption,.learn-explore-question')].filter(node => node.checkVisibility()).length;
+        return [(lesson.innerText.trim().match(/\\S+/g) || []).length, labels, Math.round(lesson.getBoundingClientRect().height / innerHeight * 10) / 10];
+      })()`);
+      assert.ok(words > 150 && labels > 5 && screens > 1, id + ': the lesson is measured with its outcome open');
+      sizes.push(id + ' ' + words + ' words, ' + labels + ' labels, ' + screens + ' screens');
+    }
+    console.log('REPORT: lesson size at 390px with the outcome open (guideline: 350 words, 10 labels, 3 screens): ' + sizes.join('; '));
 
     await navigate(base + 'learn.html#lesson=swap-impact');
     await reduceMotion({ call, evaluate });

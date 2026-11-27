@@ -20,8 +20,7 @@ test('findings track changed price directions and the average price rather than 
   const swap = runLesson('swap-impact', lessonSetup('swap-impact'));
   const finding = lessonFinding('swap-impact', swap);
   // The verdict answers "less, the same, or more" first, in the question's own amounts.
-  assert.match(finding, /^Less\. The pool pays 18,132\.22 USDC for the whole trade, an average price of \$1,813\.22 per ETH\./);
-  assert.match(finding, /At the starting pool price of \$2,000\.00, 10 ETH would be worth 20,000 USDC\.$/);
+  assert.equal(finding, 'Less. The pool pays 18,132.22 USDC, not 20,000: an average price of $1,813.22 per ETH.');
   // The difference is already in the quote, so it is not called a loss.
   assert.doesNotMatch(finding, /\blos[est]/i);
   for (const variant of [0, 1, 2]) {

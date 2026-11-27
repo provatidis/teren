@@ -3,9 +3,10 @@ import { fmt, usd, signedUSD } from './format.js';
 export function lessonFinding(id, outcome) {
   const { setup: s, result: r } = outcome;
   // Answer the question, give both amounts and stop: the difference is already
-  // in the quote, so it is not called a loss.
-  if (id === 'swap-impact') return 'Less. The pool pays ' + fmt(outcome.out, 2) + ' USDC for the whole trade, an average price of ' + usd(outcome.out / s.amount)
-    + ' per ETH. At the starting pool price of ' + usd(s.initialPrice) + ', ' + fmt(s.amount, 0) + ' ETH would be worth ' + fmt(s.amount * s.initialPrice, 0) + ' USDC.';
+  // in the quote, so it is not called a loss. It stays short enough to sit on
+  // a phone screen with the pool, with or without a note on the prediction.
+  if (id === 'swap-impact') return 'Less. The pool pays ' + fmt(outcome.out, 2) + ' USDC, not ' + fmt(s.amount * s.initialPrice, 0)
+    + ': an average price of ' + usd(outcome.out / s.amount) + ' per ETH.';
   if (id === 'pool-share') return 'The pool holds ' + fmt(s.reserveEth + s.depositEth, 0) + ' ETH after your deposit, and ' + fmt(s.depositEth, 0) + ' of them came from you. You own '
     + fmt(outcome.share, 2) + '% of the pool: the same share of its ETH and of its USDC.';
   if (id === 'token-balances') return tokenBalanceNarration(outcome).finding;
@@ -178,6 +179,42 @@ export function deeperPoolQuestion(outcome) {
       shallow: 'The swap does move this pool’s price further, and that move works against you: each ETH you sell lowers the price for the next. This pool quotes ' + here + '; the deeper pool would quote ' + deeper + '.',
     },
   };
+}
+
+// What a prediction that differs would need to be true: one sentence naming
+// the condition under which that answer holds. The verdict beside it already
+// says what holds here. It does not claim to know why the reader chose it.
+export function predictionNote(id, outcome, selected) {
+  if (!selected || selected === outcome.prediction) return '';
+  const s = outcome.setup;
+  if (id === 'swap-impact') {
+    const worth = fmt(s.amount * s.initialPrice, 0) + ' USDC';
+    return selected === 'same' ? '“Exactly ' + worth + '” would be true at one fixed price with no fee.'
+      : selected === 'more' ? '“More than ' + worth + '” would be true if selling ETH raised the pool’s price.' : '';
+  }
+  if (id === 'pool-share') {
+    const naive = s.depositEth / s.reserveEth * 100;
+    return selected === 'same' ? '“' + fmt(naive, Number.isInteger(naive) ? 0 : 2) + '%” would be true if the pool stayed the size it was.' : '';
+  }
+  if (id === 'token-balances') {
+    const still = s.futurePrice === s.initialPrice ? ' Here the price has not moved.' : '';
+    if (selected === 'more') return '“More ETH” would be true if ETH had fallen.' + still;
+    if (selected === 'less') return '“Less ETH” would be true if ETH had risen.' + still;
+    // Not "if nobody had traded": that is the case the question after the figure asks about.
+    return selected === 'same' ? '“The same ETH” would be true if your claim were a fixed set of tokens.' : '';
+  }
+  if (id === 'loss-vs-profit') {
+    if (selected === 'more') return '“More than holding” would be true with enough fees. None are counted here.';
+    if (selected === 'same') return '“The same as holding” would be true at the starting price.';
+    return selected === 'less' ? '“Less than holding” would be true at any other price.' : '';
+  }
+  if (id === 'fee-break-even') return selected === 'both-earn' ? '“Both bars” would be true if holding earned fees too.'
+    : selected === 'runner-keeps' ? '“Neither” would be true if the pool kept its fees for whoever runs it.' : '';
+  if (id === 'range-boundaries') return { eth: '“Only ETH” would be true at or below the lower end of your range.', usdc: '“Only USDC” would be true at or above the upper end of your range.',
+    both: '“ETH and USDC” would be true inside your range.' }[selected] || '';
+  if (id === 'final-challenge') return selected === 'higher-price' ? 'A rise in ETH takes holding above your start, not below it.'
+    : selected === 'either' ? 'Only a fall does. A rise takes holding above your start.' : '';
+  return '';
 }
 
 export function benchmarkNarration(id, outcome) {

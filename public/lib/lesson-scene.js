@@ -54,7 +54,7 @@ export function createPredictionPrompt(fieldset, { selected, onShow, disabled = 
   element.addEventListener('change', () => label(Boolean(fieldset.querySelector('input:checked'))));
   show.onclick = onShow;
   element.append(
-    sceneNode('p', 'Make a prediction', 'scene-prediction-invite'), '\n', fieldset, '\n',
+    sceneNode('p', 'What do you expect?', 'scene-prediction-invite'), '\n', fieldset, '\n',
     show,
   );
   if (feedback) { feedback.textContent = ''; element.append('\n', feedback); }

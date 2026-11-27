@@ -143,7 +143,7 @@ The loop-stress lesson compares holding the original 5 ETH with a three-round lo
 
 Loss versus profit, Fees & break-even and the Final challenge share one two-bar figure: holding and your claim on a fixed dollar scale, each with its tokens underneath and a dashed line at the starting value. They are described under the pool-first lessons below. Fees are a striped segment on the claim’s bar; they never change the claim’s tokens or holding. **Match holding** sets the exact break-even fees at the chosen price, not a forecast or a rounded input. Variation changes invalidate answers to the changed case, while revised predictions preserve them.
 
-The final challenge is a construction task on that figure. Learners choose a price and a fee income so that the claim matches holding and both are below the start. A broad range of lower prices works, and **Match holding for me** and **Show an example** are available. The task checks the resulting state and a conceptual explanation; it does not require a particular click sequence or infer understanding from motion. Task inputs and the checked state survive reload. Editing them clears current feedback and sharing eligibility until checked again, while earlier lesson completion remains. One worked example, ETH at the question price with the question’s fees, stays available as an optional disclosure with its own **ETH price** and **Fees** controls. The result card and the Experiment link use that example’s numbers. Financial models and recorded evidence remain unchanged.
+The final challenge is a construction task on that figure. Learners choose a price and a fee income so that the claim matches holding and both are below the start. A broad range of lower prices works, and **Match holding for me** and **Show an example** are available. The task checks the resulting state and a conceptual explanation; it does not require a particular click sequence or infer understanding from motion. Task inputs and the checked state survive reload. Editing them clears current feedback and sharing eligibility until checked again, while earlier lesson completion remains. One worked example, ETH at the question price with the question’s fees, stays available as an optional disclosure with its own **ETH price** and **Fees** controls. The result card uses that example’s numbers. The link to the full-range lab opens the reader’s own example instead. Financial models and recorded evidence remain unchanged.
 
 ## Extending the patterns
 
@@ -159,7 +159,7 @@ Each visual should replace repeated setup/result prose, retain essential assumpt
 
 ## Teaching emphasis
 
-A prediction makes an expectation explicit. It is visible, ungraded and deliberately skippable. Removing arithmetic and long introductory text supports this step; it does not require hiding it. Explanations and changed-situation checks remain the completion criteria, and direct Experiment access serves people who already have a question. Evaluate reviews against that sequence, including people who choose to see the outcome first.
+A prediction makes an expectation explicit. It is visible, ungraded and deliberately skippable: its heading asks **What do you expect?**, and until a choice is made its button reads **Not sure — show me**. In the liquidity essentials, a prediction that differs from the outcome is answered with what it would need to be true, in one sentence: “More ETH” would be true if ETH had fallen. The note names a condition under which that answer holds. It does not claim to know why the reader chose it, and the verdict beside it already says what holds here. Removing arithmetic and long introductory text supports this step; it does not require hiding it. Explanations and changed-situation checks remain the completion criteria, and direct Experiment access serves people who already have a question. Evaluate reviews against that sequence, including people who choose to see the outcome first.
 
 ## Liquidity lessons 1 to 7: pool first
 
@@ -226,6 +226,12 @@ The lesson has no range width selector. A width saved by the earlier one still l
 - No answer is given away by its length, and each question has a hint and its own feedback for every answer.
 
 The case sits in one sentence above the question, with no label of its own. The answer's feedback says whether it is right, and the box under it says where the lesson stands: “Lesson 4 done.” A lesson is complete after one right answer, plus the solved task in lesson 7. Lessons completed earlier stay complete. Saved answers to replaced questions are cleared, and the challenge keeps its answer and the reader's own example because its question did not change.
+
+**Look closer.** After the figure, each lesson gives one question to take into a lab, with a link that names the lab it opens. The test for each is whether the lab behind the link can answer it: after clicking, what can the reader change or inspect? Lesson 3’s link opens the full-range lab, which assumes traders have already moved the pool, so it asks what returns when the price moves away and back. It does not ask whether anyone has traded yet. Lesson 7’s link opens the reader’s own example and asks whether it still matches holding once costs are counted, because that lab has cost fields the lesson leaves out. Every reader gets the same link, whatever they predicted. Lessons 5 and 6 end on needing a record of fees, so once answered they also link to the recorded case “Fees over time”.
+
+The three headings a reader meets are **What do you expect?**, **Look closer** and **What does this tell you?**
+
+The browser checks print a report of how much each lesson shows on a 390px phone with its outcome open: words, headings and labels, and screens. The guideline is 350 words, 10 labels and 3 screens. It is a guideline and not a limit, and a condition an answer depends on is never cut to meet it.
 
 Lessons 3 to 7 use one set of names: your claim, holding, your start, impermanent loss for the gap to holding before fees, and break-even fees for the fees that close it. Lesson 6 adds your range and its lower and upper end. Lesson 7’s optional worked example uses the same names.
 

@@ -13,7 +13,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
     for (let i = 0; i < 3 && !(await text('learn-variation-label')).includes('1 of 3'); i++) await click('learn-variation');
   };
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
-  // Lesson 7 keeps one worked example as an optional extra under "Go further".
+  // Lesson 7 keeps one worked example as an optional extra under "Look closer".
   // Lessons 4 and 5 and the challenge itself use the shared figure: see
   // benchmark-lesson-checks.js, fee-lesson-checks.js and learning-application-checks.js.
   const id = 'final-challenge', application = 'relative-gap';
@@ -60,7 +60,7 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
   const changed = await explored();
   await choose('learn-prediction', 'higher-price');
   assert.deepEqual(await explored(), changed, 'Answering the question preserves the explored example.');
-  assert.equal(await text('learn-results-title'), 'Go further');
+  assert.equal(await text('learn-results-title'), 'Look closer');
   await reveal();
   assert.equal(await evaluate("document.getElementById('comparison-price').value"), '4000');
   assert.equal(await evaluate("document.getElementById('comparison-fees').value"), '100');
@@ -90,9 +90,12 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
   await reveal();
   assert.equal(await text('liquidity-task-feedback'), taskFeedback);
   assert.equal(await evaluate("document.getElementById('liquidity-task-feedback').hidden"), false, 'Showing the answer again keeps checked task feedback.');
+  // The lab link opens the reader's own example. Exploring the worked example does not move it.
   const link = await evaluate("document.getElementById('learn-explore').href");
-  assert.match(link, /future=4000/);
-  assert.match(link, /fees=100/);
+  assert.match(link, /future=1500/);
+  assert.equal(await text('learn-explore'), 'Open your example in the full-range lab ↗');
+  assert.equal(await text('learn-explore-question'), 'Does your example still match holding once costs are counted?');
+  assert.match(await text('learn-explore-note'), /^Opens ETH at \$1,500\.00 with \$44\.87 in fees, in a new tab\. Add the costs there\.$/);
   await fill('comparison-price', '1000');
   assert.deepEqual([await text('learn-application-context'), await text('learn-application-question')], asked);
   assert.equal(await evaluate("document.getElementById('learn-explore').href"), link);
@@ -115,9 +118,9 @@ export async function checkComparisonLessons({ evaluate, click, fill, text, navi
   await reload();
   assert.equal(await evaluate("document.getElementById('comparison-price').value"), '2033.25');
   assert.equal(await evaluate("document.getElementById('comparison-fees').value"), '123.45');
-  assert.match(await evaluate("document.getElementById('learn-explore').href"), /future=2033.25.*fees=123.45/);
+  // A saved worked example keeps its own price and fees in the result card's link.
+  assert.match(await evaluate("document.getElementById('learn-share-url').value"), /future=2033.25.*fees=123.45/);
   assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0);
-  assert.equal(await text('learn-explore-note'), 'Opens the $2,033.25 ETH example with $123.45 in fees.');
   console.log('PASS: fractional legacy question prices and fees survive editor removal without snapping and retain their exact handoff');
 
   await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });

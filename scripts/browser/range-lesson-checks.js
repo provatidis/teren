@@ -100,7 +100,10 @@ export async function checkRangeLesson({ evaluate, click, fill, text, navigate, 
   assert.match(await text('learn-prediction-feedback'), /^Your prediction matches/);
   assert.equal(await text('learn-feedback-title'), 'Lesson 6 done.', 'A prediction chosen afterwards keeps the checked answer.');
   assert.match(await evaluate("document.getElementById('learn-explore').href"), /liquidity\.html#/);
-  assert.equal(await text('learn-explore-note'), 'Opens this range in a new tab. Move its ends and the price, and see where it runs out of a token.');
+  assert.deepEqual([await text('learn-explore-question'), await text('learn-explore'), await text('learn-explore-note')],
+    ['What happens past the edge?', 'Open this range in the range lab ↗', 'Move its ends and the price there, and see where it runs out of a token. It opens in a new tab.']);
+  // Lessons 5 and 6 end on "you need a record", and the finished lesson links to one.
+  assert.deepEqual(await evaluate("(link => [link.checkVisibility(), link.textContent, link.getAttribute('href')])(document.getElementById('learn-record'))"), [true, 'See the fees one recorded range earned →', '#applied=fees-over-time']);
   await reload();
   assert.equal(await text('learn-feedback-title'), 'Lesson 6 done.');
   assert.deepEqual([await evaluate("document.getElementById('boundary-price').value"), await text('boundary-where'), await evaluate("document.querySelector('input[name=learn-prediction]:checked').value")],
