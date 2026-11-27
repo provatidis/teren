@@ -1,6 +1,7 @@
 import { runLesson } from './lesson-experiments.js';
 import { checkLiquidityChallenge } from './liquidity-challenge.js';
 import { calculateScenario } from './cp50-v1.js';
+import { calculateRange } from './cl-range-v1.js';
 
 // Missing revisions describe the original questions. Keep completed lessons,
 // but do not reuse an answer when the question it answered has changed.
@@ -11,7 +12,9 @@ export function essentialQuestionRevisions(id, variant) {
   return {
     prediction: id === 'fee-break-even' ? 4 : ['final-challenge', 'pool-share', 'loss-vs-profit'].includes(id) || (id === 'range-boundaries' && variant > 0) ? 2 : 1,
     reason: id === 'token-balances' ? 4 : id === 'final-challenge' ? 3 : ['loss-vs-profit', 'swap-impact'].includes(id) ? 2 : 1,
+    // Lesson 6's first two variations ask about a narrower range beside the reader's own.
     application: id === 'swap-impact' ? 3 : id === 'pool-share' ? [2, 3, 2][variant] : id === 'loss-vs-profit' && variant !== 1 ? 4
+      : id === 'range-boundaries' ? [2, 3, 2][variant]
       : ['loss-vs-profit', 'fee-break-even'].includes(id) ? 3 : changed ? 2 : 1,
   };
 }
@@ -59,10 +62,18 @@ export function lessonApplication(id, outcome) {
       expected: next.result.difference < 0 ? 'gap-reopens' : next.result.difference > 0 ? 'now-ahead' : 'still-matches'};
   }
   if (id === 'range-boundaries') {
-    const futurePrice = s.initialPrice * (outcome.variant === 2 ? 1 - s.width : 1 + s.width * (outcome.variant === 1 ? -.9 : .9));
+    if (outcome.variant === 2) {
+      const futurePrice = s.initialPrice * (1 - s.width);
+      return {kind: 'lower-edge', futurePrice, next: runLesson(id, {futurePrice, width: s.width}, outcome.variant), expected: 'eth-owned'};
+    }
+    // A second claim with half the range, at a price between the two ranges' ends:
+    // inside the reader's range, past the narrower one. The scene cannot show it.
+    const side = outcome.variant === 1 ? -1 : 1, narrowWidth = s.width / 2;
+    const futurePrice = s.initialPrice * (1 + side * s.width * .8);
     const next = runLesson(id, {futurePrice, width: s.width}, outcome.variant);
-    return {kind: outcome.variant === 2 ? 'lower-edge' : 'just-inside', futurePrice, next,
-      expected: outcome.variant === 2 ? 'eth-owned' : outcome.variant === 1 ? 'mostly-eth' : 'both-inside'};
+    const narrow = calculateRange({...s, futurePrice, lowerPrice: s.initialPrice * (1 - narrowWidth), upperPrice: s.initialPrice * (1 + narrowWidth), fees: 0, fullRangeFees: 0});
+    if (next.result.state !== 'inside' || narrow.state !== (side > 0 ? 'above' : 'below')) throw new Error('The narrower range must end before this price.');
+    return {kind: 'narrower-range', futurePrice, next, narrow, expected: 'narrow-out'};
   }
   if (id === 'final-challenge') return {kind: 'construct-example', expected: 'relative-gap'};
   throw new Error('Choose a supported application exercise.');

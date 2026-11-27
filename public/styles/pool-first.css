@@ -71,3 +71,24 @@
 .learning-application-scene .learning-task-hints { margin-top: 14px; }
 .challenge-scene { margin-top: 18px; }
 .challenge-scene > .learn-prediction-feedback { margin: 0 0 14px; }
+
+/* Lesson 6: the claim's range sits over its two token bars. The range guide's
+   labels are not controls here, so its rows take the height of their text. */
+.boundary-figure .scene-range-guide { margin: 0 0 8px; }
+.boundary-figure .scene-range-boundary { height: 31px; }
+/* Each label keeps clear of the marker, which reaches past the track. */
+.boundary-figure .scene-range-bound-label { min-height: 0; top: 0; line-height: 1.5; }
+.boundary-figure .scene-range-upper .scene-range-bound-label { top: auto; bottom: 0; }
+.boundary-figure .scene-range-marker { top: -5px; bottom: -5px; }
+.boundary-figure .scene-range-scale { margin-top: 4px; }
+.boundary-where { margin: 0 0 4px; font-size: 15px; line-height: 1.6; font-weight: 600; white-space: nowrap; }
+.boundary-figure .scene-token-row { padding: 8px 12px; margin: 8px 0; }
+.boundary-figure .scene-token-track { margin: 8px 0 4px; }
+.boundary-figure .scene-token-heading { flex-wrap: nowrap; }
+.boundary-figure .scene-token-heading > span { white-space: nowrap; }
+.boundary-figure .scene-key { margin: 8px 0 0; }
+/* Past its range the claim is inactive: the band dims with it. */
+.boundary-figure:is([data-state=above], [data-state=below]) .scene-range-band { opacity: .55; }
+@media (max-width: 480px) {
+  .boundary-figure .scene-token-heading { font-size: 15px; }
+}

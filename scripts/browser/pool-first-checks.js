@@ -124,12 +124,15 @@ export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
     assert.deepEqual(await evaluate("[document.querySelector('.scene-token-figure').getAnimations({subtree:true}).length, document.getElementById('token-scene-at').textContent]"), [0, 'ETH at $750.00']);
     await call('Emulation.setEmulatedMedia', { features: [] });
 
-    // Later lessons keep the question-first layout, their setup box and the pitfall in the results.
-    await navigate(base + 'learn.html#lesson=range-boundaries');
-    await evaluate("document.getElementById('learn-run').click()");
-    assert.deepEqual(await evaluate(`({ poolFirst: document.getElementById('learn-essential').hasAttribute('data-pool-first'), setup: ${shown('#learn-setup')}, run: ${shown('#learn-run')},
-      pitfall: document.getElementById('learn-pitfall').closest('#learn-results') !== null && (${shown('#learn-pitfall')}), title: document.getElementById('learn-check-title').textContent })`),
-      { poolFirst: false, setup: true, run: true, pitfall: true, title: 'Explain the result and apply the idea' });
+    // Every liquidity lesson now has this layout: no setup box, no explanation
+    // button, and the pitfall in the scene's panel instead of the results.
+    for (const id of ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit', 'fee-break-even', 'range-boundaries', 'final-challenge']) {
+      await navigate(base + 'learn.html#lesson=' + id);
+      await evaluate("document.getElementById('learn-reveal').click()");
+      assert.deepEqual(await evaluate(`({ poolFirst: document.getElementById('learn-essential').hasAttribute('data-pool-first'), setup: ${shown('#learn-setup')}, run: ${shown('#learn-run')},
+        pitfall: document.getElementById('learn-pitfall').closest('#learn-scene .foundation-outcome') !== null && (${shown('#learn-pitfall')}), title: document.getElementById('learn-check-title').textContent })`),
+        { poolFirst: true, setup: false, run: false, pitfall: true, title: 'Use what you saw' }, id);
+    }
 
     await navigate(base + 'learn.html#lesson=swap-impact');
     await reduceMotion({ call, evaluate });
@@ -139,5 +142,5 @@ export async function checkPoolFirstLesson({ evaluate, navigate, base, call }) {
     await call('Emulation.setEmulatedMedia', { features: [] });
     await evaluate(`${saved === null ? `localStorage.removeItem('${progressKey}')` : `localStorage.setItem('${progressKey}', ${JSON.stringify(saved)})`}`);
   }
-  console.log('PASS: lessons 1 to 3 show their figure first, reveal in place at 390/320px and keep the slider with what it moves; later lessons are unchanged');
+  console.log('PASS: lessons 1 to 3 show their figure first, reveal in place at 390/320px and keep the slider with what it moves; every liquidity lesson has the layout');
 }

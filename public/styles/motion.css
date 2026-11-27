@@ -6,13 +6,13 @@
   :root:not([data-scrubbing]) :is(
     .scene-token-fill, .foundation-owned, .scene-token-start, .foundation-comparison-track > span,
     .comparison-principal, .comparison-fees,
-    .scene-boundary-eth, .scene-boundary-usdc, .scene-range-marker,
+    .scene-range-marker,
     .condition-fill, .condition-reference, .response-fill, .response-reference, .stress-fill,
     .loan-accrual-original, .loan-accrual-interest,
     .width-eth, .lst-comparison-bar-fill
   ) { transition: width .28s cubic-bezier(.2, .7, .3, 1), left .28s cubic-bezier(.2, .7, .3, 1); }
 }
 /* A revealed or replayed lesson action animates its own bars over a longer time
-   (playRevealedBars in lib/lesson-scene.js, lib/foundation-lesson-scenes.js);
-   the short easing above would override it. */
-:root figure[data-motion=true] :is(.scene-token-fill, .foundation-owned) { transition: none; }
+   (playRevealedBars and playRevealedPath in lib/lesson-scene.js,
+   lib/foundation-lesson-scenes.js); the short easing above would override it. */
+:root figure[data-motion=true] :is(.scene-token-fill, .foundation-owned, .scene-range-marker) { transition: none; }

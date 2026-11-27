@@ -202,14 +202,15 @@ export async function checkFoundationLessons({ evaluate, click, fill, text, navi
   }
   assert.equal(await evaluate("localStorage.getItem('defi-sandbox-v1')"), sandbox);
   await navigate(base + 'learn.html#lesson=range-boundaries');
+  // A lesson revealed earlier folds its question, so start from a fresh variation.
+  await reset();
   assert.equal(await evaluate("document.getElementById('learn-prediction-field').closest('.scene-prediction')===null"), false);
   assert.ok(await evaluate("document.getElementById('learn-prediction-question').getBoundingClientRect().width") > 100, 'Other lessons retain their visible group legend.');
-  await reset();
-  for (const [variant, prediction, price, direction] of [[0, 'usdc', 2400, /ETH for USDC/], [1, 'eth', 1275, /USDC for ETH/], [2, 'both', 3150, /ETH for USDC/]]) {
+  for (const [variant, prediction, price, direction] of [[0, 'usdc', 2400, /bought ETH from your claim/], [1, 'eth', 1275, /sold ETH to your claim/], [2, 'both', 3150, /less ETH and more USDC/]]) {
     if (variant) await click('learn-variation');
-    await choose('learn-prediction', prediction); await click('learn-run');
+    await choose('learn-prediction', prediction); await click('learn-reveal');
     assert.match(await text('learn-prediction-feedback'), /^Your prediction matches/);
-    assert.match(await text('learn-explanation'), direction);
+    assert.match(await text('learn-prediction-feedback'), direction);
     assert.match(await evaluate("document.getElementById('learn-explore').href"), new RegExp('future=' + price));
     await reload();
     assert.equal(await evaluate("document.querySelector('input[name=learn-prediction]:checked').value"), prediction);

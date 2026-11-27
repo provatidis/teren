@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
 import { lessonApplication, essentialQuestionRevisions } from '../public/models/lesson-application.js';
 import { lessonApplicationCopy } from '../public/lib/lesson-application-copy.js';
-import { rangeBoundaryNarration } from '../public/lib/lesson-narration.js';
+import { lessonFinding } from '../public/lib/lesson-narration.js';
 import { parseProgress } from '../public/data/learning-progress.js';
 import { scenarioFromHash } from '../public/lib/scenario-links.js';
 
@@ -59,19 +59,21 @@ test('hypothetical dashboards separate principal, supplied fees and the original
 });
 
 test('range variations begin above, below and inside with matching direction-aware explanations', () => {
-  for (const [variant, price, expected, direction] of [[0, 2400, 'usdc', /ETH for USDC/], [1, 1275, 'eth', /USDC for ETH/], [2, 3150, 'both', /ETH for USDC/]]) {
+  for (const [variant, price, expected, direction] of [[0, 2400, 'usdc', /bought ETH from your claim/], [1, 1275, 'eth', /sold ETH to your claim/], [2, 3150, 'both', /less ETH and more USDC/]]) {
     const setup = lessonSetup('range-boundaries', variant);
     const result = runLesson('range-boundaries', setup, variant);
     assert.equal(setup.futurePrice, price);
     assert.equal(result.prediction, expected);
-    assert.match(rangeBoundaryNarration(result), direction);
-    assert.match(rangeBoundaryNarration(result), expected === 'eth' ? /all ETH/ : expected === 'usdc' ? /all USDC/ : /contains both ETH and USDC/);
+    assert.match(lessonFinding('range-boundaries', result), direction);
+    assert.match(lessonFinding('range-boundaries', result), expected === 'eth' ? /^Only ETH\./ : expected === 'usdc' ? /^Only USDC\./ : /^ETH and USDC\./);
     assert.equal(result.reason, 'path', 'The present token mix still does not establish past fees.');
   }
 });
 
 test('question migrations retire changed answers and keep completion plus compatible custom inputs', () => {
-  for (const [id, variant, oldApplication, revision] of [['swap-impact', 0, 'deeper-less', 1], ['swap-impact', 1, 'deeper-more', 2], ['loss-vs-profit', 0, 'gap-unchanged', 3], ['loss-vs-profit', 2, 'gap-unchanged', 3]]) {
+  for (const [id, variant, oldApplication, revision] of [['swap-impact', 0, 'deeper-less', 1], ['swap-impact', 1, 'deeper-more', 2], ['loss-vs-profit', 0, 'gap-unchanged', 3], ['loss-vs-profit', 2, 'gap-unchanged', 3],
+    // Lesson 6's "just inside the edge" questions gave way to a narrower range beside the reader's own.
+    ['range-boundaries', 0, 'both-inside', 1], ['range-boundaries', 1, 'mostly-eth', 2]]) {
     const result = runLesson(id, lessonSetup(id, variant), variant);
     const parsed = parseProgress({version: 1, completed: [id], drafts: {[id]: {variant, inputs: result.setup, prediction: result.prediction, predictionRevision: essentialQuestionRevisions(id, variant).prediction, reason: result.reason, reasonRevision: essentialQuestionRevisions(id, variant).reason, application: oldApplication, applicationRevision: revision, ran: true}}});
     assert.deepEqual(parsed.completed, [id]);

@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { lessonSetup, runLesson } from '../public/models/lesson-experiments.js';
-import { lessonFinding, rangeBoundaryNarration, priceMovePrediction, tokenBalanceNarration, benchmarkPrediction, lossProfitReasoning, feePrediction } from '../public/lib/lesson-narration.js';
+import { lessonFinding, lessonReasonFeedback, rangePrediction, priceMovePrediction, tokenBalanceNarration, benchmarkPrediction, lossProfitReasoning, feePrediction } from '../public/lib/lesson-narration.js';
+import { lessonApplicationCopy } from '../public/lib/lesson-application-copy.js';
 import { rangePositionState, rangeSceneState } from '../public/lib/liquidity-scene-state.js';
 import { managementCase } from '../public/models/range-decisions.js';
 import { lendingCase, checkLendingUnderstanding } from '../public/models/lending-lessons.js';
@@ -13,7 +14,7 @@ import { appliedQuestion } from '../public/lib/applied-lessons.js';
 import { validatePositionPeriod } from '../public/data/position-period.js';
 import { depositSceneState } from '../public/lib/foundation-scene-state.js';
 import { LESSONS } from '../public/learning/liquidity-essentials.js';
-import { usd } from '../public/lib/format.js';
+import { fmt, usd } from '../public/lib/format.js';
 
 test('findings track changed price directions and the average price rather than the starting pool price', () => {
   const swap = runLesson('swap-impact', lessonSetup('swap-impact'));
@@ -48,19 +49,60 @@ test('range scenes show token endpoints and the different gaps to each original 
   assert.equal(rangePositionState(narrow, 1900).result.pooled.usdc, 0);
 });
 
-test('range explanations follow the assessed price direction and token endpoint', () => {
+test('lesson 6 names the move against the range, and its verdict says what the claim holds and where the trading stopped', () => {
+  const where = { above: /, above your range\. /, below: /, below your range\. /, 'upper-edge': /, the upper end of your range\. /, 'lower-edge': /, the lower end of your range\. /, inside: /inside your range\. / };
   for (const variant of [0, 1, 2]) {
     for (const width of [.05, .1, .5]) {
       const base = lessonSetup('range-boundaries', variant);
       for (const factor of [.5, .95, 1, 1.05, 2]) {
-        const outcome = runLesson('range-boundaries', { ...base, width, futurePrice: base.initialPrice * factor }, variant);
-        const copy = rangeBoundaryNarration(outcome);
-        assert.match(copy, factor > 1 ? /ETH for USDC/ : factor < 1 ? /USDC for ETH/ : /unchanged price/);
-        assert.match(copy, outcome.result.pooled.eth === 0 ? /all USDC/ : outcome.result.pooled.usdc === 0 ? /all ETH/ : /contains both ETH and USDC/);
-        assert.match(copy, /does not tell us how much it earned earlier/);
+        const outcome = runLesson('range-boundaries', { ...base, width, futurePrice: base.initialPrice * factor }, variant), { setup, result } = outcome;
+        const question = rangePrediction(setup, result), finding = lessonFinding('range-boundaries', outcome);
+        assert.match(question, factor > 1 ? /^ETH rises from / : factor < 1 ? /^ETH falls from / : /^ETH stays at /);
+        assert.match(question, where[result.state]);
+        assert.match(question, /What does your claim hold then\?$/);
+        if (result.pooled.eth === 0) {
+          assert.ok(finding.startsWith('Only USDC. On the way up, traders bought ETH from your claim and paid in USDC. The last ETH went at ' + usd(result.upperPrice) + ', the upper end of your range. '), finding);
+          assert.ok(finding.endsWith(fmt(result.pooled.usdc, 2) + ' USDC.'), finding);
+        } else if (result.pooled.usdc === 0) {
+          assert.ok(finding.startsWith('Only ETH. On the way down, traders sold ETH to your claim and took USDC. The last USDC went at ' + usd(result.lowerPrice) + ', the lower end of your range. '), finding);
+          assert.ok(finding.endsWith(fmt(result.pooled.eth, 4) + ' ETH.'), finding);
+        } else {
+          assert.ok(finding.startsWith('ETH and USDC. ' + usd(setup.futurePrice) + ' is inside your range, so traders are still swapping against your claim.'), finding);
+          assert.match(finding, factor > 1 ? /less ETH and more USDC than at the start\.$/ : factor < 1 ? /more ETH and less USDC than at the start\.$/ : /its starting tokens\.$/);
+        }
+        // Past the range nothing trades; at its very end the claim has only just run out.
+        assert.equal(/nothing trades, so your claim stays at/.test(finding), ['above', 'below'].includes(result.state), finding);
       }
     }
   }
+  // The three variations end above, below and inside the range, so no answer can be guessed from the last one.
+  assert.deepEqual([0, 1, 2].map(variant => runLesson('range-boundaries', lessonSetup('range-boundaries', variant), variant).prediction), ['usdc', 'eth', 'both']);
+});
+
+test('lesson 6 uses the names of lessons 3 to 5, and its check questions cannot be read off the figure', () => {
+  const lesson = LESSONS.find(item => item.id === 'range-boundaries');
+  assert.equal(lesson.intro, 'Here your liquidity works only inside a price range you choose. See what your claim holds when ETH leaves it.');
+  const texts = [lesson.intro, lesson.prediction, lesson.reasoning, lesson.explanation, lesson.takeaway, lesson.completion, ...lesson.reasons.map(([, copy]) => copy), ...Object.values(lesson.reasonFeedbackByChoice)];
+  for (const variant of [0, 1, 2]) {
+    const outcome = { ...runLesson('range-boundaries', lessonSetup('range-boundaries', variant), variant), variant }, copy = lessonApplicationCopy('range-boundaries', outcome);
+    texts.push(rangePrediction(outcome.setup, outcome.result), lessonFinding('range-boundaries', outcome), copy.label, copy.context, copy.question, copy.hint, copy.feedback,
+      ...copy.choices.map(([, text]) => text), ...Object.values(copy.feedbackByChoice), lessonReasonFeedback('range-boundaries', outcome, 'zero'));
+    assert.equal(copy.choices[0][0], copy.expected);
+    if (variant < 2) {
+      // A second, narrower range at a price between the two ranges' ends.
+      const { application } = copy, { setup } = outcome, up = variant === 0;
+      assert.equal(application.kind, 'narrower-range');
+      assert.equal(application.next.result.state, 'inside');
+      assert.equal(application.narrow.state, up ? 'above' : 'below');
+      assert.equal(application.narrow.pooled[up ? 'eth' : 'usdc'], 0);
+      assert.ok(Math.abs(application.narrow.upperPrice - application.narrow.lowerPrice - setup.initialPrice * setup.width) < 1e-9, 'Half as wide as the reader’s range.');
+      assert.ok(copy.context.includes(usd(application.narrow.lowerPrice) + '–' + usd(application.narrow.upperPrice)) && copy.context.includes('inside your range, ' + (up ? 'above' : 'below') + ' theirs'), copy.context);
+      assert.equal(copy.choices[0][1], 'Yours holds both tokens. Theirs is all ' + (up ? 'USDC' : 'ETH') + ' and has stopped trading.');
+    } else assert.match(copy.feedback, /not a stop-loss order and not a loan/);
+  }
+  const copy = texts.join(' ');
+  assert.doesNotMatch(copy, /position|principal|boundary|bound\b|liquidity stays|LP\b/i);
+  assert.match(copy, /your claim/i); assert.match(copy, /your range/);
 });
 
 test('new lending and leverage follow-ups follow the existing financial models', () => {

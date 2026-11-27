@@ -83,7 +83,7 @@ export async function checkLessonConsistency({ evaluate, click, fill, text, navi
   assert.equal(await evaluate("document.getElementById('learn-continue').hidden"),false);
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   await navigate(base + 'learn.html#lesson=range-boundaries');
-  await choose('learn-prediction','usdc'); await click('learn-run'); await choose('learn-reason','path'); await choose('learn-application','both-inside'); await click('learn-check');
+  await choose('learn-prediction','usdc'); await click('learn-reveal'); await choose('learn-reason','path'); await choose('learn-application','narrow-out'); await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');
   await navigate(base + 'learn.html#applied=period-vs-holding');
   await evaluate("new Promise(resolve=>{const check=()=>document.getElementById('learn-applied').getAttribute('aria-busy')==='false'?resolve():setTimeout(check,25);check()})");

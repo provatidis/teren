@@ -1,5 +1,17 @@
 # Release history
 
+## 1.67.0 · 2026-11-27
+
+- Liquidity lesson 6 now follows the layout of the other six lessons: the figure first, the question under it, and the outcome played in place.
+- The figure shows your range on a price track, with your claim’s ETH and USDC as two bars under it. Each bar is full where the claim holds only that token.
+- The question names the move against the range: “ETH rises from $2,000.00 to $2,400.00, above your range. What does your claim hold then?” The three variations end above, below and inside the range.
+- Showing the outcome moves the price across the range. The bars change only while the price is inside it and stop where it leaves.
+- The price slider appears with the outcome, under the figure. It covers a closer span of prices, so the range takes about a third of the track, and two shortcuts jump to either end of the range.
+- One panel says what happens inside and outside the range and holds the pitfall that leaving a range is not liquidation.
+- In two of the variations the second check question is new: someone else has a narrower range, and ETH sits between the two ranges’ ends. The earlier “just inside the edge” question could be read off the figure. Saved answers to it are cleared; completed lessons stay completed.
+- The range width selector is gone from the lesson. A width saved earlier still loads. The lesson uses the names of lessons 3 to 5: your claim, your range, and its lower and upper end.
+- All seven liquidity lessons now share one layout.
+
 ## 1.66.1 · 2026-11-27
 
 - Lesson 5’s question now says its starting point is your claim before any fees. A claim includes every fee its pool has taken in, so without that the question could not be answered with confidence.

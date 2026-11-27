@@ -36,8 +36,7 @@
 .scene-consequence { font-size: 16px; line-height: 1.7; margin: 20px 0; }
 .scene-key, .scene-question-scope { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 12px 0; }
 .scene-essential-note { border-left: 3px solid var(--accent); padding-left: 14px; font-size: 14px; line-height: 1.8; margin: 18px 0; }
-.scene-question-settings { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 18px 0; }
-.scene-question-settings > summary, .scene-jump > summary { cursor: pointer; color: var(--accent); font-size: 14px; line-height: 1.6; min-height: 44px; padding: 12px 0; }
+.scene-jump > summary { cursor: pointer; color: var(--accent); font-size: 14px; line-height: 1.6; min-height: 44px; padding: 12px 0; }
 .scene-prediction { border-top: 1px solid var(--border-strong); border-bottom: 1px solid var(--border-strong); padding: 18px 0; margin: 18px 0; }
 .scene-prediction-invite { color: var(--accent); font-size: 13px; font-weight: 600; margin: 0 0 10px; }
 .scene-prediction .scene-prediction-question { color: var(--text); font-size: 15px; line-height: 1.6; margin-bottom: 12px; }
@@ -56,7 +55,6 @@
 @media (min-width: 1000px) {
   .scene-prediction .learn-choices { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 }
-.scene-question-settings .learn-controls { margin-top: 20px; }
 .scene-price-control { margin: 18px 0; }
 .scene-price-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 6px 12px; font-size: 14px; line-height: 1.7; }
 .scene-price-heading > label { min-width: 0; }
@@ -112,11 +110,6 @@ button.scene-range-bound-label { text-decoration: underline; text-underline-offs
 .scene-range-scale { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; line-height: 1.6; color: var(--muted); font-variant-numeric: tabular-nums; }
 .scene-range-tokens { margin: 0; font-size: 13px; line-height: 1.7; color: var(--muted); }
 .scene-range-gap { margin: 10px 0 0; font-size: 14px; line-height: 1.7; }
-.scene-boundary-mix { display: flex; height: 22px; border-radius: 5px; overflow: hidden; margin: 22px 0 14px; }
-.scene-boundary-eth { background: var(--allocation-eth); }
-.scene-boundary-usdc { background: var(--allocation-usdc-background); }
-#boundary-scene-tokens .allocation-swatch-eth { transform: rotate(45deg); border-radius: 1px; }
-#boundary-scene-tokens .allocation-swatch-usdc { border-radius: 50%; }
 .recorded-comparison { margin: 24px 0; }
 .recorded-comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
 .recorded-comparison-card { padding: 16px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); font-size: 14px; line-height: 1.7; }
@@ -144,5 +137,4 @@ button.scene-range-bound-label { text-decoration: underline; text-underline-offs
   .scene-range-row { margin-bottom: 12px; }
   .scene-range-gap { margin-top: 6px; }
   .scene-range-figure > figcaption, .scene-range-price { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-  .scene-boundary-figure .scene-range-price { position: static; width: auto; height: auto; margin: 0 0 16px; overflow: visible; clip-path: none; white-space: normal; font-size: 16px; }
 }

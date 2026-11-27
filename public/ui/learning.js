@@ -1,6 +1,7 @@
 import { saveLearningLocation } from '../data/learning-location.js';
 import { focusSceneOutcome, createPredictionPrompt, markPredictionRevealed, foldPrediction, sceneNode } from '../lib/lesson-scene.js';
-import { createTokenBalanceScene, createRangeBoundaryScene } from '../lib/liquidity-lesson-scenes.js';
+import { createTokenBalanceScene } from '../lib/liquidity-lesson-scenes.js';
+import { createRangeBoundaryScene } from '../lib/range-lesson-scene.js';
 import { createFoundationScene } from '../lib/foundation-lesson-scenes.js';
 import { createComparisonScene } from '../lib/comparison-lesson-scene.js';
 import { createBenchmarkScene, createFeeScene } from '../lib/benchmark-lesson-scene.js';
@@ -24,7 +25,7 @@ import { scenarioHash } from '../lib/scenario-links.js';
 import { rangeHash } from '../lib/range-links.js';
 import { resultCardBlob } from '../lib/result-card.js';
 import { appliedLessonFromHash } from '../lib/applied-lessons.js';
-import { tokenBalanceNarration, lossProfitReasoning, rangeBoundaryNarration, benchmarkNarration, lessonReasonFeedback, lessonFinding, deeperPoolQuestion, depositPrediction, priceMovePrediction, benchmarkPrediction, feePrediction } from '../lib/lesson-narration.js';
+import { tokenBalanceNarration, lossProfitReasoning, rangePrediction, benchmarkNarration, lessonReasonFeedback, lessonFinding, deeperPoolQuestion, depositPrediction, priceMovePrediction, benchmarkPrediction, feePrediction } from '../lib/lesson-narration.js';
 
 function finalReason(outcome) {
   const r = outcome.result;
@@ -39,17 +40,18 @@ export function initLearning() {
   const predictionFeedbackElement = $('learn-prediction-feedback');
   const predictionField = $('learn-prediction-field'), controls = $('learn-controls');
   let lessonScene, applicationScene;
-  // Lessons 1 to 5 put the figure before the question and reveal the outcome in
+  // Lessons 1 to 6 put the figure before the question and reveal the outcome in
   // place. Lesson 7 puts its challenge first and reveals when it is solved.
   // Links from lesson 1's pilot (&layout=play) still open it.
-  const POOL_FIRST = ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit', 'fee-break-even', 'final-challenge'];
+  const POOL_FIRST = ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit', 'fee-break-even', 'range-boundaries', 'final-challenge'];
   let poolFirst = false;
-  // Lessons 2 to 5 ask their prediction in the setup's own numbers.
+  // Lessons 2 to 6 ask their prediction in the setup's own numbers.
   const predictionCopy = () => lesson.id === 'pool-share' ? depositPrediction(draft.inputs)
     : lesson.id === 'token-balances' ? { question: priceMovePrediction(draft.inputs), choices: lesson.predictions }
       : lesson.id === 'loss-vs-profit' ? benchmarkPrediction(draft.inputs)
         : lesson.id === 'fee-break-even' ? feePrediction(draft.inputs, runLesson(lesson.id, draft.inputs, draft.variant).result)
-          : { question: lesson.prediction, choices: lesson.predictions };
+          : lesson.id === 'range-boundaries' ? { question: rangePrediction(draft.inputs, runLesson(lesson.id, draft.inputs, draft.variant).result), choices: lesson.predictions }
+            : { question: lesson.prediction, choices: lesson.predictions };
   const pitfallElement = $('learn-pitfall');
   const foundationLesson = () => ['swap-impact', 'pool-share'].includes(lesson?.id);
   const comparisonLesson = () => ['loss-vs-profit', 'fee-break-even', 'final-challenge'].includes(lesson?.id);
@@ -105,20 +107,9 @@ export function initLearning() {
       persist();
     }});
   }
-  function renderControls() {
-    controls.replaceChildren();
-    if (lesson.id !== 'range-boundaries') return;
-    const field = document.createElement('label'); field.className = 'learn-width'; field.textContent = 'Range around starting price';
-    const select = document.createElement('select'); select.id = 'learn-input-width';
-    for (const [value, label] of [[0.05, 'Tight · ±5%'], [0.1, 'Moderate · ±10%'], [0.5, 'Wide · ±50%']]) {
-      const option = document.createElement('option'); option.value = value; option.textContent = label;
-      option.selected = value === draft.inputs.width; select.append(option);
-    }
-    select.addEventListener('change', () => {
-      draft.inputs.width = Number(select.value); invalidate(); persist(); updateSetup();
-    });
-    field.append(' ', select); controls.append(field);
-  }
+  // No lesson edits its question's inputs any more: each scene explores beside
+  // the question instead. A saved range width from the earlier editor still loads.
+  function renderControls() { controls.replaceChildren(); }
   function questionLabel() {
     const s = draft.inputs;
     if (lesson.id === 'swap-impact') return formatTokenQuantity(s.amount, 4) + ' ETH swap';
@@ -168,15 +159,14 @@ export function initLearning() {
     const model = lesson.protocol + (lesson.id === 'range-boundaries' ? ' · Price range' : ['swap-impact', 'pool-share'].includes(lesson.id) ? ' · Virtual pool' : ' · Full-range 50/50');
     $('learn-model').textContent = model + ' · Illustrative inputs · USDC = $1';
     if (visualLesson()) {
-      $('learn-prediction-question').textContent = poolFirst ? predictionCopy().question
-        : 'At ' + usd(s.futurePrice) + ', which tokens will the position’s principal hold?';
+      $('learn-prediction-question').textContent = predictionCopy().question;
       const prediction = createPredictionPrompt(predictionField, { selected: draft.prediction, feedback: predictionFeedbackElement, onShow: () => showResult(true) });
       prediction.querySelector('.scene-prediction-show').id = 'learn-reveal';
       lessonScene = foundationLesson() ? createFoundationScene(lesson.id, s, draft.variant, prediction, { explanation: lesson.explanation })
         : lesson.id === 'loss-vs-profit' ? createBenchmarkScene(s, prediction, { explanation: lesson.explanation })
         : lesson.id === 'fee-break-even' ? createFeeScene(s, prediction, { explanation: lesson.explanation })
         : hasTask ? createComparisonScene(s)
-        : lesson.id === 'range-boundaries' ? createRangeBoundaryScene(s, prediction)
+        : lesson.id === 'range-boundaries' ? createRangeBoundaryScene(s, prediction, { explanation: lesson.explanation })
         : createTokenBalanceScene(s, prediction, { explanation: lesson.explanation });
       $('learn-prediction-home').replaceChildren();
       if (hasTask) {
@@ -207,7 +197,13 @@ export function initLearning() {
         lessonScene.element.querySelector('.foundation-outcome').append(pitfallElement);
         const about = sceneNode('details', undefined, 'learn-about-example');
         about.append(sceneNode('summary', 'About this example'),
-          sceneNode('p', lesson.protocol + ' pool with illustrative inputs. USDC = $1. ' + (foundationLesson()
+          sceneNode('p', lesson.protocol + ' pool with illustrative inputs. USDC = $1. ' + (lesson.id === 'range-boundaries'
+            // A range does not start half and half, unlike the pools of lessons 3 to 5.
+            ? 'You put ' + usd(s.investment) + ' into one range, ' + usd(s.initialPrice * (1 - s.width)) + '–' + usd(s.initialPrice * (1 + s.width)) + ', at ' + usd(s.initialPrice)
+              + ' per ETH. A range does not start half and half: this one starts with '
+              + (start => fmt(start.eth, 4) + ' ETH + ' + fmt(start.usdc, 2) + ' USDC')(runLesson(lesson.id, { futurePrice: s.initialPrice, width: s.width }, draft.variant).result.pooled)
+              + '. Each price you explore is a separate outcome, as if traders had already moved the pool’s price there. Fees are left out.'
+            : foundationLesson()
             ? liquidityLessonSetup(lesson.id, s).assumptions
               + (lesson.id === 'pool-share' ? ' Each deposit size you explore starts from the same pool. The later trade pays a 0.3% fee. Claims use proportional ownership before withdrawal rounding.'
                 : ' Each trade size you explore starts from the same pool.')
@@ -307,8 +303,7 @@ export function initLearning() {
     const tokenCopy = lesson.id === 'token-balances' ? tokenBalanceNarration(outcome) : null;
     const lossCopy = lesson.id === 'loss-vs-profit' ? lossProfitReasoning(outcome) : null;
     // Pool-first lessons keep their one explanation in the scene's panel.
-    $('learn-explanation').textContent = (lesson.id === 'range-boundaries' ? rangeBoundaryNarration(outcome) : null)
-      || benchmarkNarration(lesson.id, outcome) || lesson.explanation;
+    $('learn-explanation').textContent = benchmarkNarration(lesson.id, outcome) || lesson.explanation;
     const depthCopy = lesson.id === 'swap-impact' ? deeperPoolQuestion(outcome) : null;
     $('learn-reason-question').textContent = lossCopy?.reasoning || tokenCopy?.reasoning || depthCopy?.reasoning || lesson.reasoning;
     const reasons = lossCopy?.reasons || tokenCopy?.reasons
@@ -345,7 +340,7 @@ export function initLearning() {
       $('learn-explore').textContent = 'Open the same example in Experiment ↗';
       $('learn-explore-note').textContent = 'Opens the ' + usd(s.futurePrice) + ' ETH example with ' + usd(s.fees) + ' in fees.';
     }
-    else if (lesson.id === 'range-boundaries') $('learn-explore-note').textContent = 'Move ETH below, inside and above the bounds. Watch which token remains and when swaps can use the position.';
+    else if (lesson.id === 'range-boundaries') $('learn-explore-note').textContent = 'Opens this range in a new tab. Move its ends and the price, and see where it runs out of a token.';
     if (r && lesson.id === 'final-challenge') $('learn-share-url').value = home.href;
   }
   function loadLesson() {
@@ -399,13 +394,7 @@ export function initLearning() {
       'loss-vs-profit': 'Profit compared with what?', 'fee-break-even': 'Can fees close the gap?', 'final-challenge': 'Your challenge', 'range-boundaries': 'Watch the price cross your range',
     }[lesson.id] || 'Your experiment';
     $('learn-results-title').after(predictionFeedbackElement);
-    if (lesson.id === 'range-boundaries') {
-      const settings = sceneNode('details', undefined, 'scene-question-settings');
-      settings.append(sceneNode('summary', 'Try a different range width'), controls);
-      $('learn-controls-home').replaceChildren(settings);
-    } else {
-      $('learn-controls-home').replaceChildren(controls);
-    }
+    $('learn-controls-home').replaceChildren(controls);
     renderControls(); updateSetup(); updateProgress();
     if (draft.ran) {
       if (visualLesson()) lessonScene.showQuestion();

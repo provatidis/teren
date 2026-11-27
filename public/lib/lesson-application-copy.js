@@ -150,38 +150,36 @@ export function lessonApplicationCopy(id, outcome) {
       ? 'Your claim now trails holding. Traders leave it with less ETH as ETH rises, so it gains less from the rise than holding does. There are no fees to cover that gap.'
       : 'The gap reopens. Moving farther from the starting price widens the gap before fees, so the break-even fees are now larger. The same USDC fee balance no longer covers them.'};
   if (id === 'range-boundaries' && outcome.variant === 2) return {...base,
-    label: 'ETH falls below the range',
-    context: 'ETH reaches the lower bound, ' + usd(application.futurePrice) + '. The position’s principal is now all ETH. Liquidity stays deposited; fees are excluded.',
-    question: 'If ETH falls further, what happens to those tokens?',
-    choices: [['eth-owned','The position keeps the same ETH amount, whose dollar value falls.'],['stop-loss','The position sells its ETH at the boundary and preserves that dollar value.'],['liquidated','The pool removes the ETH to cover a debt.']],
-    hint: 'This position has no borrowing. Going outside a range changes swap activity, not ownership.',
+    label: 'ETH falls below your range',
+    context: 'ETH reaches ' + usd(application.futurePrice) + ', the lower end of your range. Your claim is now all ETH. Fees are left out.',
+    question: 'If ETH falls further, what happens to your claim?',
+    choices: [['eth-owned','It keeps the same ETH, and that ETH is worth fewer dollars.'],['stop-loss','It sells its ETH at ' + usd(application.futurePrice) + ', so its dollar value stops falling.'],['liquidated','The pool takes the ETH to cover a debt.']],
+    hint: 'Nothing was borrowed here. Leaving the range stops the trading. It does not change who owns the tokens.',
     feedbackByChoice: {
-      'stop-loss': 'At the lower edge, the position holds ETH, not cash. Going below the range does not sell it, so its dollar value can keep falling.',
-      liquidated: 'There is no loan to liquidate. The owner keeps the ETH even though the position is no longer active in swaps.',
+      'stop-loss': 'At the lower end your claim holds ETH, not cash. Nothing sells that ETH below the range, so its dollar value keeps falling with the price.',
+      liquidated: 'There is no loan to liquidate. You still own the ETH, although no one is trading against it.',
     },
-    feedback: 'The same ETH remains owned outside the lower bound. Its dollar value can keep falling; a plain liquidity range is neither a stop-loss order nor a collateral loan.'};
-  if (id === 'range-boundaries' && outcome.variant === 1) return {...base,
-    label: 'Just inside the lower edge',
-    context: 'Keep the ' + usd(outcome.result.lowerPrice) + '–' + usd(outcome.result.upperPrice) + ' range. ETH is now ' + usd(application.futurePrice) + ', just inside its lower bound.',
-    question: 'What does the position hold, and what can earn it fees here?',
-    choices: [['mostly-eth','Both tokens, mostly ETH by value; swaps using its liquidity can earn fees.'],['all-eth','Only ETH; it must return to the middle before swaps can use it.'],['time-income','Both tokens; time inside the range adds fees even without swaps.']],
-    hint: 'Inside the lower edge, some USDC remains alongside the ETH.',
-    feedbackByChoice: {
-      'all-eth': 'Just inside the range, some USDC remains. The position can participate in swaps here; it need not return to the middle.',
-      'time-income': 'Being in range makes the liquidity available. Fees come from swaps using it, not from the passing of time.',
-    },
-    feedback: 'Just inside the lower bound, both tokens remain, with most value in ETH. Being active makes swaps possible; it does not pay interest for waiting.'};
-  if (id === 'range-boundaries') return {...base,
-    label: 'Just inside the upper edge',
-    context: 'Keep the ' + usd(outcome.result.lowerPrice) + '–' + usd(outcome.result.upperPrice) + ' range. ETH is now ' + usd(application.futurePrice) + ', just inside the upper bound.',
-    question: 'What does the position hold, and can it take part in swaps here?',
-    choices: [['both-inside','Both tokens, mostly USDC by value; swaps can still use its liquidity.'],['usdc-wait','Only USDC; it waits for price to reach the middle of the range.'],['both-paid','Both tokens; it earns fees simply by staying inside the range.']],
-    hint: 'The last ETH is exchanged at the boundary. Inside it, swaps can still use the position.',
-    feedbackByChoice: {
-      'usdc-wait': 'Just inside the upper edge, some ETH remains. Swaps can use the position here without price returning to the middle.',
-      'both-paid': 'Being in range makes the liquidity available. It earns fees when swaps use it, not simply because it remains there.',
-    },
-    feedback: 'Just inside the upper bound, a small amount of ETH remains beside the USDC. The position can earn when swaps use its liquidity; being inside does not itself create fees.'};
+    feedback: 'Your claim keeps the same ETH below its range, and that ETH is worth less as the price falls. A range is not a stop-loss order and not a loan.'};
+  if (id === 'range-boundaries') {
+    // The narrower range has run out of the token the price move takes away.
+    const up = application.futurePrice > s.initialPrice, gone = up ? 'ETH' : 'USDC', left = up ? 'USDC' : 'ETH';
+    const price = usd(application.futurePrice), end = usd(up ? application.narrow.upperPrice : application.narrow.lowerPrice);
+    return {...base,
+      label: 'A narrower range',
+      context: 'Someone else starts with the same ' + usd(s.investment) + ' at the same price, in a narrower range: ' + usd(application.narrow.lowerPrice) + '–' + usd(application.narrow.upperPrice)
+        + '. ETH is now ' + price + ': inside your range, ' + (up ? 'above' : 'below') + ' theirs.',
+      question: 'What do the two claims hold?',
+      choices: [['narrow-out','Yours holds both tokens. Theirs is all ' + left + ' and has stopped trading.'],
+        ['both-hold','Both hold both tokens: ' + price + ' is close to where they started.'],
+        ['narrow-keeps','Theirs holds more ' + gone + ' than yours: a narrower range trades less.']],
+      hint: 'Each claim has its own range. Compare ' + price + ' with the ' + (up ? 'upper' : 'lower') + ' end of each.',
+      feedbackByChoice: {
+        'both-hold': 'How close the price is to the start does not decide it. Their range ends at ' + end + ', and their last ' + gone + ' went there.',
+        'narrow-keeps': 'A narrower range trades faster, not less: the same move in price takes it through all of its ' + gone + '. Theirs ran out at ' + end + '.',
+      },
+      feedback: 'Each claim follows its own range. At ' + price + ' yours is still inside and holds both tokens. Theirs passed its ' + (up ? 'upper' : 'lower') + ' end at ' + end
+        + ', so it is all ' + left + ' and no one trades against it.'};
+  }
   return {...base,
     label: 'Match holding while losing dollars',
     context: 'Think back to the price and fees you chose in your own example.',

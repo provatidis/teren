@@ -67,17 +67,18 @@ export const LESSONS = [
     takeaway: 'Break-even fees say what would be needed. They do not say what you will earn.',
   },
   {
-    id: 'range-boundaries', completion: 'You connected range position, token ownership and eligibility to earn fees.', protocol: 'Uniswap v3-style', title: 'Token balances at range boundaries', short: 'Concentrated liquidity', concept: 'Ranges', skill: 'Identify the token held at either range boundary.',
-    intro: 'A concentrated position supplies liquidity within a chosen price range. Follow the token mix as ETH moves through its boundaries.',
-    prediction: 'At the selected future price, what will the position hold?',
+    id: 'range-boundaries', completion: 'You connected where the price sits in a range with what a claim holds and whether it can earn.', protocol: 'Uniswap v3-style', title: 'Token balances at range boundaries', short: 'Concentrated liquidity', concept: 'Ranges', skill: 'Identify the token held at either range boundary.',
+    intro: 'Here your liquidity works only inside a price range you choose. See what your claim holds when ETH leaves it.',
+    // The question carries the lesson's own prices and range: see rangePrediction.
+    prediction: 'ETH moves against your range. What does your claim hold then?',
     predictions: [['eth', 'Only ETH'], ['both', 'ETH and USDC'], ['usdc', 'Only USDC']],
-    reasoning: 'What does the final range status tell us about swap fees?',
-    reasons: [['path', 'Whether it is active now; past fee income needs records.'], ['zero', 'Whether it earned fees throughout the whole observed period.'], ['fixed', 'The fee income earned from the position’s chosen range width.']],
+    reasoning: 'What does the price ETH ends at tell you about your claim’s fees?',
+    reasons: [['path', 'Whether it can earn now. What it earned on the way needs records.'], ['zero', 'Whether it earned fees the whole way there.'], ['fixed', 'How much it earned. That follows from the width of the range.']],
     reasonFeedbackByChoice: {
-      fixed: 'Width affects where the position can trade. It does not tell you how much trading happened or the position’s share of those fees.',
+      fixed: 'The width decides at which prices your claim can trade. It does not say how much trading happened there, or what share of the fees was yours.',
     },
-    explanation: 'Swaps change the token mix while price is inside the range. Above the range, principal is all USDC; below it, all ETH. Outside the range, token amounts stay fixed until price returns. Past fee income needs separate records.',
-    takeaway: 'The final price tells you which tokens remain. Past fees need records of earlier activity.',
+    explanation: 'Inside your range your claim trades as it would in a pool that covers every price, only faster: a rising price turns your ETH into USDC, and a falling price does the reverse. At either end of the range it runs out of one token. Outside the range nothing trades: the amounts stay as they are and no new fees come in.',
+    takeaway: 'Where ETH ends tells you which tokens your claim holds. What it earned on the way needs records.',
   },
   {
     id: 'final-challenge', completion: 'You built an example where matching holding still leaves a dollar loss.', protocol: 'Uniswap v2-style', title: 'Can you match holding and still lose dollars?', short: 'Final challenge', concept: 'Apply what you learned', skill: 'Build your own example.',
