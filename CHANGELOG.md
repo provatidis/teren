@@ -1,5 +1,9 @@
 # Release history
 
+## 1.69.1 · 2026-11-27
+
+- The new line beside the sandbox’s slippage control now looks like the “Try this” note the sandbox already had, with the same mark and wording.
+
 ## 1.69.0 · 2026-11-27
 
 - A prediction that differs from the outcome is now answered with what it would need to be true, in one sentence: “More ETH” would be true if ETH had fallen. It replaces “You expected: More ETH.” It names a condition and does not guess why you chose it.
