@@ -44,8 +44,6 @@
 .learn-control-label{display:flex;justify-content:space-between;gap:12px;font-size:12px;margin-bottom:16px}
 .learn-control output{color:var(--accent);font-variant-numeric:tabular-nums}
 .learn-control input{height:8px;margin:0}
-.learn-width{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px}
-.learn-width select{background:var(--surface);border:1px solid var(--border-strong);color:var(--text);border-radius:8px;padding:10px}
 .learn-fieldset{border:0;padding:0;margin:24px 0;scroll-margin-top:24px}
 .learn-fieldset legend{font-size:13px;line-height:1.7;padding:0;margin-bottom:14px;font-weight:500}
 .learn-stage{color:var(--accent);font-size:10px;margin-right:8px}
@@ -122,8 +120,6 @@
  .learn-metric:last-child{border:0;padding-bottom:0}
  .learn-metric strong{margin:0;font-size:21px;text-align:right}
  .learn-metric-note{grid-column:1/-1}
- .learn-width{align-items:flex-start;flex-direction:column}
- .learn-width select{width:100%}
  .learn-bar-label{font-size:10px}
  .learn-continue{align-items:flex-start;flex-direction:column}
  .learn-text-button{font-size:11px}

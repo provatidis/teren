@@ -85,7 +85,8 @@ test('transfer changes the actual selected setup, including extremes and falling
       }
       for (const width of [.05,.1,.5]) {
         const original=runLesson('range-boundaries',{futurePrice,width},variant), changed=lessonApplication('range-boundaries',original);
-        assert.equal(changed.expected,['both-inside','mostly-eth','eth-owned'][variant]);
+        assert.equal(changed.expected,['narrow-out','narrow-out','eth-owned'][variant]);
+        if (variant<2) { assert.equal(changed.narrow.state,variant===0?'above':'below'); assert.equal(changed.narrow.pooled[variant===0?'eth':'usdc'],0); }
         if (variant===2) { assert.equal(changed.next.result.state,'lower-edge'); assert.equal(changed.next.result.pooled.usdc,0); }
         else {
           assert.equal(changed.next.result.state,'inside');

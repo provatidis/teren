@@ -26,17 +26,16 @@ export async function checkLearning({ evaluate, click, fill, text, navigate, rel
     ['token-balances','less','rebalance','original-mix'],
     ['loss-vs-profit','less','traded-mix','holding-basket'],
     ['fee-break-even','toward-target','assumption','gap-reopens'],
-    ['range-boundaries','usdc','path','both-inside'],
+    ['range-boundaries','usdc','path','narrow-out'],
     ['final-challenge','lower-price','total','relative-gap'],
   ];
   for (const [id, prediction, reason, application] of cases) {
     await navigate(base + 'learn.html#lesson=' + id);
     assert.equal(await evaluate("document.querySelectorAll('#learn-controls input[type=range]').length"), 0, 'Only the visual explores amounts, prices and fees.');
     await choose('learn-prediction', id === 'swap-impact' ? 'same' : prediction);
-    // Lessons 1 to 5 and 7 reveal the outcome from the question; they have no separate explanation button.
-    const poolFirst = id !== 'range-boundaries';
-    await click(poolFirst ? 'learn-reveal' : 'learn-run');
-    if (poolFirst) assert.equal(await evaluate("document.getElementById('learn-run').checkVisibility()"), false);
+    // Every lesson reveals the outcome from its question; none has a separate explanation button.
+    await click('learn-reveal');
+    assert.equal(await evaluate("document.getElementById('learn-run').checkVisibility()"), false);
     assert.equal(await evaluate("document.getElementById('learn-results').hidden"), false);
     assert.ok((await text('learn-pitfall')).length>40);
     assert.equal(await evaluate("document.getElementById('learn-deeper').open"),false);
@@ -190,7 +189,7 @@ export async function checkMobileLearning({ evaluate, click, fill, text, navigat
   assert.equal(await evaluate("document.getElementById('learn-course').open"), false);
   await navigate(base + 'learn.html#lesson=range-boundaries');
   await evaluate("document.querySelector('input[name=learn-prediction][value=usdc]').click()");
-  await click('learn-run');
+  await click('learn-reveal');
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
   await evaluate("document.querySelector('#learn-deeper > summary').click()");
   await evaluate("document.querySelector('#learn-math > summary').click()");
@@ -198,7 +197,7 @@ export async function checkMobileLearning({ evaluate, click, fill, text, navigat
   assert.equal(await evaluate("document.querySelectorAll('#learn-deeper input').length"),0);
   assert.equal(await evaluate("document.querySelector('#learn-answer, #learn-calculation, #learn-calculation-check')"),null);
   assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'),true);
-  await evaluate("document.querySelector('input[name=learn-application][value=both-inside]').click()");
+  await evaluate("document.querySelector('input[name=learn-application][value=narrow-out]').click()");
   await evaluate("document.querySelector('input[name=learn-reason][value=path]').click()");
   await click('learn-check');
   assert.equal(await text('learn-feedback-title'),'Both answers are correct.');

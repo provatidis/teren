@@ -17,6 +17,19 @@ export function playRevealedBars(figure, fills, before) {
   fills.forEach((fill, i) => fill.animate([{ width: before[i] }, { width: fill.style.width }],
     { duration: ACTION_MS, delay: REVEAL_DELAY_MS, easing: ACTION_EASING, fill: 'backwards' }));
 }
+// A reveal whose parts do not all move for the whole of it: a price marker
+// crosses a range while the bars change only inside the range. Each part moves
+// between two fractions of the one shared timeline, so they stay in step.
+export function playRevealedPath(figure, parts, duration = ACTION_MS) {
+  if (!matchMedia('(prefers-reduced-motion: no-preference)').matches) return;
+  figure.dataset.motion = 'true';
+  for (const { element, property = 'width', from, between = [0, 1] } of parts) {
+    const to = element.style[property], start = Math.min(1, Math.max(0, between[0])), end = Math.min(1, Math.max(start, between[1]));
+    element.animate([{ [property]: from, offset: 0 }, ...(start > 0 ? [{ [property]: from, offset: start }] : []),
+      ...(end < 1 ? [{ [property]: to, offset: end }] : []), { [property]: to, offset: 1 }],
+    { duration, delay: REVEAL_DELAY_MS, easing: ACTION_EASING, fill: 'backwards' });
+  }
+}
 // The slider owns the bars again.
 export function endPlayedBars(figure) {
   for (const animation of figure.getAnimations({ subtree: true })) animation.cancel();

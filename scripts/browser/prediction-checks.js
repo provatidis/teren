@@ -16,7 +16,7 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
     }; check();
   })`);
   const nonvisual = {
-    'range-boundaries': ['path', 'both-inside'], 'fee-tiers': ['active-swaps', 'more-volume'],
+    'range-boundaries': ['path', 'narrow-out'], 'fee-tiers': ['active-swaps', 'more-volume'],
     'range-management': ['asset', 'automatic'], 'fees-over-time': ['growth', 'same'],
     'between-samples': ['returned', 'edge-placement'], 'period-vs-holding': ['price-returned', 'smaller-lead'],
     'final-challenge': ['total', 'relative-gap'],
@@ -38,8 +38,8 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         await navigate(base + route); await ready();
         assert.equal(await evaluate(`document.querySelector('${selector} input').checkVisibility()`), true, route + ': choices are visible immediately');
         assert.equal(await evaluate(`document.querySelector('${selector} input:checked') === null`), true);
-        // Liquidity lessons 1 to 5 and 7 have no setup box: the figure above the question carries the setup.
-        const poolFirst = ['swap-impact', 'pool-share', 'token-balances', 'loss-vs-profit', 'fee-break-even', 'final-challenge'].includes(id) && prefix === 'learn';
+        // The liquidity lessons have no setup box: the figure above the question carries the setup.
+        const poolFirst = prefix === 'learn';
         const setup = await evaluate(`(() => {
           const field = document.querySelector('${selector}');
           const section = field.closest('article');
@@ -50,6 +50,7 @@ export async function checkPredictions({ evaluate, click, text, navigate, reload
         assert.ok(setup?.text.length > 60, route + ': the prediction has a visible setup');
         if (poolFirst) assert.match(setup.text, id === 'swap-impact' ? /Ready to swap: 10 ETH → USDC[\s\S]*100\.00 ETH[\s\S]*200,000\.00 USDC[\s\S]*Starting pool price: \$2,000\.00 per ETH/
           : id === 'token-balances' ? /Your claim[\s\S]*ETH at \$2,000\.00[\s\S]*1\.2500 ETH[\s\S]*2,500\.00 USDC/
+          : id === 'range-boundaries' ? /Your claim[\s\S]*ETH at \$2,000\.00[\s\S]*Lower \$1,800\.00[\s\S]*Upper \$2,200\.00[\s\S]*Inside your range[\s\S]*1\.1889 ETH[\s\S]*2,622\.10 USDC/
           : id === 'fee-break-even' ? /ETH at \$4,000\.00[\s\S]*Holding in your wallet[\s\S]*\$7,500\.00[\s\S]*Your claim in the pool[\s\S]*\$7,071\.07[\s\S]*Gap covered:[\s\S]*\$0\.00 of \$428\.93/
           : id === 'final-challenge' ? /ETH at \$2,000\.00[\s\S]*Holding in your wallet[\s\S]*\$5,000\.00[\s\S]*Your claim in the pool[\s\S]*1\.25 ETH \+ 2,500 USDC[\s\S]*Striped = fees/
           : id === 'loss-vs-profit' ? /ETH at \$2,000\.00[\s\S]*Holding in your wallet[\s\S]*\$5,000\.00[\s\S]*Your claim in the pool[\s\S]*1\.25 ETH \+ 2,500 USDC[\s\S]*your \$5,000\.00 start/

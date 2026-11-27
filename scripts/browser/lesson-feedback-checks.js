@@ -63,7 +63,7 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
     await navigate(base + 'learn.html#lesson=range-boundaries');
     await resetVariation('learn');
     await evaluate("document.querySelector('.scene-prediction-show').click()");
-    assert.match(await text('boundary-scene-tokens'), /0.0000 ETH/);
+    assert.equal(await text('boundary-eth'), '0.0000 ETH');
     const guidesFit = () => evaluate(`(() => [...document.querySelectorAll('.scene-range-guide')].filter(guide => guide.checkVisibility()).every(guide => {
       const band = guide.querySelector('.scene-range-band').getBoundingClientRect();
       const bounds = ['lower', 'upper'].map(edge => guide.querySelector('.scene-range-' + edge));
@@ -82,15 +82,17 @@ export async function checkLessonFeedback({ evaluate, click, fill, text, navigat
     })()`), true, 'The above-range question price is visibly beyond its upper boundary.');
     const handoff = await evaluate("document.getElementById('learn-explore').href");
     const progress = await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')");
-    await evaluate("[...document.querySelectorAll('#learn-scene .scene-shortcut')].find(button => button.textContent==='Just inside upper').click()");
-    assert.match(await text('boundary-scene-status'), /Inside range/);
-    assert.ok(await evaluate("document.getElementById('boundary-scene-status').getBoundingClientRect().height >= 24"), 'The range status must remain readable on phones.');
-    assert.doesNotMatch(await text('boundary-scene-tokens'), /^0.0000 ETH/);
+    await fill('boundary-price', '2180');
+    assert.equal(await text('boundary-where'), 'Inside your range');
+    assert.ok(await evaluate("document.getElementById('boundary-where').getBoundingClientRect().height >= 24"), 'The range status must remain readable on phones.');
+    assert.notEqual(await text('boundary-eth'), '0.0000 ETH');
     assert.equal(await evaluate("document.getElementById('learn-explore').href"), handoff);
     assert.equal(await evaluate("localStorage.getItem('degenerator-learning-liquidity-v1')"), progress);
     assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
+    // Range widths saved by the earlier editor still load.
     for (const value of ['0.05', '0.5']) {
-      await evaluate(`(() => { const field = document.getElementById('learn-input-width'); field.value = '${value}'; field.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+      await evaluate(`{ const progress = JSON.parse(localStorage.getItem('degenerator-learning-liquidity-v1')); progress.drafts['range-boundaries'].inputs.width = ${value}; localStorage.setItem('degenerator-learning-liquidity-v1', JSON.stringify(progress)); }`);
+      await reload(); await ready();
       assert.equal(await guidesFit(), true, 'Narrow and wide boundary labels remain on screen.');
     }
     await navigate(base + 'learn.html#manage=range-width');

@@ -9,10 +9,17 @@ export function lessonFinding(id, outcome) {
   if (id === 'pool-share') return 'The pool holds ' + fmt(s.reserveEth + s.depositEth, 0) + ' ETH after your deposit, and ' + fmt(s.depositEth, 0) + ' of them came from you. You own '
     + fmt(outcome.share, 2) + '% of the pool: the same share of its ETH and of its USDC.';
   if (id === 'token-balances') return tokenBalanceNarration(outcome).finding;
-  if (id === 'range-boundaries') return outcome.prediction === 'usdc'
-    ? 'At or above the upper ETH-price boundary, the position’s principal is all USDC.'
-    : outcome.prediction === 'eth' ? 'At or below the lower ETH-price boundary, the position’s principal is all ETH.'
-      : 'Inside its price range, the position’s principal contains both ETH and USDC.';
+  // Lesson 6's verdict answers what the claim holds, then says where the trading stopped.
+  if (id === 'range-boundaries') {
+    if (outcome.prediction === 'both') return 'ETH and USDC. ' + usd(s.futurePrice) + ' is inside your range, so traders are still swapping against your claim. It holds ' + fmt(r.pooled.eth, 4) + ' ETH + ' + fmt(r.pooled.usdc, 2) + ' USDC'
+      + (s.futurePrice === s.initialPrice ? ', its starting tokens.' : ': ' + (s.futurePrice > s.initialPrice ? 'less ETH and more USDC' : 'more ETH and less USDC') + ' than at the start.');
+    const up = outcome.prediction === 'usdc', end = usd(up ? r.upperPrice : r.lowerPrice), past = r.state === 'above' || r.state === 'below';
+    return (up ? 'Only USDC. On the way up, traders bought ETH from your claim and paid in USDC. The last ETH went at '
+      : 'Only ETH. On the way down, traders sold ETH to your claim and took USDC. The last USDC went at ')
+      + end + ', the ' + (up ? 'upper' : 'lower') + ' end of your range. '
+      + (past ? (up ? 'Above' : 'Below') + ' it nothing trades, so your claim stays at ' : 'Your claim now holds ')
+      + (up ? fmt(r.pooled.usdc, 2) + ' USDC.' : fmt(r.pooled.eth, 4) + ' ETH.');
+  }
   // Lesson 4's verdict answers the question, then gives both comparisons.
   if (id === 'loss-vs-profit') return r.lpBeforeFees === r.holdValue
     ? 'The same. At the starting price your claim and holding are the same tokens, worth ' + usd(s.investment) + '.'
@@ -144,15 +151,13 @@ export function benchmarkPrediction(setup) {
   };
 }
 
-export function rangeBoundaryNarration(outcome) {
-  const { setup: s } = outcome;
-  const exchange = s.futurePrice > s.initialPrice
-    ? 'As ETH’s price rises through the range, swaps exchange the position’s ETH for USDC.'
-    : s.futurePrice < s.initialPrice
-      ? 'As ETH’s price falls through the range, swaps exchange the position’s USDC for ETH.'
-      : 'At the unchanged price, the position keeps its starting ETH and USDC amounts in this fee-free model.';
-  return exchange + ' ' + lessonFinding('range-boundaries', outcome)
-    + ' Outside the range, swaps stop changing its token amounts until price returns. This final token mix does not tell us how much it earned earlier.';
+// Lesson 6's question names the move and where it ends against the range.
+export function rangePrediction(setup, result) {
+  const { initialPrice: start, futurePrice: price } = setup;
+  const move = price === start ? 'ETH stays at ' + usd(start) : 'ETH ' + (price > start ? 'rises' : 'falls') + ' from ' + usd(start) + ' to ' + usd(price);
+  const where = { above: 'above your range', below: 'below your range', 'upper-edge': 'the upper end of your range', 'lower-edge': 'the lower end of your range',
+    inside: price === start ? 'inside your range' : 'still inside your range' }[result.state];
+  return move + ', ' + where + '. What does your claim hold then?';
 }
 
 // The share question in the lesson's own numbers: the deposit against the pool
@@ -195,8 +200,8 @@ export function lessonReasonFeedback(id, outcome, reason, feedbackByChoice = {})
       || 'Compare the LP’s changed token mix with the original tokens kept by holding.';
   }
   if (id === 'range-boundaries' && reason === 'zero') return outcome.prediction === 'both'
-    ? 'This endpoint is inside the range, but that does not establish earlier earnings. Past fees require historical fee accounting, separate from the final token mix.'
-    : 'This endpoint is at or outside a range boundary. That does not prove it was inactive earlier. Past fees require historical fee accounting, separate from the final token mix.';
+    ? 'Ending inside the range says your claim can earn now. It does not say what it earned on the way: that needs records of the trading while ETH was in range.'
+    : 'Ending at or past the end of the range says your claim earns nothing new now. It does not say it earned nothing on the way: that needs records of the trading while ETH was in range.';
   return feedbackByChoice[reason] || 'Choose an explanation for this setup. The result and hint explain the comparison.';
 }
 

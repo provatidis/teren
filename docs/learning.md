@@ -23,7 +23,7 @@ Keep the evidence needed for a question beside it, and name the situation being 
 | Token balances | Rebalancing creates tokens, pays interest or protects a falling asset. | Explain swaps and a price return; distinguish holding more ETH from having more dollar value. |
 | Loss versus profit | Dollar profit means beating holding; withdrawal erases or charges the holding gap. | Explain the swaps behind the changed exposure, then choose the original-token benchmark for a fictional dashboard or consider withdrawal. Reasoning follows the selected price, including an unchanged price. |
 | Break-even fees | Matching holding once locks in the result; a required fee target predicts earnings. | Distinguish the total fee target from the amount still needed. Then hold earned USDC fees fixed while ETH moves farther from its starting price. |
-| Range boundaries | Outside means liquidation, no earlier fees, or no price exposure. | Predict all-USDC, all-ETH and mixed principal across the three fresh variations; distinguish eligibility for swaps from earned fees. |
+| Range boundaries | Outside means liquidation, no earlier fees, or no price exposure. | Predict an all-USDC, an all-ETH and a mixed claim across the three variations; tell being able to earn now from fees earned on the way; apply the range’s ends to a second, narrower range. |
 | Final challenge | Matching holding means making a dollar profit; a correct simulation proves safety. | Construct a case where the claim matches holding while both finish below the start, then explain the two comparisons. |
 | Narrow and wide ranges | Tighter capital concentration always means greater profit; price exposure means a position is trading. | Compare eligibility, follow a price move below one range, and choose each position’s own holding basket. |
 | Fee tiers and APR | The highest charge earns most; a past fee APR fixes future profit; reinvesting guarantees a larger fee share. | Explain a lower-tier pool earning more, interpret yesterday’s APR after competition changes, and distinguish collection from reinvesting while other LPs add more liquidity. |
@@ -161,7 +161,7 @@ Each visual should replace repeated setup/result prose, retain essential assumpt
 
 A prediction makes an expectation explicit. It is visible, ungraded and deliberately skippable. Removing arithmetic and long introductory text supports this step; it does not require hiding it. Explanations and changed-situation checks remain the completion criteria, and direct Experiment access serves people who already have a question. Evaluate reviews against that sequence, including people who choose to see the outcome first.
 
-## Liquidity lessons 1 to 5 and 7: pool first
+## Liquidity lessons 1 to 7: pool first
 
 [Lesson 1](https://teren.sh/learn.html#lesson=swap-impact) is the reference for how a lesson moves from seeing to doing. Links from its pilot (`&layout=play`) still open it.
 
@@ -211,9 +211,18 @@ Lesson 4 uses three names: your start, holding, and your claim.
 3. **Read why.** Solving the challenge or showing that answer opens one panel: matching holding and making money are two different results. It holds the pitfall too. Solving does not move focus or the page.
 4. **Apply it.** The first check question describes a different case, the one lesson 5 showed, and asks how fees affect the comparison with holding. The second asks what the fees covered in the reader’s own example. Completion needs a solved challenge and both answers.
 
-Lessons 3 to 7 use one set of names: your claim, holding, your start, impermanent loss for the gap to holding before fees, and break-even fees for the fees that close it. Lesson 7’s optional worked example uses them too.
+[Lesson 6](https://teren.sh/learn.html#lesson=range-boundaries) gives the claim a price range.
 
-Anything above a slider keeps its height while the slider moves, so the slider stays under a dragging thumb. Lines whose numbers follow the slider use a label and a value in fixed columns or stay on one line, and sentences above a slider do not contain those numbers. Lesson 6 keeps the question-first layout with its setup box.
+1. **See the price leave the range.** The figure has a price track with the range as a band and the price as a marker, and under it the claim’s ETH and USDC as two bars. Each bar is full where the claim holds only that token: ETH at the lower end, USDC at the upper end. The question names the move against the range, for example “ETH rises from $2,000.00 to $2,400.00, above your range”, and asks what the claim holds then. The reveal moves the marker across the track. The bars change only while the marker is inside the band, so they stop where it leaves. The three variations end above, below and inside the range.
+2. **Drag the price.** The slider sits under the figure and shares its span of prices. That span is closer than in lesson 3, so the range takes about a third of the track. Two shortcuts jump to the lower and upper end. One line under the track says where the price is: inside, above, below, or at an end.
+3. **Read what a range does.** One panel has a line for the price on the slider and the explanation: inside the range the claim trades as in a pool that covers every price, only faster, and outside it nothing trades. It holds the pitfall that leaving a range is not liquidation.
+4. **Apply it.** The first check question asks what the price ETH ends at tells you about fees: whether the claim can earn now, not what it earned on the way. In two variations the second gives someone else a range half as wide and a price between the two ranges’ ends, and asks what both claims hold. In the third it takes ETH to the lower end and asks what happens to the claim if ETH falls further. Neither can be read off the figure.
+
+The lesson has no range width selector. A width saved by the earlier one still loads, with its own range and span of prices.
+
+Lessons 3 to 7 use one set of names: your claim, holding, your start, impermanent loss for the gap to holding before fees, and break-even fees for the fees that close it. Lesson 6 adds your range and its lower and upper end. Lesson 7’s optional worked example uses the same names.
+
+Anything above a slider keeps its height while the slider moves, so the slider stays under a dragging thumb. Lines whose numbers follow the slider use a label and a value in fixed columns or stay on one line, and sentences above a slider do not contain those numbers.
 
 ## Observation plan
 
