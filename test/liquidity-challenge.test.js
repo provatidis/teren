@@ -7,6 +7,7 @@ import { parseProgress } from '../public/data/learning-progress.js';
 import { runLesson } from '../public/models/lesson-experiments.js';
 import { lessonApplicationCopy } from '../public/lib/lesson-application-copy.js';
 import { calculateScenario } from '../public/models/cp50-v1.js';
+import { challengeGoals, challengeFeedback } from '../public/lib/challenge-guidance.js';
 import { usd } from '../public/lib/format.js';
 
 test('the challenge accepts many loss-making matched cases and requires both comparisons', () => {
@@ -111,5 +112,35 @@ test('the challenge’s feedback on the wrong answer describes the reader’s ow
     const plain = lessonApplicationCopy('final-challenge', outcome), moved = lessonApplicationCopy('final-challenge', outcome, solved);
     assert.deepEqual([moved.question, moved.choices, moved.hint, moved.feedback, moved.context], [plain.question, plain.choices, plain.hint, plain.feedback, '']);
     assert.equal(plain.hint, 'When the two bars line up, where are they relative to the dashed starting line?');
+  }
+});
+
+test('the challenge names the condition that failed and the control that changes it', () => {
+  // The state an outside review met: holding $25 below the start, $500 in fees keep the claim above it.
+  const first = lessonSetup('final-challenge', 0);
+  assert.deepEqual(challengeGoals(first, { price: 1980, fees: 500 }), { matches: { met: false, amount: '+$499.94' }, below: { met: false, amount: '+$474.94' } });
+  assert.deepEqual(challengeFeedback(first, { price: 1980, fees: 500 }), { state: 'different',
+    copy: 'Holding is already $25.00 below your start. Your fees put your claim $474.94 above it. Lower the fees until your claim meets holding.' });
+  for (let variant = 0; variant < 3; variant++) {
+    const input = lessonSetup('final-challenge', variant), start = input.investment, max = input.investment / 10;
+    const at = (price, fees) => calculateScenario({ ...input, futurePrice: price, fees });
+    for (const factor of [.5, .63, .75, .9, .99, 1, 1.01, 1.5, 2]) for (const share of [0, .25, .5, .75, 1]) {
+      const value = { price: input.initialPrice * factor, fees: max * share }, r = at(value.price, value.fees);
+      const check = checkLiquidityChallenge(input, value), goals = challengeGoals(input, value), { state, copy } = challengeFeedback(input, value);
+      // A goal's mark and its amount never disagree: "below" is met only when the amount shown is below zero.
+      assert.equal(goals.below.met, check.belowStart);
+      // The amount is the higher of holding and the claim, against the start.
+      assert.equal(goals.below.amount.startsWith('−'), Math.max(r.holdValue, r.lpValue) - start <= -.005);
+      if (goals.below.met) assert.match(goals.below.amount, /^−\$/);
+      if (!goals.below.met) assert.ok(Math.max(r.holdValue, r.lpValue) >= start - .01);
+      assert.equal(state, check.passed ? 'match' : 'different');
+      if (check.passed) continue;
+      // Each state points at the control that changes it, and only at that one.
+      if (r.holdValue >= start - .01) assert.match(copy, /Choose a lower ETH price\.$/);
+      else if (r.lpValue >= start - .01) { assert.match(copy, /^Holding is already \$[\d,.]+ below your start\. Your fees put your claim .* Lower the fees until your claim meets holding\.$/); assert.doesNotMatch(copy, /price/); }
+      else assert.equal(copy, 'Both are below your start. ' + (r.difference < 0 ? 'Raise' : 'Lower') + ' the fees until your claim meets holding.');
+      // Following the advice can solve it: the fee that matches holding is inside the slider's reach.
+      if (r.holdValue < start - .01) { const match = matchChallengeHolding(input, value.price); assert.ok(match.fees <= max); assert.equal(checkLiquidityChallenge(input, match).passed, true); }
+    }
   }
 });

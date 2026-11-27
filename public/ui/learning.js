@@ -94,7 +94,7 @@ export function initLearning() {
   function selection(name) { return document.querySelector('input[name="' + name + '"]:checked')?.value || ''; }
   function choices(container, name, values, selected) {
     learningChoices($(container),{name,values,selected,seed:draft.choiceSeed,group:lesson.id+name,shuffle:name!=='learn-prediction',onChange:value=>{
-      if(name==='learn-prediction') {draft.prediction=value;$('learn-run').disabled=false;if(draft.ran)renderPrediction();}
+      if(name==='learn-prediction') {draft.prediction=value;$('learn-run').disabled=false;if(draft.ran)renderPrediction(!arrowing);arrowing=false;}
       else {draft.application=value;draft.taskChecked=false;clearUnderstandingFeedback('learn');$('learn-feedback').hidden=true;$('learn-continue').hidden=true;$('learn-record').hidden=true;$('learn-share').hidden=true;clearCard();}
       persist();
     }});
@@ -114,13 +114,40 @@ export function initLearning() {
     const s = draft.inputs;
     return 'Explain the ' + (foundationLesson() ? questionLabel() : usd(s.futurePrice) + ' outcome') + ' ↓';
   }
-  function renderPrediction() {
+  // Arrow keys select each answer in a radio group as they move through it. While
+  // a reader revises a prediction that way, the verdict follows and the answers
+  // stay open; Enter, Space or leaving the group folds them. A click folds at once.
+  let arrowing = false;
+  predictionField.addEventListener('keydown', event => {
+    if (event.key.startsWith('Arrow')) { arrowing = true; return; }
+    const input = event.target;
+    if (!draft.ran || !poolFirst || input.name !== 'learn-prediction' || !(event.key === 'Enter' || (event.key === ' ' && input.checked))) return;
+    event.preventDefault();
+    renderPrediction();
+    predictionFeedbackElement.tabIndex = -1; predictionFeedbackElement.focus({ preventScroll: true });
+  });
+  predictionField.addEventListener('keyup', () => { arrowing = false; });
+  // A click on the answer already chosen confirms it too; a new one folds through its change.
+  predictionField.addEventListener('click', event => {
+    const input = event.target;
+    if (event.detail > 0 && draft.ran && poolFirst && input.name === 'learn-prediction' && input.checked && input.value === draft.prediction) renderPrediction();
+  });
+  // Moving focus to a control outside the prompt confirms the choice. The prompt
+  // is rebuilt with each lesson, so this listens on the lesson around it. A click
+  // on the page around it moves focus nowhere and leaves the answers open.
+  $('learn-essential').addEventListener('focusout', event => {
+    const prompt = predictionField.closest('.scene-prediction');
+    if (!draft?.ran || !poolFirst || !prompt?.contains(event.target) || prompt.dataset.folded !== 'false'
+      || !event.relatedTarget || prompt.contains(event.relatedTarget)) return;
+    renderPrediction();
+  });
+  function renderPrediction(fold = true) {
     renderPredictionFeedback(predictionFeedbackElement, predictionCopy().choices, draft.prediction, outcome.prediction,
       (['final-challenge', 'fee-break-even'].includes(lesson.id) ? '' : questionLabel() + ': ') + lessonFinding(lesson.id, outcome),
       // A prediction that differs is answered with what it would need to be true.
       predictionNote(lesson.id, outcome, draft.prediction));
     markPredictionRevealed(predictionField);
-    if (poolFirst) foldPrediction(predictionField, lesson.id === 'final-challenge' ? 'Your answer on the price move'
+    if (poolFirst && fold) foldPrediction(predictionField, lesson.id === 'final-challenge' ? 'Your answer on the price move'
       : 'Your prediction for ' + (foundationLesson() ? 'the ' : '') + questionLabel());
   }
   function prepareChallenge(input) {

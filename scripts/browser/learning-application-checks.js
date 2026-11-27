@@ -219,6 +219,17 @@ export async function checkLearningApplications({ evaluate, click, fill, text, n
   await fill('liquidity-task-price', '2400');
   assert.deepEqual(await goals(), ['false', 'false']);
   assert.equal(await hidden('liquidity-task-solved'), true, 'A new price needs its own fee amount.');
+  // Fees can keep the claim above the start while holding is below it. The goal
+  // shows the amount that decides it, and Check names the control that fixes it.
+  await fill('liquidity-task-price', '1980'); await fill('liquidity-task-fees', '500');
+  assert.deepEqual(await evaluate("Array.from(document.querySelectorAll('#liquidity-task-goals li'), item => item.textContent.replace(/\\s+/g, ' ').trim())"),
+    ['○ Not yet: Your claim matches holding +$499.94', '○ Not yet: Both are below your start +$474.94']);
+  await click('learn-check');
+  assert.equal(await text('liquidity-task-feedback'), 'Holding is already $25.00 below your start. Your fees put your claim $474.94 above it. Lower the fees until your claim meets holding.');
+  await fill('liquidity-task-fees', '0'); await click('learn-check');
+  assert.equal(await text('liquidity-task-feedback'), 'Both are below your start. Raise the fees until your claim meets holding.');
+  await fill('liquidity-task-price', '3000'); await click('learn-check');
+  assert.equal(await text('liquidity-task-feedback'), 'At this price holding is $1,250.00 above your start. Choose a lower ETH price.');
   console.log('PASS: independent constructed challenge, default-task failure, explained example, explicit checks, live goals and solved state, preserved completion and isolated Observe/handoff');
 
   for (const width of [390, 320]) {

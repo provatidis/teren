@@ -104,6 +104,9 @@ test('lesson 6 uses the names of lessons 3 to 5, and its question cannot be read
     // It asks what the end can tell you, not which path paid more.
     assert.equal(copy.question, 'Does ending with the same tokens tell you it earned the same fees?');
     assert.equal(Object.fromEntries(copy.choices).path, 'No. The end does not record the trades on the way.');
+    // The feedback says what the end can show. Time alone does not settle which path paid more.
+    assert.equal(copy.feedback, 'Fees come from trades, and only trades inside your range pay your claim. The tokens you end with show what your claim holds, not the trades that paid it. To know what it earned, you need a record of its fees over that time.');
+    assert.doesNotMatch(JSON.stringify(copy), /Weeks of trading|pay more than/);
     const { pooled } = outcome.result;
     const ends = variant === 0 ? fmt(pooled.usdc, 2) + ' USDC' : variant === 1 ? fmt(pooled.eth, 4) + ' ETH' : fmt(pooled.eth, 4) + ' ETH + ' + fmt(pooled.usdc, 2) + ' USDC';
     assert.equal(copy.context, 'ETH can reach ' + usd(outcome.setup.futurePrice) + ' in one move, or after weeks of moving up and down inside your range. Either way your claim ends as ' + ends + '.');

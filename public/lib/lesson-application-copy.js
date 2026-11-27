@@ -84,7 +84,9 @@ export function lessonApplicationCopy(id, outcome, task) {
         'same-end': 'The end fixes which tokens your claim holds. Its fees were paid by the trades on the way, and the two paths did not have the same trades.',
         'range-only': 'The range decides at which prices your claim can earn. How much it earns there depends on how much trading happens inside it.',
       },
-      feedback: 'Fees come from trades, and only trades inside your range pay your claim. Weeks of trading inside the range pay more than one move through it. The tokens you end with are the same either way, so they cannot show it.'};
+      // It says what the end can and cannot show. Which path paid more is not
+      // settled by time alone, so it makes no claim about that.
+      feedback: 'Fees come from trades, and only trades inside your range pay your claim. The tokens you end with show what your claim holds, not the trades that paid it. To know what it earned, you need a record of its fees over that time.'};
   }
   // The reader's own example can sit anywhere when they answer: solved, not yet
   // matching, or at a price where holding has lost nothing. The feedback on the
